@@ -1,0 +1,9 @@
+icm : Exception calling "DownloadFile" with "2" argument(s): "The remote name could not be resolved: 
+'repo.maven.apache.org'"
+At line:1 char:60
++ ... 'mvnw.cmd'; icm -ScriptBlock ([Scriptblock]::Create((Get-Content -Raw ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Invoke-Command], MethodInvocationException
+    + FullyQualifiedErrorId : WebException,Microsoft.PowerShell.Commands.InvokeCommandCommand
+ 
+Cannot start maven from wrapper  

@@ -1,0 +1,6 @@
+-- ============================================================
+-- V1__baseline.sql
+-- PLUS33 ERP — Initial baseline migration
+-- This is an intentional no-op to establish the Flyway baseline.
+-- All schema objects will be created in subsequent migrations.
+-- ============================================================

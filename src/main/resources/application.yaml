@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: plus33-erp
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/plus33_erp
+    username: postgres
+    password: crazy@8
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+
+app:
+  jwt:
+    secret: plus33-erp-jwt-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256
+    expiration-minutes: 60
+
+
+jwt:
+  secret: "plus33-super-secret-key-for-development-minimum-32-characters"
+  issuer: "plus33-erp"
+  expiration-seconds: 3600
+

@@ -1,0 +1,8 @@
+Test-Path : Access is denied
+At line:87 char:11
++ if (-not (Test-Path -Path $MAVEN_M2_PATH)) {
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\admin\.m2:String) [Test-Path], UnauthorizedAccessException
+    + FullyQualifiedErrorId : ItemExistsUnauthorizedAccessError,Microsoft.PowerShell.Commands.TestPathCommand
+ 
+Cannot start maven from wrapper  

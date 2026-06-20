@@ -1,0 +1,53 @@
+package com.plus33.erp.organization.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Schema(description = "Store details response payload")
+public record StoreResponse(
+        @Schema(description = "Database ID of the store", example = "1")
+        Long id,
+
+        @Schema(description = "Unique code of the store", example = "DXB_STORE_01")
+        String code,
+
+        @Schema(description = "Name of the store", example = "Dubai Mall Store")
+        String name,
+
+        @Schema(description = "Address of the store", example = "Financial Centre Road, Dubai")
+        String address,
+
+        @Schema(description = "Phone number", example = "+97140000001")
+        String phone,
+
+        @Schema(description = "Email address", example = "store.dxb@plus33.com")
+        String email,
+
+        @Schema(description = "Timezone", example = "Asia/Dubai")
+        String timezone,
+
+        @Schema(description = "Opening date", example = "2026-01-01")
+        LocalDate openingDate,
+
+        @Schema(description = "Region ID mapping", example = "1")
+        Long regionId,
+
+        @Schema(description = "Region Code of the store", example = "UAE_REGION")
+        String regionCode,
+
+        @Schema(description = "Default warehouse ID mapping", example = "1")
+        Long warehouseId,
+
+        @Schema(description = "Default warehouse Code of the store", example = "DXB_WH_01")
+        String warehouseCode,
+
+        @Schema(description = "Status of the store", example = "true")
+        Boolean active,
+
+        @Schema(description = "Creation date time", example = "2026-06-20T12:00:00")
+        LocalDateTime createdAt,
+
+        @Schema(description = "Last modification date time", example = "2026-06-20T12:30:00")
+        LocalDateTime updatedAt
+) {}
