@@ -47,6 +47,7 @@ public class Supplier {
     @Column(name = "tax_number", length = 100)
     private String taxNumber;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
 

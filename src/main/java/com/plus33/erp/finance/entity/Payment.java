@@ -1,6 +1,7 @@
 package com.plus33.erp.finance.entity;
 
 import com.plus33.erp.organization.entity.Company;
+import com.plus33.erp.procurement.entity.Supplier;
 import com.plus33.erp.security.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,6 +34,10 @@ public class Payment {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate;
 
@@ -53,7 +58,23 @@ public class Payment {
     private JournalEntry journalEntry;
 
     @Column(name = "currency_code", nullable = false, length = 3)
+    @Builder.Default
     private String currencyCode = "AED";
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private PaymentStatus status = PaymentStatus.COMPLETED;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancelled_by")
+    private User cancelledBy;
+
+    @Column(name = "cancellation_reason", columnDefinition = "TEXT")
+    private String cancellationReason;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)

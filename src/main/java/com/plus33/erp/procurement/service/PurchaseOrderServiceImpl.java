@@ -20,8 +20,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.plus33.erp.analytics.event.ProcurementRefreshEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,6 +42,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final PurchaseOrderMapper purchaseOrderMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public PurchaseOrderServiceImpl(PurchaseOrderRepository purchaseOrderRepository,
                                     PurchaseRequestRepository purchaseRequestRepository,
@@ -47,7 +50,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                     SupplierRepository supplierRepository,
                                     ProductRepository productRepository,
                                     UserRepository userRepository,
-                                    PurchaseOrderMapper purchaseOrderMapper) {
+                                    PurchaseOrderMapper purchaseOrderMapper,
+                                    ApplicationEventPublisher eventPublisher) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.companyRepository = companyRepository;
@@ -55,6 +59,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.purchaseOrderMapper = purchaseOrderMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -243,6 +248,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         po.setIssuedAt(LocalDateTime.now());
 
         PurchaseOrder saved = purchaseOrderRepository.save(po);
+        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
         return purchaseOrderMapper.toResponse(saved);
     }
 
@@ -266,6 +272,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         po.setCancellationReason(reason);
 
         PurchaseOrder saved = purchaseOrderRepository.save(po);
+        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
         return purchaseOrderMapper.toResponse(saved);
     }
 
@@ -283,6 +290,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         po.setClosedAt(LocalDateTime.now());
 
         PurchaseOrder saved = purchaseOrderRepository.save(po);
+        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
         return purchaseOrderMapper.toResponse(saved);
     }
 

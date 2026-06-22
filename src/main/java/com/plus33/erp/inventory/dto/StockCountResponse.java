@@ -1,0 +1,44 @@
+package com.plus33.erp.inventory.dto;
+
+import com.plus33.erp.inventory.entity.StockCountStatus;
+import com.plus33.erp.inventory.entity.StockCountType;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+public record StockCountResponse(
+        Long id,
+        String countNumber,
+        Long companyId,
+        Long warehouseId,
+        Long storeId,
+        StockCountStatus status,
+        StockCountType countType,
+        boolean blindCount,
+        Long assignedToId,
+        String assignedToName,
+        Long adjustmentId,
+        boolean approvalRequired,
+        BigDecimal approvalThresholdPercentage,
+        UUID clientReferenceId,
+        String remarks,
+        String rejectionReason,
+        int recountNumber,
+        Long createdById,
+        LocalDateTime createdAt,
+        Long assignedById,
+        LocalDateTime assignedAt,
+        Long startedById,
+        LocalDateTime startedAt,
+        Long submittedById,
+        LocalDateTime submittedAt,
+        Long approvedById,
+        LocalDateTime approvedAt,
+        Long postedById,
+        LocalDateTime postedAt,
+        Long closedById,
+        LocalDateTime closedAt,
+        List<StockCountItemResponse> items,
+        Long version
+) {}

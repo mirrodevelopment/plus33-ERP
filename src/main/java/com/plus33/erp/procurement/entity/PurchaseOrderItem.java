@@ -35,6 +35,9 @@ public class PurchaseOrderItem {
     @Column(name = "received_quantity", nullable = false, precision = 12, scale = 2)
     private BigDecimal receivedQuantity = BigDecimal.ZERO;
 
+    @Column(name = "invoiced_quantity", nullable = false, precision = 12, scale = 2)
+    private BigDecimal invoicedQuantity = BigDecimal.ZERO;
+
     @Column(name = "remaining_quantity", nullable = false, precision = 12, scale = 2)
     private BigDecimal remainingQuantity;
 

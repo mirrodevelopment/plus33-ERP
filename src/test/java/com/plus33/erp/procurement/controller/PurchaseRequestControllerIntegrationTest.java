@@ -19,7 +19,7 @@ import com.plus33.erp.procurement.repository.PurchaseRequestRepository;
 import com.plus33.erp.procurement.repository.SupplierRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -33,8 +33,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class PurchaseRequestControllerIntegrationTest {
 
     @Autowired
@@ -130,19 +133,19 @@ public class PurchaseRequestControllerIntegrationTest {
 
         // Test Validation: Destination-company mismatch
         Company company2 = new Company();
-        company2.setCode("COMP_TEST_PO");
+        company2.setCode("COMP_TEST_PO_" + System.nanoTime());
         company2.setName("Company Test PO");
         company2.setActive(true);
         company2 = companyRepository.save(company2);
 
         Region region2 = new Region();
-        region2.setCode("REG_TEST_PO");
+        region2.setCode("REG_TEST_PO_" + System.nanoTime());
         region2.setName("Region Test PO");
         region2.setCompany(company2);
         region2 = regionRepository.save(region2);
 
         Store store2 = new Store();
-        store2.setCode("STORE_TEST_PO");
+        store2.setCode("STORE_TEST_PO_" + System.nanoTime());
         store2.setName("Store Test PO");
         store2.setRegion(region2);
         store2.setActive(true);

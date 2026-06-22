@@ -34,9 +34,11 @@ public class DashboardConfig {
     @Column(name = "role_code", nullable = false, length = 100)
     private String roleCode;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Builder.Default
     @Column(name = "refresh_interval_minutes", nullable = false)
     private Integer refreshIntervalMinutes = 15;
 

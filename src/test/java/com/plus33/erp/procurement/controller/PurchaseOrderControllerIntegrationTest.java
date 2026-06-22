@@ -15,11 +15,14 @@ import com.plus33.erp.procurement.repository.SupplierRepository;
 import com.plus33.erp.security.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.plus33.erp.organization.entity.Warehouse;
+import com.plus33.erp.organization.repository.WarehouseRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,8 +33,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class PurchaseOrderControllerIntegrationTest {
 
     @Autowired
@@ -59,12 +65,18 @@ public class PurchaseOrderControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private WarehouseRepository warehouseRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private PurchaseRequest createApprovedPurchaseRequest(Company company, Supplier supplier) {
+        Warehouse warehouse = warehouseRepository.findByCode("DUBAI_WAREHOUSE")
+                .orElseThrow(() -> new AssertionError("DUBAI_WAREHOUSE not found"));
         PurchaseRequest pr = new PurchaseRequest();
         pr.setCompany(company);
         pr.setSupplier(supplier);
+        pr.setWarehouse(warehouse);
         pr.setRequestNumber("PR-TEST-" + System.nanoTime());
         pr.setRequestedBy(userRepository.findAll().get(0));
         pr.setRequiredDate(LocalDate.now().plusDays(10));
@@ -74,9 +86,12 @@ public class PurchaseOrderControllerIntegrationTest {
     }
 
     private PurchaseRequest createDraftPurchaseRequest(Company company, Supplier supplier) {
+        Warehouse warehouse = warehouseRepository.findByCode("DUBAI_WAREHOUSE")
+                .orElseThrow(() -> new AssertionError("DUBAI_WAREHOUSE not found"));
         PurchaseRequest pr = new PurchaseRequest();
         pr.setCompany(company);
         pr.setSupplier(supplier);
+        pr.setWarehouse(warehouse);
         pr.setRequestNumber("PR-TEST-DRAFT-" + System.nanoTime());
         pr.setRequestedBy(userRepository.findAll().get(0));
         pr.setRequiredDate(LocalDate.now().plusDays(10));

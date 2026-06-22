@@ -9,6 +9,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -46,20 +48,54 @@ public class SupplierInvoice {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
+    @Column(name = "subtotal_amount", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal subtotalAmount = BigDecimal.ZERO;
+
+    @Column(name = "tax_amount", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+
+    @Column(name = "discount_amount", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
     @Column(name = "total_amount", nullable = false, precision = 14, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(name = "paid_amount", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal paidAmount = BigDecimal.ZERO;
+
+    @Column(name = "outstanding_balance", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal outstandingBalance = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private String status = "PENDING";
+    @Builder.Default
+    private SupplierInvoiceStatus status = SupplierInvoiceStatus.DRAFT;
 
     @Column(name = "currency_code", nullable = false, length = 3)
+    @Builder.Default
     private String currencyCode = "AED";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "journal_entry_id")
+    private JournalEntry journalEntry;
+
+    @OneToMany(mappedBy = "supplierInvoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<SupplierInvoiceItem> items = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Version
+    private Long version;
 
     @PrePersist
     protected void onCreate() {
@@ -72,3 +108,4 @@ public class SupplierInvoice {
         updatedAt = LocalDateTime.now();
     }
 }
+

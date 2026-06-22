@@ -5,7 +5,6 @@ import com.plus33.erp.procurement.dto.*;
 import com.plus33.erp.procurement.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import java.util.List;
 
 @Mapper(config = GlobalMapperConfig.class)
@@ -32,6 +31,7 @@ public interface PurchaseRequestMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "items", ignore = true)
+    @Mapping(target = "requestDate", ignore = true)
     PurchaseRequest toEntity(PurchaseRequestRequest request);
 
     @Mapping(target = "companyId", source = "company.id")

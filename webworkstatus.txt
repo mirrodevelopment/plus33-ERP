@@ -1,0 +1,121 @@
+2026-06-22 | V23.3
+Module: Goods Receipt
+Work:
+* Added goods receipt schema and tables (V33, V34)
+* Implemented GoodsReceipt and GoodsReceiptItem entities and services
+* Integrated goods receipt tracking with purchase orders
+* Implemented GoodsReceiptController endpoints
+* Created and verified GoodsReceiptControllerIntegrationTest
+Status:
+VERIFIED
+
+2026-06-22 | V23.4
+Module: Supplier Invoice
+Work:
+* Added supplier invoice schema (V35, V36, V41)
+* Implemented SupplierInvoice and SupplierInvoiceItem entities
+* Added automatic journal entry generation on invoice approval
+* Implemented SupplierInvoiceController endpoints
+* Created and verified SupplierInvoiceControllerIntegrationTest
+Status:
+VERIFIED
+
+2026-06-22 | V23.5
+Module: Payment Processing
+Work:
+* Added payment schema and permissions (V37)
+* Implemented Payment, PaymentAllocation, and status flow
+* Integrated automatic posted journal entries on payment creation and cancel reversals
+* Implemented PaymentController endpoints
+* Created and verified PaymentControllerIntegrationTest
+Status:
+VERIFIED
+
+2026-06-22 | V23.6
+Module: Procurement Analytics & Approval Dashboards
+Work:
+* Added materialized views for summary, supplier metrics, payables aging, PO fulfillment, and 3-way matching exceptions (V38)
+* Implemented event-driven refresh architecture using Spring Events
+* Implemented ProcurementAnalyticsController endpoints and service layers
+* Created and verified ProcurementAnalyticsControllerIntegrationTest
+Status:
+VERIFIED
+
+2026-06-22 | V24.1
+Module: Inventory Transfer
+Work:
+* Added inventory transfers and items schema (V39, V40)
+* Implemented InventoryTransfer and items entities with quantity constraints
+* Integrated available stock verification and reservations logic
+* Implemented InventoryTransferController endpoints
+* Created and verified InventoryTransferControllerIntegrationTest
+Status:
+VERIFIED
+
+2026-06-22 | V24.2
+Module: Inventory Adjustment
+Work:
+* Added inventory adjustments and items schema (V42, V43) with XOR location constraints and trigger validations
+* Implemented InventoryAdjustment and items entities with MapStruct mapper
+* Integrated auto-approvals for stock additions and manual approvals for reductions
+* Added physical stock update under pessimistic write locks and registered stock movements
+* Created and verified InventoryAdjustmentControllerIntegrationTest
+Status:
+VERIFIED
+
+2026-06-22 | V24.3
+Module: Stock Count & Cycle Count API
+Work:
+* Added stock counts and items schema (V44, V45) with region-company triggers and active session overlap validators
+* Implemented StockCount and StockCountItem entities, DTOs, and mapper
+* Integrated blind count response masking for system and variance columns
+* Added start count snapshotting of system, reserved, and available quantities
+* Implemented tolerance variance checks with auto-approvals and recount reopens
+* Integrated count approval with V24.2 InventoryAdjustment creation and posting
+* Created and verified StockCountControllerIntegrationTest covering all flows and concurrency
+Status:
+VERIFIED
+
+2026-06-22 | V24.4 — Inventory Replenishment API
+
+Module:
+Inventory
+
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-22 | V24.5 — Inventory Traceability API
+Module: Inventory
+Work:
+* Added inventory traceability schema, lots, serials, trace events, and recalls (V48, V49) with location triggers
+* Implemented FEFO (First Expired First Out) allocation logic for lots and sequential serial status transitions
+* Integrated automated lot expiry daily scheduler job
+* Added database-level unique indices to prevent overlapping active recalls per lot or serial
+* Integrated trace logging with Goods Receipts, Inventory Transfers, Adjustments, and Stock Counts
+* Created and verified InventoryTraceabilityControllerIntegrationTest
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-22 | V24.6 — Inventory Analytics & Dashboards
+Module: Inventory
+Work:
+* Added inventory analytics schema, materialized views, staging tables, and unique indices (V50, V51)
+* Implemented 7 materialized views with multi-level (company-wide, warehouse, store) isolation and nullable location groupings
+* Added weekly product demand summary staging table and AnalyticsRefreshService scheduler with staggered cron jobs and audit logging
+* Integrated Spring Event listeners to trigger prioritised asynchronous view refreshes upon Goods Receipts, Transfers, Counts, Replenishments, Recalls, and Expiry events
+* Implemented InventoryAnalyticsController API endpoints for summary kpis, aging/expiry, ABC/XYZ, slow/dead stock, turnover, replenishment, traceability, and health logs
+* Created and verified InventoryAnalyticsControllerIntegrationTest
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-22 | V25.1 — Customer Management
+Module: Sales & Order Management
+Work:
+* Added sales customer schema, sequences, unique constraints, and check constraints (V52, V53)
+* Implemented CustomerStatus, TaxProfile, and CustomerType enums with Customer entity mapping
+* Added CustomerRepository with native sequence generator mapping CUST-YYYY-xxxxxx customer codes
+* Implemented CustomerServiceImpl scoped to Company isolation with credit limit, code/email uniqueness checks, and status mappings
+* Implemented CustomerController REST endpoints with method-level Spring Security permissions checks
+* Created and verified CustomerControllerIntegrationTest covering CRUD, paginated filters, and status state transitions
+Status:
+COMPLETED AND VERIFIED

@@ -30,6 +30,7 @@ public interface PurchaseOrderMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "items", ignore = true)
+    @Mapping(target = "version", ignore = true)
     PurchaseOrder toEntity(PurchaseOrderRequest request);
 
     @Mapping(target = "companyId", source = "company.id")
@@ -53,6 +54,8 @@ public interface PurchaseOrderMapper {
     @Mapping(target = "product", ignore = true)
     @Mapping(target = "receivedQuantity", ignore = true)
     @Mapping(target = "remainingQuantity", ignore = true)
+    @Mapping(target = "invoicedQuantity", ignore = true)
+    @Mapping(target = "version", ignore = true)
     PurchaseOrderItem toItemEntity(PurchaseOrderItemRequest request);
 
     @Mapping(target = "productId", source = "product.id")

@@ -31,3 +31,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Build troubleshooting files
+*_out.txt
+*_err.txt
+
+# Local verification scripts
+run-verify.bat
+
+# Local IDE scratch files
+scratch/
+
+# Maven debug files
+mvn-*.txt
+where-*.txt
+whoami-*.txt
+

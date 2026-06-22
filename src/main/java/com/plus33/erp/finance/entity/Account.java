@@ -38,6 +38,7 @@ public class Account {
     @JoinColumn(name = "parent_account_id")
     private Account parentAccount;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
 

@@ -1,0 +1,990 @@
+================================================================================
+PLUS33 ERP — SYSTEM DOCUMENTATION
+================================================================================
+
+This document contains the official technical and functional documentation for
+the PLUS33 ERP platform. It is maintained for developers, DevOps engineers,
+QA engineers, business analysts, and future system maintainers.
+
+--------------------------------------------------------------------------------
+1. PROJECT OVERVIEW
+--------------------------------------------------------------------------------
+* Platform Name: PLUS33 ERP
+* Description: A robust, multi-tenant capable Enterprise Resource Planning (ERP)
+  system designed to model organizational structures, manage workforce
+  schedules and payroll, track real-time inventory levels, control procurement 
+  and supply chain workflows, and perform finance accounting ledgers.
+* High-Level Architecture: Layered Monolith Architecture following standard
+  Spring Boot conventions: Controller -> DTO -> Mapper -> Service ->
+  Repository -> JPA Entity.
+* Technology Stack:
+  - Java Version: JDK 17
+  - Backend Framework: Spring Boot 4.0.8-SNAPSHOT, Spring Security, Spring Data JPA
+  - Database: PostgreSQL (for production, staging, and integration test execution)
+  - Database Migrations: Flyway (with postgresql-specific extensions)
+  - Mapping: MapStruct 1.6.3
+  - Lombok for boilerplate minimization
+  - Nimbus JOSE JWT for stateless JWT decoding and signature verification
+  - Testing: JUnit 5, MockMvc, AssertJ, Hamcrest Matchers
+  - Build System: Apache Maven (wrapper scripts provided)
+
+--------------------------------------------------------------------------------
+2. MODULE OVERVIEW
+--------------------------------------------------------------------------------
+The application is structured into the following operational domains:
+
+* Authentication & Authorization:
+  Secures APIs using stateless JWT authentication. Resolves user roles and maps
+  granted authority strings to controllers for method-level security checking.
+
+* Organization Management:
+  Represents company hierarchy and nodes:
+  - Companies: Top-level logical tenant boundaries.
+  - Regions: Geographical group boundaries within a company.
+  - Warehouses: Physical storage nodes containing bulk inventory.
+  - Stores: Retail outlets that pull stock from default warehouses.
+
+* Workforce Management:
+  Manages employee profiles, work shifts, daily clock-in/out attendance logs,
+  leave type policies, leave applications, payroll periods, and calculations
+  supporting overtime multipliers.
+
+* Inventory Management & Traceability:
+  Supports product catalog metadata, real-time stock balances (physical quantity and reserved quantity),
+  audit trails of stock movements, manual stock corrections, and physical stock count cycle sessions.
+  Also includes traceability: batch/lot expiry tracking, serial number tracking, genealogy movement logs,
+  and dedicated quarantine/recall workflows.
+
+* Procurement:
+  Streamlines supply chain interactions from Purchase Requests (PRs), Supplier
+  information directories, Purchase Orders (POs), and Goods Receipts (GRs)
+  validating actual received physical quantities against orders.
+
+* Finance & Ledger:
+  Implements double-entry ledger bookkeeping. Defines the Chart of Accounts (COA)
+  mapping codes (e.g., Accounts Payable 2100, Cash 1100, Bank 1200), Journal Entries
+  representing balanced debits/credits, Supplier Invoices with three-way matching,
+  and Supplier Payments allocating cash offsets.
+
+* Analytics & Reporting:
+  Uses PostgreSQL Materialized Views to perform concurrent, high-performance updates
+  on key metrics like PO fulfillment, aging payables, supplier performance, and
+  three-way matching exceptions. Also provides inventory dashboards for KPIs,
+  stock aging/expiry, ABC/XYZ classifications, slow/dead stock, replenishment rule coverage,
+  and recalls.
+
+* Sales & Customer Management:
+  Supports customer accounts (B2B and B2C), billing/shipping addresses,
+  tax profile categories, credit limit thresholds, outstanding balances,
+  pricing tiers, payment terms, and status lifecycles.
+
+--------------------------------------------------------------------------------
+3. DATABASE DOCUMENTATION
+--------------------------------------------------------------------------------
+This section lists the database tables, purposes, key relationships, constraints,
+and corresponding Flyway migration files:
+
+* roles
+  - Purpose: Stores system security roles.
+  - Key Fields: id (BIGSERIAL PK), code (VARCHAR(50) UNIQUE), name (VARCHAR(100)).
+  - Flyway Version: V2__initial_schema.sql
+
+* permissions
+  - Purpose: Granular security actions.
+  - Key Fields: id (BIGSERIAL PK), code (VARCHAR(50) UNIQUE), name (VARCHAR(100)).
+  - Flyway Version: V2__initial_schema.sql
+
+* role_permissions
+  - Purpose: Joins security roles to permissions.
+  - Relationships: FK role_id -> roles, FK permission_id -> permissions.
+  - Constraints: UNIQUE (role_id, permission_id).
+  - Flyway Version: V2__initial_schema.sql
+
+* users
+  - Purpose: System user profiles.
+  - Key Fields: id (BIGSERIAL PK), email (VARCHAR(100) UNIQUE), password (VARCHAR(100)).
+  - Flyway Version: V4__create_users_table.sql
+
+* user_roles
+  - Purpose: Joins users to roles.
+  - Relationships: FK user_id -> users, FK role_id -> roles.
+  - Constraints: UNIQUE (user_id, role_id).
+  - Flyway Version: V4__create_users_table.sql
+
+* companies
+  - Purpose: Identifies top-level company entities.
+  - Key Fields: id (BIGSERIAL PK), code (VARCHAR(50) UNIQUE), active (BOOLEAN).
+  - Flyway Version: V7__create_organization_structure.sql
+
+* regions
+  - Purpose: Groups locations by region under a company.
+  - Relationships: FK company_id -> companies.
+  - Flyway Version: V7__create_organization_structure.sql
+
+* warehouses
+  - Purpose: Models bulk storage warehouses.
+  - Relationships: FK region_id -> regions.
+  - Constraints: Unique code.
+  - Flyway Version: V7__create_organization_structure.sql
+
+* stores
+  - Purpose: Models store locations pulling default stock.
+  - Relationships: FK region_id -> regions, FK default_warehouse_id -> warehouses.
+  - Flyway Version: V7__create_organization_structure.sql
+
+* user_regions / user_warehouses / user_stores
+  - Purpose: Maps users to their managed regions, warehouses, or stores.
+  - Flyway Version: V9__create_user_assignments.sql
+
+* employees
+  - Purpose: Workforce member profiles.
+  - Constraints: Unique employee_code, unique email.
+  - Flyway Version: V10__create_employees.sql / V28__migrate_employee_uniqueness.sql
+
+* shifts
+  - Purpose: Shift schedule details (start time, end time).
+  - Flyway Version: V11__create_shifts.sql
+
+* employee_shifts
+  - Purpose: Shift assignments for employees.
+  - Flyway Version: V11__create_shifts.sql
+
+* attendance
+  - Purpose: Daily timekeeping logs (clock-in, clock-out).
+  - Relationships: FK employee_id -> employees.
+  - Flyway Version: V12__create_attendance.sql
+
+* leave_types
+  - Purpose: Types of leaves (Annual, Sick, Maternity).
+  - Flyway Version: V13__create_leave_management.sql
+
+* employee_leaves
+  - Purpose: Tracks employee leave request state.
+  - Flyway Version: V13__create_leave_management.sql
+
+* payroll_periods
+  - Purpose: Defines start and end dates for payroll computations.
+  - Flyway Version: V14__create_payroll.sql
+
+* employee_payrolls
+  - Purpose: Computed earnings, taxes, deductions, net salary.
+  - Flyway Version: V14__create_payroll.sql
+
+* overtime_rules
+  - Purpose: Configuration of overtime rates.
+  - Flyway Version: V14__create_payroll.sql
+
+* product_categories
+  - Purpose: Product groupings.
+  - Flyway Version: V15__create_inventory.sql
+
+* units_of_measure
+  - Purpose: Metric abbreviations (e.g. PCS, KG, LTR).
+  - Flyway Version: V15__create_inventory.sql
+
+* products
+  - Purpose: Inventory product metadata.
+  - Relationships: FK category_id -> product_categories, FK uom_id -> units_of_measure.
+  - Flyway Version: V15__create_inventory.sql
+
+* inventory_stock
+  - Purpose: Tracks on-hand inventory levels and reservations.
+  - Key Fields: quantity (DECIMAL), reserved_quantity (DECIMAL).
+  - Constraints: CHECK (reserved_quantity >= 0 AND reserved_quantity <= quantity).
+  - Flyway Version: V15__create_inventory.sql / V39__create_inventory_transfers.sql
+
+* stock_movements
+  - Purpose: Audit trail of stock additions, deductions, and reservations.
+  - Key Fields: movement_type (VARCHAR), reference_type (VARCHAR).
+  - Flyway Version: V15__create_inventory.sql
+
+* suppliers
+  - Purpose: Scoped supplier entities.
+  - Relationships: FK company_id -> companies.
+  - Flyway Version: V16__create_procurement.sql / V24__migrate_suppliers_to_company_scope.sql
+
+* purchase_requests
+  - Purpose: Requisition demands.
+  - Constraints: chk_purchase_requests_location CHECK (
+      (warehouse_id IS NOT NULL AND store_id IS NULL) OR
+      (warehouse_id IS NULL AND store_id IS NOT NULL)
+    ).
+  - Flyway Version: V16__create_procurement.sql / V30__alter_purchase_requests_schema.sql
+
+* purchase_request_items
+  - Purpose: Line items under a Purchase Request.
+  - Flyway Version: V16__create_procurement.sql
+
+* purchase_orders
+  - Purpose: Standard PO entries.
+  - Relationships: FK company_id -> companies, FK supplier_id -> suppliers, FK purchase_request_id -> purchase_requests.
+  - Flyway Version: V16__create_procurement.sql / V32__alter_purchase_orders_schema.sql
+
+* purchase_order_items
+  - Purpose: Line items under a Purchase Order.
+  - Flyway Version: V16__create_procurement.sql
+
+* goods_receipts
+  - Purpose: Documents actual arrivals.
+  - Relationships: FK purchase_order_id -> purchase_orders.
+  - Flyway Version: V33__create_goods_receipts_schema.sql
+
+* goods_receipt_items
+  - Purpose: Received line quantities.
+  - Flyway Version: V33__create_goods_receipts_schema.sql
+
+* chart_of_accounts
+  - Purpose: Financial ledger account codes.
+  - Constraints: UNIQUE (company_id, account_code).
+  - Flyway Version: V19__create_finance.sql
+
+* journal_entries
+  - Purpose: General ledger entries.
+  - Relationships: FK company_id -> companies, FK reversal_entry_id -> journal_entries.
+  - Flyway Version: V19__create_finance.sql
+
+* journal_entry_lines
+  - Purpose: Debit or Credit line offsets.
+  - Constraints: Debit/Credit totals must balance per entry.
+  - Flyway Version: V19__create_finance.sql
+
+* supplier_invoices
+  - Purpose: Bills submitted by suppliers.
+  - Flyway Version: V19__create_finance.sql
+
+* supplier_invoice_items
+  - Purpose: Invoiced quantities and prices matched to PO items.
+  - Constraints: UNIQUE (supplier_invoice_id, purchase_order_item_id)
+    DEFERRABLE INITIALLY DEFERRED.
+  - Flyway Version: V35__alter_supplier_invoices_schema.sql / V41__fix_invoice_item_constraint_deferrable.sql
+
+* payments
+  - Purpose: Outward payments.
+  - Relationships: FK company_id -> companies, FK journal_entry_id -> journal_entries.
+  - Flyway Version: V19__create_finance.sql / V37__alter_payments_schema.sql
+
+* payment_allocations
+  - Purpose: Allocates paid cash offsets against invoices.
+  - Flyway Version: V19__create_finance.sql
+
+* inventory_transfers
+  - Purpose: Records warehouse-to-store or warehouse-to-warehouse transfers.
+  - Constraints:
+    - chk_transfers_source CHECK ((source_warehouse_id IS NOT NULL AND source_store_id IS NULL) OR (source_warehouse_id IS NULL AND source_store_id IS NOT NULL))
+    - chk_transfers_dest CHECK ((dest_warehouse_id IS NOT NULL AND dest_store_id IS NULL) OR (dest_warehouse_id IS NULL AND dest_store_id IS NOT NULL))
+    - Trigger trg_validate_inventory_transfer blocks store-to-warehouse transfers, same-location transfers, and mismatched companies.
+  - Flyway Version: V39__create_inventory_transfers.sql
+
+* inventory_transfer_items
+  - Purpose: Transfer line items with received tracking.
+  - Constraints: CHECK (received_quantity <= quantity).
+  - Flyway Version: V39__create_inventory_transfers.sql
+
+* inventory_adjustments
+  - Purpose: Records manual stock corrections, damages, expired goods, and count variances.
+  - Constraints:
+    - chk_adjustments_status CHECK (status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'POSTED', 'CANCELLED'))
+    - chk_adjustments_type CHECK (adjustment_type IN ('DAMAGE', 'EXPIRED', 'SHRINKAGE', 'FOUND_STOCK', 'STOCK_COUNT_VARIANCE', 'MANUAL_CORRECTION'))
+    - chk_adjustments_location CHECK ((warehouse_id IS NOT NULL AND store_id IS NULL) OR (warehouse_id IS NULL AND store_id IS NOT NULL))
+    - Trigger trg_validate_inventory_adjustment blocks locations belonging to different companies.
+  - Flyway Version: V42__create_inventory_adjustments.sql
+
+* inventory_adjustment_items
+  - Purpose: Individual product quantities adjusted under a header.
+  - Constraints: UNIQUE (adjustment_id, product_id) DEFERRABLE INITIALLY DEFERRED, CHECK (quantity <> 0.00).
+  - Flyway Version: V42__create_inventory_adjustments.sql / V43__seed_inventory_adjustment_permissions.sql
+
+* stock_counts
+  - Purpose: Tracks physical count sessions at a specific store or warehouse.
+  - Constraints: XOR location, uq_stock_count_item, region-company match trigger, active count uniqueness.
+  - Flyway Version: V44__create_stock_counts.sql / V45__seed_stock_count_permissions.sql
+
+* stock_count_items
+  - Purpose: Individual product lines within a count session.
+  - Constraints: UNIQUE (stock_count_id, product_id) DEFERRABLE INITIALLY DEFERRED.
+  - Flyway Version: V44__create_stock_counts.sql
+
+* recipes / recipe_items / sales_transactions / sales_transaction_items / waste_records
+  - Purpose: Tracks retail kitchen bills of materials, point of sales transactions, and waste.
+  - Flyway Version: V18__create_store_operations.sql
+
+* stock_transfers / stock_transfer_items / stock_adjustments
+  - Purpose: Core warehouse logistics stock tracking.
+  - Flyway Version: V17__create_warehouse_operations.sql
+
+* dashboard_configs
+  - Purpose: Configuration for analytical dashboard displays.
+  - Flyway Version: V21__create_analytics.sql
+
+* inventory_lots
+  - Purpose: Tracks manufacturing batches, lot numbers, and expiry dates.
+  - Relationships: FK company_id -> companies, FK product_id -> products.
+  - Constraints: UNIQUE (company_id, product_id, lot_number).
+  - Flyway Version: V48__create_inventory_traceability.sql
+
+* inventory_serials
+  - Purpose: Tracks individual products by serial numbers and location snapshot.
+  - Relationships: FK company_id -> companies, FK product_id -> products, FK lot_id -> inventory_lots.
+  - Constraints: UNIQUE (company_id, product_id, serial_number), location XOR constraint.
+  - Flyway Version: V48__create_inventory_traceability.sql
+
+* inventory_recalls
+  - Purpose: Logs product recall campaigns and isolates compromised lots/serials.
+  - Relationships: FK company_id -> companies, FK product_id -> products, FK lot_id -> inventory_lots, FK serial_id -> inventory_serials.
+  - Constraints: Unique recall_number, unique active lot/serial indexes to prevent overlapping.
+  - Flyway Version: V48__create_inventory_traceability.sql / V49__seed_inventory_traceability_permissions.sql
+
+* inventory_trace_events
+  - Purpose: High-integrity ledger tracking the end-to-end genealogy of all items.
+  - Relationships: FK company_id -> companies, FK product_id -> products, FK lot_id -> inventory_lots, FK serial_id -> inventory_serials.
+  - Flyway Version: V48__create_inventory_traceability.sql
+
+* customers
+  - Purpose: Stores customer profiles, addresses, credit limits, and pricing tiers.
+  - Relationships: FK company_id -> companies.
+  - Constraints: UNIQUE (company_id, code), UNIQUE (company_id, email), checks on credit_limit, outstanding_balance, discount_rate, and payment_terms_days.
+  - Flyway Version: V52__create_sales_customers.sql / V53__seed_sales_customer_permissions.sql
+
+--------------------------------------------------------------------------------
+4. ENTITY DOCUMENTATION
+--------------------------------------------------------------------------------
+All key database tables correspond to JPA entity classes annotated with Lombok
+builders, getters/setters, and validation rules.
+
+* User
+  - Location: com.plus33.erp.security.entity.User
+  - Fields: id (Long), email (String), password (String), roles (Set<Role>)
+  - Validations: @Email, @NotBlank
+
+* Role
+  - Location: com.plus33.erp.security.entity.Role
+  - Fields: id (Long), code (String), name (String), permissions (Set<Permission>)
+
+* Company
+  - Location: com.plus33.erp.organization.entity.Company
+  - Fields: id (Long), code (String), name (String), active (Boolean)
+
+* Region
+  - Location: com.plus33.erp.organization.entity.Region
+  - Fields: id (Long), code (String), name (String), company (Company)
+
+* Warehouse
+  - Location: com.plus33.erp.organization.entity.Warehouse
+  - Fields: id (Long), code (String), name (String), region (Region), active (Boolean)
+
+* Store
+  - Location: com.plus33.erp.organization.entity.Store
+  - Fields: id (Long), code (String), name (String), region (Region), defaultWarehouse (Warehouse), active (Boolean)
+
+* Employee
+  - Location: com.plus33.erp.workforce.entity.Employee
+  - Fields: id (Long), employeeCode (String), firstName (String), lastName (String), email (String), active (Boolean)
+  - Validations: @NotBlank, @Email
+
+* Product
+  - Location: com.plus33.erp.inventory.entity.Product
+  - Fields: id (Long), code (String), name (String), category (ProductCategory), uom (UnitOfMeasure), active (Boolean)
+
+* InventoryStock
+  - Location: com.plus33.erp.inventory.entity.InventoryStock
+  - Fields: id (Long), product (Product), warehouse (Warehouse), store (Store), quantity (BigDecimal), reservedQuantity (BigDecimal)
+  - Validations: quantity >= 0, reservedQuantity <= quantity
+
+* StockMovement
+  - Location: com.plus33.erp.inventory.entity.StockMovement
+  - Fields: id (Long), product (Product), warehouse (Warehouse), store (Store), quantity (BigDecimal), movementType (String), referenceType (StockMovementReferenceType), referenceId (Long), referenceNumber (String)
+
+* Supplier
+  - Location: com.plus33.erp.procurement.entity.Supplier
+  - Fields: id (Long), code (String), name (String), company (Company), active (Boolean)
+
+* PurchaseRequest
+  - Location: com.plus33.erp.procurement.entity.PurchaseRequest
+  - Fields: id (Long), requestNumber (String), company (Company), supplier (Supplier), warehouse (Warehouse), store (Store), status (PurchaseRequestStatus), requiredDate (LocalDate), items (List<PurchaseRequestItem>)
+  - Validations: XOR constraint on destination location, requiredDate must be future/present
+
+* PurchaseRequestItem
+  - Location: com.plus33.erp.procurement.entity.PurchaseRequestItem
+  - Fields: id (Long), purchaseRequest (PurchaseRequest), product (Product), requestedQuantity (BigDecimal), approvedQuantity (BigDecimal)
+
+* PurchaseOrder
+  - Location: com.plus33.erp.procurement.entity.PurchaseOrder
+  - Fields: id (Long), orderNumber (String), company (Company), supplier (Supplier), purchaseRequest (PurchaseRequest), status (PurchaseOrderStatus), totalAmount (BigDecimal), items (List<PurchaseOrderItem>)
+
+* PurchaseOrderItem
+  - Location: com.plus33.erp.procurement.entity.PurchaseOrderItem
+  - Fields: id (Long), purchaseOrder (PurchaseOrder), product (Product), orderedQuantity (BigDecimal), receivedQuantity (BigDecimal), remainingQuantity (BigDecimal), invoicedQuantity (BigDecimal)
+
+* GoodsReceipt
+  - Location: com.plus33.erp.procurement.entity.GoodsReceipt
+  - Fields: id (Long), receiptNumber (String), purchaseOrder (PurchaseOrder), status (GoodsReceiptStatus), receivedDate (LocalDate), items (List<GoodsReceiptItem>)
+
+* GoodsReceiptItem
+  - Location: com.plus33.erp.procurement.entity.GoodsReceiptItem
+  - Fields: id (Long), goodsReceipt (GoodsReceipt), purchaseOrderItem (PurchaseOrderItem), receivedQuantity (BigDecimal)
+
+* Account
+  - Location: com.plus33.erp.finance.entity.Account
+  - Fields: id (Long), accountCode (String), accountName (String), accountType (String), company (Company)
+
+* JournalEntry
+  - Location: com.plus33.erp.finance.entity.JournalEntry
+  - Fields: id (Long), entryNumber (String), company (Company), entryDate (LocalDate), status (String), lines (List<JournalEntryLine>), reversalEntry (JournalEntry)
+
+* JournalEntryLine
+  - Location: com.plus33.erp.finance.entity.JournalEntryLine
+  - Fields: id (Long), journalEntry (JournalEntry), account (Account), debitAmount (BigDecimal), creditAmount (BigDecimal)
+
+* SupplierInvoice
+  - Location: com.plus33.erp.finance.entity.SupplierInvoice
+  - Fields: id (Long), invoiceNumber (String), company (Company), supplier (Supplier), purchaseOrder (PurchaseOrder), totalAmount (BigDecimal), outstandingBalance (BigDecimal), paidAmount (BigDecimal), status (SupplierInvoiceStatus), items (List<SupplierInvoiceItem>)
+
+* SupplierInvoiceItem
+  - Location: com.plus33.erp.finance.entity.SupplierInvoiceItem
+  - Fields: id (Long), supplierInvoice (SupplierInvoice), purchaseOrderItem (PurchaseOrderItem), product (Product), quantity (BigDecimal), unitPrice (BigDecimal)
+
+* Payment
+  - Location: com.plus33.erp.finance.entity.Payment
+  - Fields: id (Long), paymentNumber (String), company (Company), supplier (Supplier), amount (BigDecimal), status (PaymentStatus), allocations (List<PaymentAllocation>), journalEntry (JournalEntry)
+
+* PaymentAllocation
+  - Location: com.plus33.erp.finance.entity.PaymentAllocation
+  - Fields: id (Long), payment (Payment), supplierInvoice (SupplierInvoice), allocatedAmount (BigDecimal)
+
+* InventoryTransfer
+  - Location: com.plus33.erp.inventory.entity.InventoryTransfer
+  - Fields: id (Long), transferNumber (String), company (Company), sourceWarehouse (Warehouse), sourceStore (Store), destWarehouse (Warehouse), destStore (Store), status (InventoryTransferStatus), items (List<InventoryTransferItem>)
+
+* InventoryTransferItem
+  - Location: com.plus33.erp.inventory.entity.InventoryTransferItem
+  - Fields: id (Long), inventoryTransfer (InventoryTransfer), product (Product), quantity (BigDecimal), receivedQuantity (BigDecimal), remainingQuantity (BigDecimal)
+
+* InventoryAdjustment
+  - Location: com.plus33.erp.inventory.entity.InventoryAdjustment
+  - Fields: id (Long), adjustmentNumber (String), company (Company), warehouse (Warehouse), store (Store), adjustmentType (InventoryAdjustmentType), status (InventoryAdjustmentStatus), clientReferenceId (UUID), remarks (String), items (List<InventoryAdjustmentItem>)
+
+* InventoryAdjustmentItem
+  - Location: com.plus33.erp.inventory.entity.InventoryAdjustmentItem
+  - Fields: id (Long), inventoryAdjustment (InventoryAdjustment), product (Product), quantity (BigDecimal)
+
+* StockCount
+  - Location: com.plus33.erp.inventory.entity.StockCount
+  - Fields: id (Long), countNumber (String), company (Company), warehouse (Warehouse), store (Store), status (StockCountStatus), countType (StockCountType), blindCount (boolean), assignedTo (User), adjustment (InventoryAdjustment), approvalRequired (boolean), approvalThresholdPercentage (BigDecimal), clientReferenceId (UUID), remarks (String), rejectionReason (String), recountNumber (int), items (List<StockCountItem>)
+
+* StockCountItem
+  - Location: com.plus33.erp.inventory.entity.StockCountItem
+  - Fields: id (Long), stockCount (StockCount), product (Product), systemQuantity (BigDecimal), reservedQuantity (BigDecimal), availableQuantity (BigDecimal), countedQuantity (BigDecimal), variance (BigDecimal)
+
+* InventoryLot
+  - Location: com.plus33.erp.inventory.entity.InventoryLot
+  - Fields: id (Long), company (Company), product (Product), lotNumber (String), expiryDate (LocalDate), manufacturedDate (LocalDate), status (InventoryLotStatus), version (Long)
+
+* InventorySerial
+  - Location: com.plus33.erp.inventory.entity.InventorySerial
+  - Fields: id (Long), company (Company), product (Product), lot (InventoryLot), serialNumber (String), warehouse (Warehouse), store (Store), status (InventorySerialStatus), version (Long)
+
+* InventoryRecall
+  - Location: com.plus33.erp.inventory.entity.InventoryRecall
+  - Fields: id (Long), company (Company), product (Product), lot (InventoryLot), serial (InventorySerial), recallNumber (String), recallReason (String), recallReferenceNumber (String), recalledBy (User), recalledAt (LocalDateTime)
+
+* InventoryTraceEvent
+  - Location: com.plus33.erp.inventory.entity.InventoryTraceEvent
+  - Fields: id (Long), company (Company), product (Product), lot (InventoryLot), serial (InventorySerial), warehouse (Warehouse), store (Store), eventType (InventoryTraceEventType), quantity (BigDecimal), referenceType (InventoryTraceReferenceType), referenceId (Long), referenceNumber (String), notes (String), createdBy (User), createdAt (LocalDateTime)
+
+* Customer
+  - Location: com.plus33.erp.sales.entity.Customer
+  - Fields: id (Long), company (Company), code (String), name (String), customerType (CustomerType), status (CustomerStatus), contactPerson (String), email (String), phone (String), billingAddress (String), shippingAddress (String), taxNumber (String), taxProfile (TaxProfile), creditLimit (BigDecimal), outstandingBalance (BigDecimal), pricingTier (String), discountRate (BigDecimal), paymentTermsDays (Integer), currencyCode (String), createdAt (LocalDateTime), updatedAt (LocalDateTime), version (Long)
+
+--------------------------------------------------------------------------------
+5. API DOCUMENTATION
+--------------------------------------------------------------------------------
+This section lists primary REST endpoints, parameters, permissions, validation rules,
+workflow transitions, and possible errors:
+
+* Authentication (AuthController)
+  - Endpoint: POST /api/v1/auth/login
+  - Purpose: Validates email/password credentials and issues a JWT token.
+  - Required Permission: None
+  - Request: LoginRequest DTO (email, password)
+  - Response: TokenResponse (token, email, roles)
+  - Errors: 400 Bad Request (validation errors), 401 Unauthorized (invalid credentials)
+
+* Supplier Invoices (SupplierInvoiceController)
+  - Endpoint: POST /api/v1/supplier-invoices
+  - Purpose: Creates a draft supplier invoice linked to a PO.
+  - Required Permission: SUPPLIER_INVOICE_CREATE
+  - Request: SupplierInvoiceRequest DTO
+  - Response: ApiResponse<SupplierInvoiceResponse>
+  - Errors: 400 (validation), 404 (not found), 409 (conflict)
+
+  - Endpoint: PUT /api/v1/supplier-invoices/{id}
+  - Purpose: Updates a draft supplier invoice.
+  - Required Permission: SUPPLIER_INVOICE_UPDATE
+  - Request: SupplierInvoiceUpdateRequest DTO
+  - Response: ApiResponse<SupplierInvoiceResponse>
+  - Errors: 400 (invalid state/validation), 404 (not found)
+
+  - Endpoint: POST /api/v1/supplier-invoices/{id}/approve
+  - Purpose: Approves a draft invoice. Transitions status to APPROVED and automatically generates posted ledger journal entries.
+  - Required Permission: SUPPLIER_INVOICE_APPROVE
+  - Request: None
+  - Response: ApiResponse<SupplierInvoiceResponse>
+  - Errors: 400 (not DRAFT), 404 (not found)
+
+  - Endpoint: POST /api/v1/supplier-invoices/{id}/cancel
+  - Purpose: Cancels a supplier invoice and automatically generates reversing journal entries.
+  - Required Permission: SUPPLIER_INVOICE_CANCEL
+  - Request: None
+  - Response: ApiResponse<SupplierInvoiceResponse>
+  - Errors: 400 (not APPROVED), 404 (not found)
+
+* Payment Processing (PaymentController)
+  - Endpoint: POST /api/v1/payments
+  - Purpose: Creates a completed payment, records allocations against outstanding supplier invoices, and generates posted cash/AP journal entries.
+  - Required Permission: PAYMENT_CREATE
+  - Request: PaymentRequest DTO (companyId, supplierId, allocations, paymentMethod, amount, referenceNumber)
+  - Response: ApiResponse<PaymentResponse>
+  - Errors: 400 (validation, allocation limits exceeded), 404 (not found), 409 (duplicate reference)
+
+  - Endpoint: POST /api/v1/payments/{id}/cancel
+  - Purpose: Cancels a payment, restores invoice outstanding balances, and generates reversing journal entries.
+  - Required Permission: PAYMENT_CANCEL
+  - Request: PaymentCancelRequest DTO (reason)
+  - Response: ApiResponse<PaymentResponse>
+  - Errors: 400 (not COMPLETED), 404 (not found)
+
+* Inventory Transfers (InventoryTransferController)
+  - Endpoint: POST /api/v1/inventory-transfers
+  - Purpose: Initiates a draft internal stock transfer request.
+  - Required Permission: INVENTORY_TRANSFER_CREATE
+  - Request: InventoryTransferRequest DTO (companyId, source, destination, items)
+  - Response: ApiResponse<InventoryTransferResponse>
+  - Errors: 400 (validation, store-to-warehouse transfer, identical locations)
+
+  - Endpoint: POST /api/v1/inventory-transfers/{id}/submit
+  - Purpose: Submits a draft transfer. Transitions status to SUBMITTED.
+  - Required Permission: INVENTORY_TRANSFER_UPDATE
+  - Errors: 400 (not DRAFT), 404 (not found)
+
+  - Endpoint: POST /api/v1/inventory-transfers/{id}/approve
+  - Purpose: Approves a submitted transfer. Locks stock at source (adds reserved_quantity) and transitions status to APPROVED.
+  - Required Permission: INVENTORY_TRANSFER_APPROVE
+  - Errors: 400 (not SUBMITTED, insufficient available stock), 404 (not found)
+
+  - Endpoint: POST /api/v1/inventory-transfers/{id}/dispatch
+  - Purpose: Dispatches an approved transfer. Deducts physical and reserved quantities from source stock and transitions status to IN_TRANSIT.
+  - Required Permission: INVENTORY_TRANSFER_DISPATCH
+  - Errors: 400 (not APPROVED)
+
+  - Endpoint: POST /api/v1/inventory-transfers/{id}/receive
+  - Purpose: Completes a transfer. Increments destination stock, marks received quantities, and transitions status to RECEIVED and CLOSED.
+  - Required Permission: INVENTORY_TRANSFER_RECEIVE
+  - Errors: 400 (not IN_TRANSIT)
+
+  - Endpoint: POST /api/v1/inventory-transfers/{id}/cancel
+  - Purpose: Cancels a transfer. Releases reserved stock at source and transitions status to CANCELLED.
+  - Required Permission: INVENTORY_TRANSFER_CANCEL
+  - Errors: 400 (already dispatched / IN_TRANSIT, not APPROVED/SUBMITTED)
+
+* Inventory Adjustments (InventoryAdjustmentController)
+  - Endpoint: POST /api/v1/inventory-adjustments
+    - Purpose: Initiates a draft inventory stock adjustment.
+    - Required Permission: INVENTORY_ADJUSTMENT_CREATE
+    - Request: InventoryAdjustmentRequest DTO (companyId, warehouseId, storeId, adjustmentType, items)
+    - Response: ApiResponse<InventoryAdjustmentResponse>
+    - Errors: 400 (validation, both locations specified, mismatched company)
+  - Endpoint: PUT /api/v1/inventory-adjustments/{id}
+    - Purpose: Updates a draft inventory adjustment.
+    - Required Permission: INVENTORY_ADJUSTMENT_UPDATE
+    - Request: InventoryAdjustmentUpdateRequest DTO
+    - Response: ApiResponse<InventoryAdjustmentResponse>
+    - Errors: 400 (not DRAFT)
+  - Endpoint: POST /api/v1/inventory-adjustments/{id}/submit
+    - Purpose: Submits an adjustment. Auto-approves to APPROVED if all line quantities are positive; otherwise transitions to SUBMITTED.
+    - Required Permission: INVENTORY_ADJUSTMENT_CREATE
+    - Errors: 400 (not DRAFT)
+  - Endpoint: POST /api/v1/inventory-adjustments/{id}/approve
+    - Purpose: Approves a submitted adjustment.
+    - Required Permission: INVENTORY_ADJUSTMENT_APPROVE
+    - Errors: 400 (not SUBMITTED)
+  - Endpoint: POST /api/v1/inventory-adjustments/{id}/post
+    - Purpose: Posts an approved adjustment. Performs physical stock updates in inventory_stock under PESSIMISTIC_WRITE locks, creates StockMovements, and fires an refresh event.
+    - Required Permission: INVENTORY_ADJUSTMENT_POST
+    - Errors: 400 (not APPROVED, negative adjustment exceeds on-hand stock)
+  - Endpoint: POST /api/v1/inventory-adjustments/{id}/cancel
+    - Purpose: Cancels a draft, submitted, or approved adjustment.
+    - Required Permission: INVENTORY_ADJUSTMENT_CANCEL
+    - Request Parameter: reason (String)
+    - Errors: 400 (already posted or cancelled)
+
+* Stock Counts (StockCountController)
+  - Endpoint: POST /api/v1/stock-counts
+    - Purpose: Creates a draft stock count session.
+    - Required Permission: STOCK_COUNT_CREATE
+    - Request: StockCountRequest DTO (companyId, warehouseId, storeId, countType, blindCount, approvalThresholdPercentage, clientReferenceId, remarks, cycleProductIds)
+    - Response: ApiResponse<StockCountResponse>
+    - Errors: 400 (validation, both locations, overlapping active count session)
+  - Endpoint: PUT /api/v1/stock-counts/{id}
+    - Purpose: Updates a draft stock count session.
+    - Required Permission: STOCK_COUNT_UPDATE
+    - Request: StockCountUpdateRequest DTO
+    - Response: ApiResponse<StockCountResponse>
+    - Errors: 400 (not DRAFT)
+  - Endpoint: POST /api/v1/stock-counts/{id}/assign
+    - Purpose: Assigns count to a user.
+    - Required Permission: STOCK_COUNT_ASSIGN
+    - Request Parameter: userId (Long)
+    - Errors: 400 (not DRAFT/ASSIGNED)
+  - Endpoint: POST /api/v1/stock-counts/{id}/start
+    - Purpose: Starts counting, taking immutable snapshot of stock.
+    - Required Permission: STOCK_COUNT_UPDATE
+    - Errors: 400 (not ASSIGNED)
+  - Endpoint: POST /api/v1/stock-counts/{id}/submit
+    - Purpose: Submits counted quantities. If variance <= threshold, auto-approves.
+    - Required Permission: STOCK_COUNT_SUBMIT
+    - Request: StockCountSubmitRequest DTO
+    - Errors: 400 (not IN_PROGRESS, uncounted items)
+  - Endpoint: POST /api/v1/stock-counts/{id}/reject
+    - Purpose: Rejects count.
+    - Required Permission: STOCK_COUNT_APPROVE
+    - Request Parameter: reason (String)
+    - Errors: 400 (not SUBMITTED)
+  - Endpoint: POST /api/v1/stock-counts/{id}/reopen
+    - Purpose: Reopens rejected count, incrementing recount_number and clearing count quantities.
+    - Required Permission: STOCK_COUNT_APPROVE
+    - Errors: 400 (not REJECTED)
+  - Endpoint: POST /api/v1/stock-counts/{id}/approve
+    - Purpose: Approves count, automatically creating a variance InventoryAdjustment.
+    - Required Permission: STOCK_COUNT_APPROVE
+    - Errors: 400 (not SUBMITTED)
+  - Endpoint: POST /api/v1/stock-counts/{id}/post
+    - Purpose: Posts count and its Linked InventoryAdjustment.
+    - Required Permission: STOCK_COUNT_POST
+    - Errors: 400 (not APPROVED)
+  - Endpoint: POST /api/v1/stock-counts/{id}/close
+    - Purpose: Administratively closes count session.
+    - Required Permission: STOCK_COUNT_POST
+    - Errors: 400 (not POSTED)
+
+* Inventory Replenishment (ReplenishmentController)
+  - Endpoint: POST /api/v1/replenishment/rules
+    - Purpose: Creates a new replenishment rule.
+    - Required Permission: REPLENISHMENT_RULE_CREATE
+  - Endpoint: GET /api/v1/replenishment/rules
+    - Purpose: Lists replenishment rules.
+    - Required Permission: REPLENISHMENT_RULE_VIEW
+  - Endpoint: GET /api/v1/replenishment/rules/{id}
+    - Purpose: Retrieves a replenishment rule by ID.
+    - Required Permission: REPLENISHMENT_RULE_VIEW
+  - Endpoint: PUT /api/v1/replenishment/rules/{id}
+    - Purpose: Updates an existing replenishment rule.
+    - Required Permission: REPLENISHMENT_RULE_UPDATE
+  - Endpoint: DELETE /api/v1/replenishment/rules/{id}
+    - Purpose: Soft deletes / deactivates a replenishment rule.
+    - Required Permission: REPLENISHMENT_RULE_DELETE
+  - Endpoint: POST /api/v1/replenishment/evaluate
+    - Purpose: Evaluates all active replenishment rules for a company.
+    - Required Permission: REPLENISHMENT_SUGGESTION_VIEW
+  - Endpoint: POST /api/v1/replenishment/rules/{id}/evaluate
+    - Purpose: Evaluates a single replenishment rule.
+    - Required Permission: REPLENISHMENT_SUGGESTION_VIEW
+  - Endpoint: GET /api/v1/replenishment/suggestions
+    - Purpose: Lists replenishment suggestions.
+    - Required Permission: REPLENISHMENT_SUGGESTION_VIEW
+  - Endpoint: GET /api/v1/replenishment/suggestions/{id}
+    - Purpose: Retrieves a replenishment suggestion by ID.
+    - Required Permission: REPLENISHMENT_SUGGESTION_VIEW
+  - Endpoint: POST /api/v1/replenishment/suggestions/{id}/acknowledge
+    - Purpose: Acknowledges an open replenishment suggestion.
+    - Required Permission: REPLENISHMENT_SUGGESTION_ACKNOWLEDGE
+  - Endpoint: POST /api/v1/replenishment/suggestions/{id}/cancel
+    - Purpose: Cancels an open or acknowledged suggestion.
+    - Required Permission: REPLENISHMENT_SUGGESTION_CANCEL
+  - Endpoint: POST /api/v1/replenishment/suggestions/{id}/create-purchase-request
+    - Purpose: Auto-generates a Purchase Request from a suggestion.
+    - Required Permission: REPLENISHMENT_SUGGESTION_ORDER
+  - Endpoint: POST /api/v1/replenishment/suggestions/{id}/create-transfer
+    - Purpose: Auto-generates an Inventory Transfer from a suggestion (stores only).
+    - Required Permission: REPLENISHMENT_SUGGESTION_ORDER
+
+* Procurement Analytics (ProcurementAnalyticsController)
+  - Endpoint: GET /api/v1/analytics/procurement/summary
+  - Endpoint: GET /api/v1/analytics/procurement/suppliers
+  - Endpoint: GET /api/v1/analytics/procurement/payables-aging
+  - Endpoint: GET /api/v1/analytics/procurement/purchase-orders
+  - Endpoint: GET /api/v1/analytics/procurement/invoice-matching
+  - Purpose: Queries materialized views for KPIs, aging Payables, and three-way matches.
+  - Required Permission: ANALYTICS_VIEW
+  - Request Parameter: companyId (Long)
+  - Response: ApiResponse containing DTO dashboards
+  - Errors: 403 Forbidden (missing permission), 400 (invalid param)
+
+* Inventory Traceability (InventoryTraceabilityController)
+  - Endpoint: POST /api/v1/inventory-lots
+    - Purpose: Registers a new manufacturing lot/batch.
+    - Required Permission: INVENTORY_LOT_CREATE
+  - Endpoint: GET /api/v1/inventory-lots
+    - Purpose: Lists all lots/batches.
+    - Required Permission: INVENTORY_LOT_VIEW
+  - Endpoint: GET /api/v1/inventory-lots/{id}
+    - Purpose: Gets single lot details.
+    - Required Permission: INVENTORY_LOT_VIEW
+  - Endpoint: GET /api/v1/inventory-serials
+    - Purpose: Lists tracked serial numbers.
+    - Required Permission: INVENTORY_SERIAL_VIEW
+  - Endpoint: GET /api/v1/inventory-trace/{productId}
+    - Purpose: Retrieves end-to-end trace genealogy events for a product.
+    - Required Permission: INVENTORY_TRACE_VIEW
+  - Endpoint: GET /api/v1/inventory-trace/lot/{lotNumber}
+    - Purpose: Retrieves trace history filtering by lot.
+    - Required Permission: INVENTORY_TRACE_VIEW
+  - Endpoint: GET /api/v1/inventory-trace/serial/{serialNumber}
+    - Purpose: Retrieves trace history filtering by serial number.
+    - Required Permission: INVENTORY_TRACE_VIEW
+  - Endpoint: POST /api/v1/inventory-recalls
+    - Purpose: Declares a recall campaign, quarantine-locking lots and serials.
+    - Required Permission: INVENTORY_RECALL_CREATE
+  - Endpoint: GET /api/v1/inventory-recalls
+    - Purpose: Lists recall campaigns.
+    - Required Permission: INVENTORY_RECALL_VIEW
+
+* Customer Management (CustomerController)
+  - Endpoint: POST /api/v1/customers
+    - Purpose: Creates a new customer scoped to a company. Code is generated automatically if not provided.
+    - Required Permission: CUSTOMER_CREATE
+    - Request: CustomerRequest DTO
+    - Response: ApiResponse<CustomerResponse>
+    - Errors: 400 (validation), 404 (not found), 409 (duplicate code/email)
+  - Endpoint: GET /api/v1/customers/{id}
+    - Purpose: Retrieves customer details by ID.
+    - Required Permission: CUSTOMER_VIEW
+    - Response: ApiResponse<CustomerResponse>
+    - Errors: 404 (not found)
+  - Endpoint: GET /api/v1/customers
+    - Purpose: Dynamic paginated search filtering by company, type, status, pricing, and activeOnly status.
+    - Required Permission: CUSTOMER_VIEW
+    - Response: ApiResponse<PageResponse<CustomerResponse>>
+  - Endpoint: PUT /api/v1/customers/{id}
+    - Purpose: Updates customer details.
+    - Required Permission: CUSTOMER_UPDATE
+    - Request: CustomerRequest DTO
+    - Response: ApiResponse<CustomerResponse>
+    - Errors: 400 (soft-deleted / inactive customer update block), 404 (not found)
+  - Endpoint: PATCH /api/v1/customers/{id}/activate
+    - Purpose: Activates an inactive, suspended, or blocked customer.
+    - Required Permission: CUSTOMER_ACTIVATE
+    - Response: ApiResponse<CustomerResponse>
+  - Endpoint: PATCH /api/v1/customers/{id}/deactivate
+    - Purpose: Deactivates a customer. Sets status to INACTIVE.
+    - Required Permission: CUSTOMER_DEACTIVATE
+    - Response: ApiResponse<CustomerResponse>
+  - Endpoint: DELETE /api/v1/customers/{id}
+    - Purpose: Soft deletes a customer record by setting status to INACTIVE.
+    - Required Permission: CUSTOMER_DELETE
+    - Response: ApiResponse<Void>
+
+--------------------------------------------------------------------------------
+6. WORKFLOW DOCUMENTATION
+--------------------------------------------------------------------------------
+This section defines business states, transitions, validations, and side effects.
+
+* Purchase Requisition Workflow:
+  - DRAFT: Initial creation. Editable.
+  - SUBMITTED: Locks edits. Submitted for manager approval.
+  - APPROVED: Manager validates items and signs off. Snapshots approved quantities.
+  - CONVERTED_TO_PO: Purchase Request converted into a PO draft, linking entities.
+  - REJECTED/CANCELLED: Terminal rejection states. Rejection reasons are audited.
+
+* Purchase Order Workflow:
+  - DRAFT: Initial PO.
+  - ISSUED: PO approved. Expected delivery date must be present and future.
+  - PARTIALLY_RECEIVED: Goods receipts contain quantities less than ordered.
+  - RECEIVED: Goods receipt fully matched. Remaining quantity is 0.
+  - CLOSED/CANCELLED: Terminal states.
+
+* Goods Receipt Process:
+  - Validations:
+    - Linked PO must be ISSUED or PARTIALLY_RECEIVED.
+    - Product must exist in the PO lines.
+    - Received quantity cannot exceed remaining quantity on the PO line.
+  - Side Effects:
+    - Completing increments product physical on-hand quantity in inventory_stock.
+    - Generates a GOODS_RECEIPT type StockMovement entry.
+    - Decrements PO line remaining_quantity, increments received_quantity.
+    - Cancelling a Goods Receipt reverses the entire stock addition and PO counts.
+
+* Inventory Transfer Workflow:
+  - DRAFT -> SUBMITTED -> APPROVED -> IN_TRANSIT -> RECEIVED -> CLOSED
+  - Validation: Same-company constraint, store-to-warehouse transfer block.
+  - Side Effects:
+    - Approve: Verifies available stock (on_hand - reserved >= requested). Updates
+      reserved_quantity on source stock. Publishes TRANSFER_RESERVE StockMovement.
+    - Dispatch: Decrements physical quantity and reserved_quantity from source.
+      Publishes TRANSFER_OUT StockMovement.
+    - Receive: Increments physical quantity at destination. Marks received_quantity.
+      Publishes TRANSFER_IN StockMovement. Transitions immediately to CLOSED.
+    - Cancel: Reverses reserved_quantity on source. Publishes TRANSFER_RELEASE.
+
+* Inventory Adjustment Workflow:
+  - DRAFT -> SUBMITTED (if reductions exist) -> APPROVED -> POSTED
+  - DRAFT -> APPROVED (auto-approved if additions only) -> POSTED
+  - Validation: XOR location, mismatched company, negative stock check.
+  - Side Effects:
+    - Post: Locks stock and adjusts physical quantity by the delta. Publishes INVENTORY_ADJUSTMENT StockMovement. Fires InventoryAdjustmentRefreshEvent.
+
+* Stock Count & Cycle Count Workflow:
+  - DRAFT -> ASSIGNED -> IN_PROGRESS -> SUBMITTED -> APPROVED -> POSTED -> CLOSED
+  - Exception Path: SUBMITTED -> REJECTED -> IN_PROGRESS (via reopen)
+  - Validation: XOR location, mismatched company, overlapping active count check.
+  - Blind Count Rule: Hide system quantity and variance details from DTO responses while active (DRAFT, ASSIGNED, IN_PROGRESS).
+  - Side Effects:
+    - Start: Snapshots current stock levels and takes immutable quantities.
+    - Submit: Computes variances. Auto-approves directly to APPROVED if all lines are within threshold.
+    - Reopen: Resets counted quantity and variance. Increments recount_number.
+    - Approve: Automatically creates STOCK_COUNT_VARIANCE InventoryAdjustment.
+    - Post: Triggers posting on the variance InventoryAdjustment.
+
+* Inventory Replenishment Workflow:
+  - Rules: DRAFT -> ACTIVE
+  - Suggestions: OPEN -> ACKNOWLEDGED -> ORDERED -> FULFILLED
+  - Suggestions alternate: OPEN/ACKNOWLEDGED -> CANCELLED
+  - Validation:
+    - Rule location must target exactly one warehouse or store.
+    - Rule quantities constraints: min >= 0, point >= min, max > point, reorder > 0, reorder <= max.
+    - Locations and parent rules must belong to same company.
+    - Only one active (OPEN/ACKNOWLEDGED) suggestion per rule.
+  - Side Effects:
+    - Evaluation: Compares available quantity against reorder point. Creates OPEN suggestion if at or below reorder point.
+    - Create PR: Auto-creates a draft Purchase Request using first active company supplier and links it. Transitions to ORDERED.
+    - Create Transfer: Only for stores. Auto-creates a draft Inventory Transfer using first active company warehouse as source and links it. Transitions to ORDERED.
+
+* Inventory Traceability & Recall Workflows:
+  - FEFO Allocation: Lots are queried sorted by expiry_date ASC, optimizing allocation to limit waste.
+  - Serial Status Lifecycle: State transitions are strictly validated:
+    - IN_STOCK -> TRANSIT / SOLD / RECALLED / QUARANTINED (Valid)
+    - TRANSIT / QUARANTINED -> IN_STOCK (Valid)
+    - SOLD / RECALLED are terminal statuses and cannot transition further.
+  - Automated Expiry Scheduler: A nightly background job runs at 01:15 AM, checks expired lots (expiry_date < today), updates status to EXPIRED, and records auto-expiry events.
+  - Recall Quarantine: Creating a recall isolates the target lot/serial, updates statuses to RECALLED, and generates audit trail events. Unique indices block overlapping recalls.
+
+* Customer Management Workflow:
+  - Customer status: ACTIVE, INACTIVE, ON_HOLD, BLOCKED.
+  - CRUD operations are restricted to company scope (no cross-company manipulation).
+  - Validation: checks on credit_limit >= 0, outstanding_balance >= 0, discount_rate between 0 and 100, and payment_terms_days >= 0.
+  - Customer Code Generation: Generated automatically on creation using format CUST-YYYY-xxxxxx.
+  - Soft Delete: soft deletes are performed by updating status to INACTIVE.
+
+--------------------------------------------------------------------------------
+7. SECURITY DOCUMENTATION
+--------------------------------------------------------------------------------
+* Authentication Flow:
+  Stateless token-based authentication. Client calls /api/v1/auth/login with
+  credentials. Upon successful DaoAuthentication validation, AuthController signs
+  a JWT using Spring Security OAuth2 (Jose library). Subsequent requests pass
+  "Authorization: Bearer <token>".
+* Authorization Model:
+  Method security enabled via @EnableMethodSecurity. REST controller endpoints
+  assert authority constraints using @PreAuthorize("hasAuthority('...')").
+* Predefined System Roles:
+  - ULTIMATE_ADMIN (Full system control)
+  - REGIONAL_MANAGER (Scope restricted to regions)
+  - WAREHOUSE_MANAGER (Logistics controls)
+  - FINANCE_MANAGER (Ledger and payment controls)
+  - PROCUREMENT_MANAGER (Supplier and requisition controls)
+
+--------------------------------------------------------------------------------
+8. EVENT-DRIVEN ARCHITECTURE
+--------------------------------------------------------------------------------
+Spring's application event publishing framework decouples business transactions
+from analytical updates.
+
+* Events:
+  - ProcurementRefreshEvent: Fired on PO, GR, Invoice, or Payment changes.
+  - InventoryRefreshEvent: Fired on Goods Receipt completions.
+  - InventoryTransferRefreshEvent: Fired on inventory transfer approvals, dispatches, receipts, or cancellations.
+  - InventoryAdjustmentRefreshEvent: Fired on posting inventory adjustments and Stock Counts.
+  - ReplenishmentRefreshEvent: Fired on replenishment suggestions and rule evaluations.
+  - InventoryTraceabilityRefreshEvent: Fired on recall creations or lot expiry checks.
+* Listeners:
+  - ProcurementRefreshEventListener
+  - InventoryRefreshEventListener
+  - InventoryTransferRefreshEventListener
+  - InventoryAdjustmentRefreshEventListener
+  - ReplenishmentRefreshEventListener
+  - InventoryTraceabilityRefreshEventListener
+* Processing:
+  Listeners use @Async and @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT).
+  They trigger AnalyticsRefreshService inside new propagation transactions to update
+  corresponding PostgreSQL materialized views.
+
+--------------------------------------------------------------------------------
+9. ANALYTICS DOCUMENTATION
+--------------------------------------------------------------------------------
+* Materialized Views:
+  - mv_procurement_summary: Company metrics.
+  - mv_supplier_performance: On-time delivery rates and lead times.
+  - mv_payables_aging: Groups unpaid invoices by aging buckets (current, 30, 60, 90+ days).
+  - mv_po_fulfilment: Order lines fulfillment status.
+  - mv_invoice_matching: Flags three-way matching discrepancies (unit price/quantity).
+  - mv_inventory_kpis: Aggregates total stock value, unique product counts, out of stock, low stock, and overstocks.
+  - mv_inventory_aging_expiry: Calculates stock aging buckets (0-30, 31-90, 91-180, 180+ days) and lot expiry risks.
+  - mv_inventory_abc_xyz: Performs ABC/XYZ demand volatility classifications over 365 days.
+  - mv_inventory_slow_dead: Identifies slow-moving and dead stock items.
+  - mv_inventory_replenishment_metrics: Tracks rules coverage, cycle times, and stockout prevention rates.
+  - mv_inventory_traceability_metrics: Audits recalls, serial counts, and product compromise rates.
+  - mv_inventory_turnover: Calculates COGS, average stock value, and turnover ratios.
+* Indexes for Concurrent Refreshes:
+  Unique indexes (e.g. uidx_mv_payables_aging, uidx_mv_inventory_kpis) allow non-blocking concurrent refreshes
+  ("REFRESH MATERIALIZED VIEW CONCURRENTLY view_name"). Expression indexes cannot be used for concurrent refreshes;
+  thus, unique indices are created over plain columns (company_id, warehouse_id, store_id) directly.
+* Scheduling:
+  AnalyticsRefreshService runs scheduled staggered cron updates to minimize DB contention:
+  - Every 15 mins (0, 15, 30, 45): KPIs
+  - Every 15 mins (5, 20, 35, 50): Aging/Expiry
+  - Every 15 mins (10, 25, 40, 55): ABC/XYZ
+  - Every 15 mins (12, 27, 42, 57): Traceability
+  - Every 15 mins (14, 29, 44, 59): Replenishment
+  - Every 15 mins (7, 22, 37, 52): Turnover
+
+--------------------------------------------------------------------------------
+10. TESTING DOCUMENTATION
+--------------------------------------------------------------------------------
+* Strategy: MockMvc integration tests executing against real contexts.
+* Database Isolation: Test classes annotated with @Transactional roll back changes.
+* Setup Isolation: Setup methods (@BeforeEach) must call repository.flush() after deleting
+  stale entries. This ensures pending Hibernate deletions are executed before database
+  immediate inserts (IDENTITY generation strategy) fire, preventing unique constraint violations.
+
+--------------------------------------------------------------------------------
+11. DEPLOYMENT DOCUMENTATION
+--------------------------------------------------------------------------------
+* Build command:
+  ./mvnw.cmd clean package -DskipTests
+* Database:
+  A PostgreSQL instance must be configured via application.properties / environment variables:
+  - spring.datasource.url=jdbc:postgresql://<host>:<port>/plus33_erp
+  - spring.datasource.username=<user>
+  - spring.datasource.password=<password>
+
+--------------------------------------------------------------------------------
+12. TROUBLESHOOTING GUIDE
+--------------------------------------------------------------------------------
+* Optimistic Locking Failures (ObjectOptimisticLockingFailureException):
+  Occur when two threads edit the same entity (version mismatch). Resolve by implementing
+  optimistic retry wrappers or locking via PESSIMISTIC_WRITE.
+* Unique Constraint Violations:
+  Often due to missing @Transactional in integration tests or missing flush() after deletes in @BeforeEach.
+  Resolve by verifying transactional rollback and setup flush.
+* Hibernate Flush Ordering:
+  When using clear() + addAll() on collection replacements, Hibernate executes inserts before deletes.
+  Declaring composite uniqueness constraints as DEFERRABLE INITIALLY DEFERRED is required.
+
+--------------------------------------------------------------------------------
+13. DEVELOPER GUIDELINES
+--------------------------------------------------------------------------------
+* Collection Update Constraint Rule:
+  Whenever a collection mapping uses cascade = CascadeType.ALL and orphanRemoval = true,
+  and the collection is replaced using clear() + addAll(newItems), the composite unique
+  key containing the parent foreign key in the child table MUST be declared as
+  "DEFERRABLE INITIALLY DEFERRED". This defers unique constraint evaluation until commit,
+  preventing statement-level violations during Hibernate's insert-before-delete flush.

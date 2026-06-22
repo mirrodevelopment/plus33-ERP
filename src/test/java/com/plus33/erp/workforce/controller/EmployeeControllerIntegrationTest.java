@@ -15,13 +15,15 @@ import com.plus33.erp.workforce.dto.EmployeeRequest;
 import com.plus33.erp.workforce.repository.EmployeeRepository;
 import com.plus33.erp.workforce.repository.UserRegionRepository;
 import com.plus33.erp.workforce.repository.UserStoreRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -31,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class EmployeeControllerIntegrationTest {
 
     @Autowired
@@ -59,6 +62,20 @@ public class EmployeeControllerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @BeforeEach
+    public void resetDatabaseState() {
+        // Remove any entities committed by a previous non-@Transactional run.
+        // Deletion order respects FK constraints (children before parents).
+        storeRepository.findByCode("INACTIVE_STORE").ifPresent(storeRepository::delete);
+        storeRepository.findByCode("STORE_2").ifPresent(storeRepository::delete);
+        employeeRepository.findByEmployeeCode("EMP_001").ifPresent(employeeRepository::delete);
+        userRepository.findByEmail("emp1@plus33.com").ifPresent(userRepository::delete);
+        regionRepository.findByCode("REG_2").ifPresent(regionRepository::delete);
+        companyRepository.findByCode("COMP_2").ifPresent(companyRepository::delete);
+        // Flush queued deletes because IDENTITY inserts execute immediately.
+        userRepository.flush();
+    }
 
     @Test
     @WithMockUser(username = "admin@plus33.com", authorities = {
@@ -106,7 +123,7 @@ public class EmployeeControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/employees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dupCodeRequest)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("Employee with code EMP_001 already exists in company PLUS33 Global Corp"));
 
@@ -119,7 +136,7 @@ public class EmployeeControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/employees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dupEmailRequest)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("Employee with email emp1@plus33.com already exists in company PLUS33 Global Corp"));
 
@@ -132,7 +149,7 @@ public class EmployeeControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/employees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dupUserRequest)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("User account is already assigned to another employee"));
 

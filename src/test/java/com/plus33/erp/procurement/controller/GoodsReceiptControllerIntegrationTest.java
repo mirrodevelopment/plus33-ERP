@@ -20,7 +20,7 @@ import com.plus33.erp.procurement.repository.SupplierRepository;
 import com.plus33.erp.security.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -39,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class GoodsReceiptControllerIntegrationTest {
 
     @Autowired
@@ -230,6 +231,7 @@ public class GoodsReceiptControllerIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
 
         Long grId = objectMapper.readTree(partialResponse).path("data").path("id").asLong();
+        String receiptNumber = objectMapper.readTree(partialResponse).path("data").path("receiptNumber").asText();
 
         // Verify PO was transitioned to PARTIALLY_RECEIVED (40 / 100 = 40%)
         PurchaseOrder updatedPo = purchaseOrderRepository.findById(po.getId()).orElseThrow();
@@ -239,7 +241,7 @@ public class GoodsReceiptControllerIntegrationTest {
 
         // Verify Stock Movement was created correctly
         List<StockMovement> movements = stockMovementRepository.findAll().stream()
-                .filter(m -> m.getReferenceNumber() != null && m.getReferenceNumber().equals(objectMapper.readTree(partialResponse).path("data").path("receiptNumber").asText()))
+                .filter(m -> m.getReferenceNumber() != null && m.getReferenceNumber().equals(receiptNumber))
                 .toList();
         assertFalse(movements.isEmpty());
         assertEquals(StockMovementReferenceType.GOODS_RECEIPT, movements.get(0).getReferenceType());

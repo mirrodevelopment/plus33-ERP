@@ -10,8 +10,8 @@ import com.plus33.erp.inventory.entity.Product;
 import com.plus33.erp.inventory.entity.StockMovement;
 import com.plus33.erp.inventory.entity.StockMovementReferenceType;
 import com.plus33.erp.inventory.event.InventoryRefreshEvent;
+import com.plus33.erp.analytics.event.ProcurementRefreshEvent;
 import com.plus33.erp.inventory.repository.InventoryStockRepository;
-import com.plus33.erp.inventory.repository.ProductRepository;
 import com.plus33.erp.inventory.repository.StockMovementRepository;
 import com.plus33.erp.organization.entity.Company;
 import com.plus33.erp.organization.entity.Store;
@@ -49,41 +49,38 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
 
     private final GoodsReceiptRepository goodsReceiptRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
-    private final PurchaseOrderItemRepository purchaseOrderItemRepository;
     private final CompanyRepository companyRepository;
     private final WarehouseRepository warehouseRepository;
     private final StoreRepository storeRepository;
-    private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final InventoryStockRepository inventoryStockRepository;
     private final StockMovementRepository stockMovementRepository;
     private final GoodsReceiptMapper goodsReceiptMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.plus33.erp.inventory.service.InventoryTraceabilityService inventoryTraceabilityService;
 
     public GoodsReceiptServiceImpl(GoodsReceiptRepository goodsReceiptRepository,
                                     PurchaseOrderRepository purchaseOrderRepository,
-                                    PurchaseOrderItemRepository purchaseOrderItemRepository,
                                     CompanyRepository companyRepository,
                                     WarehouseRepository warehouseRepository,
                                     StoreRepository storeRepository,
-                                    ProductRepository productRepository,
                                     UserRepository userRepository,
                                     InventoryStockRepository inventoryStockRepository,
                                     StockMovementRepository stockMovementRepository,
                                     GoodsReceiptMapper goodsReceiptMapper,
-                                    ApplicationEventPublisher eventPublisher) {
+                                    ApplicationEventPublisher eventPublisher,
+                                    com.plus33.erp.inventory.service.InventoryTraceabilityService inventoryTraceabilityService) {
         this.goodsReceiptRepository = goodsReceiptRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
-        this.purchaseOrderItemRepository = purchaseOrderItemRepository;
         this.companyRepository = companyRepository;
         this.warehouseRepository = warehouseRepository;
         this.storeRepository = storeRepository;
-        this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.inventoryStockRepository = inventoryStockRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.goodsReceiptMapper = goodsReceiptMapper;
         this.eventPublisher = eventPublisher;
+        this.inventoryTraceabilityService = inventoryTraceabilityService;
     }
 
     @Override
@@ -222,8 +219,27 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
 
         GoodsReceipt saved = goodsReceiptRepository.save(gr);
 
+        // Record trace events
+        for (GoodsReceiptItem item : saved.getItems()) {
+            inventoryTraceabilityService.recordTraceEvent(
+                    saved.getCompany().getId(),
+                    item.getProduct().getId(),
+                    null, // lotId
+                    null, // serialId
+                    saved.getWarehouse() != null ? saved.getWarehouse().getId() : null,
+                    saved.getStore() != null ? saved.getStore().getId() : null,
+                    com.plus33.erp.inventory.entity.InventoryTraceEventType.RECEIPT,
+                    item.getReceivedQuantity(),
+                    com.plus33.erp.inventory.entity.InventoryTraceReferenceType.GOODS_RECEIPT,
+                    saved.getId(),
+                    saved.getReceiptNumber(),
+                    "Goods received from Purchase Order #" + po.getOrderNumber()
+            );
+        }
+
         // Publish event for transactional async refresh
         eventPublisher.publishEvent(new InventoryRefreshEvent(this));
+        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
 
         return new IdempotentCreateResult<>(goodsReceiptMapper.toResponse(saved), true);
     }
@@ -360,6 +376,7 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
 
         // Publish event for transactional async refresh
         eventPublisher.publishEvent(new InventoryRefreshEvent(this));
+        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
 
         return goodsReceiptMapper.toResponse(saved);
     }

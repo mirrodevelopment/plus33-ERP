@@ -34,6 +34,9 @@ public class InventoryStock {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal quantity = BigDecimal.ZERO;
 
+    @Column(name = "reserved_quantity", nullable = false, precision = 12, scale = 2)
+    private BigDecimal reservedQuantity = BigDecimal.ZERO;
+
     @Version
     private Long version;
 }

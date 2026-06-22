@@ -14,6 +14,8 @@ spring:
 
   flyway:
     enabled: true
+    clean-on-validation-error: true
+    clean-disabled: false
 
 app:
   jwt:

@@ -26,9 +26,11 @@ public class JournalEntryLine {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
+    @Builder.Default
     @Column(name = "debit_amount", nullable = false, precision = 14, scale = 2)
     private BigDecimal debitAmount = BigDecimal.ZERO;
 
+    @Builder.Default
     @Column(name = "credit_amount", nullable = false, precision = 14, scale = 2)
     private BigDecimal creditAmount = BigDecimal.ZERO;
 }

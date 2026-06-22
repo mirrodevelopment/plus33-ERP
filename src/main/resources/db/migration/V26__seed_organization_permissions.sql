@@ -21,7 +21,8 @@ VALUES
 ('STORE_CREATE',      'Create Stores',       'Create new stores'),
 ('STORE_VIEW',        'View Stores',         'View store information'),
 ('STORE_UPDATE',      'Update Stores',       'Modify store details'),
-('STORE_DELETE',      'Delete Stores',       'Soft-delete stores');
+('STORE_DELETE',      'Delete Stores',       'Soft-delete stores')
+ON CONFLICT (code) DO NOTHING;
 
 -- Assign to ULTIMATE_ADMIN role
 INSERT INTO role_permissions (role_id, permission_id)
@@ -34,4 +35,5 @@ WHERE r.code = 'ULTIMATE_ADMIN'
     'REGION_CREATE', 'REGION_VIEW', 'REGION_UPDATE', 'REGION_DELETE',
     'WAREHOUSE_CREATE', 'WAREHOUSE_VIEW', 'WAREHOUSE_UPDATE', 'WAREHOUSE_DELETE',
     'STORE_CREATE', 'STORE_VIEW', 'STORE_UPDATE', 'STORE_DELETE'
-  );
+  )
+ON CONFLICT (role_id, permission_id) DO NOTHING;

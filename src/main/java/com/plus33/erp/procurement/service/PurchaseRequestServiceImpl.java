@@ -2,7 +2,6 @@ package com.plus33.erp.procurement.service;
 
 import com.plus33.erp.common.dto.PageResponse;
 import com.plus33.erp.common.exception.BusinessException;
-import com.plus33.erp.common.exception.DuplicateResourceException;
 import com.plus33.erp.common.exception.ResourceNotFoundException;
 import com.plus33.erp.inventory.entity.Product;
 import com.plus33.erp.inventory.repository.ProductRepository;
@@ -311,12 +310,12 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         PurchaseRequest pr = purchaseRequestRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Purchase Request not found with ID: " + id));
 
-        if (pr.getStatus() != PurchaseRequestStatus.APPROVED) {
-            throw new BusinessException("Unauthorized transitions: Cannot convert Purchase Request to PO from " + pr.getStatus() + " status");
-        }
-
         if (pr.getPurchaseOrder() != null) {
             throw new BusinessException("Double conversion attempts: Purchase Request is already linked to Purchase Order " + pr.getPurchaseOrder().getOrderNumber());
+        }
+
+        if (pr.getStatus() != PurchaseRequestStatus.APPROVED) {
+            throw new BusinessException("Unauthorized transitions: Cannot convert Purchase Request to PO from " + pr.getStatus() + " status");
         }
 
         User currentUser = getCurrentUser();

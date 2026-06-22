@@ -40,6 +40,7 @@ public class Product {
     @Builder.Default
     private BigDecimal reorderLevel = BigDecimal.ZERO;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;
 

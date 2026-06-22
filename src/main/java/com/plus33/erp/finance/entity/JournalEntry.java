@@ -44,6 +44,7 @@ public class JournalEntry {
     @Column(name = "source_reference", length = 100)
     private String sourceReference;
 
+    @Builder.Default
     @Column(nullable = false, length = 30)
     private String status = "DRAFT";
 
@@ -51,6 +52,7 @@ public class JournalEntry {
     @JoinColumn(name = "reversal_entry_id")
     private JournalEntry reversalEntry;
 
+    @Builder.Default
     @Column(name = "currency_code", nullable = false, length = 3)
     private String currencyCode = "AED";
 
