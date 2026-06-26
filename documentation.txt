@@ -76,7 +76,11 @@ The application is structured into the following operational domains:
 * Sales & Customer Management:
   Supports customer accounts (B2B and B2C), billing/shipping addresses,
   tax profile categories, credit limit thresholds, outstanding balances,
-  pricing tiers, payment terms, and status lifecycles.
+  pricing tiers, payment terms, and status lifecycles. Includes sales
+  orders with snapshot-based customer data, credit limit validation,
+  and idempotency. Implements order fulfillment through pick lists with
+  stock allocation, partial picking, packing, shipping, and cancellation
+  rollback workflows.
 
 --------------------------------------------------------------------------------
 3. DATABASE DOCUMENTATION
@@ -345,6 +349,52 @@ and corresponding Flyway migration files:
   - Constraints: UNIQUE (company_id, code), UNIQUE (company_id, email), checks on credit_limit, outstanding_balance, discount_rate, and payment_terms_days.
   - Flyway Version: V52__create_sales_customers.sql / V53__seed_sales_customer_permissions.sql
 
+* sales_orders
+  - Purpose: Serves as the source document for sales agreements, tracking headers and historical customer snapshots.
+  - Relationships: FK company_id -> companies, FK customer_id -> customers, FK ordered_by -> users, FK submitted_by -> users, FK approved_by -> users, FK cancelled_by -> users.
+  - Constraints: UNIQUE (company_id, order_number), UNIQUE (company_id, client_reference_id), CHECK on status, CHECKs on non-negative subtotal, discount_amount, tax_amount, total_amount, and outstanding_amount.
+  - Flyway Version: V54__create_sales_orders.sql / V55__seed_sales_order_permissions.sql
+
+* sales_order_items
+  - Purpose: Tracks individual product quantities, unit prices, discounts, taxes, and totals under a sales order header.
+  - Key Fields: allocated_quantity, fulfilled_quantity, invoiced_quantity (tracked by downstream modules).
+  - Relationships: FK sales_order_id -> sales_orders, FK product_id -> products.
+  - Constraints: UNIQUE (sales_order_id, product_id) DEFERRABLE INITIALLY DEFERRED, CHECKs on ordered_quantity > 0, unit_price >= 0, discount_percentage (0-100), tax_percentage (0-100), and line_total >= 0.
+  - Flyway Version: V54__create_sales_orders.sql
+
+* pick_lists
+  - Purpose: Manages order fulfillment pick lists linking a sales order to a warehouse or store for stock allocation and shipping.
+  - Key Fields: id (BIGSERIAL PK), company_id, sales_order_id, pick_number (VARCHAR(50)), client_reference_id (UUID), status (PickListStatus enum), warehouse_id (nullable), store_id (nullable), created_by, released_by, released_at, picked_by, picked_at, packed_by, packed_at, shipped_by, shipped_at, cancelled_by, cancelled_at, cancellation_reason, version.
+  - Relationships: FK company_id -> companies, FK sales_order_id -> sales_orders, FK warehouse_id -> warehouses, FK store_id -> stores, FK created_by/released_by/picked_by/packed_by/shipped_by/cancelled_by -> users.
+  - Constraints: UNIQUE (company_id, client_reference_id), CHECK on status (DRAFT, RELEASED, PICKING, PICKED, PACKED, SHIPPED, CANCELLED), XOR constraint on warehouse_id/store_id.
+  - Flyway Version: V56__create_pick_lists.sql / V57__seed_pick_list_permissions.sql
+
+* pick_list_items
+  - Purpose: Individual line items on a pick list tracking ordered, allocated, picked, and shipped quantities.
+  - Key Fields: id (BIGSERIAL PK), pick_list_id, sales_order_item_id, product_id, ordered_quantity, allocated_quantity, picked_quantity, shipped_quantity, version.
+  - Relationships: FK pick_list_id -> pick_lists, FK sales_order_item_id -> sales_order_items, FK product_id -> products.
+  - Constraints: UNIQUE (pick_list_id, product_id) DEFERRABLE INITIALLY DEFERRED, CHECKs on quantities >= 0.
+  - Flyway Version: V56__create_pick_lists.sql
+
+* inventory_allocations
+  - Purpose: Audit trail for stock reservations linking pick lists to specific inventory locations with lifecycle status tracking.
+  - Key Fields: id (BIGSERIAL PK), company_id, sales_order_id, sales_order_item_id, pick_list_id, product_id, warehouse_id (nullable), store_id (nullable), allocated_quantity, allocation_status (ACTIVE, RELEASED, CONSUMED, CANCELLED), allocation_reference.
+  - Relationships: FK company_id -> companies, FK sales_order_id -> sales_orders, FK sales_order_item_id -> sales_order_items, FK pick_list_id -> pick_lists, FK product_id -> products, FK warehouse_id -> warehouses, FK store_id -> stores.
+  - Constraints: CHECKs on allocated_quantity > 0 and allocation_status enum values.
+  - Flyway Version: V56__create_pick_lists.sql
+
+* customer_invoices
+  - Purpose: Stores billing invoices sent to customers.
+  - Relationships: FK company_id -> companies, FK customer_id -> customers, FK sales_order_id -> sales_orders, FK journal_entry_id -> journal_entries, FK created_by/submitted_by/approved_by/cancelled_by -> users.
+  - Constraints: UNIQUE (company_id, invoice_number), UNIQUE (company_id, client_reference_id), CHECKs on status enum, and non-negative subtotal, discount, tax, total, paid, and outstanding balances.
+  - Flyway Version: V58__create_customer_invoices.sql / V59__seed_customer_invoice_permissions.sql
+
+* customer_invoice_items
+  - Purpose: Line items under a customer invoice.
+  - Relationships: FK customer_invoice_id -> customer_invoices, FK sales_order_item_id -> sales_order_items, FK pick_list_item_id -> pick_list_items, FK product_id -> products.
+  - Constraints: UNIQUE (customer_invoice_id, product_id) DEFERRABLE INITIALLY DEFERRED, CHECKs on quantity > 0, unit_price >= 0, discount_percentage (0-100), tax_percentage (0-100), and line totals.
+  - Flyway Version: V58__create_customer_invoices.sql
+
 --------------------------------------------------------------------------------
 4. ENTITY DOCUMENTATION
 --------------------------------------------------------------------------------
@@ -494,6 +544,34 @@ builders, getters/setters, and validation rules.
 * Customer
   - Location: com.plus33.erp.sales.entity.Customer
   - Fields: id (Long), company (Company), code (String), name (String), customerType (CustomerType), status (CustomerStatus), contactPerson (String), email (String), phone (String), billingAddress (String), shippingAddress (String), taxNumber (String), taxProfile (TaxProfile), creditLimit (BigDecimal), outstandingBalance (BigDecimal), pricingTier (String), discountRate (BigDecimal), paymentTermsDays (Integer), currencyCode (String), createdAt (LocalDateTime), updatedAt (LocalDateTime), version (Long)
+
+* SalesOrder
+  - Location: com.plus33.erp.sales.entity.SalesOrder
+  - Fields: id (Long), company (Company), customer (Customer), orderNumber (String), clientReferenceId (UUID), orderDate (LocalDate), requestedDeliveryDate (LocalDate), currencyCode (String), paymentTermsDays (Integer), billingAddress (String), shippingAddress (String), status (SalesOrderStatus), customerName (String), customerCode (String), customerType (String), pricingTier (String), discountRate (BigDecimal), taxProfile (String), subtotal (BigDecimal), discountAmount (BigDecimal), taxAmount (BigDecimal), totalAmount (BigDecimal), outstandingAmount (BigDecimal), creditOverride (Boolean), orderedBy (User), submittedBy (User), approvedBy (User), cancelledBy (User), submittedAt (LocalDateTime), approvedAt (LocalDateTime), cancelledAt (LocalDateTime), cancellationReason (String), createdAt (LocalDateTime), updatedAt (LocalDateTime), version (Long), items (List<SalesOrderItem>)
+
+* SalesOrderItem
+  - Location: com.plus33.erp.sales.entity.SalesOrderItem
+  - Fields: id (Long), salesOrder (SalesOrder), product (Product), orderedQuantity (BigDecimal), unitPrice (BigDecimal), discountPercentage (BigDecimal), taxPercentage (BigDecimal), lineTotal (BigDecimal), allocatedQuantity (BigDecimal), fulfilledQuantity (BigDecimal), invoicedQuantity (BigDecimal), version (Long)
+
+* PickList
+  - Location: com.plus33.erp.sales.entity.PickList
+  - Fields: id (Long), company (Company), salesOrder (SalesOrder), pickNumber (String), clientReferenceId (UUID), status (PickListStatus), warehouse (Warehouse), store (Store), createdBy (User), releasedBy (User), releasedAt (LocalDateTime), pickedBy (User), pickedAt (LocalDateTime), packedBy (User), packedAt (LocalDateTime), shippedBy (User), shippedAt (LocalDateTime), cancelledBy (User), cancelledAt (LocalDateTime), cancellationReason (String), version (Long), items (List<PickListItem>)
+
+* PickListItem
+  - Location: com.plus33.erp.sales.entity.PickListItem
+  - Fields: id (Long), pickList (PickList), salesOrderItem (SalesOrderItem), product (Product), orderedQuantity (BigDecimal), allocatedQuantity (BigDecimal), pickedQuantity (BigDecimal), shippedQuantity (BigDecimal), version (Long)
+
+* InventoryAllocation
+  - Location: com.plus33.erp.sales.entity.InventoryAllocation
+  - Fields: id (Long), company (Company), salesOrder (SalesOrder), salesOrderItem (SalesOrderItem), pickList (PickList), product (Product), warehouse (Warehouse), store (Store), allocatedQuantity (BigDecimal), allocationStatus (AllocationStatus), allocationReference (String)
+
+* CustomerInvoice
+  - Location: com.plus33.erp.sales.entity.CustomerInvoice
+  - Fields: id (Long), company (Company), customer (Customer), salesOrder (SalesOrder), invoiceNumber (String), clientReferenceId (UUID), invoiceDate (LocalDate), dueDate (LocalDate), currencyCode (String), subtotalAmount (BigDecimal), taxAmount (BigDecimal), discountAmount (BigDecimal), totalAmount (BigDecimal), paidAmount (BigDecimal), outstandingBalance (BigDecimal), status (CustomerInvoiceStatus), journalEntry (JournalEntry), createdBy (User), submittedBy (User), approvedBy (User), cancelledBy (User), createdAt (LocalDateTime), submittedAt (LocalDateTime), approvedAt (LocalDateTime), cancelledAt (LocalDateTime), cancellationReason (String), items (List<CustomerInvoiceItem>), version (Long)
+
+* CustomerInvoiceItem
+  - Location: com.plus33.erp.sales.entity.CustomerInvoiceItem
+  - Fields: id (Long), customerInvoice (CustomerInvoice), salesOrderItem (SalesOrderItem), pickListItem (PickListItem), product (Product), quantity (BigDecimal), unitPrice (BigDecimal), discountPercentage (BigDecimal), taxPercentage (BigDecimal), netAmount (BigDecimal), taxAmount (BigDecimal), discountAmount (BigDecimal), totalAmount (BigDecimal), version (Long)
 
 --------------------------------------------------------------------------------
 5. API DOCUMENTATION
@@ -783,6 +861,152 @@ workflow transitions, and possible errors:
     - Required Permission: CUSTOMER_DELETE
     - Response: ApiResponse<Void>
 
+* Sales Orders (SalesOrderController)
+  - Endpoint: POST /api/v1/sales-orders
+    - Purpose: Creates a new sales order in DRAFT status. Validates company boundaries, client-reference-based idempotency, and snapshots customer profile and addresses.
+    - Required Permission: SALES_ORDER_CREATE
+    - Request: SalesOrderRequest DTO
+    - Response: ApiResponse<SalesOrderResponse>
+    - Errors: 400 (validation, cross-company customer match, missing billing/shipping address), 404 (not found)
+  - Endpoint: PUT /api/v1/sales-orders/{id}
+    - Purpose: Updates a draft sales order items and delivery dates.
+    - Required Permission: SALES_ORDER_UPDATE
+    - Request: SalesOrderRequest DTO
+    - Response: ApiResponse<SalesOrderResponse>
+    - Errors: 400 (not in DRAFT status), 404 (not found)
+  - Endpoint: GET /api/v1/sales-orders/{id}
+    - Purpose: Retrieves sales order details and its line items by ID.
+    - Required Permission: SALES_ORDER_VIEW
+    - Response: ApiResponse<SalesOrderResponse>
+    - Errors: 404 (not found)
+  - Endpoint: GET /api/v1/sales-orders
+    - Purpose: Performs dynamic filter search and pagination for sales orders.
+    - Required Permission: SALES_ORDER_VIEW
+    - Request parameters: query, companyId, customerId, status, customerType, creditOverride, requestedDeliveryDateFrom, requestedDeliveryDateTo, createdBy, approvedBy
+    - Response: ApiResponse<PageResponse<SalesOrderResponse>>
+  - Endpoint: POST /api/v1/sales-orders/{id}/submit
+    - Purpose: Submits a DRAFT order for approval. Transitions status to SUBMITTED and records submitter audit details.
+    - Required Permission: SALES_ORDER_SUBMIT
+    - Response: ApiResponse<SalesOrderResponse>
+    - Errors: 400 (not DRAFT), 404 (not found)
+  - Endpoint: POST /api/v1/sales-orders/{id}/approve
+    - Purpose: Approves a SUBMITTED order, performing credit validation. If exceeded, requires SALES_ORDER_OVERRIDE_CREDIT_LIMIT, SALES_OVERRIDE_CREDIT_LIMIT, or CUSTOMER_OVERRIDE_CREDIT_LIMIT permission. Updates the customer's outstanding balance.
+    - Required Permission: SALES_ORDER_APPROVE
+    - Response: ApiResponse<SalesOrderResponse>
+    - Errors: 400 (not SUBMITTED, inactive customer, credit check failure without permission), 404 (not found)
+  - Endpoint: POST /api/v1/sales-orders/{id}/cancel
+    - Purpose: Cancels a DRAFT, SUBMITTED, or APPROVED order. Reverts the customer's outstanding balance if the order was APPROVED.
+    - Required Permission: SALES_ORDER_CANCEL
+    - Request: SalesOrderCancelRequest DTO (reason)
+    - Response: ApiResponse<SalesOrderResponse>
+    - Errors: 400 (not in DRAFT, SUBMITTED, or APPROVED status), 404 (not found)
+
+* Order Fulfillment & Picking (PickListController)
+  - Endpoint: POST /api/v1/pick-lists
+    - Purpose: Creates a DRAFT pick list for an approved sales order at a specific warehouse or store. Supports idempotency via client_reference_id. Validates XOR location (exactly one of warehouse or store), company ownership, and one-active-pick-list-per-location constraint.
+    - Required Permission: PICK_LIST_CREATE
+    - Request: PickListRequest DTO (companyId, salesOrderId, warehouseId, storeId, clientReferenceId)
+    - Response: ApiResponse<PickListResponse> (HTTP 201)
+    - Errors: 400 (inactive company, invalid SO status, both/neither location, active PL exists), 404 (not found)
+
+  - Endpoint: POST /api/v1/pick-lists/{id}/release
+    - Purpose: Releases a DRAFT pick list. Allocates stock using pessimistic write locks, creates ACTIVE inventory allocations, reserves stock, updates SalesOrderItem.allocatedQuantity, and logs SALES_RESERVE stock movements. Supports partial allocation when insufficient stock.
+    - Required Permission: PICK_LIST_RELEASE
+    - Response: ApiResponse<PickListResponse>
+    - Errors: 400 (not DRAFT), 404 (not found)
+
+  - Endpoint: POST /api/v1/pick-lists/{id}/start-picking
+    - Purpose: Transitions a RELEASED pick list to PICKING status.
+    - Required Permission: PICK_LIST_PICK
+    - Response: ApiResponse<PickListResponse>
+    - Errors: 400 (not RELEASED), 404 (not found)
+
+  - Endpoint: POST /api/v1/pick-lists/{id}/complete-picking
+    - Purpose: Records picked quantities for each item. Validates that picked quantity does not exceed allocated quantity.
+    - Required Permission: PICK_LIST_PICK
+    - Request: CompletePickingRequest DTO (items[productId, pickedQuantity])
+    - Response: ApiResponse<PickListResponse>
+    - Errors: 400 (not PICKING, picked > allocated), 404 (not found)
+
+  - Endpoint: POST /api/v1/pick-lists/{id}/pack
+    - Purpose: Transitions a PICKED pick list to PACKED status.
+    - Required Permission: PICK_LIST_PACK
+    - Response: ApiResponse<PickListResponse>
+    - Errors: 400 (not PICKED), 404 (not found)
+
+  - Endpoint: POST /api/v1/pick-lists/{id}/ship
+    - Purpose: Ships a PACKED pick list. Deducts physical stock, clears reservations, updates SalesOrderItem.fulfilledQuantity, progresses SalesOrder status (PARTIALLY_FULFILLED or FULFILLED), creates CONSUMED/RELEASED allocation records, and logs SALES_SHIPMENT/SALES_RELEASE stock movements.
+    - Required Permission: PICK_LIST_SHIP
+    - Request: ShipRequest DTO (items[productId, shippedQuantity])
+    - Response: ApiResponse<PickListResponse>
+    - Errors: 400 (not PACKED, shipped > picked), 404 (not found)
+
+  - Endpoint: POST /api/v1/pick-lists/{id}/cancel
+    - Purpose: Cancels a pick list (any status except SHIPPED/CANCELLED). Rolls back stock reservations, restores SalesOrderItem.allocatedQuantity, marks allocations as CANCELLED, and logs SALES_RELEASE stock movements.
+    - Required Permission: PICK_LIST_CANCEL
+    - Request: SalesOrderCancelRequest DTO (reason)
+    - Response: ApiResponse<PickListResponse>
+    - Errors: 400 (already SHIPPED or CANCELLED), 404 (not found)
+
+  - Endpoint: GET /api/v1/pick-lists/{id}
+    - Purpose: Retrieves a single pick list by ID.
+    - Required Permission: PICK_LIST_VIEW
+    - Response: ApiResponse<PickListResponse>
+
+  - Endpoint: GET /api/v1/pick-lists/sales-order/{salesOrderId}
+    - Purpose: Lists all pick lists for a sales order.
+    - Required Permission: PICK_LIST_VIEW
+
+  - Endpoint: GET /api/v1/pick-lists/warehouse/{warehouseId}
+    - Purpose: Lists all pick lists for a warehouse.
+    - Required Permission: PICK_LIST_VIEW
+
+  - Endpoint: GET /api/v1/pick-lists/store/{storeId}
+    - Purpose: Lists all pick lists for a store.
+    - Required Permission: PICK_LIST_VIEW
+
+  - Endpoint: GET /api/v1/pick-lists/status/{status}
+    - Purpose: Lists all pick lists with a given status.
+    - Required Permission: PICK_LIST_VIEW
+
+* Customer Invoices (CustomerInvoiceController)
+  - Endpoint: POST /api/v1/customer-invoices
+    - Purpose: Creates a new customer invoice in DRAFT status. Supports idempotency via client_reference_id.
+    - Required Permission: CUSTOMER_INVOICE_CREATE
+    - Request: CustomerInvoiceRequest DTO
+    - Response: ApiResponse<CustomerInvoiceResponse> (HTTP 201)
+  - Endpoint: PUT /api/v1/customer-invoices/{id}
+    - Purpose: Updates an existing DRAFT customer invoice.
+    - Required Permission: CUSTOMER_INVOICE_UPDATE
+    - Request: CustomerInvoiceUpdateRequest DTO
+    - Response: ApiResponse<CustomerInvoiceResponse>
+  - Endpoint: GET /api/v1/customer-invoices/{id}
+    - Purpose: Retrieves a single customer invoice by ID.
+    - Required Permission: CUSTOMER_INVOICE_VIEW
+    - Response: ApiResponse<CustomerInvoiceResponse>
+  - Endpoint: GET /api/v1/customer-invoices
+    - Purpose: Dynamic filter search and pagination for customer invoices.
+    - Required Permission: CUSTOMER_INVOICE_VIEW
+    - Request Parameters: companyId, customerId, salesOrderId, invoiceNumber, status, invoiceDateFrom, invoiceDateTo
+    - Response: ApiResponse<PageResponse<CustomerInvoiceResponse>>
+  - Endpoint: POST /api/v1/customer-invoices/{id}/submit
+    - Purpose: Submits a DRAFT customer invoice. Locks edits and records submitter details.
+    - Required Permission: CUSTOMER_INVOICE_SUBMIT
+    - Response: ApiResponse<CustomerInvoiceResponse>
+  - Endpoint: POST /api/v1/customer-invoices/{id}/approve
+    - Purpose: Approves a SUBMITTED invoice. Generates a balanced Journal Entry, posts to ledger accounts (1400, 2200, 4000), updates customer outstanding balance (if ad-hoc), and triggers analytics refresh.
+    - Required Permission: CUSTOMER_INVOICE_APPROVE
+    - Response: ApiResponse<CustomerInvoiceResponse>
+  - Endpoint: POST /api/v1/customer-invoices/{id}/cancel
+    - Purpose: Cancels an APPROVED customer invoice. Reverses the ledger posting via a reversal Journal Entry, restores outstanding balances, and updates quantity records.
+    - Required Permission: CUSTOMER_INVOICE_CANCEL
+    - Request: CustomerInvoiceCancelRequest DTO (reason)
+    - Response: ApiResponse<CustomerInvoiceResponse>
+  - Endpoint: POST /api/v1/customer-invoices/{id}/void
+    - Purpose: Voids a DRAFT or SUBMITTED invoice (accounting-safe cancellation before posting).
+    - Required Permission: CUSTOMER_INVOICE_VOID
+    - Response: ApiResponse<CustomerInvoiceResponse>
+
 --------------------------------------------------------------------------------
 6. WORKFLOW DOCUMENTATION
 --------------------------------------------------------------------------------
@@ -874,6 +1098,41 @@ This section defines business states, transitions, validations, and side effects
   - Customer Code Generation: Generated automatically on creation using format CUST-YYYY-xxxxxx.
   - Soft Delete: soft deletes are performed by updating status to INACTIVE.
 
+* Sales Order Workflow:
+  - Workflow States: DRAFT -> SUBMITTED -> APPROVED -> PARTIALLY_FULFILLED -> FULFILLED (via fulfillment module). CANCELLED is reachable from DRAFT, SUBMITTED, or APPROVED.
+  - Snapshot Rule: Copies customer code, name, customer type, pricing tier, discount rate, tax profile, payment terms, billing/shipping addresses, and currency code at creation, ensuring historical data is preserved even if the customer profile is updated later.
+  - Company Isolation: Enforces company validation (sales_order.company_id == customer.company_id), rejecting cross-company assignments.
+  - Monetary Validations: Database constraints prevent negative amounts for subtotal, discount_amount, tax_amount, total_amount, outstanding_amount, and line item unit_price/quantity.
+  - Credit Limit Verification: Upon approval, if outstanding_balance + total_amount exceeds the customer's credit_limit, the system blocks transition unless overridden by a user with SALES_ORDER_OVERRIDE_CREDIT_LIMIT, SALES_OVERRIDE_CREDIT_LIMIT, or CUSTOMER_OVERRIDE_CREDIT_LIMIT permissions. If overridden, credit_override flag is set to true.
+  - Outstanding Balance Management: Approving a sales order increments the customer's outstanding_balance by the order's total_amount. Cancelling an approved sales order decrements the customer's outstanding_balance by the order's total_amount.
+  - Idempotency support: client_reference_id (UUID) UNIQUE constraint prevents duplicate sales orders from API retries.
+  - Inventory Integration: Approved orders feed into the fulfillment module (V25.3) for stock allocation and shipping.
+
+* Order Fulfillment & Picking Workflow:
+  - Workflow States: DRAFT -> RELEASED -> PICKING -> PICKED -> PACKED -> SHIPPED. CANCELLED is reachable from any active status (not SHIPPED/CANCELLED).
+  - Idempotency: client_reference_id (UUID) per company prevents duplicate pick list creation from API retries.
+  - Location Constraint: Exactly one of warehouse_id or store_id must be specified (XOR).
+  - One Active Pick List Rule: Only one non-terminal (not SHIPPED/CANCELLED) pick list per sales order per location is allowed.
+  - Side Effects:
+    - Create (DRAFT): Populates pick list items from unallocated SalesOrderItem quantities.
+    - Release (DRAFT -> RELEASED): Pessimistic write locks on InventoryStock. Allocates up to available stock (partial allocation supported). Creates ACTIVE InventoryAllocation records. Reserves stock (increments reserved_quantity). Updates SalesOrderItem.allocatedQuantity. Logs SALES_RESERVE StockMovement.
+    - Start Picking (RELEASED -> PICKING): Status transition only.
+    - Complete Picking (PICKING -> PICKED): Records picked quantities per item. Validates picked <= allocated.
+    - Pack (PICKED -> PACKED): Status transition only.
+    - Ship (PACKED -> SHIPPED): Pessimistic write locks on InventoryStock. Deducts shippedQuantity from physical stock. Clears full allocatedQuantity from reserved stock. Updates SalesOrderItem (fulfilledQuantity += shipped, allocatedQuantity -= allocated). Creates CONSUMED allocation for shipped quantity. Creates RELEASED allocation for remainder (partial shipment). Logs SALES_SHIPMENT and SALES_RELEASE StockMovements. Progresses SalesOrder to PARTIALLY_FULFILLED or FULFILLED.
+    - Cancel (any -> CANCELLED): Reverses stock reservations. Restores SalesOrderItem.allocatedQuantity. Marks all ACTIVE allocations as CANCELLED. Logs SALES_RELEASE StockMovement.
+
+* Customer Invoicing Workflow:
+  - Workflow States: DRAFT -> SUBMITTED -> APPROVED -> PAID / PARTIALLY_PAID. CANCELLED is reachable from APPROVED. VOID is reachable from DRAFT or SUBMITTED.
+  - Remaining-to-Invoice Validation: For order-based invoices, the sum of invoiced quantity across all invoices cannot exceed the sales order's fulfilled quantity: `quantity <= (fulfilled_quantity - invoiced_quantity)`.
+  - Date Validation: Enforces `due_date >= invoice_date` at both database and service levels.
+  - Accounts Verification: Checks for the existence of required general ledger accounts: Accounts Receivable (1400), Tax Payable (2200), and Revenue (4000) prior to invoice approval.
+  - Side Effects:
+    - Approve (SUBMITTED -> APPROVED): Automatically generates and posts a balanced double-entry Journal Entry (Debit 1400 Receivables, Credit 4000 Revenue, Credit 2200 Tax). For ad-hoc invoices, increments the customer's `outstanding_balance`.
+    - Payment Allocation: Allocating a receivable payment decreases the invoice's `outstanding_balance` and transitions its status to `PARTIALLY_PAID` or `PAID`. For ad-hoc invoices, decreases the customer's `outstanding_balance` accordingly.
+    - Cancel (APPROVED -> CANCELLED): Reverses the ledger entry by posting a balanced reversal Journal Entry, and decrements the customer's outstanding balance (if ad-hoc).
+    - Void (DRAFT/SUBMITTED -> VOID): Marks the invoice as voided before posting, preventing any ledger impact.
+
 --------------------------------------------------------------------------------
 7. SECURITY DOCUMENTATION
 --------------------------------------------------------------------------------
@@ -905,6 +1164,8 @@ from analytical updates.
   - InventoryAdjustmentRefreshEvent: Fired on posting inventory adjustments and Stock Counts.
   - ReplenishmentRefreshEvent: Fired on replenishment suggestions and rule evaluations.
   - InventoryTraceabilityRefreshEvent: Fired on recall creations or lot expiry checks.
+  - PickListRefreshEvent: Fired on pick list releases, shipments, and cancellations.
+  - CustomerInvoiceRefreshEvent: Fired on customer invoice creations, submissions, approvals, cancellations, payments, and voids.
 * Listeners:
   - ProcurementRefreshEventListener
   - InventoryRefreshEventListener
@@ -912,6 +1173,8 @@ from analytical updates.
   - InventoryAdjustmentRefreshEventListener
   - ReplenishmentRefreshEventListener
   - InventoryTraceabilityRefreshEventListener
+  - PickListRefreshEventListener
+  - CustomerInvoiceRefreshEventListener
 * Processing:
   Listeners use @Async and @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT).
   They trigger AnalyticsRefreshService inside new propagation transactions to update
@@ -933,6 +1196,9 @@ from analytical updates.
   - mv_inventory_replenishment_metrics: Tracks rules coverage, cycle times, and stockout prevention rates.
   - mv_inventory_traceability_metrics: Audits recalls, serial counts, and product compromise rates.
   - mv_inventory_turnover: Calculates COGS, average stock value, and turnover ratios.
+  - mv_sales_kpis: Aggregates total invoices, total invoiced, total paid, and total outstanding receivables.
+  - mv_receivables_dashboard: Summarizes invoice counts, total amounts, and outstanding balances by status.
+  - mv_customer_aging: Dynamically computes customer aging buckets (current, 1-30, 31-60, 61-90, 90+ days) based on invoice due dates.
 * Indexes for Concurrent Refreshes:
   Unique indexes (e.g. uidx_mv_payables_aging, uidx_mv_inventory_kpis) allow non-blocking concurrent refreshes
   ("REFRESH MATERIALIZED VIEW CONCURRENTLY view_name"). Expression indexes cannot be used for concurrent refreshes;
@@ -988,3 +1254,336 @@ from analytical updates.
   key containing the parent foreign key in the child table MUST be declared as
   "DEFERRABLE INITIALLY DEFERRED". This defers unique constraint evaluation until commit,
   preventing statement-level violations during Hibernate's insert-before-delete flush.
+
+--------------------------------------------------------------------------------
+14. CUSTOMER RETURNS & CREDIT NOTES (V25.5)
+--------------------------------------------------------------------------------
+This module completes the Sales lifecycle by supporting customer returns, product inspections, restocking/scrapping/quarantining, credit note generation, double-entry ledger reversals, and Accounts Receivable updates.
+
+* Database Tables:
+  - customer_returns: Header for return requests. Tracks company, customer, sales order, invoice, warehouse, store, return number, client reference ID, status, reason, remarks, and audit fields (createdBy, approvedBy, receivedBy, inspectedBy, closedBy, cancelledBy).
+  - customer_return_items: Line items. Tracks sales order item, invoice item, product, quantity, inspection result (RESTOCK, SCRAP, QUARANTINE), inspection notes, lot, and serial.
+  - credit_notes: Header for credit notes. Tracks company, customer, return, invoice, credit note number, client reference ID, status (DRAFT, APPROVED, POSTED, CANCELLED), subtotal, tax, discount, total, journal entry, and audit fields.
+  - credit_note_items: Line items under a credit note.
+
+* Domain Entities:
+  - CustomerReturn (com.plus33.erp.sales.entity.CustomerReturn)
+  - CustomerReturnItem (com.plus33.erp.sales.entity.CustomerReturnItem)
+  - CreditNote (com.plus33.erp.sales.entity.CreditNote)
+  - CreditNoteItem (com.plus33.erp.sales.entity.CreditNoteItem)
+
+* REST APIs:
+  - POST /api/v1/customer-returns (Create request)
+  - PUT /api/v1/customer-returns/{id} (Update request - DRAFT only)
+  - GET /api/v1/customer-returns/{id} (Retrieve single return)
+  - GET /api/v1/customer-returns (Search and page returns)
+  - POST /api/v1/customer-returns/{id}/approve (Approve request)
+  - POST /api/v1/customer-returns/{id}/receive (Receive returned goods)
+  - POST /api/v1/customer-returns/{id}/inspect (Record line-level inspection outcomes)
+  - POST /api/v1/customer-returns/{id}/close (Close return, process inventory, generate & post credit note)
+  - POST /api/v1/customer-returns/{id}/cancel (Cancel return)
+  - GET /api/v1/credit-notes/{id} (Retrieve single credit note)
+  - GET /api/v1/credit-notes (Search credit notes)
+
+* Workflows & Side Effects:
+  - Return requested -> Approved -> Received -> Inspected -> Closed (or Cancelled).
+  - Validation: Partial return checks prevent over-returning (returnedQuantity <= invoicedQuantity). Only products on the original invoice may be returned. Serials and lots must exist, belong to the invoice, and not be already returned.
+  - Close Return (INSPECTED -> CLOSED):
+    - RESTOCK: Increments physical stock, registers CUSTOMER_RETURN stock movement, records trace event, and sets serial status to IN_STOCK.
+    - SCRAP: Registers CUSTOMER_RETURN stock movement (zero stock change), sets serial to RECALLED, and records trace event.
+    - QUARANTINE: Sets serial/lot status to QUARANTINED, registers stock movement, and records trace event.
+    - Generates Credit Note (POSTED) and posts balanced Journal Entry (Debit 4000 Revenue, Debit 2200 Tax, Credit 1400 AR).
+    - Updates CustomerInvoice creditedAmount, remainingBalance, and transitions status (PARTIALLY_CREDITED / FULLY_CREDITED).
+    - Deducts credit note total from Customer outstandingBalance.
+  - Analytics Refresh: Publishes CustomerReturnRefreshEvent on APPROVAL, RECEIVE, INSPECT, and CLOSE, triggering asynchronous refresh of materialized views (mv_sales_kpis, mv_receivables_dashboard, mv_customer_aging, mv_inventory_kpis, mv_inventory_traceability_metrics).
+
+* Verification Notes:
+  - Status: PASSED and VERIFIED.
+  - Integration Test Suite: com.plus33.erp.sales.controller.CustomerReturnControllerIntegrationTest
+  - Execution Command: `.\mvnw.cmd clean test -Dtest=CustomerReturnControllerIntegrationTest`
+  - Test Scope: Covers the entire end-to-end return request lifecycle (Draft -> Approved -> Received -> Inspected -> Closed) and verifies:
+    - Company-scoped multi-tenant isolation and security permission checks.
+    - Over-return validation: blocks returns exceeding remaining invoiced quantity.
+    - Product invoice membership check: returns 409 Conflict if a returned product does not belong to the invoice.
+    - Serial/lot validation: checks status (must be SOLD) and prevents duplicate returns.
+    - Granular line-level inspection outcomes (RESTOCK, SCRAP, QUARANTINE) with stock movements, trace events, and status updates.
+    - Credit Note generation (POSTED) and customer balance reduction.
+    - Balanced GL reversing Journal Entry posting: Debit 4000 (Sales Returns), Debit 2200 (Tax Payable), Credit 1400 (Accounts Receivable).
+    - Customer Invoice status transition (PARTIALLY_CREDITED / FULLY_CREDITED) and remaining balance calculations.
+    - Event-driven dashboard updates (CustomerReturnRefreshEvent).
+
+--------------------------------------------------------------------------------
+15. ACCOUNTS RECEIVABLE (V25.6)
+--------------------------------------------------------------------------------
+This module extends the Sales and invoicing architecture by introducing dedicated Accounts Receivable reporting, customer balance summaries, chronological customer ledger statements, overdue invoice tracking, and bad-debt write-off processing with automated General Ledger postings.
+
+* Database Tables:
+  - ar_write_offs: Records each bad-debt write-off as an immutable accounting event. Tracks company, customer, customer invoice, write-off amount, write-off date, reason, journal entry, and audit fields (createdBy, writtenAt).
+
+* Domain Entities:
+  - ARWriteOff (com.plus33.erp.ar.entity.ARWriteOff)
+
+* REST APIs:
+  - GET /api/v1/ar/aging (Get AR Aging Report from mv_customer_aging view)
+  - GET /api/v1/ar/summary (Get AR Summary / Dashboard metrics)
+  - GET /api/v1/ar/customers/{customerId}/balance (Get Customer AR Balance)
+  - GET /api/v1/ar/customers/{customerId}/statement (Get Customer AR Statement ledger)
+  - GET /api/v1/ar/overdue (Get paginated list of overdue invoices)
+  - POST /api/v1/ar/write-offs (Record an AR write-off)
+  - GET /api/v1/ar/write-offs/{id} (Get write-off details by ID)
+  - GET /api/v1/ar/write-offs (Search write-offs with filtering)
+
+* Workflows & Side Effects:
+  - Customer Statement: Dynamically builds a chronological ledger of customer invoices, payments/allocations, credit notes, and write-offs within a date range, calculating a running balance in-memory.
+  - Overdue Invoices: Dynamically lists approved/partially paid invoices where due_date < current_date and outstanding_balance > 0.
+  - Write-off Processing:
+    - Verifies invoice status is eligible (APPROVED, PARTIALLY_PAID, PARTIALLY_CREDITED).
+    - Verifies write-off amount does not exceed invoice outstanding balance.
+    - Generates unique write-off reference numbers using sequence `ar_write_off_seq`.
+    - Automatically posts balanced General Ledger journal entry: Debit Bad Debt Expense (5300) / Credit Accounts Receivable (1400).
+    - Decreases both CustomerInvoice.outstandingBalance and Customer.outstandingBalance.
+    - Does NOT change the invoice status (unless fully written off, where outstanding balance is reduced to zero and write-off serves as the accounting event).
+    - Publishes CustomerInvoiceRefreshEvent to trigger asynchronous refresh of materialized views (mv_sales_kpis, mv_receivables_dashboard, mv_customer_aging).
+
+* Verification Notes:
+  - Status: PASSED and VERIFIED.
+  - Integration Test Suite: com.plus33.erp.ar.controller.ARControllerIntegrationTest
+  - Execution Command: `.\mvnw.cmd clean test -Dtest=ARControllerIntegrationTest`
+  - Test Scope: Covers the entire Accounts Receivable reporting and write-off lifecycle:
+    - Customer balance retrieval, overdue invoice listing, and statement generation.
+    - Recording a write-off and asserting write-off persistence.
+    - Verification of automatic balanced GL Journal Entry generation (Debit 5300, Credit 1400) linked to the write-off.
+    - Verification of customer invoice outstanding balance and customer outstanding balance reductions.
+    - Chronological statement listing with correct running balance calculations.
+
+--------------------------------------------------------------------------------
+16. ACCOUNTS PAYABLE (V26)
+--------------------------------------------------------------------------------
+This module introduces a unified Accounts Payable (AP) management and reporting layer over the existing Procurement and Finance systems. It provides real-time dashboard KPIs, configurable aging bucketing, supplier outstanding balances, chronological statements, overdue bill tracking, and secure voiding transactions.
+
+* Database Tables & Enhancements:
+  - Altered status check constraint on supplier_invoices to support SUBMITTED and VOID statuses (V66).
+  - Seeded system permissions: AP_VIEW, AP_STATEMENT_VIEW, and VENDOR_BILL_VOID mapped to ULTIMATE_ADMIN (V67).
+
+* REST APIs:
+  - GET /api/v1/ap/dashboard (Get AP Dashboard summary and KPIs)
+  - GET /api/v1/ap/aging (Get AP Aging Report with dynamic, configurable intervals)
+  - GET /api/v1/ap/suppliers/{supplierId}/balance (Get Supplier AP Balance)
+  - GET /api/v1/ap/suppliers/{supplierId}/statement (Get Supplier Chronological Statement ledger)
+  - GET /api/v1/ap/overdue (Get paginated list of overdue supplier invoices)
+  - GET /api/v1/ap/analytics (Get detailed AP analytics and cash requirement forecasts)
+  - POST /api/v1/supplier-invoices/{id}/submit (Submit a draft invoice, transitioning DRAFT -> SUBMITTED)
+  - POST /api/v1/supplier-invoices/{id}/void (Void a draft or submitted invoice, transitioning DRAFT/SUBMITTED -> VOID)
+
+* Workflows & Side Effects:
+  - Lifecycle Rules: Supplier invoices transition through DRAFT -> SUBMITTED -> APPROVED -> PARTIALLY_PAID -> PAID.
+  - Void Rules: Voiding is allowed only on DRAFT and SUBMITTED statuses. Approved, partially paid, or paid invoices are blocked from voiding and must be reversed using the accounting cancel/reversal process.
+  - Supplier Statement: Dynamically builds a chronological ledger of bills (credit), payments/allocations (debit), and cancellations (debit) within a date range, starting from an opening balance (sum of all historical movements before the starting date) and computing a running balance in-memory.
+  - Configurable Aging: Dynamically maps all outstanding supplier invoices into configurable day intervals (e.g. 15, 30, 60, 120) or defaults to standard buckets (30, 60, 90) in Java, avoiding hardcoded database aging scripts.
+  - Company Isolation: Enforces multi-company validation on all endpoints, ensuring that all supplier, invoice, and payment requests belong to the same company boundary.
+  - Event-driven refreshes: Publishes SupplierInvoiceRefreshEvent on all status changes to asynchronously refresh payables and procurement views (mv_payables_aging, mv_procurement_summary, mv_supplier_performance, mv_po_fulfilment, mv_invoice_matching) via Spring Event listeners.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.ap.controller.APControllerIntegrationTest
+  - Execution Command: .\mvnw.cmd clean test -Dtest=APControllerIntegrationTest
+  - Test Scope: Covers the entire Accounts Payable reporting and lifecycle:
+    - Dashboard KPIs: asserts correct calculation of payables, current due, overdue, due this week, open bills, average payment days, awaiting approvals, and cash forecasts.
+    - Configurable aging: asserts correct bucketing of outstanding bills with custom intervals.
+    - Chronological statements: asserts correct opening, running, and closing balances with bill/payment/cancellation flows.
+    - Overdue bill paginated listing.
+    - Void rules: asserts that draft and submitted invoices can be voided, while approved invoices are blocked.
+    - Multi-tenant company isolation and security permission checks.
+
+--------------------------------------------------------------------------------
+17. SUPPLIER PAYMENTS & PAYMENT RUNS (V26.2)
+--------------------------------------------------------------------------------
+This module automates bulk, consolidated batch payments to suppliers. It provides invoice selection and reservation, supplier-level payment consolidation, transaction-isolated execution (ensuring partial batch success), rich auditing of execution results, strategy-pattern-based bank file exports stored securely on the local filesystem, and an operational dashboard.
+
+* Database Tables:
+  - payment_runs: Header table representing the batch run.
+    - Fields: id (BIGSERIAL PK), company_id (BIGINT FK -> companies), run_number (VARCHAR(50) UNIQUE), status (VARCHAR(50)), payment_method (VARCHAR(50)), payment_date (DATE), client_reference_id (UUID UNIQUE), total_amount (DECIMAL), successful_payments_count (INTEGER), failed_payments_count (INTEGER), export_file_name (VARCHAR(255)), export_storage_path (VARCHAR(255)), export_checksum (VARCHAR(64)), export_generated_at (TIMESTAMP), created_by / approved_by / executed_by / cancelled_by (VARCHAR(100)), created_at / approved_at / executed_at / cancelled_at (TIMESTAMP), error_message (TEXT).
+  - payment_run_invoices: Details table linking selected invoices to the payment run.
+    - Fields: id (BIGSERIAL PK), payment_run_id (BIGINT FK -> payment_runs), supplier_invoice_id (BIGINT FK -> supplier_invoices), payment_amount (DECIMAL).
+  - payment_run_supplier_results: Child auditing table tracking execution results per supplier.
+    - Fields: id (BIGSERIAL PK), payment_run_id (BIGINT FK -> payment_runs), supplier_id (BIGINT FK -> suppliers), payment_id (BIGINT FK -> payments, nullable), status (VARCHAR(50)), amount (DECIMAL), started_at (TIMESTAMP), completed_at (TIMESTAMP), error_message (TEXT).
+
+* Security Permissions (Mapped to ULTIMATE_ADMIN):
+  - PAYMENT_RUN_CREATE: Allows creating and calculating a payment run.
+  - PAYMENT_RUN_VIEW: Allows viewing payment run details, listings, dashboards, and downloading bank exports.
+  - PAYMENT_RUN_APPROVE: Allows approving a calculated payment run.
+  - PAYMENT_RUN_EXECUTE: Allows executing an approved payment run.
+
+* REST APIs:
+  - POST /api/v1/payment-runs (Create and calculate a payment run. Filters by company, currency, due date, supplier, and payment method. Reserves matching invoices by setting supplier_invoices.payment_run_id, locking them from other runs.)
+  - GET /api/v1/payment-runs/{id} (Retrieve details of a single payment run, including invoice lines and supplier execution results.)
+  - GET /api/v1/payment-runs (Search and page payment runs with company-level tenant isolation.)
+  - POST /api/v1/payment-runs/{id}/approve (Approve a calculated DRAFT run, transitioning status DRAFT -> APPROVED.)
+  - POST /api/v1/payment-runs/{id}/execute (Execute payments for an APPROVED run. Integrates unique client_reference_id header/body to enforce idempotency.)
+  - POST /api/v1/payment-runs/{id}/cancel (Cancel a DRAFT or APPROVED run, releasing all reserved invoices and clearing the reservation foreign keys.)
+  - GET /api/v1/payment-runs/dashboard (Fetch operational KPIs: total payment runs, total processed amount, successful vs failed payments, and pending runs.)
+  - GET /api/v1/payment-runs/{id}/download-export (Download the generated bank export file from filesystem.)
+
+* Workflows & Architectural Safeguards:
+  - **Company Scopes**: Strictly validates that run.company_id == invoice.company_id == supplier.company_id.
+  - **Invoice Reservation**: Calculated runs lock invoices via a foreign key `supplier_invoices.payment_run_id`. These invoices cannot be selected in other runs or paid individually until the run is executed or cancelled.
+  - **Payment Consolidation**: During execution, the run groups outstanding invoices by supplier. It generates exactly one consolidated `Payment` (DEBIT) and multiple `PaymentAllocation` records per supplier.
+  - **Transaction Partitioning**: To ensure partial batch success, each supplier's payment execution is wrapped in an independent transaction (`Propagation.REQUIRES_NEW`) using a dedicated `PaymentRunExecutionHelper`. If a supplier payment fails (e.g. invalid bank details or GL account configuration), the failure is recorded in `payment_run_supplier_results` and committed. The main run transaction continues to the next supplier, preventing a single failure from failing the entire batch.
+  - **Scalable Export Storage**: The system supports CSV, ISO 20022 XML, SEPA XML, and NEFT/RTGS text formats via the Strategy Pattern (`BankExportGenerator`). Instead of storing massive file payloads in the database, `FileStorageService` writes them to the local directory `storage/exports/bank`. The database persists only metadata (`export_file_name`, `export_storage_path`, `export_checksum`, `export_generated_at`), keeping the DB light and high-performing.
+  - **Idempotency Safeguard**: The execution requires a unique `client_reference_id` UUID. If a client retries the execution of an already completed or processing run, the API returns the existing record immediately without re-executing.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.paymentrun.controller.PaymentRunControllerIntegrationTest
+  - Execution Command: `.\mvnw.cmd clean test -Dtest=PaymentRunControllerIntegrationTest`
+  - Test Scope: Comprises 7 comprehensive test scenarios:
+    1. Calculation and invoice selection/reservation.
+    2. Supplier payment consolidation and allocation.
+    3. Multi-tenant company isolation.
+    4. Execution idempotency (prevent double payments).
+    5. Isolated transaction partitioning (partial success / isolated rollbacks).
+    6. Filesystem bank export writing and checksum validation.
+    7. Operational dashboard KPIs.
+
+--------------------------------------------------------------------------------
+18. FINANCIAL REPORTING (V27.1)
+--------------------------------------------------------------------------------
+This module implements robust, mathematically validated financial statements (Trial Balance, Income Statement, and Balance Sheet) leveraging the double-entry General Ledger system, with configurable fiscal calendars, multi-currency functional conversion, period lock controls, and audited fiscal closing/reopening workflows.
+
+* Database Tables:
+  - fiscal_years: Tracks company fiscal years, statuses, and links opening/closing journals.
+    - Fields: id (BIGSERIAL PK), company_id (BIGINT FK -> companies), fiscal_year (INTEGER), start_date (DATE), end_date (DATE), status (VARCHAR(30)), opening_journal_id (BIGINT FK -> journal_entries), closing_journal_id (BIGINT FK -> journal_entries), closed_by (VARCHAR(100)), closed_at (TIMESTAMP).
+    - Constraints: UNIQUE (company_id, fiscal_year), CHECK (status IN ('OPEN', 'CLOSED')).
+  - period_locks: Tracks the locked period date and type per company.
+    - Fields: id (BIGSERIAL PK), company_id (BIGINT FK -> companies UNIQUE), lock_date (DATE), lock_type (VARCHAR(30)), locked_by (VARCHAR(100)), locked_at (TIMESTAMP), reason (VARCHAR(255)).
+    - Constraints: CHECK (lock_type IN ('SOFT', 'HARD')).
+  - period_lock_overrides: Audit log tracking soft-lock overrides.
+    - Fields: id (BIGSERIAL PK), company_id (BIGINT FK -> companies), user_email (VARCHAR(100)), override_at (TIMESTAMP), original_lock_date (DATE), transaction_date (DATE), journal_entry_id (BIGINT FK -> journal_entries), reason (VARCHAR(255)).
+  - exchange_rates: Multi-rate database-backed currency conversion rates.
+    - Fields: id (BIGSERIAL PK), company_id (BIGINT FK -> companies), from_currency (VARCHAR(3)), to_currency (VARCHAR(3)), rate_type (VARCHAR(30)), rate (DECIMAL(12,6)), effective_date (DATE).
+    - Constraints: UNIQUE (company_id, from_currency, to_currency, rate_type, effective_date), CHECK (rate > 0), CHECK (from_currency <> to_currency), CHECK (rate_type IN ('SPOT', 'CORPORATE', 'MONTH_END', 'AVERAGE')).
+
+* Domain Entities & Enums:
+  - Enums: FiscalYearStatus (OPEN, CLOSED), PeriodLockType (SOFT, HARD), ExchangeRateType (SPOT, CORPORATE, MONTH_END, AVERAGE), ClosingEntryType (NORMAL, ADJUSTMENT, REOPEN_REVERSAL).
+  - Entities: FiscalYear, PeriodLock, PeriodLockOverride, ExchangeRate under package com.plus33.erp.finance.reporting.entity.
+
+* REST APIs:
+  - GET /api/v1/financial-reports/trial-balance (Generate Trial Balance statement)
+  - GET /api/v1/financial-reports/income-statement (Generate Income Statement/P&L)
+  - GET /api/v1/financial-reports/balance-sheet (Generate Balance Sheet as of date)
+  - GET /api/v1/financial-reports/export (Export Trial Balance, Income Statement, or Balance Sheet to CSV or HTML)
+  - POST /api/v1/financial-reports/period-lock (Create or update a period lock)
+  - GET /api/v1/financial-reports/period-lock (Retrieve current period lock status)
+  - POST /api/v1/financial-reports/fiscal-year-close (Perform audited year-end closing)
+  - POST /api/v1/financial-reports/fiscal-year-reopen/{fiscalYear} (Reopen a closed fiscal year)
+
+* Workflows & Side Effects:
+  - **Fiscal Calendar Validation**: Dynamically validates company fiscal month/day settings using leap-year-safe LocalDate construction. Invalid combinations (e.g. February 31) are caught in the service layer, returning 400 Bad Request.
+  - **Functional Currency Conversion**: In functional mode, converts foreign currency ledger entries to Functional Currency using exchange rate lookups matching company, date, from/to currencies, and rate type.
+  - **Same-Currency Bypass**: Immediately returns rate = 1.0 without database queries if from_currency == to_currency.
+  - **Spring AOP PeriodLockAspect**: Intercepts service-layer boundaries and repository journal saves, validating transaction dates against company locks.
+  - **Lock Override Auditing**: Soft lock violations by authorized users (Finance Manager / Ultimate Admin) are permitted but write an immutable override log in a separate transaction (Propagation.REQUIRES_NEW), surviving business rollbacks. Hard locks strictly reject postings.
+  - **Double-Counting Protection**: Balance Sheet aggregates Retained Earnings correctly by dynamically computing net income only for the current unclosed year and combining it with account 3100 (historical closed years). Caches this calculation in-memory.
+  - **Immutable Closing Entries**: Standard reversals or modifications to journals marked as closing entries are strictly blocked.
+  - **Pre-Close Completeness Check**: Rejects fiscal year closing if any unposted (DRAFT) journal entries exist in the period.
+  - **Audited Non-Destructive Reopening**: Reopening a closed fiscal year is protected by chronological checks (blocks if subsequent year is closed) and posts an Automatic Reversing Journal (marked with closing_type = 'REOPEN_REVERSAL') to preserve a complete audit trail.
+  - **Decoupled Report Exporters**: Supports native CSV and print-optimized HTML exports incorporating comprehensive metadata headers (Report Name, Company, Date, Generated By, Generated At, Currency, Exchange Rate Type).
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.finance.reporting.controller.FinancialReportingControllerIntegrationTest
+  - Execution Command: `.\mvnw.cmd clean test -Dtest=FinancialReportingControllerIntegrationTest`
+  - Test Scope: Comprises 10 compliance and accounting scenarios:
+    1. Fiscal calendar date validations (invalid combos rejected).
+    2. Exchange rates & functional currency reporting (conversions and same-currency bypasses).
+    3. Service-layer soft/hard locks & override auditing (rollback survival).
+    - Export authorization checks (FINANCIAL_REPORT_EXPORT permission).
+    - CSV and HTML exports with metadata headers.
+
+-------------------------------------------------------------------------------19. FIXED ASSET MANAGEMENT (V27.2 - ULTIMATE ENTERPRISE EDITION)
+--------------------------------------------------------------------------------
+This module implements an industry-leading, highly scalable Fixed Asset Management system capable of handling portfolios of 10,000 to 500,000+ assets. It manages the complete fixed asset lifecycle—from CWIP construction, multi-stage approval transfers, and parent-child hierarchy recursive accounting to revaluations, impairments, leases, reservations, maintenance work orders, soft deletes, and compliance legal holds.
+
+* Database Tables & Sequence:
+  - fixed_asset_code_seq: Database sequence generating unique asset codes (AST-YYYY-xxxxxx).
+  - asset_categories: Category metadata mapping GL accounts and capitalization thresholds.
+  - fixed_assets: Main asset register tracking acquisition, components, location, documents, warranty, insurance, health scores, GIS, IoT telemetry, and functional currency values.
+  - fixed_asset_books: Join table for multi-book (FINANCIAL, TAX, MANAGEMENT) and multi-frequency (MONTHLY, QUARTERLY, HALF_YEARLY, YEARLY) depreciation tracking.
+  - fixed_asset_depreciation_logs: Logs individual asset depreciation entries.
+  - fixed_asset_transfers: Logs physical location transfers with multi-stage approval workflows (REQUESTED, MANAGER_APPROVED, IN_TRANSIT, RECEIVED, ACTIVE).
+  - fixed_asset_maintenances / fixed_asset_maintenance_plans: Scheduled preventive maintenance and logged maintenance events.
+  - fixed_asset_work_orders: Formal maintenance work orders tracking technicians, labor/parts costs, and downtime.
+  - fixed_asset_assignments: Logs employee and location assignment history.
+  - fixed_asset_audits / fixed_asset_audit_items: Periodic physical audits automatically transitioning missing assets to LOST and damaged to UNDER_MAINTENANCE.
+  - fixed_asset_revaluations / fixed_asset_impairments: IAS 16 revaluation reserves and IAS 36 impairment losses.
+  - fixed_asset_leases: Operating and finance lease tracking with lease liability account mapping.
+  - fixed_asset_relations: Tracks asset split, merge, replacement, and parent-child components relations.
+  - fixed_asset_utilization: Usage-based utilization readings (hours, mileage, units).
+  - fixed_asset_attachments / fixed_asset_attachment_versions: Multi-version document attachments.
+  - fixed_asset_reservations: Shared asset checkouts and reservations.
+  - fixed_asset_insurance_claims: Tracking claims history against policies.
+  - fixed_asset_downtimes: Tracks lost operational hours and production revenue.
+  - fixed_asset_notifications: Database-backed alerts for maintenance, warranties, insurance, and audits.
+  - fixed_asset_fx_logs: Multi-currency revaluation logs.
+  - fixed_asset_history: Immutable, chronological audit timeline tracking all actions.
+
+* Security Permissions:
+  - FIXED_ASSET_VIEW, FIXED_ASSET_CREATE, FIXED_ASSET_ACQUIRE, FIXED_ASSET_DEPRECIATE, FIXED_ASSET_TRANSFER, FIXED_ASSET_DISPOSE, FIXED_ASSET_MAINTAIN, FIXED_ASSET_ASSIGN, FIXED_ASSET_AUDIT.
+  - FIXED_ASSET_REVALUE, FIXED_ASSET_IMPAIR, FIXED_ASSET_LEASE, FIXED_ASSET_SPLIT_MERGE, FIXED_ASSET_APPROVE_DISPOSAL, FIXED_ASSET_RESERVE, FIXED_ASSET_CLAIM, FIXED_ASSET_TRANSFER_APPROVE, FIXED_ASSET_DOWNTIME, FIXED_ASSET_BULK, FIXED_ASSET_WORK_ORDER, FIXED_ASSET_COMPLIANCE.
+
+* REST APIs (Exposing 25+ Secure Endpoints):
+  - POST /api/v1/fixed-assets/categories (Create category)
+  - GET /api/v1/fixed-assets/categories (Get categories)
+  - POST /api/v1/fixed-assets (Register draft asset)
+  - GET /api/v1/fixed-assets/{id} (Get asset details)
+  - GET /api/v1/fixed-assets (Search/page assets with company isolation)
+  - POST /api/v1/fixed-assets/{id}/acquire (Capitalize/acquire asset and post GL)
+  - POST /api/v1/fixed-assets/{id}/assign (Assign asset to employee/location)
+  - POST /api/v1/fixed-assets/{id}/transfer (Request transfer)
+  - POST /api/v1/fixed-assets/transfers/{transferId}/approve (Approve transfer)
+  - POST /api/v1/fixed-assets/transfers/{transferId}/receive (Mark transfer received)
+  - POST /api/v1/fixed-assets/{id}/maintain (Log maintenance)
+  - POST /api/v1/fixed-assets/{id}/dispose (Dispose/sell asset and post GL)
+  - POST /api/v1/fixed-assets/depreciate (Run batch/dry-run depreciation)
+  - POST /api/v1/fixed-assets/audits (Submit physical audit)
+  - GET /api/v1/fixed-assets/dashboard (Get standard dashboard KPIs)
+  - POST /api/v1/fixed-assets/{id}/revalue (Revalue asset)
+  - GET /api/v1/fixed-assets/{id}/revaluations (Get revaluations)
+  - POST /api/v1/fixed-assets/{id}/impair (Impair asset)
+  - GET /api/v1/fixed-assets/{id}/impairments (Get impairments)
+  - POST /api/v1/fixed-assets/{id}/partial-dispose (Partially dispose asset)
+  - POST /api/v1/fixed-assets/{id}/capitalize-cwip (Capitalize CWIP asset)
+  - POST /api/v1/fixed-assets/{id}/leases (Lease asset)
+  - GET /api/v1/fixed-assets/{id}/leases (Get leases)
+  - POST /api/v1/fixed-assets/{id}/split (Split asset)
+  - POST /api/v1/fixed-assets/merge (Merge assets)
+  - POST /api/v1/fixed-assets/{id}/utilization (Log usage)
+  - GET /api/v1/fixed-assets/{id}/utilization (Get usage history)
+  - GET /api/v1/fixed-assets/{id}/tco (Get TCO analysis)
+  - POST /api/v1/fixed-assets/maintenance-plans (Create maintenance plan)
+  - GET /api/v1/fixed-assets/{id}/maintenance-plans (Get maintenance plans)
+  - POST /api/v1/fixed-assets/reservations (Reserve asset)
+  - GET /api/v1/fixed-assets/{id}/reservations (Get reservations)
+  - POST /api/v1/fixed-assets/work-orders (Create work order)
+  - POST /api/v1/fixed-assets/work-orders/{workOrderId}/complete (Complete work order)
+  - GET /api/v1/fixed-assets/{id}/work-orders (Get work orders)
+  - GET /api/v1/fixed-assets/{id}/history (Get history log)
+  - POST /api/v1/fixed-assets/{id}/legal-hold (Toggle legal hold)
+  - DELETE /api/v1/fixed-assets/{id} (Soft delete asset)
+  - GET /api/v1/fixed-assets/{id}/rollup (Get hierarchy rollup KPIs)
+
+* Key Workflows & Enterprise Safeguards:
+  - **Recursive Roll-up Accounting**: Service recursively traverses nested parent-child assets to roll up acquisition costs, net book values, accumulated depreciation, maintenance costs, and average health scores.
+  - **Multi-Currency Valuations**: Translates foreign acquisitions using historical exchange rates, recording FX gain/loss adjustments over time in `fixed_asset_fx_logs`.
+  - **Capitalization Threshold Rules**: If `acquisitionCost < category.capitalizationThreshold`, automatically registers as `EXPENSED`, skips depreciation, and immediately expenses cost: `DR Category Depreciation Expense / CR Accounts Payable` (bypassing asset accounts).
+  - **Construction Work-in-Progress (CWIP)**: Registers construction assets under `UNDER_CONSTRUCTION` status, accumulating costs in `cwip_account_id` and capitalizes via `DR Asset Account / CR CWIP Account`.
+  - **Split & Merge Engine**: Distributes cost and accumulated depreciation proportionally on splits, and aggregates them on merges while maintaining relationships.
+  - **TCO, Downtime & Health Scoring**: Dynamically calculates Total Cost of Ownership (TCO), cost per operating hour, and asset health scores based on age, maintenance logs, and downtime events.
+  - **Legal Holds & Soft Deletes**: Supports soft deletes (hiding assets from standard queries) and legal holds (blocking any delete, disposal, split, or transfer operation).
+  - **Scheduler sweeps**: Monthly depreciation run and daily sweeps for maintenance reminders, warranty expiries, insurance renewals, audit discrepancies, and data retention sweeps.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.finance.assets.controller.FixedAssetControllerIntegrationTest
+  - Execution Command: `.\mvnw.cmd clean test -Dtest=FixedAssetControllerIntegrationTest`
+  - Test Scope: Expanded to 10 comprehensive test methods covering all 15 compliance and lifecycle scenarios.

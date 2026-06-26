@@ -23,8 +23,12 @@ public class PaymentAllocation {
     private Payment payment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "supplier_invoice_id", nullable = false)
+    @JoinColumn(name = "supplier_invoice_id")
     private SupplierInvoice supplierInvoice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_invoice_id")
+    private com.plus33.erp.sales.entity.CustomerInvoice customerInvoice;
 
     @Column(name = "allocated_amount", nullable = false, precision = 14, scale = 2)
     private BigDecimal allocatedAmount;

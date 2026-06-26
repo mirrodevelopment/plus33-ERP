@@ -46,6 +46,18 @@ public class SalesOrderItem {
     @Column(name = "line_total", nullable = false, precision = 12, scale = 2)
     private BigDecimal lineTotal;
 
+    @Builder.Default
+    @Column(name = "allocated_quantity", nullable = false, precision = 12, scale = 2)
+    private BigDecimal allocatedQuantity = BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(name = "fulfilled_quantity", nullable = false, precision = 12, scale = 2)
+    private BigDecimal fulfilledQuantity = BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(name = "invoiced_quantity", nullable = false, precision = 12, scale = 2)
+    private BigDecimal invoicedQuantity = BigDecimal.ZERO;
+
     @Version
     private Long version;
 }

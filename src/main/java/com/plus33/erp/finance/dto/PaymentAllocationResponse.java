@@ -15,5 +15,7 @@ public class PaymentAllocationResponse {
     private Long id;
     private Long supplierInvoiceId;
     private String supplierInvoiceNumber;
+    private Long customerInvoiceId;
+    private String customerInvoiceNumber;
     private BigDecimal allocatedAmount;
 }

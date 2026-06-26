@@ -24,8 +24,9 @@ public class PaymentRequest {
     @NotNull(message = "Company ID is required")
     private Long companyId;
 
-    @NotNull(message = "Supplier ID is required")
     private Long supplierId;
+
+    private Long customerId;
 
     @NotNull(message = "Payment date is required")
     private LocalDate paymentDate;

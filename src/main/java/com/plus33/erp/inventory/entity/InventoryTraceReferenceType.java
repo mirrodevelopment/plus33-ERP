@@ -6,5 +6,6 @@ public enum InventoryTraceReferenceType {
     INVENTORY_ADJUSTMENT,
     STOCK_COUNT,
     SALES_ORDER,
-    INVENTORY_RECALL
+    INVENTORY_RECALL,
+    CUSTOMER_RETURN
 }

@@ -22,6 +22,8 @@ public class PaymentResponse {
     private String companyName;
     private Long supplierId;
     private String supplierName;
+    private Long customerId;
+    private String customerName;
     private LocalDate paymentDate;
     private String paymentMethod;
     private String paymentType;

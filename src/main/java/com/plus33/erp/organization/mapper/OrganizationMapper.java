@@ -14,6 +14,8 @@ public interface OrganizationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "fiscalYearStartMonth", ignore = true)
+    @Mapping(target = "fiscalYearStartDay", ignore = true)
     Company toEntity(CompanyRequest request);
 
     CompanyResponse toResponse(Company entity);
@@ -21,6 +23,8 @@ public interface OrganizationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "fiscalYearStartMonth", ignore = true)
+    @Mapping(target = "fiscalYearStartDay", ignore = true)
     void updateEntity(CompanyRequest request, @MappingTarget Company entity);
 
     // --- Region Mappings ---

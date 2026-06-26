@@ -105,4 +105,20 @@ public class SupplierInvoiceController {
         SupplierInvoiceResponse response = supplierInvoiceService.cancelInvoice(id);
         return ResponseEntity.ok(ApiResponse.success("Supplier invoice cancelled successfully", response));
     }
+
+    @PostMapping("/{id}/submit")
+    @PreAuthorize("hasAuthority('SUPPLIER_INVOICE_UPDATE')")
+    @Operation(summary = "Submit a supplier invoice", description = "Submits a draft supplier invoice, progressing it to SUBMITTED status.")
+    public ResponseEntity<ApiResponse<SupplierInvoiceResponse>> submitInvoice(@PathVariable Long id) {
+        SupplierInvoiceResponse response = supplierInvoiceService.submitInvoice(id);
+        return ResponseEntity.ok(ApiResponse.success("Supplier invoice submitted successfully", response));
+    }
+
+    @PostMapping("/{id}/void")
+    @PreAuthorize("hasAuthority('VENDOR_BILL_VOID')")
+    @Operation(summary = "Void a supplier invoice", description = "Voids a draft or submitted supplier invoice, progressing it to VOID status.")
+    public ResponseEntity<ApiResponse<SupplierInvoiceResponse>> voidInvoice(@PathVariable Long id) {
+        SupplierInvoiceResponse response = supplierInvoiceService.voidInvoice(id);
+        return ResponseEntity.ok(ApiResponse.success("Supplier invoice voided successfully", response));
+    }
 }

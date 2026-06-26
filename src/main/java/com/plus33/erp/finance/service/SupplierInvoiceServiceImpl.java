@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.plus33.erp.analytics.event.ProcurementRefreshEvent;
+import com.plus33.erp.finance.event.SupplierInvoiceRefreshEvent;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -134,7 +135,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         calculateTotals(invoice);
 
         SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
-        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+        eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
         return supplierInvoiceMapper.toResponse(saved);
     }
 
@@ -163,7 +164,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         calculateTotals(invoice);
 
         SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
-        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+        eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
         return supplierInvoiceMapper.toResponse(saved);
     }
 
@@ -224,8 +225,8 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         SupplierInvoice invoice = supplierInvoiceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Supplier Invoice not found with ID: " + id));
 
-        if (invoice.getStatus() != SupplierInvoiceStatus.DRAFT) {
-            throw new BusinessException("Only DRAFT invoices can be approved. Current status: " + invoice.getStatus());
+        if (invoice.getStatus() != SupplierInvoiceStatus.SUBMITTED) {
+            throw new BusinessException("Only SUBMITTED invoices can be approved. Current status: " + invoice.getStatus());
         }
 
         // 1. Re-validate quantity checks and update PO invoiced quantities
@@ -249,7 +250,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         invoice.setStatus(SupplierInvoiceStatus.APPROVED);
 
         SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
-        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+        eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
         return supplierInvoiceMapper.toResponse(saved);
     }
 
@@ -288,7 +289,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
 
         invoice.setStatus(SupplierInvoiceStatus.CANCELLED);
         SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
-        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+        eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
         return supplierInvoiceMapper.toResponse(saved);
     }
 
@@ -320,7 +321,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         }
 
         SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
-        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+        eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
         return supplierInvoiceMapper.toResponse(saved);
     }
 
@@ -352,7 +353,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         }
 
         SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
-        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+        eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
         return supplierInvoiceMapper.toResponse(saved);
     }
 
@@ -552,5 +553,37 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Current user not found with email: " + email));
+    }
+
+    @Override
+    @Transactional
+    public SupplierInvoiceResponse submitInvoice(Long id) {
+        SupplierInvoice invoice = supplierInvoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier Invoice not found with ID: " + id));
+
+        if (invoice.getStatus() != SupplierInvoiceStatus.DRAFT) {
+            throw new BusinessException("Only DRAFT invoices can be submitted. Current status: " + invoice.getStatus());
+        }
+
+        invoice.setStatus(SupplierInvoiceStatus.SUBMITTED);
+        SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
+        eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
+        return supplierInvoiceMapper.toResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public SupplierInvoiceResponse voidInvoice(Long id) {
+        SupplierInvoice invoice = supplierInvoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier Invoice not found with ID: " + id));
+
+        if (invoice.getStatus() != SupplierInvoiceStatus.DRAFT && invoice.getStatus() != SupplierInvoiceStatus.SUBMITTED) {
+            throw new BusinessException("Only DRAFT or SUBMITTED invoices can be voided. Current status: " + invoice.getStatus());
+        }
+
+        invoice.setStatus(SupplierInvoiceStatus.VOID);
+        SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
+        eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
+        return supplierInvoiceMapper.toResponse(saved);
     }
 }

@@ -47,6 +47,18 @@ public class Supplier {
     @Column(name = "tax_number", length = 100)
     private String taxNumber;
 
+    @Column(name = "bank_name", length = 150)
+    private String bankName;
+
+    @Column(name = "bank_account_number", length = 50)
+    private String bankAccountNumber;
+
+    @Column(name = "swift_code", length = 30)
+    private String swiftCode;
+
+    @Column(length = 50)
+    private String iban;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean active = true;

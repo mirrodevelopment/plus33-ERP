@@ -12,4 +12,6 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
 
     @Query(value = "SELECT nextval('journal_entry_seq')", nativeQuery = true)
     Long getNextSequenceValue();
+
+    boolean existsByCompanyIdAndSourceModuleAndSourceReference(Long companyId, String sourceModule, String sourceReference);
 }

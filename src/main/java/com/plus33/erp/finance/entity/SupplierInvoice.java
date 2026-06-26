@@ -84,6 +84,10 @@ public class SupplierInvoice {
     @JoinColumn(name = "journal_entry_id")
     private JournalEntry journalEntry;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_run_id")
+    private com.plus33.erp.paymentrun.entity.PaymentRun paymentRun;
+
     @OneToMany(mappedBy = "supplierInvoice", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<SupplierInvoiceItem> items = new ArrayList<>();

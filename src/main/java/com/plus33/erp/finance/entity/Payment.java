@@ -38,6 +38,10 @@ public class Payment {
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private com.plus33.erp.sales.entity.Customer customer;
+
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate;
 

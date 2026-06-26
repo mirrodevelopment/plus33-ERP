@@ -53,6 +53,14 @@ public class JournalEntry {
     private JournalEntry reversalEntry;
 
     @Builder.Default
+    @Column(name = "closing_entry", nullable = false)
+    private Boolean closingEntry = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "closing_type", length = 30)
+    private ClosingEntryType closingType;
+
+    @Builder.Default
     @Column(name = "currency_code", nullable = false, length = 3)
     private String currencyCode = "AED";
 

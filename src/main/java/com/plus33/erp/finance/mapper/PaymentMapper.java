@@ -16,6 +16,7 @@ public interface PaymentMapper {
     @Mapping(target = "paymentNumber", ignore = true)
     @Mapping(target = "company", ignore = true)
     @Mapping(target = "supplier", ignore = true)
+    @Mapping(target = "customer", ignore = true)
     @Mapping(target = "journalEntry", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "cancelledAt", ignore = true)
@@ -32,6 +33,8 @@ public interface PaymentMapper {
     @Mapping(target = "companyName", source = "company.name")
     @Mapping(target = "supplierId", source = "supplier.id")
     @Mapping(target = "supplierName", source = "supplier.name")
+    @Mapping(target = "customerId", source = "customer.id")
+    @Mapping(target = "customerName", source = "customer.name")
     @Mapping(target = "journalEntryId", source = "journalEntry.id")
     @Mapping(target = "journalEntryNumber", source = "journalEntry.entryNumber")
     @Mapping(target = "cancelledByUserId", source = "cancelledBy.id")
@@ -45,10 +48,13 @@ public interface PaymentMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "payment", ignore = true)
     @Mapping(target = "supplierInvoice", ignore = true)
+    @Mapping(target = "customerInvoice", ignore = true)
     PaymentAllocation toAllocationEntity(PaymentAllocationRequest request);
 
     @Mapping(target = "supplierInvoiceId", source = "supplierInvoice.id")
     @Mapping(target = "supplierInvoiceNumber", source = "supplierInvoice.invoiceNumber")
+    @Mapping(target = "customerInvoiceId", source = "customerInvoice.id")
+    @Mapping(target = "customerInvoiceNumber", source = "customerInvoice.invoiceNumber")
     PaymentAllocationResponse toAllocationResponse(PaymentAllocation entity);
 
     List<PaymentAllocationResponse> toAllocationResponseList(List<PaymentAllocation> list);

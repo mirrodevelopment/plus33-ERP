@@ -15,8 +15,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class PaymentAllocationRequest {
 
-    @NotNull(message = "Supplier invoice ID is required")
     private Long supplierInvoiceId;
+
+    private Long customerInvoiceId;
 
     @NotNull(message = "Allocated amount is required")
     @Positive(message = "Allocated amount must be greater than zero")

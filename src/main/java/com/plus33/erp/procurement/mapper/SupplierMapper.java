@@ -15,6 +15,10 @@ public interface SupplierMapper {
     @Mapping(target = "company", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "bankName", ignore = true)
+    @Mapping(target = "bankAccountNumber", ignore = true)
+    @Mapping(target = "swiftCode", ignore = true)
+    @Mapping(target = "iban", ignore = true)
     Supplier toEntity(SupplierRequest request);
 
     @Mapping(target = "companyId", source = "company.id")
@@ -25,5 +29,9 @@ public interface SupplierMapper {
     @Mapping(target = "company", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "bankName", ignore = true)
+    @Mapping(target = "bankAccountNumber", ignore = true)
+    @Mapping(target = "swiftCode", ignore = true)
+    @Mapping(target = "iban", ignore = true)
     void updateEntity(SupplierRequest request, @MappingTarget Supplier entity);
 }

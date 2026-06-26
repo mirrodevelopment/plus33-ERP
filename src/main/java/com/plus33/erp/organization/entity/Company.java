@@ -31,6 +31,12 @@ public class Company {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Column(name = "fiscal_year_start_month", nullable = false)
+    private Integer fiscalYearStartMonth = 1;
+
+    @Column(name = "fiscal_year_start_day", nullable = false)
+    private Integer fiscalYearStartDay = 1;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

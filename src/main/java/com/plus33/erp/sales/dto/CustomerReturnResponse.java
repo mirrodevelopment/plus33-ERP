@@ -1,0 +1,50 @@
+package com.plus33.erp.sales.dto;
+
+import com.plus33.erp.sales.entity.CustomerReturnStatus;
+import com.plus33.erp.sales.entity.ReturnReason;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+public record CustomerReturnResponse(
+    Long id,
+    Long companyId,
+    Long customerId,
+    String customerName,
+    String customerCode,
+    Long salesOrderId,
+    String salesOrderNumber,
+    Long customerInvoiceId,
+    String customerInvoiceNumber,
+    Long warehouseId,
+    String warehouseName,
+    Long storeId,
+    String storeName,
+    String returnNumber,
+    UUID clientReferenceId,
+    CustomerReturnStatus status,
+    ReturnReason reason,
+    String remarks,
+    Long createdById,
+    String createdByName,
+    Long approvedById,
+    String approvedByName,
+    Long receivedById,
+    String receivedByName,
+    Long inspectedById,
+    String inspectedByName,
+    Long closedById,
+    String closedByName,
+    Long cancelledById,
+    String cancelledByName,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt,
+    LocalDateTime approvedAt,
+    LocalDateTime receivedAt,
+    LocalDateTime inspectedAt,
+    LocalDateTime closedAt,
+    LocalDateTime cancelledAt,
+    String cancellationReason,
+    List<CustomerReturnItemResponse> items,
+    Long version
+) {}

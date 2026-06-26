@@ -1,0 +1,41 @@
+package com.plus33.erp.sales.dto;
+
+import com.plus33.erp.sales.entity.CreditNoteStatus;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record CreditNoteResponse(
+    Long id,
+    Long companyId,
+    Long customerId,
+    String customerName,
+    String customerCode,
+    Long customerReturnId,
+    String customerReturnNumber,
+    Long customerInvoiceId,
+    String customerInvoiceNumber,
+    String creditNoteNumber,
+    java.util.UUID clientReferenceId,
+    CreditNoteStatus status,
+    BigDecimal subtotalAmount,
+    BigDecimal taxAmount,
+    BigDecimal discountAmount,
+    BigDecimal totalAmount,
+    Long journalEntryId,
+    String journalEntryNumber,
+    String remarks,
+    Long createdById,
+    String createdByName,
+    Long approvedById,
+    String approvedByName,
+    Long cancelledById,
+    String cancelledByName,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt,
+    LocalDateTime approvedAt,
+    LocalDateTime cancelledAt,
+    String cancellationReason,
+    List<CreditNoteItemResponse> items,
+    Long version
+) {}

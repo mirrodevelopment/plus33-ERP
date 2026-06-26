@@ -107,8 +107,9 @@ Work:
 * Created and verified InventoryAnalyticsControllerIntegrationTest
 Status:
 COMPLETED AND VERIFIED
-
-2026-06-22 | V25.1 — Customer Management
+  
+  
+2026-06-24 | V25.1 — Customer Management
 Module: Sales & Order Management
 Work:
 * Added sales customer schema, sequences, unique constraints, and check constraints (V52, V53)
@@ -119,3 +120,161 @@ Work:
 * Created and verified CustomerControllerIntegrationTest covering CRUD, paginated filters, and status state transitions
 Status:
 COMPLETED AND VERIFIED
+
+2026-06-24 | V25.2 — Sales Orders
+Module: Sales & Order Management
+Work:
+* Added sales orders and items schema, sequences, unique constraints, and non-negative monetary checks (V54, V55)
+* Implemented SalesOrderStatus enum, SalesOrder and SalesOrderItem entities, DTOs, and MapStruct mappers
+* Added client-reference-based idempotency checks to prevent duplicate sales orders on API retries
+* Integrated immutable customer profile snapshots (billing/shipping addresses, pricing tier, discount rate, currency, tax profile, payment terms) copied at creation
+* Implemented sales order state transitions (DRAFT -> SUBMITTED -> APPROVED) and cancellation support
+* Added credit limit validation upon order approval with permission-based overrides (SALES_ORDER_OVERRIDE_CREDIT_LIMIT, SALES_OVERRIDE_CREDIT_LIMIT, CUSTOMER_OVERRIDE_CREDIT_LIMIT)
+* Integrated automated updates to customer outstanding balance on order approval (increment) and cancellation (rollback decrement)
+* Created and verified SalesOrderControllerIntegrationTest covering workflow, calculations, company boundaries, product uniqueness, credit limits, overrides, balance adjustments, and optimistic locking
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-24 | V25.3 — Order Fulfillment & Picking
+Module: Sales & Order Management
+Work:
+* Added pick lists, pick list items, and inventory allocations schema with sequences and constraints (V56, V57)
+* Implemented PickListStatus and AllocationStatus enums, PickList, PickListItem, and InventoryAllocation entities
+* Added idempotency via client_reference_id UUID with company-scoped uniqueness constraint
+* Integrated full audit trail fields (released_by, picked_by, packed_by, shipped_by, cancelled_by with timestamps)
+* Implemented PickListServiceImpl with pessimistic write locks, partial stock allocation, XOR location validation, and one-active-pick-list-per-location enforcement
+* Added SalesOrder status progression (APPROVED -> PARTIALLY_FULFILLED -> FULFILLED) driven by shipment fulfillment ratios
+* Integrated stock movement logging (SALES_RESERVE, SALES_SHIPMENT, SALES_RELEASE) and InventoryAllocation lifecycle tracking (ACTIVE -> CONSUMED/RELEASED/CANCELLED)
+* Implemented cancellation rollback restoring reserved quantities, SalesOrderItem allocations, and allocation statuses
+* Implemented PickListController REST endpoints for create, release, start-picking, complete-picking, pack, ship, cancel, and query operations
+* Created and verified PickListControllerIntegrationTest (4 tests: full workflow, cancellation rollback, partial allocation, partial shipment)
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-25 | V25.4 — Customer Invoicing
+Module: Sales & Order Management
+Work:
+* Added customer invoices, items, and materialized views schema with sequences and constraints (V58, V59)
+* Implemented CustomerInvoiceStatus enum, CustomerInvoice, and CustomerInvoiceItem entities, DTOs, and MapStruct mappers
+* Added client-reference-based idempotency checks to prevent duplicate invoices on API retries
+* Integrated automated balanced Journal Entry posting upon invoice approval: Debit Accounts Receivable (1400), Credit Revenue (4000), and Credit Tax Payable (2200)
+* Extended the payment system to support RECEIVABLE type payments and allocations directly to CustomerInvoice
+* Integrated customer outstanding balance updates on ad-hoc invoice approval, cancellation, and payment allocation
+* Implemented asynchronous refresh of materialized views (mv_sales_kpis, mv_receivables_dashboard, mv_customer_aging) via Spring events (CustomerInvoiceRefreshEvent)
+* Created and verified CustomerInvoiceControllerIntegrationTest covering the entire invoicing lifecycle, journal entry generation, and payment allocation
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-25 | V25.5 — Customer Returns & Credit Notes
+Module: Sales & Order Management
+Work:
+* Added customer returns, return items, credit notes, and credit note items schema with sequences and constraints (V60, V61)
+* Implemented CustomerReturnStatus, InspectionResult, CreditNoteStatus, and ReturnReason enums
+* Implemented CustomerReturn, CustomerReturnItem, CreditNote, and CreditNoteItem entities with MapStruct mappers
+* Added partial returns tracking and quantity validation (returnedQuantity <= invoicedQuantity) to prevent over-returning
+* Integrated serial and lot tracking validation: serials and lots must exist, belong to the company/product, and not be already returned
+* Added line-level inspection outcomes (RESTOCK, SCRAP, QUARANTINE) with granular stock movements and trace events
+* Integrated automated Credit Note generation (POSTED) and balanced reversing Journal Entry posting: Debit Sales Returns (4000), Debit Tax Payable (2200), and Credit Accounts Receivable (1400)
+* Integrated customer invoice updates (creditedAmount, remainingBalance, status) and customer outstanding balance reductions
+* Implemented event-driven analytics refreshes (CustomerReturnRefreshEvent) on all status transitions to update sales and inventory dashboards
+* Created and verified CustomerReturnControllerIntegrationTest covering the entire return request lifecycle (Draft -> Approved -> Received -> Inspected -> Closed)
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-25 | V25.6 — Accounts Receivable
+Module: Sales & Order Management / Finance
+Work:
+* Added Accounts Receivable module schema, write-off tables, sequence, and seeded Bad Debt Expense (5300) (V64)
+* Seeded system permissions: AR_VIEW, AR_STATEMENT_VIEW, AR_WRITE_OFF_CREATE (V65)
+* Implemented ARWriteOff entity, repository, and extended PaymentAllocationRepository with findByCustomerInvoiceId()
+* Created ARAgingResponse, ARStatusBucket, ARSummaryResponse, CustomerARBalanceResponse, CustomerStatementEntry, CustomerStatementResponse, AROverdueInvoiceResponse, ARWriteOffRequest, ARWriteOffResponse DTOs
+* Implemented ARService and ARServiceImpl for high-performance dashboard summary, customer balance, aging view, overdue list, and dynamic chronological statement generation with running balances
+* Implemented ARWriteOffService and ARWriteOffServiceImpl for bad-debt write-offs, double-entry GL journal entry postings (DR 5300 / CR 1400), customer/invoice balance reductions, and event-driven refresh propagation
+* Implemented ARController REST endpoints with method-level Spring Security permissions
+* Created and verified ARControllerIntegrationTest covering overdue listing, balance queries, statements, and write-off workflows
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-25 | V26.1 — Accounts Payable
+Module: Procurement / Finance
+Work:
+* Added Accounts Payable module schema enhancements to support SUBMITTED and VOID invoice statuses (V66)
+* Seeded system permissions: AP_VIEW, AP_STATEMENT_VIEW, and VENDOR_BILL_VOID mapped to ULTIMATE_ADMIN (V67)
+* Implemented submitInvoice() and voidInvoice() with strict lifecycle rules (allow DRAFT/SUBMITTED, block APPROVED/PAID) in SupplierInvoiceServiceImpl
+* Created custom SupplierInvoiceRefreshEvent and SupplierInvoiceRefreshEventListener for decoupled asynchronous materialized view refreshes
+* Created 12 dedicated DTO records under com.plus33.erp.ap.dto representing aging buckets, balances, statements, dashboard KPIs, cash forecasts, and payment trends
+* Implemented APService and APServiceImpl for real-time dashboard KPIs, custom aging bucketing with dynamic intervals, supplier AP balances, and overdue lists
+* Implemented chronological statement generation starting from a calculated opening balance with running balances and cancellation rollbacks
+* Implemented APController REST endpoints under /api/v1/ap with method-level Spring Security permissions
+* Created and verified APControllerIntegrationTest covering dashboard KPIs, configurable aging bucketing, statements, overdue lists, voiding rules, company isolation, and security permissions
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-26 | V26.2 — Supplier Payments & Payment Runs
+Module: Procurement / Finance
+Work:
+* Added Supplier Payments & Payment Runs schema, including payment_runs, payment_run_invoices, and payment_run_supplier_results (V68, V70)
+* Seeded system permissions: PAYMENT_RUN_CREATE, PAYMENT_RUN_VIEW, PAYMENT_RUN_APPROVE, and PAYMENT_RUN_EXECUTE mapped to ULTIMATE_ADMIN (V69)
+* Implemented PaymentRun, PaymentRunInvoice, and PaymentRunSupplierResult JPA entities, repositories, and MapStruct mappers
+* Integrated bank export generation strategy pattern supporting CSV, ISO 20022 XML, SEPA XML, and NEFT/RTGS text formats
+* Added FileStorageService to save generated bank export files to the local filesystem (storage/exports/bank), persisting only file metadata (filename, path, checksum) in the database to prevent database bloat
+* Implemented per-supplier transaction isolation (Propagation.REQUIRES_NEW) in PaymentRunExecutionHelper to ensure partial batch success even if some suppliers fail
+* Added Supplier-level payment consolidation, grouping outstanding invoices per supplier to generate exactly one Payment with multiple PaymentAllocations
+* Integrated unique client_reference_id UUID idempotency checks on execution to prevent double payments on network retries
+* Exposed a secure REST API under /api/v1/payment-runs with method-level Spring Security permissions, including dashboard KPIs, run details, list queries, and bank export downloads
+* Created and verified PaymentRunControllerIntegrationTest covering all flows (calculation, consolidation, partial payments, isolated rollbacks, idempotency, and dashboard KPIs)
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-26 | V27.1 — Financial Reporting
+Module: Finance / Ledger
+Work:
+* Added Financial Reporting module schema, including period_locks, period_lock_overrides, exchange_rates, and fiscal_years tables (V71)
+* Seeded system permissions: FINANCIAL_REPORT_VIEW, FINANCIAL_REPORT_EXPORT, PERIOD_LOCK_VIEW, PERIOD_LOCK_CREATE, FISCAL_YEAR_CLOSE, and FISCAL_YEAR_REOPEN mapped to roles (V72)
+* Implemented FiscalYearStatus, PeriodLockType, ExchangeRateType, and ClosingEntryType type-safe enums and JPA entities
+* Added Company configurable fiscal calendar columns with calendar-safe try-catch LocalDate validations in the service layer
+* Implemented Spring AOP PeriodLockAspect to intercept service-layer business transaction boundaries and validate period locking
+* Added PeriodLockValidator and PeriodLockOverrideLogger (Propagation.REQUIRES_NEW) to enforce soft/hard locks and audit overrides
+* Implemented GeneralLedgerBalanceService returning a reusable LedgerBalanceSnapshot, caching and grouping balances to optimize DB roundtrips to O(1)
+* Added CsvFinancialReportExporter and HtmlFinancialReportExporter print-ready exporters decoupled behind a clean FinancialReportExporter interface
+* Implemented TrialBalanceResponse and BalanceSheetResponse with aligned validation fields (totalDebits, totalCredits, difference, balanced, warnings) and audit metadata
+* Integrated chronological reopen safeguards (block if subsequent year closed) and completeness checks (block if DRAFT journals exist)
+* Implemented immutable closing journal entries (closing_entry = true) with non-destructive reversing journal reopening workflows
+* Created and verified FinancialReportingControllerIntegrationTest covering all 10 detailed compliance and accounting scenarios
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-26 | V27.2 — Fixed Asset Management (Ultimate Enterprise Edition)
+Module: Finance / Fixed Assets
+Work:
+* Added Fixed Asset Management module schema, sequences, and tables including asset_categories, fixed_assets, fixed_asset_depreciation_logs, fixed_asset_transfers, fixed_asset_maintenances, fixed_asset_assignments, fixed_asset_audits, and fixed_asset_audit_items (V73)
+* Seeded system permissions: FIXED_ASSET_VIEW, FIXED_ASSET_CREATE, FIXED_ASSET_ACQUIRE, FIXED_ASSET_DEPRECIATE, FIXED_ASSET_TRANSFER, FIXED_ASSET_DISPOSE, FIXED_ASSET_MAINTAIN, FIXED_ASSET_ASSIGN, and FIXED_ASSET_AUDIT mapped to ULTIMATE_ADMIN and FINANCE_MANAGER roles (V74)
+* Added advanced enterprise schema (depreciation_books, fixed_asset_books, fixed_asset_revaluations, fixed_asset_impairments, fixed_asset_leases, fixed_asset_relations, fixed_asset_maintenance_plans, fixed_asset_utilization, fixed_asset_attachments, fixed_asset_attachment_versions, fixed_asset_reservations, fixed_asset_insurance_claims, fixed_asset_downtimes, fixed_asset_work_orders, fixed_asset_notifications, fixed_asset_fx_logs, fixed_asset_history) (V75)
+* Seeded 12 new enterprise permissions (revalue, impair, lease, split/merge, approve disposal, reserve, claim, transfer approve, downtime, bulk, work order, compliance) mapped to ULTIMATE_ADMIN and FINANCE_MANAGER (V75)
+* Implemented type-safe enums and JPA entities for all 17 domain tables with clean manual mapping records
+* Implemented unique asset code generator sequence mapping AST-YYYY-xxxxxx codes automatically
+* Integrated parent-child component trees allowing independent depreciation parameters and nested component retrievals
+* Implemented Straight-Line and WDV depreciation monthly calculations, capping depreciation to prevent dropping below salvage values
+* Added support for dryRun = true depreciation runs returning affected assets, calculated depreciation, and projected GL journal entries without committing to database
+* Integrated automated balanced Journal Entry postings upon asset capitalization (Debit Asset Account / Credit Accounts Payable), capitalized maintenance (Debit Asset Account / Credit Bank/AP), and depreciation (Debit Depreciation Expense / Credit Accumulated Depreciation)
+* Implemented non-destructive asset disposal accounting, calculating gains/losses and posting balanced double-entry GL journals (Debit Bank, Debit Accum Depr, Credit Asset Account, and Debit/Credit Gain/Loss on Disposal)
+* Added physical verification audits with status transition side-effects automatically setting missing assets to LOST and damaged assets to UNDER_MAINTENANCE
+* Implemented FixedAssetDepreciationScheduler with a monthly `@Scheduled` cron job to automatically run depreciation on the last day of each month
+* Integrated PeriodLockValidator to reject capitalization, capitalized maintenance, depreciation, and disposal in locked periods
+* Implemented Capital Work-in-Progress (CWIP) accumulation and capitalization (DR Asset / CR CWIP Account)
+* Implemented capitalization threshold rules, automatically expensing assets below category thresholds
+* Implemented multi-book and multi-frequency depreciation engine (Financial, Tax, Management books)
+* Implemented asset split & merge engines with proportional cost/depreciation allocations and audit relations
+* Implemented lease accounting (operating vs finance) and lease liability mappings
+* Implemented maintenance work orders with parts/labor costing, technician/vendor tracking, and downtime logging
+* Implemented shared asset reservations with checkouts and returns
+* Implemented recursive rollup accounting (cost, NBV, depreciation, maintenance, health score) for parent-child hierarchies
+* Implemented multi-currency valuations and historical FX gain/loss logging
+* Implemented compliance legal holds (blocking splits, disposals, transfers, deletions), soft deletes, and automated data retention sweeps
+* Implemented multi-version document attachments and database-backed notification log sweeps
+* Implemented high-fidelity operational, audit, and executive dashboards with TCO lifecycle cost analysis and trend analytics
+* Implemented FixedAssetController REST endpoints with method-level Spring Security permissions
+* Created and verified FixedAssetControllerIntegrationTest covering all 15 advanced operational, lifecycle, and accounting scenarios
+Status:
+COMPLETED AND VERIFIED
+

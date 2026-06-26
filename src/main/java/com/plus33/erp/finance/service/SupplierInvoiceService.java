@@ -15,4 +15,6 @@ public interface SupplierInvoiceService {
     SupplierInvoiceResponse cancelInvoice(Long id);
     SupplierInvoiceResponse allocatePayment(Long id, BigDecimal amount);
     SupplierInvoiceResponse deallocatePayment(Long id, BigDecimal amount);
+    SupplierInvoiceResponse submitInvoice(Long id);
+    SupplierInvoiceResponse voidInvoice(Long id);
 }

@@ -16,6 +16,13 @@ import com.plus33.erp.organization.entity.Company;
 import com.plus33.erp.organization.repository.CompanyRepository;
 import com.plus33.erp.procurement.entity.Supplier;
 import com.plus33.erp.procurement.repository.SupplierRepository;
+import com.plus33.erp.sales.entity.Customer;
+import com.plus33.erp.sales.entity.CustomerInvoice;
+import com.plus33.erp.sales.entity.CustomerInvoiceStatus;
+import com.plus33.erp.sales.dto.CustomerInvoiceResponse;
+import com.plus33.erp.sales.repository.CustomerInvoiceRepository;
+import com.plus33.erp.sales.repository.CustomerRepository;
+import com.plus33.erp.sales.service.CustomerInvoiceService;
 import com.plus33.erp.security.entity.User;
 import com.plus33.erp.security.repository.UserRepository;
 import jakarta.persistence.criteria.Predicate;
@@ -27,6 +34,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.plus33.erp.analytics.event.ProcurementRefreshEvent;
+import com.plus33.erp.sales.event.CustomerInvoiceRefreshEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -42,8 +50,11 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final SupplierInvoiceRepository supplierInvoiceRepository;
     private final SupplierInvoiceService supplierInvoiceService;
+    private final CustomerInvoiceService customerInvoiceService;
     private final CompanyRepository companyRepository;
     private final SupplierRepository supplierRepository;
+    private final CustomerRepository customerRepository;
+    private final CustomerInvoiceRepository customerInvoiceRepository;
     private final AccountRepository accountRepository;
     private final JournalEntryRepository journalEntryRepository;
     private final UserRepository userRepository;
@@ -54,8 +65,11 @@ public class PaymentServiceImpl implements PaymentService {
             PaymentRepository paymentRepository,
             SupplierInvoiceRepository supplierInvoiceRepository,
             SupplierInvoiceService supplierInvoiceService,
+            CustomerInvoiceService customerInvoiceService,
             CompanyRepository companyRepository,
             SupplierRepository supplierRepository,
+            CustomerRepository customerRepository,
+            CustomerInvoiceRepository customerInvoiceRepository,
             AccountRepository accountRepository,
             JournalEntryRepository journalEntryRepository,
             UserRepository userRepository,
@@ -64,8 +78,11 @@ public class PaymentServiceImpl implements PaymentService {
         this.paymentRepository = paymentRepository;
         this.supplierInvoiceRepository = supplierInvoiceRepository;
         this.supplierInvoiceService = supplierInvoiceService;
+        this.customerInvoiceService = customerInvoiceService;
         this.companyRepository = companyRepository;
         this.supplierRepository = supplierRepository;
+        this.customerRepository = customerRepository;
+        this.customerInvoiceRepository = customerInvoiceRepository;
         this.accountRepository = accountRepository;
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
@@ -83,14 +100,34 @@ public class PaymentServiceImpl implements PaymentService {
             throw new BusinessException("Company is inactive");
         }
 
-        // Validate Supplier
-        Supplier supplier = supplierRepository.findById(request.getSupplierId())
-                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with ID: " + request.getSupplierId()));
-        if (!supplier.getActive()) {
-            throw new BusinessException("Supplier is inactive");
+        // Must specify either supplier or customer, not both or neither
+        if ((request.getSupplierId() == null && request.getCustomerId() == null) ||
+            (request.getSupplierId() != null && request.getCustomerId() != null)) {
+            throw new BusinessException("Payment must specify either a Supplier or a Customer, not both or neither");
         }
-        if (!supplier.getCompany().getId().equals(company.getId())) {
-            throw new BusinessException("Supplier must belong to the same company");
+
+        Supplier supplier = null;
+        Customer customer = null;
+        String paymentType = "PAYABLE";
+
+        if (request.getSupplierId() != null) {
+            // Validate Supplier
+            supplier = supplierRepository.findById(request.getSupplierId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with ID: " + request.getSupplierId()));
+            if (!supplier.getActive()) {
+                throw new BusinessException("Supplier is inactive");
+            }
+            if (!supplier.getCompany().getId().equals(company.getId())) {
+                throw new BusinessException("Supplier must belong to the same company");
+            }
+        } else {
+            // Validate Customer
+            customer = customerRepository.findById(request.getCustomerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Customer not found with ID: " + request.getCustomerId()));
+            if (!customer.getCompany().getId().equals(company.getId())) {
+                throw new BusinessException("Customer must belong to the same company");
+            }
+            paymentType = "RECEIVABLE";
         }
 
         // Validate duplicate reference number per company
@@ -118,9 +155,10 @@ public class PaymentServiceImpl implements PaymentService {
                 .paymentNumber(paymentNumber)
                 .company(company)
                 .supplier(supplier)
+                .customer(customer)
                 .paymentDate(request.getPaymentDate())
                 .paymentMethod(request.getPaymentMethod().toUpperCase())
-                .paymentType("PAYABLE")
+                .paymentType(paymentType)
                 .amount(request.getAmount())
                 .referenceNumber(request.getReferenceNumber())
                 .currencyCode(request.getCurrencyCode() != null ? request.getCurrencyCode() : "AED")
@@ -131,30 +169,67 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Process allocations
         for (PaymentAllocationRequest allocReq : request.getAllocations()) {
-            SupplierInvoice invoice = supplierInvoiceRepository.findById(allocReq.getSupplierInvoiceId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Supplier Invoice not found with ID: " + allocReq.getSupplierInvoiceId()));
+            PaymentAllocation allocation;
+            if (paymentType.equals("PAYABLE")) {
+                if (allocReq.getSupplierInvoiceId() == null) {
+                    throw new BusinessException("Supplier Invoice ID is required for PAYABLE payments");
+                }
+                SupplierInvoice invoice = supplierInvoiceRepository.findById(allocReq.getSupplierInvoiceId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Supplier Invoice not found with ID: " + allocReq.getSupplierInvoiceId()));
 
-            if (!invoice.getCompany().getId().equals(company.getId())) {
-                throw new BusinessException("Invoice company does not match payment company");
-            }
-            if (!invoice.getSupplier().getId().equals(supplier.getId())) {
-                throw new BusinessException("Invoice supplier does not match payment supplier");
-            }
-            if (invoice.getStatus() != SupplierInvoiceStatus.APPROVED && invoice.getStatus() != SupplierInvoiceStatus.PARTIALLY_PAID) {
-                throw new BusinessException("Only APPROVED or PARTIALLY_PAID invoices can receive payments. Invoice ID " + invoice.getId() + " is in status " + invoice.getStatus());
-            }
-            if (allocReq.getAllocatedAmount().compareTo(invoice.getOutstandingBalance()) > 0) {
-                throw new BusinessException("Allocation amount " + allocReq.getAllocatedAmount() + " cannot exceed outstanding balance " + invoice.getOutstandingBalance() + " for invoice ID " + invoice.getId());
-            }
+                if (!invoice.getCompany().getId().equals(company.getId())) {
+                    throw new BusinessException("Invoice company does not match payment company");
+                }
+                if (!invoice.getSupplier().getId().equals(supplier.getId())) {
+                    throw new BusinessException("Invoice supplier does not match payment supplier");
+                }
+                if (invoice.getStatus() != SupplierInvoiceStatus.APPROVED && invoice.getStatus() != SupplierInvoiceStatus.PARTIALLY_PAID) {
+                    throw new BusinessException("Only APPROVED or PARTIALLY_PAID invoices can receive payments");
+                }
+                if (allocReq.getAllocatedAmount().compareTo(invoice.getOutstandingBalance()) > 0) {
+                    throw new BusinessException("Allocation amount " + allocReq.getAllocatedAmount() + " cannot exceed outstanding balance " + invoice.getOutstandingBalance());
+                }
 
-            // Apply allocation via Invoice Service
-            supplierInvoiceService.allocatePayment(invoice.getId(), allocReq.getAllocatedAmount());
+                supplierInvoiceService.allocatePayment(invoice.getId(), allocReq.getAllocatedAmount());
 
-            PaymentAllocation allocation = PaymentAllocation.builder()
-                    .payment(payment)
-                    .supplierInvoice(invoice)
-                    .allocatedAmount(allocReq.getAllocatedAmount())
-                    .build();
+                allocation = PaymentAllocation.builder()
+                        .payment(payment)
+                        .supplierInvoice(invoice)
+                        .allocatedAmount(allocReq.getAllocatedAmount())
+                        .build();
+            } else {
+                if (allocReq.getCustomerInvoiceId() == null) {
+                    throw new BusinessException("Customer Invoice ID is required for RECEIVABLE payments");
+                }
+                CustomerInvoiceResponse invoice = customerInvoiceService.getInvoiceById(allocReq.getCustomerInvoiceId());
+                if (!invoice.companyId().equals(company.getId())) {
+                    throw new BusinessException("Invoice company does not match payment company");
+                }
+                if (!invoice.customerId().equals(customer.getId())) {
+                    throw new BusinessException("Invoice customer does not match payment customer");
+                }
+                if (invoice.status() != CustomerInvoiceStatus.APPROVED && invoice.status() != CustomerInvoiceStatus.PARTIALLY_PAID) {
+                    throw new BusinessException("Only APPROVED or PARTIALLY_PAID invoices can receive payments");
+                }
+                if (allocReq.getAllocatedAmount().compareTo(invoice.outstandingBalance()) > 0) {
+                    throw new BusinessException("Allocation amount " + allocReq.getAllocatedAmount() + " cannot exceed outstanding balance " + invoice.outstandingBalance());
+                }
+
+                customerInvoiceService.allocatePayment(invoice.id(), allocReq.getAllocatedAmount());
+
+                // Subtract from customer outstanding balance
+                customer.setOutstandingBalance(customer.getOutstandingBalance().subtract(allocReq.getAllocatedAmount()));
+                customerRepository.save(customer);
+
+                CustomerInvoice custInvoiceEntity = customerInvoiceRepository.findById(invoice.id())
+                        .orElseThrow(() -> new ResourceNotFoundException("Customer Invoice not found with ID: " + invoice.id()));
+
+                allocation = PaymentAllocation.builder()
+                        .payment(payment)
+                        .customerInvoice(custInvoiceEntity)
+                        .allocatedAmount(allocReq.getAllocatedAmount())
+                        .build();
+            }
 
             payment.getAllocations().add(allocation);
         }
@@ -165,7 +240,13 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment.setJournalEntry(journalEntry);
         Payment saved = paymentRepository.save(payment);
-        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+
+        if (paymentType.equals("PAYABLE")) {
+            eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+        } else {
+            eventPublisher.publishEvent(new CustomerInvoiceRefreshEvent(this));
+        }
+
         return paymentMapper.toResponse(saved);
     }
 
@@ -227,12 +308,20 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found with ID: " + id));
 
         if (payment.getStatus() != PaymentStatus.COMPLETED) {
-            throw new BusinessException("Only COMPLETED payments can be cancelled. Current status: " + payment.getStatus());
+            throw new BusinessException("Only COMPLETED payments can be cancelled");
         }
 
         // 1. Revert allocations
         for (PaymentAllocation allocation : payment.getAllocations()) {
-            supplierInvoiceService.deallocatePayment(allocation.getSupplierInvoice().getId(), allocation.getAllocatedAmount());
+            if (payment.getPaymentType().equals("PAYABLE")) {
+                supplierInvoiceService.deallocatePayment(allocation.getSupplierInvoice().getId(), allocation.getAllocatedAmount());
+            } else {
+                customerInvoiceService.deallocatePayment(allocation.getCustomerInvoice().getId(), allocation.getAllocatedAmount());
+                // Add back to customer outstanding balance
+                Customer customer = payment.getCustomer();
+                customer.setOutstandingBalance(customer.getOutstandingBalance().add(allocation.getAllocatedAmount()));
+                customerRepository.save(customer);
+            }
         }
 
         // 2. Revert Journal Entry
@@ -251,7 +340,13 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setCancellationReason(request.getReason());
 
         Payment saved = paymentRepository.save(payment);
-        eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+
+        if (payment.getPaymentType().equals("PAYABLE")) {
+            eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
+        } else {
+            eventPublisher.publishEvent(new CustomerInvoiceRefreshEvent(this));
+        }
+
         return paymentMapper.toResponse(saved);
     }
 
@@ -262,48 +357,89 @@ public class PaymentServiceImpl implements PaymentService {
 
         User currentUser = getCurrentUser();
 
-        JournalEntry je = JournalEntry.builder()
-                .entryNumber(jeNumber)
-                .company(payment.getCompany())
-                .entryDate(payment.getPaymentDate())
-                .description("Supplier Payment " + payment.getPaymentNumber())
-                .sourceModule("SUPPLIER_PAYMENT")
-                .sourceReference(payment.getPaymentNumber())
-                .status("POSTED")
-                .postedAt(LocalDateTime.now())
-                .createdBy(currentUser)
-                .currencyCode(payment.getCurrencyCode())
-                .lines(new ArrayList<>())
-                .build();
+        if (payment.getPaymentType().equals("PAYABLE")) {
+            JournalEntry je = JournalEntry.builder()
+                    .entryNumber(jeNumber)
+                    .company(payment.getCompany())
+                    .entryDate(payment.getPaymentDate())
+                    .description("Supplier Payment " + payment.getPaymentNumber())
+                    .sourceModule("SUPPLIER_PAYMENT")
+                    .sourceReference(payment.getPaymentNumber())
+                    .status("POSTED")
+                    .postedAt(LocalDateTime.now())
+                    .createdBy(currentUser)
+                    .currencyCode(payment.getCurrencyCode())
+                    .lines(new ArrayList<>())
+                    .build();
 
-        // Debit: Accounts Payable (2100)
-        Account apAccount = accountRepository.findByCompanyIdAndAccountCode(payment.getCompany().getId(), "2100")
-                .orElseThrow(() -> new BusinessException("Accounts Payable account (2100) not found in company " + payment.getCompany().getId()));
+            // Debit: Accounts Payable (2100)
+            Account apAccount = accountRepository.findByCompanyIdAndAccountCode(payment.getCompany().getId(), "2100")
+                    .orElseThrow(() -> new BusinessException("Accounts Payable account (2100) not found"));
 
-        JournalEntryLine debitLine = JournalEntryLine.builder()
-                .journalEntry(je)
-                .account(apAccount)
-                .debitAmount(payment.getAmount())
-                .creditAmount(BigDecimal.ZERO)
-                .build();
+            JournalEntryLine debitLine = JournalEntryLine.builder()
+                    .journalEntry(je)
+                    .account(apAccount)
+                    .debitAmount(payment.getAmount())
+                    .creditAmount(BigDecimal.ZERO)
+                    .build();
+            je.getLines().add(debitLine);
 
-        je.getLines().add(debitLine);
+            // Credit: Cash (1100) or Bank (1200)
+            String creditAccountCode = payment.getPaymentMethod().equalsIgnoreCase("CASH") ? "1100" : "1200";
+            Account creditAccount = accountRepository.findByCompanyIdAndAccountCode(payment.getCompany().getId(), creditAccountCode)
+                    .orElseThrow(() -> new BusinessException("Payment account (" + creditAccountCode + ") not found"));
 
-        // Credit: Cash (1100) or Bank (1200)
-        String creditAccountCode = payment.getPaymentMethod().equalsIgnoreCase("CASH") ? "1100" : "1200";
-        Account creditAccount = accountRepository.findByCompanyIdAndAccountCode(payment.getCompany().getId(), creditAccountCode)
-                .orElseThrow(() -> new BusinessException("Payment account (" + creditAccountCode + ") not found in company " + payment.getCompany().getId()));
+            JournalEntryLine creditLine = JournalEntryLine.builder()
+                    .journalEntry(je)
+                    .account(creditAccount)
+                    .debitAmount(BigDecimal.ZERO)
+                    .creditAmount(payment.getAmount())
+                    .build();
+            je.getLines().add(creditLine);
 
-        JournalEntryLine creditLine = JournalEntryLine.builder()
-                .journalEntry(je)
-                .account(creditAccount)
-                .debitAmount(BigDecimal.ZERO)
-                .creditAmount(payment.getAmount())
-                .build();
+            return je;
+        } else {
+            JournalEntry je = JournalEntry.builder()
+                    .entryNumber(jeNumber)
+                    .company(payment.getCompany())
+                    .entryDate(payment.getPaymentDate())
+                    .description("Customer Payment " + payment.getPaymentNumber())
+                    .sourceModule("CUSTOMER_PAYMENT")
+                    .sourceReference(payment.getPaymentNumber())
+                    .status("POSTED")
+                    .postedAt(LocalDateTime.now())
+                    .createdBy(currentUser)
+                    .currencyCode(payment.getCurrencyCode())
+                    .lines(new ArrayList<>())
+                    .build();
 
-        je.getLines().add(creditLine);
+            // Debit: Cash (1100) or Bank (1200)
+            String debitAccountCode = payment.getPaymentMethod().equalsIgnoreCase("CASH") ? "1100" : "1200";
+            Account debitAccount = accountRepository.findByCompanyIdAndAccountCode(payment.getCompany().getId(), debitAccountCode)
+                    .orElseThrow(() -> new BusinessException("Payment account (" + debitAccountCode + ") not found"));
 
-        return je;
+            JournalEntryLine debitLine = JournalEntryLine.builder()
+                    .journalEntry(je)
+                    .account(debitAccount)
+                    .debitAmount(payment.getAmount())
+                    .creditAmount(BigDecimal.ZERO)
+                    .build();
+            je.getLines().add(debitLine);
+
+            // Credit: Accounts Receivable (1400)
+            Account arAccount = accountRepository.findByCompanyIdAndAccountCode(payment.getCompany().getId(), "1400")
+                    .orElseThrow(() -> new BusinessException("Accounts Receivable account (1400) not found"));
+
+            JournalEntryLine creditLine = JournalEntryLine.builder()
+                    .journalEntry(je)
+                    .account(arAccount)
+                    .debitAmount(BigDecimal.ZERO)
+                    .creditAmount(payment.getAmount())
+                    .build();
+            je.getLines().add(creditLine);
+
+            return je;
+        }
     }
 
     private JournalEntry generateReversalJournalEntry(JournalEntry originalJE) {
@@ -318,7 +454,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .company(originalJE.getCompany())
                 .entryDate(LocalDate.now())
                 .description("Reversal of Journal Entry " + originalJE.getEntryNumber())
-                .sourceModule("SUPPLIER_PAYMENT")
+                .sourceModule(originalJE.getSourceModule())
                 .sourceReference(originalJE.getSourceReference())
                 .status("POSTED")
                 .postedAt(LocalDateTime.now())
