@@ -27,6 +27,7 @@ public interface PaymentMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "allocations", ignore = true)
     @Mapping(target = "paymentType", ignore = true)
+    @Mapping(target = "paymentBatchId", ignore = true)
     Payment toEntity(PaymentRequest request);
 
     @Mapping(target = "companyId", source = "company.id")

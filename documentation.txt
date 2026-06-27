@@ -1587,3 +1587,45 @@ This module implements an industry-leading, highly scalable Fixed Asset Manageme
   - Integration Test Suite: com.plus33.erp.finance.assets.controller.FixedAssetControllerIntegrationTest
   - Execution Command: `.\mvnw.cmd clean test -Dtest=FixedAssetControllerIntegrationTest`
   - Test Scope: Expanded to 10 comprehensive test methods covering all 15 compliance and lifecycle scenarios.
+
+--------------------------------------------------------------------------------
+20. TREASURY & CASH MANAGEMENT (V29 - ENTERPRISE TMS EDITION)
+--------------------------------------------------------------------------------
+This module implements a treasury management system (TMS) at an enterprise tier, incorporating cash pooling, in-house banking, automated statement reconciliation, multi-currency revaluation, configurable risk policy limits, double-entry GL ledger mapping, and immutable event auditing.
+
+* Database Tables & Sequence:
+  - treasury_entities: Organization nodes (GROUP, REGIONAL, COUNTRY, COMPANY) for multi-tenant isolation.
+  - treasury_accounting_profiles: Profile codes mapping bank accounts, fee accounts, FX gain/loss accounts, interest accounts, and investment accounts to Chart of Accounts (COA) IDs.
+  - treasury_authorization_matrices: Maker/checker permissions specifying minimum and maximum cash flow approval limits.
+  - bank_relationships / credit_facilities: Facility metadata tracking limits, types (REVOLVING, OVERDRAFT, TERM_LOAN), and expiry metrics.
+  - treasury_risk_policies: Policy engine tracking PAYMENT, FX, INVESTMENT, and BANK limit rules with soft warning thresholds and HARD_BLOCK breach actions.
+  - treasury_journal_entries: Immutable double-entry ledger database for cash transactions, FX trades, fees, and maturities.
+  - treasury_audit_events: Chronological history logs of status transitions and approvals.
+  - netting_pools / netting_transactions: Multilateral netting for corporate netting runs.
+  - hedging_contracts / hedge_effectiveness_tests: IFRS 9 hedge valuation logs.
+
+* Security Permissions:
+  - TREASURY_VIEW, TREASURY_CONFIG_EVICT, TREASURY_POLICY_EVAL, TREASURY_JOURNAL_POST.
+
+* REST APIs (Exposing Secure Endpoints):
+  - GET /api/v2/treasury/journal/event/{type}/{id} (Get ledger entries)
+  - POST /api/v2/treasury/journal/cash-transfer/{id} (Post cash transfer journal entry)
+  - GET /api/v2/treasury/audit/{aggregateType}/{aggregateId} (Get audit trail)
+  - GET /api/v2/treasury/audit/company/{companyId} (Get company-wide audit timeline)
+  - GET /api/v2/treasury/policies/evaluate (Dry-run evaluate policy limits)
+  - GET /api/v2/treasury/ai/forecast (AI advisory forecast)
+  - GET /api/v2/treasury/ai/anomalies (AI anomaly detection alerts)
+  - POST /api/v2/treasury/config/evict-cache/{companyId} (Evict configuration registry cache)
+
+* Key Workflows & Enterprise Safeguards:
+  - **Payment Lifecycle State Machine**: Implements a strict, immutable transition matrix across 15 states (DRAFT -> VALIDATED -> COMPLIANCE_PENDING -> COMPLIANCE_APPROVED -> APPROVAL_PENDING -> APPROVED -> QUEUED -> TRANSMITTING -> TRANSMITTED -> BANK_ACCEPTED -> PARTIALLY_SETTLED -> SETTLED -> RECONCILED) preventing illegal transition leaps.
+  - **MoneyAmount Value Object**: Handles bank arithmetic using banker's rounding (HALF_EVEN) and enforces currency guards to prevent mismatched operations.
+  - **Double-Entry Journal Postings**: Posts balanced Debits and Credits automatically per event type. Idempotency guarantees prevent duplicate ledger entries.
+  - **Chronological Auditing**: Employs `Propagation.REQUIRES_NEW` to guarantee that transaction failures in calling systems do not roll back the generated audit log record.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.finance.treasury.controller.TreasuryEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw test -Dtest=TreasuryEnterpriseIntegrationTest`
+  - Test Scope: 35 integration tests verifying state transitions, rounding behavior, rule limits, audit timeline persistence, API controllers, and Treasury client SDK.
+

@@ -278,3 +278,20 @@ Work:
 Status:
 COMPLETED AND VERIFIED
 
+
+2026-06-27 | V29 — Treasury & Cash Management (Enterprise TMS Edition)
+Module: Finance / Treasury
+Work:
+* Added base and enterprise DDL migrations (V77, V78, V79) establishing multi-level treasury entities, credit facilities, bank relationships, signatories, double-entry GL ledger, risk policy configurations, and immutable audit logs.
+* Fixed bug in mv_liquidity_forecast view where inflow_amount, outflow_amount, and net_change were missing (replaced with conditional sums on current_balance).
+* Implemented type-safe 15-state PaymentStatus lifecycle with PaymentLifecycleStateMachine transition matrix.
+* Implemented MoneyAmount value object with banker's rounding (HALF_EVEN) and currency guards.
+* Implemented TreasuryJournalServiceImpl for double-entry GL posting of CashTransfer, FxDeal, FxRevaluation, InvestmentPurchase/Maturity, InterestAccrual, and BankFee events, resolving getCurrencyCode() compile issues.
+* Implemented TreasuryRuleEngineImpl supporting WARNING thresholds and HARD_BLOCK policy enforcement.
+* Implemented TreasuryAuditTimelineServiceImpl with REQUIRES_NEW propagation to preserve audit trails during parent transaction failures.
+* Implemented decoupled SDK boundary façade (TreasuryClient) for external module consumption.
+* Exposed REST endpoints under TreasuryV2Controller (/api/v2/treasury) covering ledger entries, paginated timelines, policy dry-runs, and AI forecasting/anomaly stubs.
+* Created and verified TreasuryEnterpriseIntegrationTest verifying 35 detailed enterprise scenarios across all modules, incorporating setup-level database purges to handle REQUIRES_NEW propagation safely.
+Status:
+COMPLETED AND VERIFIED
+

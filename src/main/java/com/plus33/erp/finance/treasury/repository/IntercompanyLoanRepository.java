@@ -1,0 +1,14 @@
+package com.plus33.erp.finance.treasury.repository;
+
+import com.plus33.erp.finance.treasury.entity.IntercompanyLoan;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface IntercompanyLoanRepository extends JpaRepository<IntercompanyLoan, Long> {
+    List<IntercompanyLoan> findByLenderCompanyId(Long lenderCompanyId);
+    List<IntercompanyLoan> findByBorrowerCompanyId(Long borrowerCompanyId);
+    List<IntercompanyLoan> findByStatus(String status);
+}
