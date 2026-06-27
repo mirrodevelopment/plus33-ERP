@@ -20,6 +20,12 @@ import com.plus33.erp.sales.mapper.CustomerInvoiceMapper;
 import com.plus33.erp.sales.repository.*;
 import com.plus33.erp.security.entity.User;
 import com.plus33.erp.security.repository.UserRepository;
+import com.plus33.erp.finance.tax.service.TaxCalculationEngine;
+import com.plus33.erp.finance.tax.dto.TaxCalculationRequest;
+import com.plus33.erp.finance.tax.dto.TaxCalculationLineRequest;
+import com.plus33.erp.finance.tax.dto.TaxCalculationResult;
+import com.plus33.erp.finance.tax.dto.TaxCalculationLineResult;
+import com.plus33.erp.finance.tax.dto.TaxComponentResult;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -52,6 +58,7 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
     private final UserRepository userRepository;
     private final CustomerInvoiceMapper customerInvoiceMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final TaxCalculationEngine taxCalculationEngine;
 
     public CustomerInvoiceServiceImpl(
             CustomerInvoiceRepository customerInvoiceRepository,
@@ -66,7 +73,8 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
             JournalEntryRepository journalEntryRepository,
             UserRepository userRepository,
             CustomerInvoiceMapper customerInvoiceMapper,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            TaxCalculationEngine taxCalculationEngine) {
         this.customerInvoiceRepository = customerInvoiceRepository;
         this.customerInvoiceItemRepository = customerInvoiceItemRepository;
         this.companyRepository = companyRepository;
@@ -80,6 +88,7 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         this.userRepository = userRepository;
         this.customerInvoiceMapper = customerInvoiceMapper;
         this.eventPublisher = eventPublisher;
+        this.taxCalculationEngine = taxCalculationEngine;
     }
 
     @Override
@@ -450,7 +459,43 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         List<CustomerInvoiceItem> items = new ArrayList<>();
         Set<Long> productIds = new HashSet<>();
 
-        for (CustomerInvoiceItemRequest req : requests) {
+        List<TaxCalculationLineRequest> taxLineReqs = new ArrayList<>();
+        for (int i = 0; i < requests.size(); i++) {
+            CustomerInvoiceItemRequest req = requests.get(i);
+            BigDecimal lineSubtotal = req.quantity().multiply(req.unitPrice()).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal lineDiscount = lineSubtotal.multiply(req.discountPercentage() != null ? req.discountPercentage() : BigDecimal.ZERO)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal lineNet = lineSubtotal.subtract(lineDiscount);
+
+            Product product = productRepository.findById(req.productId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + req.productId()));
+
+            taxLineReqs.add(TaxCalculationLineRequest.builder()
+                    .lineId((long) i)
+                    .productTaxCategory(product.getCategory() != null ? product.getCategory().getCode() : "STANDARD")
+                    .amount(lineNet)
+                    .taxInclusive(false)
+                    .build());
+        }
+
+        TaxCalculationRequest taxReq = TaxCalculationRequest.builder()
+                .companyId(invoice.getCompany().getId())
+                .transactionDate(invoice.getInvoiceDate())
+                .documentType("SALES_INVOICE")
+                .customerId(invoice.getCustomer().getId())
+                .customerTaxProfile(invoice.getCustomer().getTaxProfile() != null ? invoice.getCustomer().getTaxProfile().name() : "STANDARD")
+                .lines(taxLineReqs)
+                .build();
+
+        TaxCalculationResult taxResult = null;
+        try {
+            taxResult = taxCalculationEngine.calculateTax(taxReq);
+        } catch (Exception e) {
+            // Fall back to manual calculation if rules or engine are not configured
+        }
+
+        for (int i = 0; i < requests.size(); i++) {
+            CustomerInvoiceItemRequest req = requests.get(i);
             if (!productIds.add(req.productId())) {
                 throw new BusinessException("Duplicate product lines detected in invoice: " + req.productId());
             }
@@ -483,7 +528,26 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
             BigDecimal qty = req.quantity();
             BigDecimal price = req.unitPrice();
             BigDecimal discPct = req.discountPercentage() != null ? req.discountPercentage() : BigDecimal.ZERO;
-            BigDecimal taxPct = req.taxPercentage() != null ? req.taxPercentage() : BigDecimal.ZERO;
+
+            BigDecimal lineSubtotal = qty.multiply(price).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal lineDiscount = lineSubtotal.multiply(discPct).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal lineNet = lineSubtotal.subtract(lineDiscount);
+
+            BigDecimal lineTax;
+            BigDecimal taxPct;
+            if (taxResult != null) {
+                TaxCalculationLineResult lineTaxRes = taxResult.getLines().get(i);
+                lineTax = lineTaxRes.getTaxAmount();
+                if (!lineTaxRes.getTaxComponents().isEmpty()) {
+                    taxPct = lineTaxRes.getTaxComponents().get(0).getRatePercent();
+                } else {
+                    taxPct = BigDecimal.ZERO;
+                }
+            } else {
+                taxPct = req.taxPercentage() != null ? req.taxPercentage() : BigDecimal.ZERO;
+                lineTax = lineNet.multiply(taxPct).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            }
+            BigDecimal lineTotal = lineNet.add(lineTax).setScale(2, RoundingMode.HALF_UP);
 
             if (soItem != null) {
                 BigDecimal remaining = soItem.getFulfilledQuantity().subtract(soItem.getInvoicedQuantity());
@@ -491,12 +555,6 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
                     throw new BusinessException("Invoiced quantity " + qty + " exceeds remaining fulfillable quantity " + remaining + " for product: " + product.getName());
                 }
             }
-
-            BigDecimal lineSubtotal = qty.multiply(price).setScale(2, RoundingMode.HALF_UP);
-            BigDecimal lineDiscount = lineSubtotal.multiply(discPct).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-            BigDecimal lineNet = lineSubtotal.subtract(lineDiscount);
-            BigDecimal lineTax = lineNet.multiply(taxPct).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-            BigDecimal lineTotal = lineNet.add(lineTax).setScale(2, RoundingMode.HALF_UP);
 
             CustomerInvoiceItem item = CustomerInvoiceItem.builder()
                     .customerInvoice(invoice)
@@ -583,18 +641,72 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
                 .build();
         je.getLines().add(revLine);
 
-        // Credit: Tax Payable (2200) if tax exists
-        if (invoice.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
-            Account taxAccount = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
-                    .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
+        // Dynamic tax postings based on posting profiles
+        TaxCalculationRequest taxReq = TaxCalculationRequest.builder()
+                .companyId(invoice.getCompany().getId())
+                .transactionDate(invoice.getInvoiceDate())
+                .documentType("SALES_INVOICE")
+                .customerId(invoice.getCustomer().getId())
+                .customerTaxProfile(invoice.getCustomer().getTaxProfile() != null ? invoice.getCustomer().getTaxProfile().name() : "STANDARD")
+                .lines(invoice.getItems().stream().map(item -> {
+                    BigDecimal lineSubtotal = item.getQuantity().multiply(item.getUnitPrice()).setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal lineNet = lineSubtotal.subtract(item.getDiscountAmount());
+                    return TaxCalculationLineRequest.builder()
+                            .lineId(item.getId())
+                            .productTaxCategory(item.getProduct().getCategory() != null ? item.getProduct().getCategory().getCode() : "STANDARD")
+                            .amount(lineNet)
+                            .taxInclusive(false)
+                            .build();
+                }).toList())
+                .build();
 
-            JournalEntryLine taxLine = JournalEntryLine.builder()
-                    .journalEntry(je)
-                    .account(taxAccount)
-                    .debitAmount(BigDecimal.ZERO)
-                    .creditAmount(invoice.getTaxAmount())
-                    .build();
-            je.getLines().add(taxLine);
+        TaxCalculationResult taxResult = null;
+        try {
+            taxResult = taxCalculationEngine.calculateTax(taxReq);
+        } catch (Exception e) {
+            // ignore
+        }
+
+        if (taxResult != null) {
+            Map<Long, BigDecimal> taxPostings = new HashMap<>();
+            for (TaxCalculationLineResult lineRes : taxResult.getLines()) {
+                for (TaxComponentResult comp : lineRes.getTaxComponents()) {
+                    if (comp.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
+                        Long accountId = comp.getOutputTaxAccountId();
+                        if (accountId == null) {
+                            Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
+                                    .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
+                            accountId = fallbackTaxAcc.getId();
+                        }
+                        taxPostings.put(accountId, taxPostings.getOrDefault(accountId, BigDecimal.ZERO).add(comp.getTaxAmount()));
+                    }
+                }
+            }
+
+            for (Map.Entry<Long, BigDecimal> entry : taxPostings.entrySet()) {
+                Account taxAcc = accountRepository.findById(entry.getKey())
+                        .orElseThrow(() -> new BusinessException("Tax account not found for ID: " + entry.getKey()));
+                JournalEntryLine taxLine = JournalEntryLine.builder()
+                        .journalEntry(je)
+                        .account(taxAcc)
+                        .debitAmount(BigDecimal.ZERO)
+                        .creditAmount(entry.getValue())
+                        .build();
+                je.getLines().add(taxLine);
+            }
+        } else {
+            // Fallback to hardcoded 2200 credit
+            if (invoice.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
+                Account taxAccount = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
+                        .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
+                JournalEntryLine taxLine = JournalEntryLine.builder()
+                        .journalEntry(je)
+                        .account(taxAccount)
+                        .debitAmount(BigDecimal.ZERO)
+                        .creditAmount(invoice.getTaxAmount())
+                        .build();
+                je.getLines().add(taxLine);
+            }
         }
 
         return je;

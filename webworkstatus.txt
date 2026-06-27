@@ -295,3 +295,19 @@ Work:
 Status:
 COMPLETED AND VERIFIED
 
+
+2026-06-27 | V30 — Enterprise Tax Management & Compliance
+Module: Finance / Tax
+Work:
+* Created base and permission DDL migrations (V80, V81) setting up tax categories, posting profiles, date-versioned rates, groups, registrations, exemption certificates, priority-based rules, standalone tax adjustments, and audit/einvoice logs, as well as 6 materialized views for reporting.
+* Fixed PSQLException on flyway migration in mv_withholding_tax_raw view by correctly joining treasury_investments with bank_accounts to obtain company_id.
+* Implemented TaxCalculationEngineImpl supporting inclusive/exclusive VAT math, exemption certification overrides, purchase recoverability rules, reverse charge accounting postings, and residual rounding difference adjustments.
+* Implemented TaxDeterminationRuleEngineImpl resolving rules dynamically through prioritized specificity (Customer -> Supplier -> Product -> Place of Supply -> Fallback).
+* Implemented TaxFilingServiceImpl managing pre-filing validation checks, filing return calculations, and transactional state progressions (DRAFT -> CALCULATED -> SUBMITTED).
+* Implemented EInvoiceComplianceServiceImpl wrapping pluggable digital signature HSM provider stubs and mapping internal documents to compliant signed formats for ZATCA, IRP, and PEPPOL registries.
+* Integrated dynamic tax calculation within CustomerInvoiceServiceImpl and SupplierInvoiceServiceImpl for automated GL entry postings.
+* Created and verified TaxManagementIntegrationTest verifying 8 detailed compliance scenarios, correcting test dependencies to use String literals for AccountType and isolating entity lookups via code queries (findByCode/findByCompanyIdAndCode).
+Status:
+COMPLETED AND VERIFIED
+
+

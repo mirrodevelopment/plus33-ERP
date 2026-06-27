@@ -31,6 +31,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.plus33.erp.analytics.event.ProcurementRefreshEvent;
 import com.plus33.erp.finance.event.SupplierInvoiceRefreshEvent;
+import com.plus33.erp.finance.tax.service.TaxCalculationEngine;
+import com.plus33.erp.finance.tax.dto.TaxCalculationRequest;
+import com.plus33.erp.finance.tax.dto.TaxCalculationLineRequest;
+import com.plus33.erp.finance.tax.dto.TaxCalculationResult;
+import com.plus33.erp.finance.tax.dto.TaxCalculationLineResult;
+import com.plus33.erp.finance.tax.dto.TaxComponentResult;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -60,6 +66,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
     private final ApplicationEventPublisher eventPublisher;
     private final BudgetDimensionSetRepository budgetDimensionSetRepository;
     private final BudgetService budgetService;
+    private final TaxCalculationEngine taxCalculationEngine;
 
     public SupplierInvoiceServiceImpl(
             SupplierInvoiceRepository supplierInvoiceRepository,
@@ -74,7 +81,8 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
             SupplierInvoiceMapper supplierInvoiceMapper,
             ApplicationEventPublisher eventPublisher,
             BudgetDimensionSetRepository budgetDimensionSetRepository,
-            BudgetService budgetService) {
+            BudgetService budgetService,
+            TaxCalculationEngine taxCalculationEngine) {
         this.supplierInvoiceRepository = supplierInvoiceRepository;
         this.companyRepository = companyRepository;
         this.supplierRepository = supplierRepository;
@@ -88,6 +96,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         this.eventPublisher = eventPublisher;
         this.budgetDimensionSetRepository = budgetDimensionSetRepository;
         this.budgetService = budgetService;
+        this.taxCalculationEngine = taxCalculationEngine;
     }
 
     @Override
@@ -436,7 +445,43 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         List<SupplierInvoiceItem> items = new ArrayList<>();
         Set<Long> poItemIds = new HashSet<>();
 
-        for (SupplierInvoiceItemRequest itemReq : itemRequests) {
+        List<TaxCalculationLineRequest> taxLineReqs = new ArrayList<>();
+        for (int i = 0; i < itemRequests.size(); i++) {
+            SupplierInvoiceItemRequest req = itemRequests.get(i);
+
+            PurchaseOrderItem poItem = purchaseOrderItemRepository.findById(req.getPurchaseOrderItemId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Purchase Order Item not found with ID: " + req.getPurchaseOrderItemId()));
+
+            BigDecimal lineSubtotal = req.getQuantity().multiply(req.getUnitPrice()).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal lineNet = lineSubtotal.subtract(req.getDiscountAmount() != null ? req.getDiscountAmount() : BigDecimal.ZERO);
+
+            Product product = poItem.getProduct();
+
+            taxLineReqs.add(TaxCalculationLineRequest.builder()
+                    .lineId((long) i)
+                    .productTaxCategory(product.getCategory() != null ? product.getCategory().getCode() : "STANDARD")
+                    .amount(lineNet)
+                    .taxInclusive(false)
+                    .build());
+        }
+
+        TaxCalculationRequest taxReq = TaxCalculationRequest.builder()
+                .companyId(invoice.getCompany().getId())
+                .transactionDate(invoice.getInvoiceDate())
+                .documentType("PURCHASE_INVOICE")
+                .supplierId(invoice.getSupplier().getId())
+                .lines(taxLineReqs)
+                .build();
+
+        TaxCalculationResult taxResult = null;
+        try {
+            taxResult = taxCalculationEngine.calculateTax(taxReq);
+        } catch (Exception e) {
+            // Fall back to manual calculation if rules or engine are not configured
+        }
+
+        for (int i = 0; i < itemRequests.size(); i++) {
+            SupplierInvoiceItemRequest itemReq = itemRequests.get(i);
             if (!poItemIds.add(itemReq.getPurchaseOrderItemId())) {
                 throw new BusinessException("Duplicate purchase order item in invoice request: " + itemReq.getPurchaseOrderItemId());
             }
@@ -444,11 +489,11 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
             PurchaseOrderItem poItem = purchaseOrderItemRepository.findById(itemReq.getPurchaseOrderItemId())
                     .orElseThrow(() -> new ResourceNotFoundException("Purchase Order Item not found with ID: " + itemReq.getPurchaseOrderItemId()));
 
+            Product product = poItem.getProduct();
+
             if (purchaseOrderId != null && !poItem.getPurchaseOrder().getId().equals(purchaseOrderId)) {
                 throw new BusinessException("Purchase order item " + itemReq.getPurchaseOrderItemId() + " does not belong to the selected Purchase Order: " + purchaseOrderId);
             }
-
-            Product product = poItem.getProduct();
 
             GoodsReceiptItem grItem = null;
             if (itemReq.getGoodsReceiptItemId() != null) {
@@ -544,8 +589,80 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
                 .lines(new ArrayList<>())
                 .build();
 
-        // Debits: Net expenses/inventory per item
-        for (SupplierInvoiceItem item : invoice.getItems()) {
+        // Dynamic tax calculation to determine posting accounts
+        TaxCalculationRequest taxReq = TaxCalculationRequest.builder()
+                .companyId(invoice.getCompany().getId())
+                .transactionDate(invoice.getInvoiceDate())
+                .documentType("PURCHASE_INVOICE")
+                .supplierId(invoice.getSupplier().getId())
+                .lines(invoice.getItems().stream().map(item -> {
+                    BigDecimal lineSubtotal = item.getQuantity().multiply(item.getUnitPrice()).setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal lineNet = lineSubtotal.subtract(item.getDiscountAmount());
+                    return TaxCalculationLineRequest.builder()
+                            .lineId(item.getId())
+                            .productTaxCategory(item.getProduct().getCategory() != null ? item.getProduct().getCategory().getCode() : "STANDARD")
+                            .amount(lineNet)
+                            .taxInclusive(false)
+                            .build();
+                }).toList())
+                .build();
+
+        TaxCalculationResult taxResult = null;
+        try {
+            taxResult = taxCalculationEngine.calculateTax(taxReq);
+        } catch (Exception e) {
+            // ignore
+        }
+
+        Map<Long, BigDecimal> taxDebits = new HashMap<>();
+        Map<Long, BigDecimal> taxCredits = new HashMap<>();
+
+        // Debits: Net expenses/inventory per item + non-recoverable tax
+        for (int i = 0; i < invoice.getItems().size(); i++) {
+            SupplierInvoiceItem item = invoice.getItems().get(i);
+            BigDecimal itemNet = item.getNetAmount().subtract(item.getDiscountAmount());
+            BigDecimal itemDebit = itemNet;
+
+            if (taxResult != null) {
+                TaxCalculationLineResult lineRes = taxResult.getLines().get(i);
+                for (TaxComponentResult comp : lineRes.getTaxComponents()) {
+                    BigDecimal compTax = comp.getTaxAmount();
+                    if (compTax.compareTo(BigDecimal.ZERO) > 0) {
+                        if (comp.getReverseChargeAccountId() != null) {
+                            // Reverse charge offsetting
+                            Long debitAccId = comp.getRecoverableAccountId() != null ? comp.getRecoverableAccountId() : comp.getInputTaxAccountId();
+                            if (debitAccId == null) {
+                                Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
+                                        .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
+                                debitAccId = fallbackTaxAcc.getId();
+                            }
+                            Long creditAccId = comp.getReverseChargeAccountId();
+                            taxDebits.put(debitAccId, taxDebits.getOrDefault(debitAccId, BigDecimal.ZERO).add(compTax));
+                            taxCredits.put(creditAccId, taxCredits.getOrDefault(creditAccId, BigDecimal.ZERO).add(compTax));
+                        } else if (comp.isRecoverable()) {
+                            // Recoverable tax: post to recoverable account
+                            Long debitAccId = comp.getRecoverableAccountId() != null ? comp.getRecoverableAccountId() : comp.getInputTaxAccountId();
+                            if (debitAccId == null) {
+                                Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
+                                        .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
+                                debitAccId = fallbackTaxAcc.getId();
+                            }
+                            taxDebits.put(debitAccId, taxDebits.getOrDefault(debitAccId, BigDecimal.ZERO).add(compTax));
+                        } else {
+                            // Non-recoverable tax: capitalize/expense it by adding to item debit
+                            itemDebit = itemDebit.add(compTax);
+                        }
+                    }
+                }
+            } else {
+                // Fallback: post tax directly to 2200
+                if (item.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
+                            .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
+                    taxDebits.put(fallbackTaxAcc.getId(), taxDebits.getOrDefault(fallbackTaxAcc.getId(), BigDecimal.ZERO).add(item.getTaxAmount()));
+                }
+            }
+
             String accountCode = isInventoryProduct(item.getProduct()) ? "1300" : "5200";
             Account account = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), accountCode)
                     .orElseThrow(() -> new BusinessException("Account not found for code " + accountCode + " in company " + invoice.getCompany().getId()));
@@ -553,14 +670,43 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
             JournalEntryLine debitLine = JournalEntryLine.builder()
                     .journalEntry(je)
                     .account(account)
-                    .debitAmount(item.getTotalAmount())
+                    .debitAmount(itemDebit)
                     .creditAmount(BigDecimal.ZERO)
                     .build();
 
             je.getLines().add(debitLine);
         }
 
-        // Credits: Accounts Payable (2100) for total amount
+        // Add tax debit lines
+        for (Map.Entry<Long, BigDecimal> entry : taxDebits.entrySet()) {
+            Account taxAcc = accountRepository.findById(entry.getKey())
+                    .orElseThrow(() -> new BusinessException("Tax account not found for ID: " + entry.getKey()));
+            JournalEntryLine taxLine = JournalEntryLine.builder()
+                    .journalEntry(je)
+                    .account(taxAcc)
+                    .debitAmount(entry.getValue())
+                    .creditAmount(BigDecimal.ZERO)
+                    .build();
+            je.getLines().add(taxLine);
+        }
+
+        // Add tax credit lines (e.g. reverse charge)
+        for (Map.Entry<Long, BigDecimal> entry : taxCredits.entrySet()) {
+            Account taxAcc = accountRepository.findById(entry.getKey())
+                    .orElseThrow(() -> new BusinessException("Tax account not found for ID: " + entry.getKey()));
+            JournalEntryLine taxLine = JournalEntryLine.builder()
+                    .journalEntry(je)
+                    .account(taxAcc)
+                    .debitAmount(BigDecimal.ZERO)
+                    .creditAmount(entry.getValue())
+                    .build();
+            je.getLines().add(taxLine);
+        }
+
+        BigDecimal totalDebits = je.getLines().stream().map(JournalEntryLine::getDebitAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalOtherCredits = je.getLines().stream().map(JournalEntryLine::getCreditAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal apCreditAmount = totalDebits.subtract(totalOtherCredits);
+
         Account apAccount = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2100")
                 .orElseThrow(() -> new BusinessException("Accounts Payable account (2100) not found in company " + invoice.getCompany().getId()));
 
@@ -568,7 +714,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
                 .journalEntry(je)
                 .account(apAccount)
                 .debitAmount(BigDecimal.ZERO)
-                .creditAmount(invoice.getTotalAmount())
+                .creditAmount(apCreditAmount)
                 .build();
 
         je.getLines().add(creditLine);

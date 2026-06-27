@@ -1629,3 +1629,54 @@ This module implements a treasury management system (TMS) at an enterprise tier,
   - Execution Command: `.\mvnw test -Dtest=TreasuryEnterpriseIntegrationTest`
   - Test Scope: 35 integration tests verifying state transitions, rounding behavior, rule limits, audit timeline persistence, API controllers, and Treasury client SDK.
 
+--------------------------------------------------------------------------------
+21. ENTERPRISE TAX MANAGEMENT & COMPLIANCE (V30 - ULTIMATE ENTERPRISE EDITION)
+--------------------------------------------------------------------------------
+This module implements a centralized tax management and compliance engine, featuring dynamic date-versioned rates, multidimensional priority-based tax determination rules, tax posting profiles, automated invoice tax calculations (for sales, purchases, and GL posting), standalone tax adjustments, localized digital signing e-invoicing compliance (ZATCA, PEPPOL, IRP), and filing lifecycle tracking.
+
+* Database Tables & Sequence:
+  - tax_categories: Tax categories (e.g. VAT, GST, Sales Tax).
+  - tax_posting_profiles: GL ledger account mappings (input tax, output tax, reverse charge, recoverable, etc.) per company and category.
+  - tax_rates: Date-versioned rate percentages.
+  - tax_groups / tax_group_lines: Grouping of multiple versioned tax rates.
+  - tax_registrations: Multi-registration hierarchy (VAT, TRN, GST, TIN) scoped by company, supplier, and customer.
+  - tax_exemption_certificates: Active exemption certificates zero-rating tax.
+  - tax_determination_rules: Multidimensional priority-based lookup engine matching customer, supplier, product, place of supply, and fallback criteria.
+  - tax_adjustment_entries: Standalone tax adjustment journals for posting manual corrections.
+  - tax_override_requests: Approval workflow tracking manual tax amount overrides.
+  - einvoice_compliance_logs: Audit trails of government portal compliance submissions.
+  - tax_audit_logs: Immutable operational audit logging.
+  - tax_calendar / tax_filings: Filing calendar periods and generated tax returns.
+
+* Materialized Views:
+  - mv_input_tax: Materialized raw items input tax for purchases.
+  - mv_output_tax: Materialized raw items output tax for sales.
+  - mv_reverse_charge: Materialized purchase invoice reverse charge offsets.
+  - mv_withholding_tax: Materialized withholding tax (WHT) records from treasury investments.
+  - mv_tax_filings: Flat filing register combining calendar and submitted tax returns.
+  - mv_tax_dashboard: Executive aggregation of total input, output, and net tax liability.
+
+* Security Permissions:
+  - TAX_RATE_MANAGE: Setup categories, rates, and groups.
+  - TAX_RULE_MANAGE: Modify priority tax determination rules.
+  - TAX_POSTING_PROFILE_MANAGE: Map GL accounts.
+  - TAX_EXEMPTION_MANAGE: Manage customer exemption certificates.
+  - TAX_OVERRIDE_APPROVE: Approve manual override workflow requests.
+  - TAX_FILING_APPROVE: Approve periodic tax returns.
+  - TAX_PROVIDER_MANAGE: Setup e-invoice connector settings.
+  - TAX_AUDIT_VIEW: Access immutable tax audit log views.
+  - TAX_DASHBOARD_VIEW: View tax liability dashboards and reports.
+  - TAX_ADMIN: Full administrative bypass and override capabilities.
+
+* Key Engine Abstractions & Services:
+  - **TaxCalculationEngine**: Performs inclusive and exclusive calculations, exemption certificate checking, recoverability evaluation, reverse charge accounting offsets, and residual rounding adjustments. Backwards compatibility fallback is implemented for pre-existing hardcoded rates when database rules are absent.
+  - **TaxDeterminationRuleEngine**: Evaluates rule specificity sequentially by priority (Customer -> Supplier -> Product -> Place of Supply -> Fallback).
+  - **TaxFilingService**: Orchestrates pre-filing validation checks (missing TRNs, negative amounts, expired exemptions) and progresses period statuses across the lifecycle: DRAFT -> CALCULATED -> SUBMITTED.
+  - **EInvoiceComplianceService**: Decoupled interface with a digital signature provider mapping internal payloads into localized UBL 2.1 compliant structures and signing them (ZATCA, IRP, and PEPPOL).
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.finance.tax.TaxManagementIntegrationTest
+  - Execution Command: `.\mvnw clean test -Dtest=TaxManagementIntegrationTest`
+  - Test Scope: 8 comprehensive integration scenarios validating registration, math, exemption, rule specificity, reverse charge offsets, pre-filing, filing lifecycle, and compliance signing.
+
