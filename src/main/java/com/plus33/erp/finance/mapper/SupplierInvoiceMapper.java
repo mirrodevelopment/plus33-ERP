@@ -52,6 +52,7 @@ public interface SupplierInvoiceMapper {
     @Mapping(target = "netAmount", ignore = true)
     @Mapping(target = "taxAmount", ignore = true)
     @Mapping(target = "totalAmount", ignore = true)
+    @Mapping(target = "dimensionSet", ignore = true)
     SupplierInvoiceItem toItemEntity(SupplierInvoiceItemRequest request);
 
     @Mapping(target = "purchaseOrderItemId", source = "purchaseOrderItem.id")
@@ -59,6 +60,7 @@ public interface SupplierInvoiceMapper {
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productCode", source = "product.code")
     @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "dimensionSetId", source = "dimensionSet.id")
     SupplierInvoiceItemResponse toItemResponse(SupplierInvoiceItem entity);
 
     List<SupplierInvoiceItemResponse> toItemResponseList(List<SupplierInvoiceItem> list);

@@ -23,5 +23,12 @@ public record PurchaseRequestItemRequest(
 
         @Schema(description = "Line item remarks", example = "Urgent requirement")
         @Size(max = 255, message = "Remarks cannot exceed 255 characters")
-        String remarks
-) {}
+        String remarks,
+
+        @Schema(description = "Budget dimension set ID", example = "1")
+        Long dimensionSetId
+) {
+    public PurchaseRequestItemRequest(Long productId, BigDecimal requestedQuantity, String unitOfMeasure, String remarks) {
+        this(productId, requestedQuantity, unitOfMeasure, remarks, null);
+    }
+}

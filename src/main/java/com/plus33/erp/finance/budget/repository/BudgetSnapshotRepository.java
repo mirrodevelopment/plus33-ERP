@@ -1,0 +1,12 @@
+package com.plus33.erp.finance.budget.repository;
+
+import com.plus33.erp.finance.budget.entity.BudgetSnapshot;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface BudgetSnapshotRepository extends JpaRepository<BudgetSnapshot, Long> {
+    List<BudgetSnapshot> findAllByBudgetIdOrderByVersionNumberDesc(Long budgetId);
+}

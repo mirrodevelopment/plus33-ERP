@@ -36,4 +36,6 @@ public class SupplierInvoiceItemRequest {
     @NotNull(message = "Discount amount is required")
     @DecimalMin(value = "0.00", message = "Discount amount cannot be negative")
     private BigDecimal discountAmount;
+
+    private Long dimensionSetId;
 }

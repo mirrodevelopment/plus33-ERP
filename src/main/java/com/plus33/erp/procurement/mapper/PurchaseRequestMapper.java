@@ -60,11 +60,13 @@ public interface PurchaseRequestMapper {
     @Mapping(target = "purchaseRequest", ignore = true)
     @Mapping(target = "product", ignore = true)
     @Mapping(target = "approvedQuantity", ignore = true)
+    @Mapping(target = "dimensionSet", ignore = true)
     PurchaseRequestItem toItemEntity(PurchaseRequestItemRequest request);
 
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productCode", source = "product.code")
     @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "dimensionSetId", source = "dimensionSet.id")
     PurchaseRequestItemResponse toItemResponse(PurchaseRequestItem entity);
 
     List<PurchaseRequestItemResponse> toItemResponseList(List<PurchaseRequestItem> list);

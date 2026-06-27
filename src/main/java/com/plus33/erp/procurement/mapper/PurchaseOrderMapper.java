@@ -56,11 +56,13 @@ public interface PurchaseOrderMapper {
     @Mapping(target = "remainingQuantity", ignore = true)
     @Mapping(target = "invoicedQuantity", ignore = true)
     @Mapping(target = "version", ignore = true)
+    @Mapping(target = "dimensionSet", ignore = true)
     PurchaseOrderItem toItemEntity(PurchaseOrderItemRequest request);
 
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productCode", source = "product.code")
     @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "dimensionSetId", source = "dimensionSet.id")
     PurchaseOrderItemResponse toItemResponse(PurchaseOrderItem entity);
 
     List<PurchaseOrderItemResponse> toItemResponseList(List<PurchaseOrderItem> list);

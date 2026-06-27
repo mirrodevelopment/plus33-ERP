@@ -8,6 +8,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+import com.plus33.erp.finance.budget.entity.BudgetDimensionSet;
+
 @Getter
 @Setter
 @Entity
@@ -22,6 +24,10 @@ public class SupplierInvoiceItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dimension_set_id")
+    private BudgetDimensionSet dimensionSet;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_invoice_id", nullable = false)

@@ -38,6 +38,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import com.plus33.erp.finance.budget.repository.BudgetDimensionSetRepository;
+import com.plus33.erp.finance.budget.service.BudgetService;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
@@ -53,6 +58,8 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
     private final UserRepository userRepository;
     private final SupplierInvoiceMapper supplierInvoiceMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final BudgetDimensionSetRepository budgetDimensionSetRepository;
+    private final BudgetService budgetService;
 
     public SupplierInvoiceServiceImpl(
             SupplierInvoiceRepository supplierInvoiceRepository,
@@ -65,7 +72,9 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
             JournalEntryRepository journalEntryRepository,
             UserRepository userRepository,
             SupplierInvoiceMapper supplierInvoiceMapper,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            BudgetDimensionSetRepository budgetDimensionSetRepository,
+            BudgetService budgetService) {
         this.supplierInvoiceRepository = supplierInvoiceRepository;
         this.companyRepository = companyRepository;
         this.supplierRepository = supplierRepository;
@@ -77,6 +86,8 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         this.userRepository = userRepository;
         this.supplierInvoiceMapper = supplierInvoiceMapper;
         this.eventPublisher = eventPublisher;
+        this.budgetDimensionSetRepository = budgetDimensionSetRepository;
+        this.budgetService = budgetService;
     }
 
     @Override
@@ -250,6 +261,25 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         invoice.setStatus(SupplierInvoiceStatus.APPROVED);
 
         SupplierInvoice saved = supplierInvoiceRepository.save(invoice);
+
+        // Transition PO reservations to actual consumptions
+        for (SupplierInvoiceItem item : saved.getItems()) {
+            if (item.getDimensionSet() != null && item.getPurchaseOrderItem() != null) {
+                try {
+                    budgetService.consumeReservation(
+                        saved.getCompany().getId(),
+                        "PROCUREMENT_PO",
+                        item.getPurchaseOrderItem().getId(),
+                        item.getTotalAmount(),
+                        saved.getInvoiceNumber()
+                    );
+                } catch (Exception e) {
+                    log.error("Failed to transition budget reservation to consumption for PO item ID: {}", item.getPurchaseOrderItem().getId(), e);
+                    throw e;
+                }
+            }
+        }
+
         eventPublisher.publishEvent(new SupplierInvoiceRefreshEvent(this));
         return supplierInvoiceMapper.toResponse(saved);
     }
@@ -284,6 +314,47 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
 
                 originalJE.setReversalEntry(reversalJE);
                 journalEntryRepository.save(originalJE);
+            }
+
+            // Revert consumptions and restore PO reservations
+            for (SupplierInvoiceItem item : invoice.getItems()) {
+                if (item.getDimensionSet() != null && item.getPurchaseOrderItem() != null) {
+                    try {
+                        budgetService.releaseConsumption("PROCUREMENT_PO", item.getPurchaseOrderItem().getId());
+
+                        // Recreate PO reservation
+                        PurchaseOrderItem poItem = item.getPurchaseOrderItem();
+                        String accountCode = isInventoryProduct(poItem.getProduct()) ? "1300" : "5200";
+                        Account account = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), accountCode)
+                            .orElseThrow(() -> new BusinessException("Account not found: " + accountCode));
+
+                        BigDecimal amount = poItem.getOrderedQuantity().multiply(poItem.getUnitPrice());
+
+                        com.plus33.erp.finance.budget.dto.BudgetDimensionSetRequest dimReq = new com.plus33.erp.finance.budget.dto.BudgetDimensionSetRequest(
+                            poItem.getDimensionSet().getDepartment() != null ? poItem.getDimensionSet().getDepartment().getId() : null,
+                            poItem.getDimensionSet().getCostCenter() != null ? poItem.getDimensionSet().getCostCenter().getId() : null,
+                            poItem.getDimensionSet().getProject() != null ? poItem.getDimensionSet().getProject().getId() : null,
+                            poItem.getDimensionSet().getWarehouse() != null ? poItem.getDimensionSet().getWarehouse().getId() : null,
+                            poItem.getDimensionSet().getAssetCategory() != null ? poItem.getDimensionSet().getAssetCategory().getId() : null,
+                            poItem.getDimensionSet().getRegion() != null ? poItem.getDimensionSet().getRegion().getId() : null,
+                            poItem.getDimensionSet().getStore() != null ? poItem.getDimensionSet().getStore().getId() : null
+                        );
+
+                        com.plus33.erp.finance.budget.dto.BudgetReservationRequest resReq = new com.plus33.erp.finance.budget.dto.BudgetReservationRequest(
+                            account.getId(),
+                            dimReq,
+                            LocalDate.now(),
+                            amount,
+                            "PROCUREMENT_PO",
+                            poItem.getId(),
+                            poItem.getPurchaseOrder().getOrderNumber(),
+                            LocalDate.now().plusDays(30)
+                        );
+                        budgetService.createReservation(invoice.getCompany().getId(), resReq);
+                    } catch (Exception e) {
+                        log.warn("Failed to revert consumption / restore PO reservation for item: {}", item.getId(), e);
+                    }
+                }
             }
         }
 
@@ -421,6 +492,10 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
                     .discountAmount(discountAmount)
                     .totalAmount(totalAmount)
                     .build();
+
+            if (itemReq.getDimensionSetId() != null) {
+                item.setDimensionSet(budgetDimensionSetRepository.findById(itemReq.getDimensionSetId()).orElse(null));
+            }
 
             items.add(item);
         }

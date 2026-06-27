@@ -31,6 +31,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.plus33.erp.finance.budget.repository.BudgetDimensionSetRepository;
+import com.plus33.erp.finance.budget.service.BudgetService;
+import com.plus33.erp.finance.repository.AccountRepository;
+import com.plus33.erp.finance.entity.Account;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
@@ -43,6 +50,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private final UserRepository userRepository;
     private final PurchaseOrderMapper purchaseOrderMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final BudgetDimensionSetRepository budgetDimensionSetRepository;
+    private final BudgetService budgetService;
+    private final AccountRepository accountRepository;
 
     public PurchaseOrderServiceImpl(PurchaseOrderRepository purchaseOrderRepository,
                                     PurchaseRequestRepository purchaseRequestRepository,
@@ -51,7 +61,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                     ProductRepository productRepository,
                                     UserRepository userRepository,
                                     PurchaseOrderMapper purchaseOrderMapper,
-                                    ApplicationEventPublisher eventPublisher) {
+                                    ApplicationEventPublisher eventPublisher,
+                                    BudgetDimensionSetRepository budgetDimensionSetRepository,
+                                    BudgetService budgetService,
+                                    AccountRepository accountRepository) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.companyRepository = companyRepository;
@@ -60,6 +73,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         this.userRepository = userRepository;
         this.purchaseOrderMapper = purchaseOrderMapper;
         this.eventPublisher = eventPublisher;
+        this.budgetDimensionSetRepository = budgetDimensionSetRepository;
+        this.budgetService = budgetService;
+        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -97,6 +113,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             item.setPurchaseOrder(po);
             item.setReceivedQuantity(BigDecimal.ZERO);
             item.setRemainingQuantity(itemReq.orderedQuantity());
+            if (itemReq.dimensionSetId() != null) {
+                item.setDimensionSet(budgetDimensionSetRepository.findById(itemReq.dimensionSetId()).orElse(null));
+            }
             po.getItems().add(item);
 
             BigDecimal lineTotal = itemReq.orderedQuantity().multiply(itemReq.unitPrice());
@@ -207,6 +226,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             item.setPurchaseOrder(po);
             item.setReceivedQuantity(BigDecimal.ZERO);
             item.setRemainingQuantity(itemReq.orderedQuantity());
+            if (itemReq.dimensionSetId() != null) {
+                item.setDimensionSet(budgetDimensionSetRepository.findById(itemReq.dimensionSetId()).orElse(null));
+            }
             po.getItems().add(item);
 
             BigDecimal lineTotal = itemReq.orderedQuantity().multiply(itemReq.unitPrice());
@@ -248,6 +270,54 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         po.setIssuedAt(LocalDateTime.now());
 
         PurchaseOrder saved = purchaseOrderRepository.save(po);
+
+        // RELEASE PR RESERVATIONS IF LINKED
+        if (saved.getPurchaseRequest() != null) {
+            for (PurchaseRequestItem prItem : saved.getPurchaseRequest().getItems()) {
+                try {
+                    budgetService.releaseReservation("PROCUREMENT_PR", prItem.getId());
+                } catch (Exception e) {
+                    log.warn("Failed to release PR reservation for item: {}", prItem.getId(), e);
+                }
+            }
+        }
+
+        // CREATE PO BUDGET RESERVATIONS
+        for (PurchaseOrderItem item : saved.getItems()) {
+            if (item.getDimensionSet() != null) {
+                try {
+                    String accountCode = isInventoryProduct(item.getProduct()) ? "1300" : "5200";
+                    Account account = accountRepository.findByCompanyIdAndAccountCode(saved.getCompany().getId(), accountCode)
+                        .orElseThrow(() -> new BusinessException("Account not found: " + accountCode));
+
+                    BigDecimal amount = item.getOrderedQuantity().multiply(item.getUnitPrice());
+
+                    com.plus33.erp.finance.budget.dto.BudgetReservationRequest resReq = new com.plus33.erp.finance.budget.dto.BudgetReservationRequest(
+                        account.getId(),
+                        new com.plus33.erp.finance.budget.dto.BudgetDimensionSetRequest(
+                            item.getDimensionSet().getDepartment() != null ? item.getDimensionSet().getDepartment().getId() : null,
+                            item.getDimensionSet().getCostCenter() != null ? item.getDimensionSet().getCostCenter().getId() : null,
+                            item.getDimensionSet().getProject() != null ? item.getDimensionSet().getProject().getId() : null,
+                            item.getDimensionSet().getWarehouse() != null ? item.getDimensionSet().getWarehouse().getId() : null,
+                            item.getDimensionSet().getAssetCategory() != null ? item.getDimensionSet().getAssetCategory().getId() : null,
+                            item.getDimensionSet().getRegion() != null ? item.getDimensionSet().getRegion().getId() : null,
+                            item.getDimensionSet().getStore() != null ? item.getDimensionSet().getStore().getId() : null
+                        ),
+                        LocalDate.now(),
+                        amount,
+                        "PROCUREMENT_PO",
+                        item.getId(),
+                        saved.getOrderNumber(),
+                        LocalDate.now().plusDays(30)
+                    );
+                    budgetService.createReservation(saved.getCompany().getId(), resReq);
+                } catch (Exception e) {
+                    log.error("Failed to create budget reservation for PO item ID: {}", item.getId(), e);
+                    throw e;
+                }
+            }
+        }
+
         eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
         return purchaseOrderMapper.toResponse(saved);
     }
@@ -272,8 +342,26 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         po.setCancellationReason(reason);
 
         PurchaseOrder saved = purchaseOrderRepository.save(po);
+
+        // RELEASE PO RESERVATIONS
+        for (PurchaseOrderItem item : saved.getItems()) {
+            try {
+                budgetService.releaseReservation("PROCUREMENT_PO", item.getId());
+            } catch (Exception e) {
+                log.warn("Failed to release PO reservation for item: {}", item.getId(), e);
+            }
+        }
+
         eventPublisher.publishEvent(new ProcurementRefreshEvent(this));
         return purchaseOrderMapper.toResponse(saved);
+    }
+
+    private boolean isInventoryProduct(Product product) {
+        if (product.getProductType() == null) {
+            return true;
+        }
+        String type = product.getProductType().toUpperCase();
+        return !type.equals("SERVICE") && !type.equals("EXPENSE");
     }
 
     @Override
@@ -317,8 +405,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         if (request.purchaseRequestId() != null) {
             PurchaseRequest pr = purchaseRequestRepository.findById(request.purchaseRequestId())
                     .orElseThrow(() -> new ResourceNotFoundException("Purchase Request not found with ID: " + request.purchaseRequestId()));
-            if (pr.getStatus() != PurchaseRequestStatus.APPROVED) {
-                throw new BusinessException("Purchase Request must be in APPROVED status");
+            if (pr.getStatus() != PurchaseRequestStatus.APPROVED && pr.getStatus() != PurchaseRequestStatus.CONVERTED_TO_PO) {
+                throw new BusinessException("Purchase Request must be in APPROVED or CONVERTED_TO_PO status");
             }
             if (!pr.getCompany().getId().equals(request.companyId())) {
                 throw new BusinessException("Purchase Request company must match Purchase Order company");

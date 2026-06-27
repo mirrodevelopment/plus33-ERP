@@ -27,5 +27,8 @@ public record PurchaseRequestItemResponse(
         String unitOfMeasure,
 
         @Schema(description = "Line item remarks", example = "Urgent requirement")
-        String remarks
+        String remarks,
+
+        @Schema(description = "Budget dimension set ID", example = "1")
+        Long dimensionSetId
 ) {}

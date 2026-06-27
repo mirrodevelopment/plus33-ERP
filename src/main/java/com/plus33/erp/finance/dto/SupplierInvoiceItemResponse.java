@@ -26,4 +26,5 @@ public class SupplierInvoiceItemResponse {
     private BigDecimal taxAmount;
     private BigDecimal discountAmount;
     private BigDecimal totalAmount;
+    private Long dimensionSetId;
 }

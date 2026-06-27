@@ -34,12 +34,17 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.plus33.erp.finance.budget.service.BudgetService;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class FixedAssetServiceImpl implements FixedAssetService {
 
     private final CompanyRepository companyRepository;
+    private final BudgetService budgetService;
     private final AssetCategoryRepository assetCategoryRepository;
     private final FixedAssetRepository fixedAssetRepository;
     private final FixedAssetDepreciationLogRepository fixedAssetDepreciationLogRepository;
@@ -326,10 +331,39 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         User currentUser = lookupUser(username);
 
         BigDecimal threshold = asset.getCategory().getCapitalizationThreshold();
-        JournalEntry je;
         boolean belowThreshold = threshold != null && threshold.compareTo(BigDecimal.ZERO) > 0 
                 && asset.getAcquisitionCost().compareTo(threshold) < 0;
 
+        // CapEx Budget Check
+        try {
+            com.plus33.erp.finance.budget.dto.BudgetDimensionSetRequest dimReq = new com.plus33.erp.finance.budget.dto.BudgetDimensionSetRequest(
+                null,
+                null,
+                null,
+                asset.getWarehouse() != null ? asset.getWarehouse().getId() : null,
+                asset.getCategory().getId(),
+                null,
+                asset.getStore() != null ? asset.getStore().getId() : null
+            );
+
+            Long accountId = belowThreshold ? asset.getCategory().getDepreciationExpenseAccount().getId() : asset.getCategory().getAssetAccount().getId();
+
+            budgetService.createDirectConsumption(
+                asset.getCompany().getId(),
+                accountId,
+                dimReq,
+                asset.getAcquisitionCost(),
+                "FIXED_ASSETS",
+                asset.getId(),
+                asset.getAssetCode(),
+                asset.getAcquisitionDate()
+            );
+        } catch (Exception e) {
+            log.error("CapEx Budget Check Failed for Asset ID: {}", asset.getId(), e);
+            throw e;
+        }
+
+        JournalEntry je;
         if (belowThreshold) {
             je = postThresholdExpensingJournal(asset, currentUser);
             asset.setStatus(FixedAssetStatus.EXPENSED);

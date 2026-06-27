@@ -30,5 +30,8 @@ public record PurchaseOrderItemResponse(
         BigDecimal remainingQuantity,
 
         @Schema(description = "Line item remarks", example = "Monthly order")
-        String remarks
+        String remarks,
+
+        @Schema(description = "Budget dimension set ID", example = "1")
+        Long dimensionSetId
 ) {}
