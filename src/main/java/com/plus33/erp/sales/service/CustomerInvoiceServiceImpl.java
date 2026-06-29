@@ -21,6 +21,7 @@ import com.plus33.erp.sales.repository.*;
 import com.plus33.erp.security.entity.User;
 import com.plus33.erp.security.repository.UserRepository;
 import com.plus33.erp.finance.tax.service.TaxCalculationEngine;
+import com.plus33.erp.finance.tax.service.TaxJournalService;
 import com.plus33.erp.finance.tax.dto.TaxCalculationRequest;
 import com.plus33.erp.finance.tax.dto.TaxCalculationLineRequest;
 import com.plus33.erp.finance.tax.dto.TaxCalculationResult;
@@ -59,6 +60,7 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
     private final CustomerInvoiceMapper customerInvoiceMapper;
     private final ApplicationEventPublisher eventPublisher;
     private final TaxCalculationEngine taxCalculationEngine;
+    private final TaxJournalService taxJournalService;
 
     public CustomerInvoiceServiceImpl(
             CustomerInvoiceRepository customerInvoiceRepository,
@@ -74,7 +76,8 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
             UserRepository userRepository,
             CustomerInvoiceMapper customerInvoiceMapper,
             ApplicationEventPublisher eventPublisher,
-            TaxCalculationEngine taxCalculationEngine) {
+            TaxCalculationEngine taxCalculationEngine,
+            TaxJournalService taxJournalService) {
         this.customerInvoiceRepository = customerInvoiceRepository;
         this.customerInvoiceItemRepository = customerInvoiceItemRepository;
         this.companyRepository = companyRepository;
@@ -89,6 +92,7 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         this.customerInvoiceMapper = customerInvoiceMapper;
         this.eventPublisher = eventPublisher;
         this.taxCalculationEngine = taxCalculationEngine;
+        this.taxJournalService = taxJournalService;
     }
 
     @Override
@@ -641,11 +645,12 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
                 .build();
         je.getLines().add(revLine);
 
-        // Dynamic tax postings based on posting profiles
+        // Delegate tax postings to centralized TaxJournalService
         TaxCalculationRequest taxReq = TaxCalculationRequest.builder()
                 .companyId(invoice.getCompany().getId())
                 .transactionDate(invoice.getInvoiceDate())
                 .documentType("SALES_INVOICE")
+                .documentId(invoice.getId())
                 .customerId(invoice.getCustomer().getId())
                 .customerTaxProfile(invoice.getCustomer().getTaxProfile() != null ? invoice.getCustomer().getTaxProfile().name() : "STANDARD")
                 .lines(invoice.getItems().stream().map(item -> {
@@ -664,36 +669,11 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         try {
             taxResult = taxCalculationEngine.calculateTax(taxReq);
         } catch (Exception e) {
-            // ignore
+            // Fall back to manual calculation if rules or engine are not configured
         }
 
         if (taxResult != null) {
-            Map<Long, BigDecimal> taxPostings = new HashMap<>();
-            for (TaxCalculationLineResult lineRes : taxResult.getLines()) {
-                for (TaxComponentResult comp : lineRes.getTaxComponents()) {
-                    if (comp.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
-                        Long accountId = comp.getOutputTaxAccountId();
-                        if (accountId == null) {
-                            Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
-                                    .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
-                            accountId = fallbackTaxAcc.getId();
-                        }
-                        taxPostings.put(accountId, taxPostings.getOrDefault(accountId, BigDecimal.ZERO).add(comp.getTaxAmount()));
-                    }
-                }
-            }
-
-            for (Map.Entry<Long, BigDecimal> entry : taxPostings.entrySet()) {
-                Account taxAcc = accountRepository.findById(entry.getKey())
-                        .orElseThrow(() -> new BusinessException("Tax account not found for ID: " + entry.getKey()));
-                JournalEntryLine taxLine = JournalEntryLine.builder()
-                        .journalEntry(je)
-                        .account(taxAcc)
-                        .debitAmount(BigDecimal.ZERO)
-                        .creditAmount(entry.getValue())
-                        .build();
-                je.getLines().add(taxLine);
-            }
+            taxJournalService.createTaxJournalLines(je, invoice.getCompany(), taxResult, false);
         } else {
             // Fallback to hardcoded 2200 credit
             if (invoice.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {

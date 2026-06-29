@@ -13,6 +13,7 @@ public class TaxCalculationRequest {
     private Long companyId;
     private LocalDate transactionDate;
     private String documentType; // SALES_INVOICE, PURCHASE_INVOICE, etc.
+    private Long documentId; // For override lookup; null during draft calculation
     private Long customerId;
     private Long supplierId;
     private String customerTaxProfile;

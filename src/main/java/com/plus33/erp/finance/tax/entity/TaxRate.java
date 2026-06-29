@@ -23,6 +23,10 @@ public class TaxRate {
     @JoinColumn(name = "category_id", nullable = false)
     private TaxCategory category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "config_version_id")
+    private TaxConfigurationVersion configVersion;
+
     @Column(name = "rate_percent", nullable = false, precision = 5, scale = 2)
     private BigDecimal ratePercent;
 

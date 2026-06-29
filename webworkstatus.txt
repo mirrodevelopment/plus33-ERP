@@ -296,18 +296,24 @@ Status:
 COMPLETED AND VERIFIED
 
 
-2026-06-27 | V30 — Enterprise Tax Management & Compliance
+2026-06-27 | V30 — Enterprise Tax Management & Compliance (Refined & Release Ready)
 Module: Finance / Tax
 Work:
-* Created base and permission DDL migrations (V80, V81) setting up tax categories, posting profiles, date-versioned rates, groups, registrations, exemption certificates, priority-based rules, standalone tax adjustments, and audit/einvoice logs, as well as 6 materialized views for reporting.
+* Created base and permission DDL migrations (V80, V81, V82) setting up tax categories, posting profiles, date-versioned rates, groups, registrations, exemption certificates, priority-based rules, standalone tax adjustments, and audit/einvoice logs, as well as 10 materialized/reporting views.
 * Fixed PSQLException on flyway migration in mv_withholding_tax_raw view by correctly joining treasury_investments with bank_accounts to obtain company_id.
-* Implemented TaxCalculationEngineImpl supporting inclusive/exclusive VAT math, exemption certification overrides, purchase recoverability rules, reverse charge accounting postings, and residual rounding difference adjustments.
-* Implemented TaxDeterminationRuleEngineImpl resolving rules dynamically through prioritized specificity (Customer -> Supplier -> Product -> Place of Supply -> Fallback).
-* Implemented TaxFilingServiceImpl managing pre-filing validation checks, filing return calculations, and transactional state progressions (DRAFT -> CALCULATED -> SUBMITTED).
-* Implemented EInvoiceComplianceServiceImpl wrapping pluggable digital signature HSM provider stubs and mapping internal documents to compliant signed formats for ZATCA, IRP, and PEPPOL registries.
-* Integrated dynamic tax calculation within CustomerInvoiceServiceImpl and SupplierInvoiceServiceImpl for automated GL entry postings.
-* Created and verified TaxManagementIntegrationTest verifying 8 detailed compliance scenarios, correcting test dependencies to use String literals for AccountType and isolating entity lookups via code queries (findByCode/findByCompanyIdAndCode).
+* Implemented O(1) TaxEngineRegistry to dynamically resolve engine providers (VAT, GST, and US Sales Tax).
+* Implemented VatTaxEngineProvider (standard VAT math), GstTaxEngineProvider (CGST/SGST intra-state and IGST inter-state splits), and SalesTaxEngineProvider (US exclusive sales tax).
+* Refactored TaxCalculationEngineImpl to support active configuration version lookup, manual overrides (Precedence 1 checks), registry delegation, immutable calculation audit logs (tax_calculation_logs), and Spring event publishing (TaxCalculatedEvent, TaxOverrideAppliedEvent, EInvoiceSubmittedEvent).
+* Implemented specificity sorting in TaxDeterminationRuleEngineImpl: Profile Match (8) > Product Category Match (4) > Place of Supply Match (2) > Incoterms Match (1) > Fallback (0), using Priority as tie-breaker.
+* Integrated TaxConfigurationCache and TaxConfigurationCacheEvictAspect (AOP) for memoization of rates/rules and automatic invalidation on version changes.
+* Created TaxMetricsRegistry and TaxDiagnosticsController exposing performance metrics, cache hit/miss statistics, and provider usage via `/api/v2/tax/diagnostics`.
+* Centralized ledger postings in TaxJournalServiceImpl, and refactored CustomerInvoiceServiceImpl and SupplierInvoiceServiceImpl to delegate double-entries and capitalize non-recoverable tax.
+* Implemented ComplianceQueueWorker scheduled processor managing e-invoice queuing, retry exponential backoffs, and dead-letter queue transitions.
+* Implemented TaxFilingServiceImpl managing pre-filing validation checks, filing calculations, and state progressions (DRAFT -> CALCULATED -> SUBMITTED).
+* Implemented EInvoiceComplianceServiceImpl wrapping digital signature provider stubs and mapping internal documents to compliant signed formats for ZATCA, IRP, and PEPPOL registries.
+* Expanded and verified TaxManagementIntegrationTest, increasing coverage to 19 comprehensive integration tests, verifying all performance caching, AOP eviction, metrics endpoints, math, specificity sorting, GST/Sales engines, overrides, logs, versioning, and compliance worker retries.
 Status:
 COMPLETED AND VERIFIED
+
 
 

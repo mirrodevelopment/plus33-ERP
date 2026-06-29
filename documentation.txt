@@ -1645,7 +1645,9 @@ This module implements a centralized tax management and compliance engine, featu
   - tax_adjustment_entries: Standalone tax adjustment journals for posting manual corrections.
   - tax_override_requests: Approval workflow tracking manual tax amount overrides.
   - einvoice_compliance_logs: Audit trails of government portal compliance submissions.
-  - tax_audit_logs: Immutable operational audit logging.
+  - tax_calculation_logs: Immutable operational audit logging recording JSON request payloads, resolved rules, applied rates, execution durations, and override flags.
+  - tax_configuration_versions: Company-scoped configuration versions specifying active rules/rates snapshots.
+  - compliance_queue_items: Background queuing engine for asynchronous e-invoicing submission.
   - tax_calendar / tax_filings: Filing calendar periods and generated tax returns.
 
 * Materialized Views:
@@ -1655,28 +1657,40 @@ This module implements a centralized tax management and compliance engine, featu
   - mv_withholding_tax: Materialized withholding tax (WHT) records from treasury investments.
   - mv_tax_filings: Flat filing register combining calendar and submitted tax returns.
   - mv_tax_dashboard: Executive aggregation of total input, output, and net tax liability.
+  - mv_monthly_tax_trend: Executive monthly trend grouping output tax.
+  - mv_tax_by_jurisdiction: Tax grouping by geographical jurisdictions.
+  - mv_tax_by_product_category: Tax grouping by product categories.
+  - mv_tax_recovery_analysis: Analytical recovery comparison (recoverable vs non-recoverable).
 
-* Security Permissions:
-  - TAX_RATE_MANAGE: Setup categories, rates, and groups.
-  - TAX_RULE_MANAGE: Modify priority tax determination rules.
-  - TAX_POSTING_PROFILE_MANAGE: Map GL accounts.
-  - TAX_EXEMPTION_MANAGE: Manage customer exemption certificates.
-  - TAX_OVERRIDE_APPROVE: Approve manual override workflow requests.
-  - TAX_FILING_APPROVE: Approve periodic tax returns.
-  - TAX_PROVIDER_MANAGE: Setup e-invoice connector settings.
-  - TAX_AUDIT_VIEW: Access immutable tax audit log views.
-  - TAX_DASHBOARD_VIEW: View tax liability dashboards and reports.
-  - TAX_ADMIN: Full administrative bypass and override capabilities.
+* Security Permissions & Role Mapping:
+  - TAX_VIEW: View tax configurations.
+  - TAX_MANAGE: Manage tax properties and configurations.
+  - TAX_OVERRIDE: Trigger manual tax overrides.
+  - TAX_REPORT_EXPORT: Export tax audit registers.
+  - TAX_EINVOICE: Force manual compliance submission.
+  - TAX_FILING: Process and submit tax filings.
+  - TAX_RATE_MANAGE / TAX_RULE_MANAGE / TAX_POSTING_PROFILE_MANAGE: Legacy specific administrative roles.
+  - (Permissions are mapped automatically to ULTIMATE_ADMIN and TAX_MANAGER roles).
 
 * Key Engine Abstractions & Services:
-  - **TaxCalculationEngine**: Performs inclusive and exclusive calculations, exemption certificate checking, recoverability evaluation, reverse charge accounting offsets, and residual rounding adjustments. Backwards compatibility fallback is implemented for pre-existing hardcoded rates when database rules are absent.
-  - **TaxDeterminationRuleEngine**: Evaluates rule specificity sequentially by priority (Customer -> Supplier -> Product -> Place of Supply -> Fallback).
-  - **TaxFilingService**: Orchestrates pre-filing validation checks (missing TRNs, negative amounts, expired exemptions) and progresses period statuses across the lifecycle: DRAFT -> CALCULATED -> SUBMITTED.
-  - **EInvoiceComplianceService**: Decoupled interface with a digital signature provider mapping internal payloads into localized UBL 2.1 compliant structures and signing them (ZATCA, IRP, and PEPPOL).
+  - **TaxEngineRegistry**: Programmatic O(1) registry for resolving engine providers (VAT, GST, SALES_TAX) at runtime.
+  - **VAT, GST, and Sales Tax Providers**:
+    - `VatTaxEngineProvider`: Standard VAT calculations (inclusive/exclusive support).
+    - `GstTaxEngineProvider`: India-style CGST/SGST (intra-state split) and IGST (inter-state) component separation.
+    - `SalesTaxEngineProvider`: US-style destination-based sales tax (always tax-exclusive, non-recoverable for the seller).
+  - **TaxCalculationEngine**: Coordinates configuration versions, manual overrides (Precedence 1 checks), and registry delegation. Records calculation logs, publishes Spring events (`TaxCalculatedEvent`, `TaxOverrideAppliedEvent`), and returns diagnostic metadata.
+  - **TaxDeterminationRuleEngine**: Evaluates specificity sorting sequentially: Profile Match (8) > Product Category Match (4) > Place of Supply Match (2) > Incoterms Match (1) > Fallback (0), using Priority as tie-breaker.
+  - **TaxConfigurationCache & TaxConfigurationCacheEvictAspect**: Concurrent caching layer memoizing active rates and determination rules, with automated AOP aspect eviction on configuration version changes.
+  - **TaxMetricsRegistry & TaxDiagnosticsController**: Internal metrics engine capturing execution durations, cache hit/miss rates, and provider usage statistics exposed secured via `/api/v2/tax/diagnostics` (`TAX_VIEW`).
+  - **TaxJournalService**: Centralized posting helper for CustomerInvoice and SupplierInvoice services, generating correct double-entries and capitalizing non-recoverable tax.
+  - **ComplianceQueueWorker**: Asynchronous background processor utilizing retry policies with exponential backoff and dead-letter queue transitions.
+  - **TaxFilingService**: Progresses periods through DRAFT -> CALCULATED -> SUBMITTED.
+  - **EInvoiceComplianceService**: Decoupled digital signature provider mapping internal payloads into compliant digital structures (ZATCA, IRP, and PEPPOL).
 
 * Verification Notes:
   - Status: **PASSED AND VERIFIED**.
   - Integration Test Suite: com.plus33.erp.finance.tax.TaxManagementIntegrationTest
   - Execution Command: `.\mvnw clean test -Dtest=TaxManagementIntegrationTest`
-  - Test Scope: 8 comprehensive integration scenarios validating registration, math, exemption, rule specificity, reverse charge offsets, pre-filing, filing lifecycle, and compliance signing.
+  - Test Scope: 19 comprehensive integration scenarios validating configuration cache performance, automated aspect eviction, metrics diagnostics endpoints, registration, math, exemption, specificity sorting, GST components, US Sales Tax, overrides, logging, versioning, event publishing, and compliance worker retries/dead-letter.
+
 

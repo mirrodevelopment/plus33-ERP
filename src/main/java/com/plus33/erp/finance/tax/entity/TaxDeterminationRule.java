@@ -61,6 +61,10 @@ public class TaxDeterminationRule {
     @JoinColumn(name = "tax_group_id", nullable = false)
     private TaxGroup taxGroup;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "config_version_id")
+    private TaxConfigurationVersion configVersion;
+
     @Column(name = "effective_from", nullable = false)
     private LocalDate effectiveFrom;
 

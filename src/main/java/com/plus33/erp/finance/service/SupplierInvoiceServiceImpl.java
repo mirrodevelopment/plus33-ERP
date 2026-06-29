@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.plus33.erp.analytics.event.ProcurementRefreshEvent;
 import com.plus33.erp.finance.event.SupplierInvoiceRefreshEvent;
 import com.plus33.erp.finance.tax.service.TaxCalculationEngine;
+import com.plus33.erp.finance.tax.service.TaxJournalService;
 import com.plus33.erp.finance.tax.dto.TaxCalculationRequest;
 import com.plus33.erp.finance.tax.dto.TaxCalculationLineRequest;
 import com.plus33.erp.finance.tax.dto.TaxCalculationResult;
@@ -67,6 +68,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
     private final BudgetDimensionSetRepository budgetDimensionSetRepository;
     private final BudgetService budgetService;
     private final TaxCalculationEngine taxCalculationEngine;
+    private final TaxJournalService taxJournalService;
 
     public SupplierInvoiceServiceImpl(
             SupplierInvoiceRepository supplierInvoiceRepository,
@@ -82,7 +84,8 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
             ApplicationEventPublisher eventPublisher,
             BudgetDimensionSetRepository budgetDimensionSetRepository,
             BudgetService budgetService,
-            TaxCalculationEngine taxCalculationEngine) {
+            TaxCalculationEngine taxCalculationEngine,
+            TaxJournalService taxJournalService) {
         this.supplierInvoiceRepository = supplierInvoiceRepository;
         this.companyRepository = companyRepository;
         this.supplierRepository = supplierRepository;
@@ -97,6 +100,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         this.budgetDimensionSetRepository = budgetDimensionSetRepository;
         this.budgetService = budgetService;
         this.taxCalculationEngine = taxCalculationEngine;
+        this.taxJournalService = taxJournalService;
     }
 
     @Override
@@ -594,6 +598,7 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
                 .companyId(invoice.getCompany().getId())
                 .transactionDate(invoice.getInvoiceDate())
                 .documentType("PURCHASE_INVOICE")
+                .documentId(invoice.getId())
                 .supplierId(invoice.getSupplier().getId())
                 .lines(invoice.getItems().stream().map(item -> {
                     BigDecimal lineSubtotal = item.getQuantity().multiply(item.getUnitPrice()).setScale(2, RoundingMode.HALF_UP);
@@ -611,11 +616,8 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         try {
             taxResult = taxCalculationEngine.calculateTax(taxReq);
         } catch (Exception e) {
-            // ignore
+            // Fall back to manual/stored values on calculation error
         }
-
-        Map<Long, BigDecimal> taxDebits = new HashMap<>();
-        Map<Long, BigDecimal> taxCredits = new HashMap<>();
 
         // Debits: Net expenses/inventory per item + non-recoverable tax
         for (int i = 0; i < invoice.getItems().size(); i++) {
@@ -628,38 +630,11 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
                 for (TaxComponentResult comp : lineRes.getTaxComponents()) {
                     BigDecimal compTax = comp.getTaxAmount();
                     if (compTax.compareTo(BigDecimal.ZERO) > 0) {
-                        if (comp.getReverseChargeAccountId() != null) {
-                            // Reverse charge offsetting
-                            Long debitAccId = comp.getRecoverableAccountId() != null ? comp.getRecoverableAccountId() : comp.getInputTaxAccountId();
-                            if (debitAccId == null) {
-                                Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
-                                        .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
-                                debitAccId = fallbackTaxAcc.getId();
-                            }
-                            Long creditAccId = comp.getReverseChargeAccountId();
-                            taxDebits.put(debitAccId, taxDebits.getOrDefault(debitAccId, BigDecimal.ZERO).add(compTax));
-                            taxCredits.put(creditAccId, taxCredits.getOrDefault(creditAccId, BigDecimal.ZERO).add(compTax));
-                        } else if (comp.isRecoverable()) {
-                            // Recoverable tax: post to recoverable account
-                            Long debitAccId = comp.getRecoverableAccountId() != null ? comp.getRecoverableAccountId() : comp.getInputTaxAccountId();
-                            if (debitAccId == null) {
-                                Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
-                                        .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
-                                debitAccId = fallbackTaxAcc.getId();
-                            }
-                            taxDebits.put(debitAccId, taxDebits.getOrDefault(debitAccId, BigDecimal.ZERO).add(compTax));
-                        } else {
+                        if (comp.getReverseChargeAccountId() == null && !comp.isRecoverable()) {
                             // Non-recoverable tax: capitalize/expense it by adding to item debit
                             itemDebit = itemDebit.add(compTax);
                         }
                     }
-                }
-            } else {
-                // Fallback: post tax directly to 2200
-                if (item.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
-                    Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
-                            .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
-                    taxDebits.put(fallbackTaxAcc.getId(), taxDebits.getOrDefault(fallbackTaxAcc.getId(), BigDecimal.ZERO).add(item.getTaxAmount()));
                 }
             }
 
@@ -677,30 +652,23 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
             je.getLines().add(debitLine);
         }
 
-        // Add tax debit lines
-        for (Map.Entry<Long, BigDecimal> entry : taxDebits.entrySet()) {
-            Account taxAcc = accountRepository.findById(entry.getKey())
-                    .orElseThrow(() -> new BusinessException("Tax account not found for ID: " + entry.getKey()));
-            JournalEntryLine taxLine = JournalEntryLine.builder()
-                    .journalEntry(je)
-                    .account(taxAcc)
-                    .debitAmount(entry.getValue())
-                    .creditAmount(BigDecimal.ZERO)
-                    .build();
-            je.getLines().add(taxLine);
-        }
-
-        // Add tax credit lines (e.g. reverse charge)
-        for (Map.Entry<Long, BigDecimal> entry : taxCredits.entrySet()) {
-            Account taxAcc = accountRepository.findById(entry.getKey())
-                    .orElseThrow(() -> new BusinessException("Tax account not found for ID: " + entry.getKey()));
-            JournalEntryLine taxLine = JournalEntryLine.builder()
-                    .journalEntry(je)
-                    .account(taxAcc)
-                    .debitAmount(BigDecimal.ZERO)
-                    .creditAmount(entry.getValue())
-                    .build();
-            je.getLines().add(taxLine);
+        // Add tax journal entries using TaxJournalService
+        if (taxResult != null) {
+            taxJournalService.createTaxJournalLines(je, invoice.getCompany(), taxResult, true);
+        } else {
+            // Fallback: post tax directly to 2200
+            BigDecimal totalTax = invoice.getTaxAmount();
+            if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
+                Account fallbackTaxAcc = accountRepository.findByCompanyIdAndAccountCode(invoice.getCompany().getId(), "2200")
+                        .orElseThrow(() -> new BusinessException("Tax Payable account (2200) not found"));
+                JournalEntryLine taxLine = JournalEntryLine.builder()
+                        .journalEntry(je)
+                        .account(fallbackTaxAcc)
+                        .debitAmount(totalTax)
+                        .creditAmount(BigDecimal.ZERO)
+                        .build();
+                je.getLines().add(taxLine);
+            }
         }
 
         BigDecimal totalDebits = je.getLines().stream().map(JournalEntryLine::getDebitAmount).reduce(BigDecimal.ZERO, BigDecimal::add);

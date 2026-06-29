@@ -1,36 +1,78 @@
 package com.plus33.erp.finance.tax.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plus33.erp.finance.tax.dto.*;
 import com.plus33.erp.finance.tax.entity.*;
+import com.plus33.erp.finance.tax.repository.TaxCalculationLogRepository;
+import com.plus33.erp.finance.tax.repository.TaxConfigurationVersionRepository;
 import com.plus33.erp.finance.tax.repository.TaxExemptionCertificateRepository;
-import com.plus33.erp.finance.tax.repository.TaxRateRepository;
+import com.plus33.erp.finance.tax.repository.TaxOverrideRequestRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class TaxCalculationEngineImpl implements TaxCalculationEngine {
 
     private final TaxDeterminationRuleEngine determinationRuleEngine;
-    private final TaxPostingProfileService postingProfileService;
-    private final TaxRateRepository taxRateRepository;
+    private final TaxEngineRegistry taxEngineRegistry;
     private final TaxExemptionCertificateRepository exemptionCertificateRepository;
+    private final TaxOverrideRequestRepository overrideRequestRepository;
+    private final TaxCalculationLogRepository calculationLogRepository;
+    private final TaxConfigurationVersionRepository configurationVersionRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
+    private final TaxMetricsRegistry metricsRegistry;
 
     @Override
+    @Transactional
     public TaxCalculationResult calculateTax(TaxCalculationRequest request) {
+        long startTime = System.currentTimeMillis();
+
         Long companyId = request.getCompanyId();
         LocalDate date = request.getTransactionDate();
         String docType = request.getDocumentType();
 
-        // 1. Exemption Certificate Check
+        // 0. Resolve active configuration version
+        Integer activeConfigVersion = null;
+        Optional<TaxConfigurationVersion> configVersion = configurationVersionRepository
+                .findActiveVersionAt(companyId, date.atStartOfDay());
+        if (configVersion.isPresent()) {
+            activeConfigVersion = configVersion.get().getVersionNumber();
+        }
+
+        // 1. Manual Override Check (Precedence 1)
+        if (request.getDocumentId() != null) {
+            Optional<TaxOverrideRequest> override = overrideRequestRepository
+                    .findByCompanyIdAndDocumentTypeAndDocumentId(companyId, docType, request.getDocumentId());
+            if (override.isPresent() && "APPROVED".equals(override.get().getStatus())) {
+                TaxOverrideRequest ovr = override.get();
+                TaxCalculationResult overrideResult = buildOverrideResult(request, ovr);
+                overrideResult.setOverrideApplied(true);
+                overrideResult.setOverrideReason(ovr.getReason());
+                overrideResult.setConfigurationVersion(activeConfigVersion);
+
+                logCalculation(request, overrideResult, null, startTime, true);
+
+                // Publish event
+                eventPublisher.publishEvent(new com.plus33.erp.finance.tax.event.TaxOverrideAppliedEvent(this, companyId, docType, request.getDocumentId(), ovr.getReason()));
+
+                return overrideResult;
+            }
+        }
+
+        // 2. Exemption Certificate Check
         boolean isExempt = false;
         if (request.getCustomerId() != null) {
             List<TaxExemptionCertificate> certificates = exemptionCertificateRepository
@@ -40,145 +82,115 @@ public class TaxCalculationEngineImpl implements TaxCalculationEngine {
             }
         }
 
-        BigDecimal totalNet = BigDecimal.ZERO;
-        BigDecimal totalTax = BigDecimal.ZERO;
-        BigDecimal totalGross = BigDecimal.ZERO;
-        List<TaxCalculationLineResult> lineResults = new ArrayList<>();
+        // 3. Rule Determination (uses first line to determine engine type)
+        // The rule engine returns the matching TaxGroup which tells us the tax type
+        TaxCalculationLineRequest firstLine = request.getLines().get(0);
+        TaxGroup taxGroup = determinationRuleEngine.determineTaxGroup(
+                companyId,
+                docType,
+                request.getCustomerTaxProfile(),
+                request.getSupplierTaxProfile(),
+                firstLine.getProductTaxCategory(),
+                request.getOriginCountry(),
+                request.getOriginState(),
+                request.getDestCountry(),
+                request.getDestState(),
+                request.getIncoterms(),
+                date
+        );
 
-        boolean isPurchase = isPurchaseDocument(docType);
+        // 4. Resolve engine provider from registry based on the tax group type
+        String taxType = taxGroup.getTaxType() != null ? taxGroup.getTaxType() : "VAT";
+        TaxEngineProvider provider = taxEngineRegistry.resolve(taxType);
 
-        for (TaxCalculationLineRequest lineReq : request.getLines()) {
-            // 2. Rule Determination
-            TaxGroup taxGroup = determinationRuleEngine.determineTaxGroup(
-                    companyId,
-                    docType,
-                    request.getCustomerTaxProfile(),
-                    request.getSupplierTaxProfile(),
-                    lineReq.getProductTaxCategory(),
-                    request.getOriginCountry(),
-                    request.getOriginState(),
-                    request.getDestCountry(),
-                    request.getDestState(),
-                    request.getIncoterms(),
-                    date
-            );
+        // 5. Delegate calculation to the resolved provider
+        TaxCalculationResult result = provider.calculateTax(request, taxGroup, isExempt);
 
-            // 3. Resolve active rate percentages for the group
-            List<TaxComponentResult> components = new ArrayList<>();
-            BigDecimal totalRatePercent = BigDecimal.ZERO;
+        // 6. Populate diagnostic metadata
+        result.setConfigurationVersion(activeConfigVersion);
+        result.setOverrideApplied(false);
+        if (result.getProviderName() == null) {
+            result.setProviderName(taxType);
+        }
 
-            for (TaxGroupLine line : taxGroup.getLines()) {
-                TaxRate defaultRate = line.getRate();
-                TaxCategory category = defaultRate.getCategory();
+        // 7. Audit log
+        logCalculation(request, result, taxGroup, startTime, false);
 
-                // Dynamic date-versioned rate lookup
-                List<TaxRate> activeRates = taxRateRepository
-                        .findActiveRatesByCategoryIdAndDate(category.getId(), date);
-                BigDecimal ratePercent = activeRates.isEmpty() ? defaultRate.getRatePercent() : activeRates.get(0).getRatePercent();
+        // 8. Publish event
+        eventPublisher.publishEvent(new com.plus33.erp.finance.tax.event.TaxCalculatedEvent(this, companyId, docType, request.getDocumentId(), result.getTotalTaxAmount()));
 
-                if (isExempt) {
-                    ratePercent = BigDecimal.ZERO;
-                }
+        return result;
+    }
 
-                totalRatePercent = totalRatePercent.add(ratePercent);
+    private TaxCalculationResult buildOverrideResult(TaxCalculationRequest request, TaxOverrideRequest override) {
+        // Build a minimal result with the overridden tax amount distributed proportionally
+        BigDecimal overrideTax = override.getRequestedTaxAmount();
+        BigDecimal totalAmount = request.getLines().stream()
+                .map(TaxCalculationLineRequest::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                // Fetch Posting Profile to get GL Accounts
-                TaxPostingProfile profile = postingProfileService.getPostingProfile(companyId, category.getId());
+        java.util.List<TaxCalculationLineResult> lineResults = new java.util.ArrayList<>();
+        BigDecimal distributedTax = BigDecimal.ZERO;
 
-                // Check recoverability
-                boolean isRecoverable = false;
-                if (isPurchase) {
-                    String prodCat = lineReq.getProductTaxCategory();
-                    boolean isNonRecProd = prodCat != null && (prodCat.toUpperCase().contains("NONREC") || prodCat.toUpperCase().contains("NON_RECOVERABLE"));
-                    if (!isNonRecProd && profile.getRecoverableAccount() != null) {
-                        isRecoverable = true;
-                    }
-                }
-
-                components.add(TaxComponentResult.builder()
-                        .taxCategoryId(category.getId())
-                        .taxCategoryCode(category.getCode())
-                        .taxCategoryName(category.getName())
-                        .ratePercent(ratePercent)
-                        .isRecoverable(isRecoverable)
-                        .inputTaxAccountId(profile.getInputTaxAccount() != null ? profile.getInputTaxAccount().getId() : null)
-                        .outputTaxAccountId(profile.getOutputTaxAccount() != null ? profile.getOutputTaxAccount().getId() : null)
-                        .reverseChargeAccountId(profile.getReverseChargeAccount() != null ? profile.getReverseChargeAccount().getId() : null)
-                        .recoverableAccountId(profile.getRecoverableAccount() != null ? profile.getRecoverableAccount().getId() : null)
-                        .nonRecoverableAccountId(profile.getNonRecoverableAccount() != null ? profile.getNonRecoverableAccount().getId() : null)
-                        .build());
-            }
-
-            // 4. Calculate Net, Tax, and Gross
-            BigDecimal lineAmount = lineReq.getAmount();
-            BigDecimal netAmount;
-            BigDecimal lineTaxAmount;
-            BigDecimal grossAmount;
-
-            if (lineReq.isTaxInclusive()) {
-                // netAmount = lineAmount / (1 + totalRatePercent / 100)
-                BigDecimal divisor = BigDecimal.ONE.add(totalRatePercent.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_EVEN));
-                netAmount = lineAmount.divide(divisor, 2, RoundingMode.HALF_EVEN);
-                lineTaxAmount = lineAmount.subtract(netAmount);
-                grossAmount = lineAmount;
+        for (int i = 0; i < request.getLines().size(); i++) {
+            TaxCalculationLineRequest lineReq = request.getLines().get(i);
+            BigDecimal lineTax;
+            if (i == request.getLines().size() - 1) {
+                lineTax = overrideTax.subtract(distributedTax);
             } else {
-                netAmount = lineAmount;
-                lineTaxAmount = lineAmount.multiply(totalRatePercent).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_EVEN);
-                grossAmount = lineAmount.add(lineTaxAmount);
-            }
-
-            // 5. Apportion Tax to Components and Adjust Rounding Differences
-            BigDecimal calculatedComponentsSum = BigDecimal.ZERO;
-            for (int i = 0; i < components.size(); i++) {
-                TaxComponentResult comp = components.get(i);
-                BigDecimal compTax;
-                if (i == components.size() - 1) {
-                    // Last component gets the residual amount to guarantee sum equality
-                    compTax = lineTaxAmount.subtract(calculatedComponentsSum);
-                } else {
-                    compTax = netAmount.multiply(comp.getRatePercent())
-                            .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_EVEN);
-                    calculatedComponentsSum = calculatedComponentsSum.add(compTax);
-                }
-                comp.setTaxAmount(compTax);
-
-                if (comp.isRecoverable()) {
-                    comp.setRecoverableAmount(compTax);
-                    comp.setNonRecoverableAmount(BigDecimal.ZERO);
-                } else {
-                    comp.setRecoverableAmount(BigDecimal.ZERO);
-                    if (isPurchase) {
-                        comp.setNonRecoverableAmount(compTax);
-                    } else {
-                        comp.setNonRecoverableAmount(BigDecimal.ZERO);
-                    }
-                }
+                lineTax = totalAmount.compareTo(BigDecimal.ZERO) > 0
+                        ? overrideTax.multiply(lineReq.getAmount()).divide(totalAmount, 2, java.math.RoundingMode.HALF_EVEN)
+                        : BigDecimal.ZERO;
+                distributedTax = distributedTax.add(lineTax);
             }
 
             lineResults.add(TaxCalculationLineResult.builder()
                     .lineId(lineReq.getLineId())
-                    .netAmount(netAmount)
-                    .taxAmount(lineTaxAmount)
-                    .grossAmount(grossAmount)
-                    .taxComponents(components)
+                    .netAmount(lineReq.getAmount())
+                    .taxAmount(lineTax)
+                    .grossAmount(lineReq.getAmount().add(lineTax))
+                    .taxComponents(java.util.Collections.emptyList())
                     .build());
-
-            totalNet = totalNet.add(netAmount);
-            totalTax = totalTax.add(lineTaxAmount);
-            totalGross = totalGross.add(grossAmount);
         }
 
         return TaxCalculationResult.builder()
-                .totalNetAmount(totalNet)
-                .totalTaxAmount(totalTax)
-                .totalGrossAmount(totalGross)
+                .totalNetAmount(totalAmount)
+                .totalTaxAmount(overrideTax)
+                .totalGrossAmount(totalAmount.add(overrideTax))
                 .lines(lineResults)
                 .build();
     }
 
-    private boolean isPurchaseDocument(String documentType) {
-        if (documentType == null) return false;
-        String doc = documentType.toUpperCase();
-        return doc.contains("PURCHASE") || doc.contains("IMPORT") || doc.contains("SELF") || doc.contains("REVERSE_CHARGE");
+    @Transactional
+    protected void logCalculation(TaxCalculationRequest request, TaxCalculationResult result,
+                                   TaxGroup taxGroup, long startTime, boolean overrideApplied) {
+        try {
+            long duration = System.currentTimeMillis() - startTime;
+            metricsRegistry.recordCalculation(result.getProviderName(), duration);
+
+            String requestJson = objectMapper.writeValueAsString(request);
+
+            TaxCalculationLog logEntry = TaxCalculationLog.builder()
+                    .companyId(request.getCompanyId())
+                    .documentType(request.getDocumentType())
+                    .documentId(request.getDocumentId())
+                    .requestPayload(requestJson)
+                    .resolvedRuleId(taxGroup != null ? taxGroup.getId() : null)
+                    .appliedRatePercent(result.getTotalTaxAmount() != null && result.getTotalNetAmount() != null
+                            && result.getTotalNetAmount().compareTo(BigDecimal.ZERO) > 0
+                            ? result.getTotalTaxAmount().multiply(BigDecimal.valueOf(100))
+                                .divide(result.getTotalNetAmount(), 2, java.math.RoundingMode.HALF_EVEN)
+                            : BigDecimal.ZERO)
+                    .providerName(result.getProviderName())
+                    .calculatedTaxAmount(result.getTotalTaxAmount() != null ? result.getTotalTaxAmount() : BigDecimal.ZERO)
+                    .overrideApplied(overrideApplied)
+                    .executionDurationMs(duration)
+                    .occurredAt(LocalDateTime.now())
+                    .build();
+
+            calculationLogRepository.save(logEntry);
+        } catch (Exception e) {
+            log.warn("Failed to persist tax calculation audit log", e);
+        }
     }
 }

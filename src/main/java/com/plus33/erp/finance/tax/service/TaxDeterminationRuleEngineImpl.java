@@ -8,14 +8,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Determines the applicable TaxGroup based on the transaction context.
+ * Rules are matched and then sorted by explicit specificity hierarchy:
+ *
+ * <ol>
+ *   <li>Customer/Supplier Tax Profile matches (highest precedence)</li>
+ *   <li>Product Tax Category matches</li>
+ *   <li>Place of Supply matches (origin/dest country+state)</li>
+ *   <li>Company default fallback (all null fields, lowest precedence)</li>
+ * </ol>
+ *
+ * Within the same specificity tier, the configured priority (ASC) breaks ties.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TaxDeterminationRuleEngineImpl implements TaxDeterminationRuleEngine {
 
     private final TaxDeterminationRuleRepository determinationRuleRepository;
+    private final TaxConfigurationCache taxConfigurationCache;
 
     @Override
     public TaxGroup determineTaxGroup(
@@ -31,7 +46,7 @@ public class TaxDeterminationRuleEngineImpl implements TaxDeterminationRuleEngin
             String incoterms,
             LocalDate date
     ) {
-        List<TaxDeterminationRule> rules = determinationRuleRepository.findMatchingRules(
+        return taxConfigurationCache.getOrLoadRule(
                 companyId,
                 documentType,
                 customerTaxProfile,
@@ -42,19 +57,74 @@ public class TaxDeterminationRuleEngineImpl implements TaxDeterminationRuleEngin
                 destCountry,
                 destState,
                 incoterms,
-                date
-        );
+                date,
+                () -> {
+                    List<TaxDeterminationRule> rules = determinationRuleRepository.findMatchingRules(
+                            companyId,
+                            documentType,
+                            customerTaxProfile,
+                            supplierTaxProfile,
+                            productTaxCategory,
+                            originCountry,
+                            originState,
+                            destCountry,
+                            destState,
+                            incoterms,
+                            date
+                    );
 
-        if (rules.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
-                    "No matching tax determination rule found for company: %d, documentType: %s, " +
-                    "customerTaxProfile: %s, supplierTaxProfile: %s, productTaxCategory: %s, date: %s",
-                    companyId, documentType, customerTaxProfile, supplierTaxProfile, productTaxCategory, date
-            ));
+                    if (rules.isEmpty()) {
+                        throw new IllegalArgumentException(String.format(
+                                "No matching tax determination rule found for company: %d, documentType: %s, " +
+                                "customerTaxProfile: %s, supplierTaxProfile: %s, productTaxCategory: %s, date: %s",
+                                companyId, documentType, customerTaxProfile, supplierTaxProfile, productTaxCategory, date
+                        ));
+                    }
+
+                    // Sort rules by specificity hierarchy (descending) then by priority (ascending)
+                    rules.sort(Comparator.comparingInt(this::calculateSpecificity).reversed()
+                            .thenComparingInt(TaxDeterminationRule::getPriority));
+
+                    return rules.get(0).getTaxGroup();
+                }
+        );
+    }
+
+    /**
+     * Calculate a specificity score for a rule.
+     * Higher score means more specific and therefore higher precedence.
+     *
+     * Scoring:
+     *   +8 for Profile match (customer or supplier tax profile is non-null)
+     *   +4 for Product Tax Category match
+     *   +2 for Place of Supply match (any of origin/dest country/state)
+     *   +1 for Incoterms match
+     *   +0 for Company default (all null)
+     */
+    private int calculateSpecificity(TaxDeterminationRule rule) {
+        int score = 0;
+
+        // Tier 1: Profile match (highest specificity)
+        if (rule.getCustomerTaxProfile() != null || rule.getSupplierTaxProfile() != null) {
+            score += 8;
         }
 
-        // The query returns rules sorted by priority ASC.
-        // Therefore, the first element represents the rule with the highest priority/specificity.
-        return rules.get(0).getTaxGroup();
+        // Tier 2: Product category match
+        if (rule.getProductTaxCategory() != null) {
+            score += 4;
+        }
+
+        // Tier 3: Place of supply match
+        if (rule.getOriginCountry() != null || rule.getOriginState() != null
+                || rule.getDestCountry() != null || rule.getDestState() != null) {
+            score += 2;
+        }
+
+        // Tier 4: Incoterms match
+        if (rule.getIncoterms() != null) {
+            score += 1;
+        }
+
+        return score;
     }
 }

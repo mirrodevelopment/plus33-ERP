@@ -14,4 +14,12 @@ public class TaxCalculationResult {
     private BigDecimal totalTaxAmount;
     private BigDecimal totalGrossAmount;
     private List<TaxCalculationLineResult> lines;
+
+    // Rule resolution diagnostics
+    private Long matchedRuleId;
+    private String matchedJurisdictionId;
+    private String providerName;
+    private Integer configurationVersion;
+    private boolean overrideApplied;
+    private String overrideReason;
 }

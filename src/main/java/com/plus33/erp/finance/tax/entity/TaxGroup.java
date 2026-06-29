@@ -26,6 +26,10 @@ public class TaxGroup {
     private String name;
 
     @Builder.Default
+    @Column(name = "tax_type", nullable = false, length = 30)
+    private String taxType = "VAT"; // VAT, GST, SALES_TAX
+
+    @Builder.Default
     @Column(name = "active", nullable = false)
     private boolean active = true;
 
