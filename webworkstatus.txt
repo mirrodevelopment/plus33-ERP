@@ -316,4 +316,15 @@ Status:
 COMPLETED AND VERIFIED
 
 
-
+2026-06-29 | V31 — Enterprise Workforce Management & Payroll (Ultimate Enterprise Edition)
+Module: Workforce / Payroll
+Work:
+* Created modular pluggable architecture with O(1) PayrollEngineRegistry resolving regional engines (US, UAE, IND, DEU, GBR).
+* Implemented regional statutory engines: US (Federal/State W4 withholdings, FICA Social Security/Medicare), UAE (Zero-tax WPS files, EOSB end-of-service gratuity calculation), IND (Provident Fund PF, ESIC, Professional Tax, TDS Slabs), DEU (Krankenversicherung health, Rentenversicherung pension, Pflegeversicherung, Solidarity Surcharge), GBR (PAYE tax bands, National Insurance NI categories).
+* Centralized double-entry GL postings through PayrollJournalServiceImpl (Debit Salary Expense 5300, Credit Payroll Payable 2200).
+* Implemented multi-calendar scheduling (Weekly, Bi-weekly, Semi-monthly, Monthly, Off-cycle), multi-currency conversion, retro-active pay adjustments, benefit deduction engine, and bonus allocation logic.
+* Integrated leave accrual/proration rules, attendance sync engine, shift differential multipliers, and ESS payroll self-service statement downloads.
+* Implemented multi-tier approval workflow engine (DRAFT -> SUBMITTED -> PENDING_APPROVAL -> APPROVED -> PROCESSED -> PAID), audit logging timeline persistence with REQUIRES_NEW propagation, and Spring Event Bus publishing (PayrollCalculatedEvent, PayrollApprovedEvent, PayrollPaidEvent, PayrollReversedEvent).
+* Created and verified PayrollEnterpriseIntegrationTest covering 30 comprehensive integration test scenarios verifying multi-company isolation, multi-calendar execution, statutory withholdings, GL postings, EOSB accruals, retro-adjustments, Treasury payment runs, reversals, ESS self-service, audit logging, and event bus publishing.
+Status:
+COMPLETED AND VERIFIED

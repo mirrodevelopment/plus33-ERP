@@ -1693,4 +1693,26 @@ This module implements a centralized tax management and compliance engine, featu
   - Execution Command: `.\mvnw clean test -Dtest=TaxManagementIntegrationTest`
   - Test Scope: 19 comprehensive integration scenarios validating configuration cache performance, automated aspect eviction, metrics diagnostics endpoints, registration, math, exemption, specificity sorting, GST components, US Sales Tax, overrides, logging, versioning, event publishing, and compliance worker retries/dead-letter.
 
+--------------------------------------------------------------------------------
+22. ENTERPRISE WORKFORCE MANAGEMENT & PAYROLL (V31 - ULTIMATE ENTERPRISE EDITION)
+--------------------------------------------------------------------------------
+This module implements a comprehensive multi-company, multi-jurisdiction workforce payroll engine supporting pluggable statutory tax calculation providers, double-entry GL journal postings, multi-tier approval workflows, audit timeline persistence, and event bus integrations.
 
+* Key Engine Abstractions & Statutory Providers:
+  - **PayrollEngineRegistry**: Programmatic O(1) registry for dynamically resolving country-specific engines (US, UAE, IND, DEU, GBR) at runtime.
+  - **Regional Tax Engines**:
+    - `UsPayrollEngine`: US Federal/State income tax withholding slabs, FICA Social Security (6.2%) and Medicare (1.45%).
+    - `UaePayrollEngine`: UAE zero-tax WPS compliant files and End-of-Service Gratuity (EOSB) accrual math.
+    - `IndiaPayrollEngine`: Indian Statutory Provident Fund (PF), ESIC, Professional Tax, and TDS tax slab deductions.
+    - `GermanyPayrollEngine`: German Krankenversicherung (health), Rentenversicherung (pension), Pflegeversicherung (nursing care), and Solidarity Surcharge.
+    - `UkPayrollEngine`: UK PAYE tax bands and National Insurance (NI) categories.
+
+* Centralized Accounting & Event Bus Integrations:
+  - **PayrollJournalServiceImpl**: Posts double-entry GL journal entries automatically on payroll processing (Debit Salary Expense 5300 / Credit Payroll Payable 2200).
+  - **Event Bus & Auditing**: Publishes Spring Application Events (`PayrollCalculatedEvent`, `PayrollApprovedEvent`, `PayrollPaidEvent`, `PayrollReversedEvent`) and logs immutable chronological audit entries with `REQUIRES_NEW` propagation.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.workforce.PayrollEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw test -Dtest=PayrollEnterpriseIntegrationTest`
+  - Test Scope: 30 comprehensive integration test scenarios covering multi-company isolation, multi-calendar execution, statutory withholdings, GL postings, EOSB accruals, retro-adjustments, Treasury payment runs, reversals, ESS self-service statement downloads, audit logging, and event bus publishing.
