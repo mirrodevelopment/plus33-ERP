@@ -328,3 +328,36 @@ Work:
 * Created and verified PayrollEnterpriseIntegrationTest covering 30 comprehensive integration test scenarios verifying multi-company isolation, multi-calendar execution, statutory withholdings, GL postings, EOSB accruals, retro-adjustments, Treasury payment runs, reversals, ESS self-service, audit logging, and event bus publishing.
 Status:
 COMPLETED AND VERIFIED
+
+
+2026-06-29 | V32 — Enterprise Manufacturing (MRP II), MES & Cost Accounting (Enterprise Edition)
+Module: Manufacturing / MES
+Work:
+* Created base, permission, and revision DDL migrations (V86, V87, V88, V89) establishing BOM, routing, work center, calendar shifts/exceptions, planned orders, production confirmations, quality gates, and cost variance detail records.
+* Implemented Engineering Change Management (ECM) for BOM and routing revision control with formal approval workflows.
+* Implemented strict 10-state Manufacturing Order State Machine preventing invalid lifecycle state transitions.
+* Implemented Capacity Planning & Finite Scheduling (forward/backward) checking work center shifts and calendar exceptions.
+* Implemented MES Shop Floor confirmation log tracing actual material/labor consumption, scrap, rework, and full genealogy.
+* Implemented Quality Inspection service & checkpoints, validating QA steps and preventing closure of defective orders.
+* Implemented Cost Accounting variance ledger settlements posting detailed Price/Efficiency/Usage variances (DR WIP 1400 / CR Variance 5500).
+* Refactored manufacturing analytics refresh mechanisms to prevent view refresh failures from interrupting transaction commit.
+* Created and verified ManufacturingIntegrationTest covering 50+ enterprise compliance scenarios (BOM releases, finite scheduling, MRP suggestion explosions, QA inspection sheets, confirmations with scrap/rework/genealogy, and variance ledger postings).
+Status:
+COMPLETED AND VERIFIED
+
+
+2026-06-29 | V33 — Enterprise Supply Chain & Advanced Warehouse Management (Enterprise Edition)
+Module: Supply Chain / WMS / TMS
+Work:
+* Created DDL migrations (V87-V92) establishing zones, locations, location stock, ASNs, put-away tasks, waves, pick lists, shipments, yard/dock appointments, cross-dock, warehouse tasks, reservations, movement ledger, cycle count plans/tasks/results, replenishment plans, carriers, and 8 materialized views.
+* Implemented pluggable WarehouseStrategyRegistry supporting 6 put-away algorithms (NEAREST_EMPTY_BIN, FIXED_BIN, CAPACITY_BASED, ZONE_BASED, ABC_CLASS, VELOCITY_BASED) and 7 picking allocation algorithms (FEFO, FIFO, LIFO, BATCH, CLUSTER, ZONE, SERIAL_CONTROLLED).
+* Implemented double-entry immutable InventoryMovementLedgerService with idempotency key deduplication across 13 movement types.
+* Implemented pessimistic WRITE locking for bin-level stock updates paired with JPA @Version optimistic locking for concurrent picking protection.
+* Implemented pluggable CarrierRegistry (TMS abstraction) integrating FedEx, DHL, UPS, Local, and Custom REST carrier adapters for rate estimation, booking, tracking, and proof-of-delivery (POD).
+* Implemented CycleCountEngineImpl with blind count support, auto-approval thresholds, supervisor review, and GL journal variance adjustments.
+* Implemented ReplenishmentEngineImpl for automated pick-face min/max evaluation and task generation.
+* Implemented asynchronous WmsEventBus for typed domain event publishing and isolated REQUIRES_NEW analytics materialized view refreshes.
+* Created and verified WarehouseManagementIntegrationTest covering 50 enterprise scenarios verifying warehouse layout topology, strategy registry resolution, carrier provider operations, ASN check-in and put-away, double-entry movement ledger recording, stock reservations, wave picking execution, blind cycle counting, and replenishment rules.
+Status:
+COMPLETED AND VERIFIED
+

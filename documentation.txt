@@ -1716,3 +1716,80 @@ This module implements a comprehensive multi-company, multi-jurisdiction workfor
   - Integration Test Suite: com.plus33.erp.workforce.PayrollEnterpriseIntegrationTest
   - Execution Command: `.\mvnw test -Dtest=PayrollEnterpriseIntegrationTest`
   - Test Scope: 30 comprehensive integration test scenarios covering multi-company isolation, multi-calendar execution, statutory withholdings, GL postings, EOSB accruals, retro-adjustments, Treasury payment runs, reversals, ESS self-service statement downloads, audit logging, and event bus publishing.
+
+--------------------------------------------------------------------------------
+23. ENTERPRISE MANUFACTURING, MES & COST ACCOUNTING (V32 - ENTERPRISE EDITION)
+--------------------------------------------------------------------------------
+This module implements a complete, enterprise-grade manufacturing suite (MRP II / MES / Cost Accounting) supporting engineering revisions, manufacturing calendars with shifts and exceptions, finite capacity-constrained planning, material and labor tracking confirmations, quality inspections, and standard vs actual cost variance GL settlements.
+
+* Database Tables:
+  - bom_headers / bom_lines: Bills of Materials tracking components, quantities, and scrap factors.
+  - routing_headers / routing_operations: Routing steps specifying sequence, work centers, setup/run times, and scheduling mode.
+  - work_centers: Work centers managing hourly labor/overhead rates and capacity.
+  - manufacturing_calendars / calendar_shifts / calendar_exceptions: Operational calendars tracking standard capacity shifts and downtime.
+  - mrp_runs / planned_orders / mrp_pegging_links: Material Requirement Planning runs generating suggestions and tracking demand/supply links.
+  - production_orders / production_operations / production_confirmations: Manufacturing orders tracking status, material/labor consumption, scrap, and rework.
+  - quality_inspections / quality_inspection_steps: Quality gates tracking inspection items, parameters, actual values, and approvals.
+  - manufacturing_costs / manufacturing_cost_details: Detailed cost cards tracking standard vs actual material, labor, and overhead components.
+  - manufacturing_events / manufacturing_event_details: Domain event auditing tracking status transitions, material genealogy, and anomalies.
+
+* Security Permissions:
+  - MANUFACTURING_VIEW: Allows viewing BOMs, routings, calendars, work centers, and order records.
+  - MANUFACTURING_MANAGE: Allows managing/creating BOMs, routings, calendars, and work centers.
+  - PRODUCTION_RELEASE: Allows releasing planned/draft manufacturing orders and allocating components.
+  - PRODUCTION_EXECUTE: Allows executing confirmations, scraps, rework, and shop floor entries.
+  - QUALITY_APPROVE: Allows inspecting and approving QA sheets and completing production orders.
+
+* Key Engine Abstractions & Services:
+  - **Engineering Change Management (ECM/ECO)**: Manages BOM and routing revisions through formal approval workflows, tracking effective dates.
+  - **Manufacturing Order State Machine**: Implements a strict lifecycle (DRAFT -> PLANNED -> RELEASED -> MATERIAL_ALLOCATED -> IN_PROGRESS -> PARTIALLY_COMPLETED -> COMPLETED -> QUALITY_PENDING -> CLOSED plus exception states HOLD, CANCELLED, SCRAPPED, REWORK) preventing illegal state leaps.
+  - **Capacity Planning & Finite Scheduling**: Dynamically schedules operations backwards or forwards, adjusting dates based on work center shifts and calendar exceptions.
+  - **MES Shop Floor Execution**: Logs production confirmations, scraps, and rework while tracing full component-to-finished-good material genealogy.
+  - **Quality Inspection & Approvals**: Formal QA checkpoints before production completion, preventing the closure of defective orders.
+  - **Cost Accounting & Variance Settlements**: Real-time overhead absorption, material costs, labor costs, and variance postings (e.g. Price, Efficiency, Usage variances) to GL accounts (DR WIP 1400 / CR Variance 5500).
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.manufacturing.ManufacturingIntegrationTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=ManufacturingIntegrationTest`
+  - Test Scope: 50+ compliance and integration validation scenarios verifying BOM/routing release, finite scheduling, MRP suggestion explosions, QA inspection workflows, shop floor confirmations (scrap/rework/genealogy), and manufacturing cost variance ledger settlements.
+
+--------------------------------------------------------------------------------
+24. ENTERPRISE SUPPLY CHAIN & ADVANCED WAREHOUSE MANAGEMENT (V33 - ENTERPRISE EDITION)
+--------------------------------------------------------------------------------
+This module implements an enterprise-grade warehouse, logistics, and supply chain management suite (WMS/TMS) supporting multi-warehouse zone/bin location topology, strategy-based put-away and picking, multi-source inventory reservations, an immutable double-entry movement ledger, cycle counting with blind audit modes, and pluggable 3PL carrier integration.
+
+* Database Tables:
+  - warehouse_zones / warehouse_locations / location_stock: Bin-level warehouse layout tracking capacity, velocity classes, pick sequences, and real-time inventory stock with optimistic locking.
+  - advance_shipping_notices / asn_lines / put_away_work: Inbound receipt management tracking ASN statuses, gate arrivals, dock doors, and directed put-away tasks.
+  - waves / picking_work / shipments / shipment_lines: Outbound fulfillment management tracking wave creation, strategy-allocated pick lists, packing, and carrier dispatch.
+  - yard_locations / dock_doors / dock_schedules / truck_checkins / appointment_slots: Yard and dock management tracking vehicle entry, loading bay scheduling, and turnaround times.
+  - cross_dock_orders / cross_dock_lines: Cross-dock management routing inbound receipts directly to outbound shipping lanes.
+  - warehouse_tasks: Centralized task engine tracking picking, put-away, cycle count, replenishment, and transfer task lifecycles.
+  - inventory_reservations / inventory_allocation_logs: Multi-source reservation tracking demand reservations across sales orders, work orders, transfers, and projects.
+  - inventory_movements: Immutable double-entry inventory ledger recording movement types, locations, quantities, unit costs, total costs, and idempotency keys.
+  - cycle_count_plans / cycle_count_tasks / cycle_count_results: Inventory audit tracking scheduling, blind count task generation, variance calculation, auto-approval thresholds, and GL journal adjustments.
+  - replenishment_plans / replenishment_tasks: Automated pick-face replenishment tracking min/max thresholds, Kanban rules, and task generation.
+  - carriers: Carrier master registry tracking 3PL integration providers, API endpoints, and credential vault references.
+
+* Security Permissions:
+  - WMS_VIEW: Allows viewing warehouse layouts, stock levels, ASNs, waves, cycle counts, and carrier records.
+  - WMS_MANAGE: Allows configuring zones, locations, count plans, replenishment rules, and carrier profiles.
+  - WMS_OPERATIONS: Allows executing inbound gate check-in, put-away, wave picking, pick confirmations, and shipment dispatch.
+  - WMS_ANALYTICS: Allows accessing warehouse performance metrics and refreshing analytics views.
+
+* Key Engine Abstractions & Services:
+  - **WarehouseStrategyRegistry**: O(1) strategy resolver for pluggable put-away algorithms (NEAREST_EMPTY_BIN, FIXED_BIN, CAPACITY_BASED, ZONE_BASED, ABC_CLASS, VELOCITY_BASED) and picking allocation algorithms (FEFO, FIFO, LIFO, BATCH, CLUSTER, ZONE, SERIAL_CONTROLLED).
+  - **Immutable Double-Entry Inventory Ledger**: Records tamper-proof movements with unique idempotency keys across 13 movement types, serving as the single source of truth for stock history.
+  - **Pessimistic & Optimistic Concurrency Control**: Uses pessimistic WRITE locks during bin updates and JPA @Version optimistic locking on picking work to guarantee high-throughput concurrency safety.
+  - **CarrierRegistry (TMS Abstraction)**: Standardized 3PL carrier interface (FEDEX, DHL, UPS, LOCAL, CUSTOM) for freight rate estimation, shipment booking, tracking, and proof-of-delivery.
+  - **Cycle Count & GL Posting Engine**: Supports blind count auditing, configurable auto-approval variance thresholds, supervisor approvals, and automatic GL journal postings for variance adjustments.
+  - **Asynchronous WmsEventBus**: Dispatches typed domain events (AsnReceivedEvent, PickingCompletedEvent, ShipmentDispatchedEvent, etc.) to safely refresh materialized views inside isolated REQUIRES_NEW transactions.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.wms.WarehouseManagementIntegrationTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=WarehouseManagementIntegrationTest`
+  - Test Scope: 50 enterprise scenarios verifying warehouse layout topology, strategy registry resolution, carrier provider operations, ASN check-in and put-away, double-entry movement ledger recording, stock reservations, wave picking execution, blind cycle counting, and replenishment rules.
+
+
