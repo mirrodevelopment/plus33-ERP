@@ -103,4 +103,64 @@ public class PlatformOpsController {
     public ResponseEntity<Map<String, Object>> getDashboard() {
         return ResponseEntity.ok(dashboardService.getDashboardData());
     }
+
+    @Autowired com.plus33.erp.platform.slo.SloMeasurementService sloService;
+    @Autowired com.plus33.erp.platform.aiops.AioModelPredictor aiopsService;
+    @Autowired com.plus33.erp.platform.chargeback.CostChargebackManager chargebackService;
+    @Autowired com.plus33.erp.platform.policy.OpaPolicyManager policyService;
+
+    @PostMapping("/slo/measurement")
+    public ResponseEntity<Void> recordSlo(
+            @RequestParam String name,
+            @RequestParam double current,
+            @RequestParam double budget,
+            @RequestParam String operator) {
+        sloService.recordMeasurement(name, current, budget);
+        auditService.logAudit("RECORD_SLO", operator, "REST", "slo=" + name + ", val=" + current);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/aiops/projection")
+    public ResponseEntity<Void> runProjection(
+            @RequestParam String metric,
+            @RequestParam double val,
+            @RequestParam String reason,
+            @RequestParam String operator) {
+        aiopsService.runProjection(metric, val, reason);
+        auditService.logAudit("RUN_AIOPS_PROJECTION", operator, "REST", "metric=" + metric + ", val=" + val);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/chargeback")
+    public ResponseEntity<Void> recordChargeback(
+            @RequestParam String centerCode,
+            @RequestParam double amount,
+            @RequestParam String month,
+            @RequestParam String operator) {
+        chargebackService.recordChargeback(centerCode, amount, month);
+        auditService.logAudit("RECORD_CHARGEBACK", operator, "REST", "center=" + centerCode + ", amt=" + amount);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/policy/audit")
+    public ResponseEntity<Void> auditPolicy(
+            @RequestParam String code,
+            @RequestParam String userId,
+            @RequestParam String action,
+            @RequestParam String decision) {
+        policyService.auditPolicy(code, userId, action, decision);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/policy/version")
+    public ResponseEntity<Void> updatePolicyVersion(
+            @RequestParam String code,
+            @RequestParam String version,
+            @RequestParam String rego,
+            @RequestParam String operator,
+            @RequestParam String reason) {
+        policyService.updatePolicyVersion(code, version, rego, operator, reason);
+        auditService.logAudit("UPDATE_POLICY_VERSION", operator, "REST", "code=" + code + ", ver=" + version);
+        return ResponseEntity.ok().build();
+    }
 }
