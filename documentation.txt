@@ -1992,10 +1992,67 @@ This module implements a complete enterprise GRC, Internal Audit, Compliance Con
   - Execution Command: `.\mvnw.cmd surefire:test -Dtest=GrcEnterpriseIntegrationTest`
   - Test Scope: 268 comprehensive integration tests verifying ERM risk appetites, audit fieldwork findings, CAP task timelines, compliance control framework mappings, cryptographic evidence vault deduplication, preventative/detective SoD rules, and policy status transition checks.
 
+--------------------------------------------------------------------------------
+31. ENTERPRISE BUSINESS INTELLIGENCE, DATA WAREHOUSE & EXECUTIVE ANALYTICS (V40)
+--------------------------------------------------------------------------------
+This module implements a complete enterprise Business Intelligence (BI), Data Warehouse (DWH) and Executive Analytics platform. It introduces a formal conformed dimension and fact table schema supporting slowly changing dimensions (SCD Type 2), operational data quality validation, metadata semantic layer catalog, low-latency materialized analytical views, row-level data access security, audit event store, and execution history.
 
+* Database Tables:
+  - bi_cdc_watermark: CDC pipeline offsets.
+  - bi_warehouse_version / bi_warehouse_build_manifest: DWH DDL schema versions and validation manifests.
+  - bi_fact_load_audit / bi_etl_job / bi_etl_job_run / bi_etl_job_dependency: ETL job runs and dependency sequences.
+  - dim_company / dim_customer / dim_supplier / dim_employee / dim_product / dim_date / dim_time / dim_account / dim_region / dim_warehouse / dim_store: 11 conformed dimension tables.
+  - fact_finance / fact_sales / fact_inventory / fact_payroll / fact_manufacturing / fact_crm / fact_procurement / fact_projects / fact_hcm / fact_grc: 10 conformed transaction facts.
+  - bi_dq_rule / bi_dq_log / bi_lineage_log: Data quality checks and lineage mappings.
+  - bi_semantic_model / bi_semantic_view / bi_calculated_measure: Semantic definitions.
+  - bi_dashboard_template / bi_dashboard_widget: Dashboard designs.
+  - bi_dashboard_permission_matrix / bi_dashboard_rls_policy: Analytical data access controls.
+  - bi_event_store: Audit logs.
+  - bi_configuration: Global scheduler config.
+  - bi_warehouse_capacity_forecast / bi_operational_metrics: System usage and analytics snapshot history.
 
+* Key Abstractions & Services:
+  - **BiSchedulerService**: Coordinates active jobs based on dependency sequences and schedules.
+  - **BiEtlJobService**: Runs CDC pulls, updates SCD Type 2 dimension spans, and aggregates facts.
+  - **BiDataQualityService**: Performs schema/nullability/uniqueness checks.
+  - **BiDashboardController & BiEtlController**: Expose metrics dashboard and ETL run configurations.
 
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.bi.BiEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=BiEnterpriseIntegrationTest`
+  - Test Scope: 80 comprehensive integration tests verifying warehouse versions, active watermarks, SCD Type 2 tracking, conformed fact loading, data quality logs, row-level dashboard authorization rules, and scheduler runs.
 
+--------------------------------------------------------------------------------
+32. ENTERPRISE DATA PLATFORM, MASTER DATA MANAGEMENT (MDM) & ADVANCED DATA GOVERNANCE (V41)
+--------------------------------------------------------------------------------
+This module extends the BI & DWH foundation into an advanced Enterprise Data Platform. It introduces master data golden records deduplication, survivorship rules matching, manual steward approval workflow, dataset metadata cataloging, business glossary, PII data classification, dynamic column masking rules, domain-based AI insight narratives, active data contracts validation, schema drift evolution tracking, self-service query safety checks, and dashboard sharing/subscriptions.
 
+* Database Tables:
+  - bi_mdm_golden_record / bi_mdm_source_mapping / bi_mdm_duplicate_candidate / bi_mdm_merge_request / bi_mdm_steward_assignment / bi_mdm_steward_decision: MDM golden records, mapping, duplicates matching, merge request lifecycle state machine, and steward review.
+  - bi_catalog_dataset / bi_catalog_glossary / bi_catalog_certification: Catalog tables, business dictionary terms, owner roles, and dataset trust levels.
+  - bi_governance_classification / bi_governance_masking_rule: Columns classification mapping and active masking rules.
+  - bi_usage_log: Logs user requests and query execution metrics.
+  - bi_ai_insight_generation: Narrative comments history with rating feedback.
+  - bi_data_contract: Registers schema definition contracts, compatibility modes, and version offsets.
+  - bi_schema_evolution_history: Logs table modifications and validation status.
+  - bi_workload_queue: Analytical query queue priorities.
+  - bi_dashboard_share / bi_dashboard_subscription: Shared permission dashboard maps and subscriber cron tasks.
+  - bi_self_service_workspace: Custom query workspaces configurations.
+
+* Key Abstractions & Services:
+  - **MdmGoldenRecordService & MdmStewardWorkflowService**: deduplicates master data and routes candidates below auto-merge to stewards.
+  - **SurvivorshipEngine**: Applies resolution rules (Priority, Confidence, Timestamp, Override) to merge candidates.
+  - **DataMaskingService & DataCatalogService**: Redacts confidential/PII values and catalogs glossary certification.
+  - **AiInsightsService**: Generates narrative performance commentaries using domain-specific insight providers.
+  - **DataContractValidator & SchemaEvolutionTracker**: Enforces schema compatibility levels (BACKWARD, FORWARD, FULL) and logs DDL drifts.
+  - **SelfServiceAnalyticsService**: Checks user query SQL syntax, whitelist datasets, read-only permissions, and company tenant isolation.
+  - **DashboardSharingService**: Coordinates subscriber schedulers.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.bi.BiV41EnterpriseIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=BiV41EnterpriseIntegrationTest`
+  - Test Scope: 250 logic scenarios verifying duplicate matching similarity, steward decision workflows, attribute survivorship priority, dynamic redaction/masking, AI insight commentaries, schema contracts validation, self-service whitelist checks, and tenant isolation constraints.
 
 
