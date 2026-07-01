@@ -41,6 +41,7 @@ public class PayrollEnterpriseIntegrationTest {
     @Autowired private AccountRepository accountRepository;
     @Autowired private PayrollAuditEventRepository auditEventRepository;
     @Autowired private PayrollApprovalWorkflowRepository approvalWorkflowRepository;
+    @Autowired private PayrollRunRepository payrollRunRepository;
 
     private Company company;
     private Employee employee;
@@ -264,8 +265,11 @@ public class PayrollEnterpriseIntegrationTest {
     }
 
     @Test void testScenario30_ApprovalWorkflowRouting() {
+        PayrollRunRequest req = new PayrollRunRequest(company.getId(), null, "RUN-WF1", PayrollCalendarType.MONTHLY, "US", "REGULAR");
+        PayrollRunResponse run = payrollProcessingService.createPayrollRun(req);
+
         PayrollApprovalWorkflow wf = new PayrollApprovalWorkflow();
-        wf.setPayrollRunId(1L);
+        wf.setPayrollRunId(run.id());
         wf.setStepNumber(1);
         wf.setApproverRole("HR_MANAGER");
         wf.setStatus("APPROVED");

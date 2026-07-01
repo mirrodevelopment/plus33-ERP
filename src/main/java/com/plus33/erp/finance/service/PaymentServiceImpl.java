@@ -180,6 +180,9 @@ public class PaymentServiceImpl implements PaymentService {
                 if (!invoice.getCompany().getId().equals(company.getId())) {
                     throw new BusinessException("Invoice company does not match payment company");
                 }
+                if (supplier == null) {
+                    throw new BusinessException("Supplier is required for PAYABLE payments");
+                }
                 if (!invoice.getSupplier().getId().equals(supplier.getId())) {
                     throw new BusinessException("Invoice supplier does not match payment supplier");
                 }
@@ -204,6 +207,9 @@ public class PaymentServiceImpl implements PaymentService {
                 CustomerInvoiceResponse invoice = customerInvoiceService.getInvoiceById(allocReq.getCustomerInvoiceId());
                 if (!invoice.companyId().equals(company.getId())) {
                     throw new BusinessException("Invoice company does not match payment company");
+                }
+                if (customer == null) {
+                    throw new BusinessException("Customer is required for RECEIVABLE payments");
                 }
                 if (!invoice.customerId().equals(customer.getId())) {
                     throw new BusinessException("Invoice customer does not match payment customer");

@@ -16,7 +16,7 @@ public class PayrollAuditTimelineServiceImpl implements PayrollAuditTimelineServ
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void logAuditEvent(Long companyId, Long payrollRunId, String eventType, String description, String actor) {
         PayrollAuditEvent event = new PayrollAuditEvent();
         event.setCompanyId(companyId);

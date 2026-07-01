@@ -85,7 +85,7 @@ public class ARServiceImpl implements ARService {
             params = new Object[]{companyId};
         }
 
-        return jdbcTemplate.query(sql, params, (rs, rowNum) -> new ARAgingResponse(
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new ARAgingResponse(
                 rs.getLong("company_id"),
                 rs.getLong("customer_id"),
                 rs.getString("customer_name"),
@@ -95,7 +95,7 @@ public class ARServiceImpl implements ARService {
                 rs.getBigDecimal("aging_31_60"),
                 rs.getBigDecimal("aging_61_90"),
                 rs.getBigDecimal("aging_90_plus")
-        ));
+        ), params);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -116,12 +116,12 @@ public class ARServiceImpl implements ARService {
         final BigDecimal[] totalPaidAmount = {BigDecimal.ZERO};
         final BigDecimal[] totalOutstandingAmount = {BigDecimal.ZERO};
 
-        jdbcTemplate.query(kpiSql, new Object[]{companyId}, rs -> {
+        jdbcTemplate.query(kpiSql, rs -> {
             totalInvoices[0] = rs.getLong("total_invoices");
             totalInvoicedAmount[0] = rs.getBigDecimal("total_invoiced_amount");
             totalPaidAmount[0] = rs.getBigDecimal("total_paid_amount");
             totalOutstandingAmount[0] = rs.getBigDecimal("total_outstanding_amount");
-        });
+        }, companyId);
 
         // Status breakdown from mv_receivables_dashboard
         String dashSql = """
@@ -131,13 +131,13 @@ public class ARServiceImpl implements ARService {
                 ORDER BY status
                 """;
 
-        List<ARStatusBucket> buckets = jdbcTemplate.query(dashSql, new Object[]{companyId},
+        List<ARStatusBucket> buckets = jdbcTemplate.query(dashSql,
                 (rs, rowNum) -> new ARStatusBucket(
                         rs.getString("status"),
                         rs.getLong("invoice_count"),
                         rs.getBigDecimal("total_amount"),
                         rs.getBigDecimal("outstanding_amount")
-                ));
+                ), companyId);
 
         return new ARSummaryResponse(
                 companyId,

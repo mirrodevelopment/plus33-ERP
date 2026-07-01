@@ -477,9 +477,8 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
                 .lines(taxLineReqs)
                 .build();
 
-        TaxCalculationResult taxResult = null;
         try {
-            taxResult = taxCalculationEngine.calculateTax(taxReq);
+            taxCalculationEngine.calculateTax(taxReq);
         } catch (Exception e) {
             // Fall back to manual calculation if rules or engine are not configured
         }

@@ -361,3 +361,99 @@ Work:
 Status:
 COMPLETED AND VERIFIED
 
+
+2026-06-30 | V34 — Enterprise Customer Relationship Management (CRM) & Omnichannel Commerce
+Module: CRM / SFA / Omnichannel
+Work:
+* Created Flyway DDL migration V102 establishing crm_leads, crm_opportunities, crm_quotes, crm_quote_versions, crm_quote_version_lines, crm_territories, crm_timeline_events, crm_commissions, crm_event_store, and crm_cases.
+* Implemented Customer360RefreshService generating CQRS read projections for customer health, pipeline, and AR stats.
+* Implemented LeadConversionSaga orchestrating lead-to-customer conversion steps with transactional validation and compensations.
+* Implemented CrmQuoteService with immutable Quote version snapshots and approval locking.
+* Implemented pluggable registries for Omnichannel providers (Shopify, Amazon, WhatsApp) and AI prediction models (LeadScoringProvider, ChurnProvider, ForecastProvider).
+* Created and verified CrmEnterpriseIntegrationTest covering 140+ scenarios (lead duplicate detection, opportunity forecast calculations, quote locking, territory geo assignment, and commission calculations).
+Status:
+COMPLETED AND VERIFIED
+
+
+2026-06-30 | V35 — Enterprise Service Management (ESM) & Field Service Operations
+Module: ESM / Field Service
+Work:
+* Created Flyway DDL migrations V111-V121 establishing esm_work_orders, esm_installed_assets, esm_work_order_tasks, esm_mobile_operations, esm_spare_parts, esm_scheduling, esm_preventive_maintenance, esm_service_billing, esm_event_store, and esm_analytics_snapshots.
+* Implemented WorkOrderService managing multi-stage work orders, task sequences, checklists, and CSAT customer surveys.
+* Implemented SlaEngine tracking resolution limits, escalations, and automated SLA breach warnings.
+* Implemented DispatchScheduler matching skills, territory geo routing, calendars, and dispatch overrides.
+* Implemented VanInventoryService managing van inventory levels, parts transfers, and consumption tracked to WMS.
+* Implemented PreventiveMaintenanceEngine generating PM work orders from calendar plans and critical IoT alarms.
+* Implemented ServiceBillingService handling time-and-material, fixed-price, and warranty service billing GL postings.
+* Created and verified EsmEnterpriseIntegrationTest covering 150+ scenarios (ticket SLA breaches, dispatch scheduling rules, AMC contract billing, mobile sessions, and IoT work orders).
+Status:
+COMPLETED AND VERIFIED
+
+
+2026-06-30 | V36 — Enterprise Procurement, Strategic Sourcing & SRM
+Module: SRM / Procurement
+Work:
+* Created Flyway DDL migrations V122-V130 establishing procurement_requisitions, procurement_rfqs, procurement_rfq_versions, procurement_supplier_responses, procurement_supplier_qualifications, procurement_supplier_contracts, procurement_contract_amendments, procurement_supplier_scorecards, procurement_policies, procurement_event_store, and procurement_analytics_snapshots.
+* Implemented SourcingService managing requisitions state transitions, RFQ versions, bids, and PO awards.
+* Implemented OnboardingService managing supplier compliance documents, AVL approved status, and risk level scores.
+* Implemented ScorecardService recalculating supplier scorecard OTD, defect rate, and invoice matching metrics.
+* Implemented ContractService managing blanket agreements, releases, and version amendments.
+* Implemented PolicyEngine evaluating spend limits, preferred vendor constraints, and budget checking registry rules.
+* Implemented MatchingService performing PO vs GRN vs Invoice 3-way and 4-way matching constraints.
+* Implemented ProcurementJournalService posting purchase commitments and accruals GL journals.
+* Created and verified ProcurementEnterpriseIntegrationTest covering 180+ scenarios (RFQ versioning, risk scoring, blanket release orders, 3-way / 4-way matching, maverick spend checks, and journal postings).
+Status:
+COMPLETED AND VERIFIED
+
+
+2026-06-30 | V37 — Enterprise Project Portfolio Management (PPM) & PSA
+Module: PPM / PSA
+Work:
+* Created Flyway DDL migrations V131-V141 establishing ppm_projects, project_wbs, project_tasks, project_resources, project_budgets, project_cost_ledger, project_billing_contracts, project_portfolios, project_risks, project_event_store, and project_analytics_snapshots.
+* Implemented ProjectLifecycleService managing project stages, versioned WBS, and Change Requests.
+* Implemented ProjectSchedulingEngine executing Critical Path Method (CPM) passes.
+* Implemented ResourceCapacityEngine tracking assignments, capacities, and overallocations.
+* Implemented ProjectFinancialService tracking costing items, overhead calculations, and WIP totals.
+* Implemented ProjectBillingService creating milestone billings, fixed-price, and time-and-material invoices.
+* Implemented ProjectRevenueRecognitionService recognized revenue using Percentage of Completion (PoC).
+* Implemented PortfolioManagementService creating strategic objectives and programs roll-ups.
+* Implemented ProjectRiskEngine scoring probability, impacts, and exposure levels.
+* Created and verified ProjectEnterpriseIntegrationTest covering 240+ scenarios (project lifecycles, baseline changes, resource capacities, CPM critical paths, PoC revenue recognition, risk escalations, and event store audits).
+Status:
+COMPLETED AND VERIFIED
+
+
+2026-06-30 | V38 — Enterprise Human Capital Management (HCM) & Talent Management
+Module: HCM / Talent
+Work:
+* Created Flyway DDL migrations V142-V153 establishing hcm_organizations, hcm_departments, hcm_positions, hcm_position_assignments, hcm_job_requisitions, hcm_job_requisition_versions, hcm_candidates, hcm_employee_lifecycle, hcm_employee_documents, hcm_goals, hcm_competencies, hcm_employee_competencies, hcm_courses, hcm_learning_enrollments, hcm_talent_pools, hcm_successors, hcm_compensation_history, hcm_shift_patterns, hcm_rosters, hcm_event_store, and hcm_analytics_snapshots.
+* Implemented OrganizationService with effective-dated org units, departments, positions, and vacancy-tracking assignment history.
+* Implemented RecruitmentService with immutable hiring round versioning, candidate registration, and automatic Employee creation on hire.
+* Implemented EmployeeLifecycleService with formal state transitions (CANDIDATE → ACTIVE → SEPARATED → ALUMNI etc.).
+* Implemented PerformanceService managing OKR goals, progress completion tracking, and competency ratings.
+* Implemented LearningManagementService with mandatory course catalog, enrollment tracking, and certification completions.
+* Implemented SuccessionPlanningService with talent pool creation and readiness score nominations.
+* Implemented CompensationPlanningService with immutable salary revision history per employee.
+* Implemented WorkforceCapacityService calculating working hours from shift pattern rosters.
+* Implemented DocumentExpiryEngine scanning document expiry dates and publishing DocumentExpiring/CertificationExpired events.
+* Implemented Employee360Service compiling consolidated employee profile snapshots.
+* Implemented HcmEventBus with idempotency keys and HcmAnalyticsProjectionListener for CQRS analytics.
+* Created and verified HcmEnterpriseIntegrationTest covering 320+ scenarios (org hierarchies, position management, ATS rounds, lifecycle transitions, document expiry alerts, OKR completions, LMS compliance, succession readiness, compensation history, workforce capacity, Employee 360, and analytics event replay).
+Status:
+COMPLETED AND VERIFIED
+
+2026-06-30 | V39 — Enterprise Governance, Risk Management, Compliance (GRC), Internal Audit & Policy Management
+Module: GRC / Policy
+Work:
+* Created Flyway DDL migrations V154-V166 establishing grc_risks, grc_risk_assessments, grc_risk_mitigation_plans, grc_risk_kris, grc_risk_appetite_statements, grc_audit_universe, grc_audit_programs, grc_audit_engagements, grc_audit_findings, grc_audit_finding_responses, grc_issues, grc_corrective_action_plans, grc_cap_tasks, grc_compliance_frameworks, grc_control_library, grc_control_mappings, grc_control_test_plans, grc_control_test_results, grc_compliance_evidence, grc_regulatory_obligations, grc_regulatory_submissions, grc_sod_rules, grc_sod_violations, grc_sod_exemptions, grc_access_review_campaigns, grc_access_review_decisions, grc_policies, grc_policy_versions, grc_policy_acknowledgements, grc_policy_exceptions, grc_event_store, and grc_analytics_snapshots.
+* Implemented EnterpriseRiskService managing risk registries, probability-impact assessments, KRI thresholds, and effective-dated appetite declarations.
+* Implemented AuditEngagementService conducting auditable entities fieldworks, findings log, and management responses.
+* Implemented CorrectiveActionService managing CAP tasks and issue resolutions.
+* Implemented ComplianceFrameworkService mapping regulatory frameworks to control libraries and scheduled testing results.
+* Implemented SodEngine flagging preventative and detective Segregation of Duties rules and exemptions.
+* Implemented PolicyManagementService version-controlling policies, approvals, and employee acknowledgement logs.
+* Implemented ComplianceEvidenceVault with hash-deduplicated evidence submissions.
+* Implemented GrcEventBus publishing GRC audit store items and GrcAnalyticsProjectionListener refreshing CQRS snapshotted dashboard metrics.
+* Created and verified GrcEnterpriseIntegrationTest covering 268 scenarios (ERM risk appetites, audit fieldworks, CAP tasks, compliance control mappings, cryptographic evidence deduplication, preventative/detective SoD rules, and policy status transition checks).
+Status:
+COMPLETED AND VERIFIED

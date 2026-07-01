@@ -26,6 +26,7 @@ public class WmsEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onMovementCreated(WmsEventBus.InventoryMovementCreatedEvent event) {
         refreshViewSafe("mv_inventory_turnover");
+        refreshViewSafe("mv_wms_inventory_turnover");
         refreshViewSafe("mv_inventory_accuracy");
         log.info("WMS: Movement ledger event processed - type={}, movementId={}", event.movementType(), event.movementId());
     }
@@ -72,6 +73,7 @@ public class WmsEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onManufacturingMaterialIssued(WmsEventBus.ManufacturingMaterialIssuedEvent event) {
         refreshViewSafe("mv_inventory_turnover");
+        refreshViewSafe("mv_wms_inventory_turnover");
         log.info("WMS: Manufacturing material issued - productionOrderId={}, productId={}, qty={}",
                 event.productionOrderId(), event.productId(), event.issuedQty());
     }

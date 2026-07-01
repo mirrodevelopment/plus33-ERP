@@ -154,7 +154,7 @@ public class PurchaseOrderControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(linkDraftPrRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Purchase Request must be in APPROVED status"));
+                .andExpect(jsonPath("$.message").value("Purchase Request must be in APPROVED or CONVERTED_TO_PO status"));
 
         // Test Validation 3: Link PR from different company
         Company company2 = new Company();

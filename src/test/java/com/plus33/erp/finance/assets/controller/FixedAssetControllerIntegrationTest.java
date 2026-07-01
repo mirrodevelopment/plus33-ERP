@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -95,6 +96,9 @@ public class FixedAssetControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private Company company;
     private User adminUser;
     private Warehouse warehouse;
@@ -130,7 +134,7 @@ public class FixedAssetControllerIntegrationTest {
         // 4. Create test employee using setter constructor
         employee = new Employee();
         employee.setCompany(company);
-        employee.setEmployeeCode("EMP-FA-TEST-99");
+        employee.setEmployeeCode("EMP-FA-TEST-" + System.nanoTime());
         employee.setFirstName("John");
         employee.setLastName("Doe");
         employee.setEmail("john.doe.test@plus33.com");
@@ -209,6 +213,9 @@ public class FixedAssetControllerIntegrationTest {
         fixedAssetRepository.deleteAll();
         
         if (category != null) {
+            // Remove any budget_dimension_sets that reference this category (committed via MockMvc CapEx budget calls)
+            // before deleting the category itself to avoid fk_dim_sets_ac violation.
+            jdbcTemplate.update("DELETE FROM budget_dimension_sets WHERE asset_category_id = ?", category.getId());
             assetCategoryRepository.delete(category);
             category = null;
         }

@@ -138,7 +138,7 @@ GROUP BY ccr.company_id, wl.warehouse_id, DATE_TRUNC('month', ccr.counted_at);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_cycle_variance ON mv_cycle_count_variance (company_id, warehouse_id, period);
 
 -- Inventory Turnover: movement volume relative to average stock
-CREATE MATERIALIZED VIEW IF NOT EXISTS mv_inventory_turnover AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS mv_wms_inventory_turnover AS
 SELECT
     im.company_id,
     im.warehouse_id,
@@ -150,4 +150,4 @@ SELECT
 FROM inventory_movements im
 GROUP BY im.company_id, im.warehouse_id, im.product_id, DATE_TRUNC('month', im.movement_at);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_inventory_turnover ON mv_inventory_turnover (company_id, warehouse_id, product_id, period);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_wms_inventory_turnover ON mv_wms_inventory_turnover (company_id, warehouse_id, product_id, period);

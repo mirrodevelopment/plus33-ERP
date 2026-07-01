@@ -121,7 +121,7 @@ CREATE TABLE work_centers (
     queue_time_hours DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     move_time_hours DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     efficiency_factor DECIMAL(7,4) NOT NULL DEFAULT 100.00,
-    gl_account_id BIGINT REFERENCES accounts(id),
+    gl_account_id BIGINT REFERENCES chart_of_accounts(id),
     active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -280,8 +280,10 @@ CREATE TABLE planned_orders (
     bom_header_id BIGINT REFERENCES bom_headers(id),
     routing_header_id BIGINT REFERENCES routing_headers(id),
     firmed BOOLEAN NOT NULL DEFAULT FALSE,
+    released_production_order_id BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE mrp_pegging_links (
     id BIGSERIAL PRIMARY KEY,
@@ -394,12 +396,9 @@ CREATE TABLE production_material_issues (
     issued_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uk_production_issue_number UNIQUE (company_id, issue_number)
+    CONSTRAINT uk_production_issue_number UNIQUE (production_order_id, issue_number)
         DEFERRABLE INITIALLY DEFERRED
 );
--- Fix column reference for company_id in the constraint above (handled via production_order join)
-ALTER TABLE production_material_issues DROP CONSTRAINT IF EXISTS uk_production_issue_number;
-ALTER TABLE production_material_issues ADD CONSTRAINT uk_production_issue_number UNIQUE (production_order_id, issue_number);
 
 CREATE TABLE production_confirmations (
     id BIGSERIAL PRIMARY KEY,
@@ -576,10 +575,12 @@ CREATE TABLE quality_inspections (
     approved_by BIGINT REFERENCES users(id),
     inspected_at TIMESTAMP,
     approved_at TIMESTAMP,
+    notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_quality_inspection_number UNIQUE (company_id, inspection_number)
 );
+
 
 -- ============================================================
 -- SECTION 10: MANUFACTURING EVENTS — Immutable Audit Trail

@@ -36,6 +36,7 @@ import com.plus33.erp.procurement.service.PurchaseOrderService;
 import com.plus33.erp.procurement.service.PurchaseRequestService;
 import com.plus33.erp.security.entity.User;
 import com.plus33.erp.security.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -231,6 +232,8 @@ public class BudgetControllerIntegrationTest {
         warehouse = warehouseRepository.findByCode("DUBAI_WAREHOUSE")
                 .orElseThrow(() -> new AssertionError("DUBAI_WAREHOUSE not found"));
     }
+
+
 
     @Test
     @WithMockUser(username = "admin@plus33.com", authorities = {"BUDGET_CREATE", "BUDGET_VIEW", "BUDGET_APPROVE", "BUDGET_LOCK", "BUDGET_REVISE", "BUDGET_FREEZE", "FINANCE_WRITE"})

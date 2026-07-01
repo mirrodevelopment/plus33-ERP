@@ -243,6 +243,12 @@ public class SupplierInvoiceControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.discountAmount").value(4.00))
                 .andExpect(jsonPath("$.data.totalAmount").value(101.00)); // 100 + 5 - 4
 
+        // 6.5. Submit the Supplier Invoice
+        mockMvc.perform(post("/api/v1/supplier-invoices/" + invoiceId + "/submit"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("SUBMITTED"));
+
         // 7. Approve the Supplier Invoice
         mockMvc.perform(post("/api/v1/supplier-invoices/" + invoiceId + "/approve"))
                 .andExpect(status().isOk())

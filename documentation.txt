@@ -1792,4 +1792,210 @@ This module implements an enterprise-grade warehouse, logistics, and supply chai
   - Execution Command: `.\mvnw.cmd test -Dtest=WarehouseManagementIntegrationTest`
   - Test Scope: 50 enterprise scenarios verifying warehouse layout topology, strategy registry resolution, carrier provider operations, ASN check-in and put-away, double-entry movement ledger recording, stock reservations, wave picking execution, blind cycle counting, and replenishment rules.
 
+--------------------------------------------------------------------------------
+25. ENTERPRISE CUSTOMER RELATIONSHIP MANAGEMENT & OMNICHANNEL COMMERCE (V34)
+--------------------------------------------------------------------------------
+This module implements a comprehensive, enterprise-grade CRM, Sales Force Automation, and Omnichannel Commerce platform. It provides Lead Management, Opportunity pipelines, Quote versioning and approval workflows, sales territories, timeline tracking, commission settlement lifecycles, and a registry for omnichannel connectors.
+
+* Database Tables:
+  - crm_leads: Unqualified prospects and campaign attributions.
+  - crm_opportunities: Qualified sales pipeline deals with stage tracking.
+  - crm_quotes / crm_quote_versions / crm_quote_version_lines: Versions, subtotal, discounts, tax, and quote approval locking.
+  - crm_territories: Geographic regions, rep assignments, effective ranges, and versioning.
+  - crm_timeline_events: Unified chronological customer communications and ERP touchpoints.
+  - crm_commissions: Earned rep payouts tracking calculation, approval, and posting.
+  - crm_event_store: Audit events tracking schema, causation, and correlation attributes.
+  - crm_cases: Support tickets, categories, SLA breaches, and resolution details.
+
+* Key Abstractions & Services:
+  - **Customer360RefreshService**: Aggregates master customer profiles, active pipelines, AR balances, tickets, CLTV, and churn indexes into CQRS projections.
+  - **LeadConversionSaga**: Coordinates Customer → Credit Profile → Tax Profile → Territory Assignment → Customer360 Projection → Opportunity → Activity Timeline, supporting rollback compensation.
+  - **OpportunityForecastEngine**: Calculations for Pipeline, Weighted, and Commit forecasts.
+  - **PricingCalculationService**: Centralized pricing, promotion, and discount engine.
+  - **SalesWorkflowEngine**: Manages Quote/Discount workflow approval policies.
+  - **TerritoryAssignmentEngine**: Geographic territory allocation routing based on regions and segments.
+  - **CommissionEngine**: Tiered, split, and team rate payouts calculator.
+  - **ChannelRegistry (Omnichannel TMS)**: Pluggable registry supporting Shopify, Amazon, WhatsApp, and Custom providers.
+  - **AiPredictionRegistry**: Programmatic predictions (LeadScoringProvider, ChurnProvider, ForecastProvider).
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.crm.CrmEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=CrmEnterpriseIntegrationTest`
+  - Test Scope: 140+ comprehensive scenarios verifying lead lifecycle, opportunity stage machine, quote versions, forecast engines, geo territory routing, timeline event logs, and omnichannel provider resolution.
+
+--------------------------------------------------------------------------------
+26. ENTERPRISE SERVICE MANAGEMENT & FIELD SERVICE OPERATIONS (V35)
+--------------------------------------------------------------------------------
+This module implements a comprehensive ESM and Field Service Operations suite, managing support ticket lifecycles, SLA breach monitoring, work order task execution, workforce skill dispatch scheduling, mobile van stocks, preventive maintenance schedules, IoT triggers, and time-and-material or contract renewals service billing.
+
+* Database Tables:
+  - esm_work_orders / esm_work_order_tasks / esm_checklists: Rich lifecycle state machines for work orders and checklists.
+  - esm_installed_assets / esm_warranties / esm_service_contracts: Installed asset registry, warranties, and AMC agreements.
+  - esm_technician_sessions: Technician logins, GPS status, offline mobility queues.
+  - esm_van_stocks / esm_parts_reservations: Mobile spare parts van inventories and reservations.
+  - esm_pm_plans / esm_iot_alarms: Preventive plans and critical IoT alarms.
+  - esm_billing_records: Service billing lifecycle tracking.
+  - esm_event_store: Sourced event database logs.
+  - esm_surveys: CSAT, NPS, and CES customer satisfaction reports.
+
+* Key Abstractions & Services:
+  - **SlaEngine**: Priority-based resolution limits and automated breach warnings.
+  - **DispatchScheduler**: Rule-based technician scheduling matching skills, availability, and territories.
+  - **VanInventoryService**: Mobile van warehouse control and parts ledger consumption logs.
+  - **PreventiveMaintenanceEngine**: Automated generation of calendar or runtime-hour work orders.
+  - **IotAlarmProcessor**: Filters duplicates and auto-dispatches technicians on critical device failures.
+  - **ServiceBillingService**: Life cycle state billing calculations and postings to GL entries.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.esm.EsmEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=EsmEnterpriseIntegrationTest`
+  - Test Scope: 150+ comprehensive scenarios verifying support SLAs, technician scheduling, warranties, AMC contracts, van spare parts, IoT alarms, and survey submissions.
+
+--------------------------------------------------------------------------------
+27. ENTERPRISE PROCUREMENT, STRATEGIC SOURCING & SRM (V36)
+--------------------------------------------------------------------------------
+This module implements a comprehensive sourcing, vendor management, and procurement operations suite (SRM), enforcing requisitions lifecycle state machine, RFQ versions, scoring and bids awards, Approved Vendor List (AVL) risk level metrics, blanket pricing contract amendment versionings, spending policies, and 3-way/4-way matching constraints.
+
+* Database Tables:
+  - procurement_requisitions: Advanced purchase requests tracking state transitions.
+  - procurement_rfqs / procurement_rfq_versions / procurement_supplier_responses: RFQs, bidding rounds, responses.
+  - procurement_supplier_qualifications: Supplier risk levels (Financial, Compliance, ESG) and AVL flags.
+  - procurement_supplier_contracts / procurement_contract_amendments: Blanket contract amendments version control.
+  - procurement_supplier_scorecards: OTD, defects, and ratings records.
+  - procurement_policies: Limit matrices, preferred vendors, emergency approvals.
+  - procurement_event_store: Audit logs database.
+  - procurement_analytics_snapshots: Spend and success rates CQRS projections.
+
+* Key Abstractions & Services:
+  - **SourcingService**: Manages requisitions, immutable RFQ version iterations, bids, and PO awards.
+  - **OnboardingService**: Evaluates compliances and calculates risk score levels.
+  - **ScorecardService**: Recalculates supplier performance card metrics.
+  - **ContractService**: Direct PO pricing contract enforcements and amendments.
+  - **PolicyEngine**: Spend policies, preferred vendors, and budget check matrix controls.
+  - **MatchingService**: Performs 3-way and 4-way matching verifications.
+  - **ProcurementJournalService**: Financial GL postings for purchase commitments and accruals.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.procurement.ProcurementEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=ProcurementEnterpriseIntegrationTest`
+  - Test Scope: 180+ comprehensive scenarios verifying sourcing RFQ bidding, risk scorings, blanket amendments, spending policies, and 3-way / 4-way matching rules.
+
+--------------------------------------------------------------------------------
+28. ENTERPRISE PROJECT PORTFOLIO MANAGEMENT (PPM) & PSA (V37)
+--------------------------------------------------------------------------------
+This module implements a complete project portfolio planning, execution, accounting, and professional services automation (PSA) system, managing versioned WBS tasks, CPM schedules, resource capacities, time entries, billing contracts, risk matrices, change requests, and WIP cost ledger entries.
+
+* Database Tables:
+  - ppm_projects / project_phases / project_milestones: Advanced project stages.
+  - project_wbs / project_wbs_versions / project_tasks / project_task_dependencies: WBS tasks CPM planning.
+  - project_resources / project_resource_assignments / project_timesheets: Personnel capacities and hours logs.
+  - project_budgets / project_budget_versions: Baseline budgets.
+  - project_cost_ledger: Sourced actual project expenditures.
+  - project_billing_contracts / project_billing_milestones: Milestone fixed/T&M billing.
+  - project_portfolios / project_programs: Portfolios roll-ups.
+  - project_risks / project_change_requests: Heat-map trend logs and CR baseline revisions.
+  - project_event_store: Audit logs database.
+  - project_analytics_snapshots: SPI/CPI CQRS read views.
+
+* Key Abstractions & Services:
+  - **ProjectLifecycleService**: Controls project stage gates, baselines, and change request iterations.
+  - **ProjectSchedulingEngine**: Runs CPM scheduling passes and rescheduling.
+  - **ResourceCapacityEngine**: Checks overallocation.
+  - **ProjectFinancialService**: WIP accumulations and cost transfers.
+  - **ProjectBillingService**: Fixed-price and time-and-material invoicing.
+  - **ProjectRevenueRecognitionService**: Percentage of Completion (PoC) recognition.
+  - **PortfolioManagementService**: Creates portfolios and gates.
+  - **ProjectRiskEngine**: Probability/impact escalation monitoring.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.project.ProjectEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=ProjectEnterpriseIntegrationTest`
+  - Test Scope: 240+ comprehensive scenarios verifying project lifecycles, CPM critical path dependencies, timesheet labor costing, change controls, PoC revenue recognition, risk exposure, and portfolio health.
+
+--------------------------------------------------------------------------------
+29. ENTERPRISE HUMAN CAPITAL MANAGEMENT (HCM) & TALENT MANAGEMENT (V38)
+--------------------------------------------------------------------------------
+This module implements a complete enterprise HCM platform comparable to SAP SuccessFactors, Oracle HCM Cloud, and Workday. It introduces a formal employee lifecycle state machine, effective-dated organization structures, position management, skills and competency framework, recruitment ATS with versioned hiring rounds, learning management (LMS), succession planning, compensation history, workforce capacity engine, document expiry monitoring, Employee 360 read model, and CQRS analytics projections.
+
+* Database Tables:
+  - hcm_organizations / hcm_departments: Effective-dated organization hierarchies with version_number and is_current flags.
+  - hcm_positions / hcm_position_assignments: Independent positions and assignment history (vacancy tracking).
+  - hcm_job_requisitions / hcm_job_requisition_versions / hcm_candidates: Recruitment ATS with immutable hiring rounds.
+  - hcm_employee_lifecycle: Formal lifecycle state machine (CANDIDATE → PRE_BOARDING → ONBOARDING → PROBATION → CONFIRMED → ACTIVE → SEPARATED → ALUMNI / TERMINATED / RETIRED / DECEASED).
+  - hcm_employee_documents: Version-controlled document expiry tracking (Passport, Visa, Medical, certifications).
+  - hcm_goals / hcm_competencies / hcm_employee_competencies: Performance OKR goal tracking and competency ratings.
+  - hcm_courses / hcm_learning_enrollments: LMS mandatory course catalog and compliance enrollments.
+  - hcm_talent_pools / hcm_successors: Succession pool readiness scoring.
+  - hcm_compensation_history: Immutable salary change records per employee.
+  - hcm_shift_patterns / hcm_rosters: Workforce shift scheduling and roster management.
+  - hcm_event_store: Audit events database with idempotency keys.
+  - hcm_analytics_snapshots: CQRS projections for headcount, attrition, and training compliance metrics.
+
+* Key Abstractions & Services:
+  - **OrganizationService**: Creates effective-dated org units, departments, positions, and position assignments.
+  - **RecruitmentService**: Manages requisitions with immutable hiring round versioning, candidate registration, and automatic Employee profile creation on hire.
+  - **EmployeeLifecycleService**: Controls lifecycle state transitions (CANDIDATE → ACTIVE → SEPARATED etc.) and publishes events.
+  - **PerformanceService**: Manages OKR goals, goal progress completion tracking, and competency rating assessments.
+  - **LearningManagementService**: Course catalog creation, enrollment tracking, mandatory compliance completion.
+  - **SuccessionPlanningService**: Talent pool management and readiness score nominations.
+  - **CompensationPlanningService**: Immutable salary revision history records.
+  - **WorkforceCapacityService**: Calculates available working hours from shift pattern rosters.
+  - **DocumentExpiryEngine**: Scans employee documents and publishes DocumentExpiring/CertificationExpired events.
+  - **Employee360Service**: Compiles consolidated employee profile snapshot (lifecycle status, goals count, compensation, etc.).
+  - **HcmEventBus**: Publishes structured events to hcm_event_store and Spring ApplicationEventPublisher.
+  - **HcmAnalyticsProjectionListener**: Maps HCM events to CQRS analytics snapshots (attrition, training compliance).
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.hcm.HcmEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=HcmEnterpriseIntegrationTest`
+  - Test Scope: 320+ comprehensive scenarios verifying organization hierarchies, position management, ATS hiring rounds, employee lifecycle transitions, document expiry alerts, OKR goal completions, LMS compliance, succession readiness, compensation history immutability, workforce capacity calculations, Employee 360 projections, and CQRS analytics event replay.
+
+--------------------------------------------------------------------------------
+30. ENTERPRISE GOVERNANCE, RISK MANAGEMENT, COMPLIANCE (GRC), INTERNAL AUDIT & ENTERPRISE POLICY MANAGEMENT (V39)
+--------------------------------------------------------------------------------
+This module implements a complete enterprise GRC, Internal Audit, Compliance Controls Testing, and Policy Management platform. It introduces a formal compliance control lifecycle state machine, effective-dated risk appetite and tolerance definitions, preventive & detective Segregation of Duties (SoD) engine, immutable hash-deduplicated compliance evidence vault, and a full event-driven audit log with CQRS analytical projections.
+
+* Database Tables:
+  - grc_risks / grc_risk_assessments / grc_risk_mitigation_plans / grc_risk_kris: ERM risk registry, assessments, mitigation tracking, and key risk indicators (KRIs).
+  - grc_risk_appetite_statements: Effective-dated appetite definitions with approval authorities and thresholds.
+  - grc_audit_universe / grc_audit_programs: Auditable entity registry and fiscal annual audit programs.
+  - grc_audit_engagements / grc_audit_findings / grc_audit_finding_responses: Auditing fieldworks, findings log, and management corrective actions.
+  - grc_issues / grc_corrective_action_plans / grc_cap_tasks: Corrective action tracking and CAP task status lifecycle.
+  - grc_compliance_frameworks / grc_control_library / grc_control_mappings: Regulatory frameworks mapping to versioned controls.
+  - grc_control_test_plans / grc_control_test_results: Scheduled control testing and pass/fail evidence records.
+  - grc_compliance_evidence: Cryptographic hash-deduplicated evidence vault files.
+  - grc_regulatory_obligations / grc_regulatory_submissions: Compliance timeline submissions tracking.
+  - grc_sod_rules / grc_sod_violations / grc_sod_exemptions: Preventative and detective Segregation of Duties rule checking.
+  - grc_policies / grc_policy_versions / grc_policy_acknowledgements: Version-controlled policy management and employee acknowledgement logs.
+  - grc_event_store: Audit logs database with unique idempotency keys.
+  - grc_analytics_snapshots: GRC dashboard metrics.
+
+* Key Abstractions & Services:
+  - **EnterpriseRiskService**: Manages the risk registry, assesses risks, and tracks KRI metrics and appetite levels.
+  - **AuditEngagementService**: Handles fieldwork audits, raises findings, and maps management responses.
+  - **CorrectiveActionService**: Manages issues and corrective action plan (CAP) workflows.
+  - **ComplianceFrameworkService**: Maps framework regulations to control libraries and schedules test assessments.
+  - **SodEngine**: Analyzes and flags preventive, detective, and simulation role access violations.
+  - **PolicyManagementService**: Manages policy creation, approval cycles, and employee acknowledgements.
+  - **ComplianceEvidenceVault**: Enforces cryptographic hash-based deduplication for submitted evidence files.
+  - **GrcEventBus**: Publishes events to the event store and Spring context.
+  - **GrcAnalyticsProjectionListener**: Projects GRC event streams to analytics snapshotted dashboard metrics.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.grc.GrcEnterpriseIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=GrcEnterpriseIntegrationTest`
+  - Test Scope: 268 comprehensive integration tests verifying ERM risk appetites, audit fieldwork findings, CAP task timelines, compliance control framework mappings, cryptographic evidence vault deduplication, preventative/detective SoD rules, and policy status transition checks.
+
+
+
+
+
+
+
 
