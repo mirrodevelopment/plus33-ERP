@@ -163,4 +163,73 @@ public class PlatformOpsController {
         auditService.logAudit("UPDATE_POLICY_VERSION", operator, "REST", "code=" + code + ", ver=" + version);
         return ResponseEntity.ok().build();
     }
+
+    @Autowired com.plus33.erp.agent.core.AgentOrchestrator agentOrchestrator;
+    @Autowired com.plus33.erp.agent.tool.ToolExecutor toolExecutor;
+    @Autowired com.plus33.erp.agent.workflow.WorkflowAutomator workflowAutomator;
+    @Autowired com.plus33.erp.agent.prompt.PromptVersionManager promptVersionManager;
+    @Autowired com.plus33.erp.agent.memory.AgentMemoryManager memoryManager;
+
+    @PostMapping("/agent/session")
+    public ResponseEntity<String> startAgentSession(
+            @RequestParam String userId,
+            @RequestParam String operator) {
+        com.plus33.erp.platform.entity.PlatformAgentSession s = agentOrchestrator.startSession(userId);
+        auditService.logAudit("START_AGENT_SESSION", operator, "REST", "user=" + userId);
+        return ResponseEntity.ok(s.getSessionToken());
+    }
+
+    @PostMapping("/agent/message")
+    public ResponseEntity<Void> processAgentMessage(
+            @RequestParam Long sessionId,
+            @RequestParam String message,
+            @RequestParam String operator) {
+        agentOrchestrator.processMessage(sessionId, message);
+        auditService.logAudit("PROCESS_AGENT_MSG", operator, "REST", "session=" + sessionId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/agent/tool")
+    public ResponseEntity<Void> executeAgentTool(
+            @RequestParam String code,
+            @RequestParam String params,
+            @RequestParam String operator) {
+        toolExecutor.executeTool(code, params);
+        auditService.logAudit("EXECUTE_AGENT_TOOL", operator, "REST", "tool=" + code);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/agent/workflow")
+    public ResponseEntity<Void> triggerAgentWorkflow(
+            @RequestParam String code,
+            @RequestParam String operator) {
+        workflowAutomator.triggerWorkflow(code);
+        auditService.logAudit("TRIGGER_AGENT_WORKFLOW", operator, "REST", "workflow=" + code);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/agent/prompt")
+    public ResponseEntity<Void> registerAgentPrompt(
+            @RequestParam String code,
+            @RequestParam String desc,
+            @RequestParam String sys,
+            @RequestParam String user,
+            @RequestParam String operator) {
+        promptVersionManager.registerPrompt(code, desc);
+        promptVersionManager.addVersion(code, "v1.0.0", sys, user);
+        auditService.logAudit("REGISTER_AGENT_PROMPT", operator, "REST", "code=" + code);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/agent/memory")
+    public ResponseEntity<Void> storeAgentMemory(
+            @RequestParam Long sessionId,
+            @RequestParam String scope,
+            @RequestParam String key,
+            @RequestParam String val,
+            @RequestParam String operator) {
+        memoryManager.storeMemory(sessionId, scope, key, val);
+        auditService.logAudit("STORE_AGENT_MEMORY", operator, "REST", "session=" + sessionId + ", key=" + key);
+        return ResponseEntity.ok().build();
+    }
 }
