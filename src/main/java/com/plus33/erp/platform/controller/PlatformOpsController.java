@@ -232,4 +232,52 @@ public class PlatformOpsController {
         auditService.logAudit("STORE_AGENT_MEMORY", operator, "REST", "session=" + sessionId + ", key=" + key);
         return ResponseEntity.ok().build();
     }
+
+    @Autowired com.plus33.erp.twin.mining.CaseAssembler caseAssembler;
+    @Autowired com.plus33.erp.twin.telemetry.TelemetryIngestionService telemetryIngestionService;
+    @Autowired com.plus33.erp.twin.decision.DecisionEngine decisionEngine;
+    @Autowired com.plus33.erp.twin.simulation.SimulationService simulationService;
+
+    @PostMapping("/process/case")
+    public ResponseEntity<Void> assembleProcessCase(
+            @RequestParam String token,
+            @RequestParam String processName,
+            @RequestParam String operator) {
+        caseAssembler.assembleCase(token, processName);
+        auditService.logAudit("ASSEMBLE_PROCESS_CASE", operator, "REST", "token=" + token);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/twin/telemetry")
+    public ResponseEntity<Void> ingestTwinTelemetry(
+            @RequestParam Long instanceId,
+            @RequestParam String name,
+            @RequestParam java.math.BigDecimal value,
+            @RequestParam String operator) {
+        telemetryIngestionService.ingest(instanceId, name, value);
+        auditService.logAudit("INGEST_TWIN_TELEMETRY", operator, "REST", "instance=" + instanceId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/decision/evaluate")
+    public ResponseEntity<Void> evaluateAutonomousDecision(
+            @RequestParam Long actionId,
+            @RequestParam java.math.BigDecimal confidence,
+            @RequestParam String operator) {
+        com.plus33.erp.platform.entity.PlatformAutonomousAction action = new com.plus33.erp.platform.entity.PlatformAutonomousAction();
+        action.setId(actionId);
+        decisionEngine.evaluateDecision(action, confidence);
+        auditService.logAudit("EVALUATE_AUTONOMOUS_DECISION", operator, "REST", "action=" + actionId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/twin/simulation")
+    public ResponseEntity<Void> runTwinSimulation(
+            @RequestParam Long scenarioId,
+            @RequestParam Long instanceId,
+            @RequestParam String operator) {
+        simulationService.runSimulation(scenarioId, instanceId);
+        auditService.logAudit("RUN_TWIN_SIMULATION", operator, "REST", "scenario=" + scenarioId);
+        return ResponseEntity.ok().build();
+    }
 }
