@@ -4,9 +4,13 @@ import com.plus33.erp.platform.config.DistributedConfigService;
 import com.plus33.erp.platform.featureflag.FeatureFlagService;
 import com.plus33.erp.platform.metrics.PrometheusExporterService;
 import com.plus33.erp.platform.audit.PlatformAuditService;
+import com.plus33.erp.platform.cache.DistributedCacheManager;
+import com.plus33.erp.platform.lock.DistributedLockManager;
+import com.plus33.erp.platform.dashboard.PlatformRuntimeDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/platform")
@@ -15,6 +19,9 @@ public class PlatformOpsController {
     @Autowired FeatureFlagService flagService;
     @Autowired PrometheusExporterService metricsService;
     @Autowired PlatformAuditService auditService;
+    @Autowired DistributedCacheManager cacheManager;
+    @Autowired DistributedLockManager lockManager;
+    @Autowired PlatformRuntimeDashboardService dashboardService;
 
     @GetMapping("/config")
     public ResponseEntity<String> getConfig(@RequestParam String key, @RequestParam String profile) {
@@ -64,5 +71,36 @@ public class PlatformOpsController {
     @GetMapping("/metrics")
     public ResponseEntity<String> getMetrics() {
         return ResponseEntity.ok(metricsService.exportPrometheusFormat());
+    }
+
+    @PostMapping("/cache/evict")
+    public ResponseEntity<Void> evictCache(
+            @RequestParam String namespace,
+            @RequestParam String key,
+            @RequestParam String operator) {
+        cacheManager.evict(namespace, key);
+        auditService.logAudit("EVICT_CACHE", operator, "REST", "ns=" + namespace + ", key=" + key);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/lock")
+    public ResponseEntity<Boolean> acquireLock(
+            @RequestParam String name,
+            @RequestParam String node,
+            @RequestParam int ttl) {
+        return ResponseEntity.ok(lockManager.acquireLock(name, node, ttl));
+    }
+
+    @DeleteMapping("/lock")
+    public ResponseEntity<Void> releaseLock(
+            @RequestParam String name,
+            @RequestParam String node) {
+        lockManager.releaseLock(name, node);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<Map<String, Object>> getDashboard() {
+        return ResponseEntity.ok(dashboardService.getDashboardData());
     }
 }
