@@ -93,8 +93,10 @@ public class MdmGoldenRecordService {
     }
 
     private void createSourceMapping(Long goldenId, String system, String table, Long dimId, double score) {
+        MdmGoldenRecord gr = goldenRecordRepo.findById(goldenId)
+                .orElseThrow(() -> new IllegalArgumentException("Golden record not found"));
         MdmSourceMapping mapping = new MdmSourceMapping();
-        mapping.setGoldenRecordId(goldenId);
+        mapping.setGoldenRecord(gr);
         mapping.setSourceSystem(system);
         mapping.setSourceTable(table);
         mapping.setSourceDimId(dimId);
@@ -114,11 +116,13 @@ public class MdmGoldenRecordService {
 
         Long goldenId = request.getSourceDimIdA();
         Long dimIdB = request.getSourceDimIdB();
+        MdmGoldenRecord grA = goldenRecordRepo.findById(goldenId)
+                .orElseThrow(() -> new IllegalArgumentException("Golden record not found"));
         
         List<MdmSourceMapping> mappings = sourceMappingRepo.findAll();
         for (MdmSourceMapping m : mappings) {
             if (m.getSourceDimId().equals(dimIdB)) {
-                m.setGoldenRecordId(goldenId);
+                m.setGoldenRecord(grA);
                 sourceMappingRepo.save(m);
             }
         }
@@ -141,7 +145,7 @@ public class MdmGoldenRecordService {
         List<SurvivorshipEngine.AttributeCandidate> taxCandidates = new ArrayList<>();
 
         for (MdmSourceMapping m : mappings) {
-            if (!m.getGoldenRecordId().equals(goldenId)) {
+            if (!m.getGoldenRecord().getId().equals(goldenId)) {
                 continue;
             }
             int priority = 3;

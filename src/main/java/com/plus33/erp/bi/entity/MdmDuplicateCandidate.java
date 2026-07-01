@@ -1,6 +1,8 @@
 package com.plus33.erp.bi.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -9,26 +11,53 @@ public class MdmDuplicateCandidate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "record_type", nullable = false)
+    @NotNull
+    @Size(max = 50)
     private String recordType;
+
     @Column(name = "source_system_a", nullable = false)
+    @NotNull
+    @Size(max = 100)
     private String sourceSystemA;
+
     @Column(name = "source_table_a", nullable = false)
+    @NotNull
+    @Size(max = 100)
     private String sourceTableA;
+
     @Column(name = "source_dim_id_a", nullable = false)
+    @NotNull
     private Long sourceDimIdA;
+
     @Column(name = "source_system_b", nullable = false)
+    @NotNull
+    @Size(max = 100)
     private String sourceSystemB;
+
     @Column(name = "source_table_b", nullable = false)
+    @NotNull
+    @Size(max = 100)
     private String sourceTableB;
+
     @Column(name = "source_dim_id_b", nullable = false)
+    @NotNull
     private Long sourceDimIdB;
+
     @Column(name = "similarity_score", nullable = false)
+    @NotNull
     private java.math.BigDecimal similarityScore;
+
     @Column(nullable = false)
+    @NotNull
+    @Size(max = 50)
     private String status = "PENDING";
+
     @Column(name = "detected_at", nullable = false)
+    @NotNull
     private LocalDateTime detectedAt = LocalDateTime.now();
+
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
 

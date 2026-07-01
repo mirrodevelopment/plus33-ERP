@@ -1,6 +1,8 @@
 package com.plus33.erp.bi.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -9,20 +11,40 @@ public class MdmGoldenRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "record_type", nullable = false)
+    @NotNull
+    @Size(max = 50)
     private String recordType;
+
     @Column(name = "display_name", nullable = false)
+    @NotNull
+    @Size(max = 250)
     private String displayName;
+
+    @Size(max = 250)
     private String email;
+
+    @Size(max = 50)
     private String phone;
+
     private String address;
+
     @Column(name = "tax_number")
+    @Size(max = 50)
     private String taxNumber;
+
     @Column(nullable = false)
+    @NotNull
+    @Size(max = 50)
     private String status = "ACTIVE";
+
     @Column(name = "created_at", nullable = false, updatable = false)
+    @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();
+
     @Column(name = "updated_at", nullable = false)
+    @NotNull
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     public Long getId() { return id; }

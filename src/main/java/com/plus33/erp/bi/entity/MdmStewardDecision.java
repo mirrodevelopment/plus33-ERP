@@ -1,6 +1,8 @@
 package com.plus33.erp.bi.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -9,18 +11,27 @@ public class MdmStewardDecision {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "steward_assignment_id", nullable = false)
-    private Long stewardAssignmentId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "steward_assignment_id", nullable = false)
+    @NotNull
+    private MdmStewardAssignment stewardAssignment;
+
     @Column(nullable = false)
+    @NotNull
+    @Size(max = 50)
     private String decision;
+
     private String notes;
+
     @Column(name = "decided_at", nullable = false)
+    @NotNull
     private LocalDateTime decidedAt = LocalDateTime.now();
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public Long getStewardAssignmentId() { return stewardAssignmentId; }
-    public void setStewardAssignmentId(Long stewardAssignmentId) { this.stewardAssignmentId = stewardAssignmentId; }
+    public MdmStewardAssignment getStewardAssignment() { return stewardAssignment; }
+    public void setStewardAssignment(MdmStewardAssignment stewardAssignment) { this.stewardAssignment = stewardAssignment; }
     public String getDecision() { return decision; }
     public void setDecision(String decision) { this.decision = decision; }
     public String getNotes() { return notes; }

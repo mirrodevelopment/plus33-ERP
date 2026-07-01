@@ -28,7 +28,7 @@ public class MdmStewardWorkflowService {
         mergeRequestRepo.save(mr);
 
         MdmStewardAssignment assignment = new MdmStewardAssignment();
-        assignment.setMergeRequestId(mergeRequestId);
+        assignment.setMergeRequest(mr);
         assignment.setStewardUser(stewardUser);
         assignment.setAssignedAt(LocalDateTime.now());
         assignment.setDueAt(LocalDateTime.now().plusDays(3));
@@ -44,8 +44,7 @@ public class MdmStewardWorkflowService {
         assignment.setStatus("COMPLETED");
         assignmentRepo.save(assignment);
 
-        MdmMergeRequest mr = mergeRequestRepo.findById(assignment.getMergeRequestId())
-                .orElseThrow(() -> new IllegalArgumentException("Merge request not found"));
+        MdmMergeRequest mr = assignment.getMergeRequest();
 
         if ("APPROVE".equalsIgnoreCase(decision)) {
             mr.setStatus("APPROVED");
@@ -58,7 +57,7 @@ public class MdmStewardWorkflowService {
         mergeRequestRepo.save(mr);
 
         MdmStewardDecision sd = new MdmStewardDecision();
-        sd.setStewardAssignmentId(assignmentId);
+        sd.setStewardAssignment(assignment);
         sd.setDecision(decision);
         sd.setNotes(notes);
         sd.setDecidedAt(LocalDateTime.now());

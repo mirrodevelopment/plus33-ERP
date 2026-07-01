@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS bi_mdm_duplicate_candidate (
 
 CREATE TABLE IF NOT EXISTS bi_mdm_merge_request (
     id                  BIGSERIAL PRIMARY KEY,
+    version             INT NOT NULL DEFAULT 0,
     request_code        VARCHAR(100) NOT NULL UNIQUE,
     record_type         VARCHAR(50) NOT NULL,
     source_system_a     VARCHAR(100) NOT NULL,
@@ -55,6 +56,7 @@ CREATE TABLE IF NOT EXISTS bi_mdm_merge_request (
 
 CREATE TABLE IF NOT EXISTS bi_mdm_steward_assignment (
     id                  BIGSERIAL PRIMARY KEY,
+    version             INT NOT NULL DEFAULT 0,
     merge_request_id    BIGINT NOT NULL REFERENCES bi_mdm_merge_request(id) ON DELETE CASCADE,
     steward_user        VARCHAR(100) NOT NULL,
     assigned_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
