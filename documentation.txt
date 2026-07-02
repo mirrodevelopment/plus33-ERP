@@ -2055,4 +2055,281 @@ This module extends the BI & DWH foundation into an advanced Enterprise Data Pla
   - Execution Command: `.\mvnw.cmd surefire:test -Dtest=BiV41EnterpriseIntegrationTest`
   - Test Scope: 250 logic scenarios verifying duplicate matching similarity, steward decision workflows, attribute survivorship priority, dynamic redaction/masking, AI insight commentaries, schema contracts validation, self-service whitelist checks, and tenant isolation constraints.
 
+--------------------------------------------------------------------------------
+33. ENTERPRISE INTEGRATION PLATFORM (EIP) & EVENT MESH (V42)
+--------------------------------------------------------------------------------
+This module provides the core event messaging and service broker integration capabilities for the platform. It implements transaction outbox patterns, CloudEvent envelope parsing, topic configurations, routing schemas, and dynamic message serialization to connect internal services with external event systems.
+
+* Database Tables:
+  - integration_config: Stores EIP configurations and target brokers definitions.
+  - integration_topic_map: Mapped message types to specific event mesh topics.
+
+* Key Abstractions & Services:
+  - **EventMeshConnector**: Connects to the primary message broker.
+  - **OutboxPublisher**: Periodically scans transactional outbox logs and dispatches messages.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.IntegrationPlatformIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=IntegrationPlatformIntegrationTest`
+  - Test Scope: Validates event outbox processing, topic router matching, and message delivery.
+
+--------------------------------------------------------------------------------
+34. PLATFORM OPERATIONS, MULTI-TENANCY & HIGH AVAILABILITY (V43)
+--------------------------------------------------------------------------------
+Tracks system deployments configurations, tenant-specific schema routing rules, operational backup/restore histories, and coordinates service discovery registries.
+
+* Database Tables:
+  - platform_deployment: Tracks deploy histories and target version rollouts.
+  - tenant_routing_map: Routes user requests to corresponding schema endpoints.
+
+* Key Abstractions & Services:
+  - **TenantRoutingService**: Handles requests routing and resolves tenant DB contexts.
+  - **ServiceDiscoveryRegistry**: Coordinates service endpoints and tracks network maps.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.OpsPlatformIntegrationTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=OpsPlatformIntegrationTest`
+  - Test Scope: Verifies tenant context resolutions, leader election, and blue-green routing mappings.
+
+--------------------------------------------------------------------------------
+35. CLOUD-NATIVE INFRASTRUCTURE & HIGH AVAILABILITY (V44)
+--------------------------------------------------------------------------------
+Supports distributed cluster node coordination, autoscaling threshold policies, cache node registries, and circuit breaker states configurations.
+
+* Database Tables:
+  - platform_cache_node: Lists active distributed memory cache clusters.
+  - platform_autoscaling_policy: Policies specifying CPU/memory threshold actions.
+
+* Key Abstractions & Services:
+  - **ClusterCoordinator**: Orchestrates multi-node heartbeats and locks.
+  - **AutoscalerService**: Monitors telemetry and calculates nodes target scale.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suite: com.plus33.erp.platform.PlatformCloudNativeEnterpriseTest
+  - Execution Command: `.\mvnw.cmd surefire:test -Dtest=PlatformCloudNativeEnterpriseTest`
+  - Test Scope: Validates cluster split-brain mitigations, distributed locking, and scaling thresholds.
+
+--------------------------------------------------------------------------------
+36. ADVANCED PLATFORM ANALYTICS, AIOPS, FINOPS & POLICY ENGINE (V45)
+--------------------------------------------------------------------------------
+Tracks AIOps system metric telemetry anomalies, FinOps chargeback cost allocations, multi-cloud inventory nodes, and OPA-style policy version controls.
+
+* Database Tables:
+  - platform_aiops_telemetry: Stores telemetry events for machine learning detection.
+  - platform_finops_chargeback: Logs company chargebacks and cost allocations.
+  - platform_policy_version: Stores raw policy scripts and matching rules.
+
+* Key Abstractions & Services:
+  - **AIOpsPredictor**: Detects anomalous platform signals and triggers self-healing runs.
+  - **PolicyEngine**: Version-controls and executes fine-grained GRC rules validations.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: PlatformAIOpsIntegrationTest, PlatformFinOpsIntegrationTest, PlatformMultiCloudIntegrationTest, PlatformObservabilityIntegrationTest, PlatformPolicyIntegrationTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=PlatformAIOpsIntegrationTest,PlatformFinOpsIntegrationTest,PlatformMultiCloudIntegrationTest,PlatformObservabilityIntegrationTest,PlatformPolicyIntegrationTest`
+  - Test Scope: Asserts policy evaluations, chargeback allocations, and cost Optimization recommendations.
+
+--------------------------------------------------------------------------------
+37. AI AGENT COGNITIVE ENGINE & MULTI-AGENT WORKFLOWS (V46)
+--------------------------------------------------------------------------------
+Supports the AI cognitive execution runtime. Features agent templates registries, conversation history stores, registered tools schemas, text splits vector indexing, and memory contexts.
+
+* Database Tables:
+  - agent_metadata: System registration profiles for LLM instances.
+  - agent_conversation: Persistent user-to-agent session chats histories.
+  - agent_memory: Long-term and short-term semantic knowledge keys.
+
+* Key Abstractions & Services:
+  - **AgentOrchestrator**: Executes main prompt routing and tool invocation.
+  - **AgentMemoryManager**: Manages context windows and retrieves semantic memories.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: AgentConversationTest, AgentLifecycleTest, KnowledgeManagementTest, ToolExecutionTest, WorkflowAutomationTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=AgentConversationTest,AgentLifecycleTest,KnowledgeManagementTest,ToolExecutionTest,WorkflowAutomationTest`
+  - Test Scope: Verifies contextual chat responses, RAG retrieval quality, and tool dispatch logs.
+
+--------------------------------------------------------------------------------
+38. DIGITAL TWIN ENGINE & PROCESS MINING (V47)
+--------------------------------------------------------------------------------
+Coordinates industrial equipment digital twins definitions, live telemetry ingestion, case pathway mining, and conformance verification checks.
+
+* Database Tables:
+  - digital_twin_definition: Twin metadata formats and physical sensor schemas.
+  - process_mining_log: System transaction event streams mapped to BPMN pathways.
+
+* Key Abstractions & Services:
+  - **TwinStateProjector**: Project physical telemetry onto digital states.
+  - **ConformanceEngine**: Verifies if trace logs conform to structural model rules.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: AutonomousDecisionTest, DigitalTwinTest, ProcessMiningTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=AutonomousDecisionTest,DigitalTwinTest,ProcessMiningTest`
+  - Test Scope: Verifies trace alignment algorithms, telemetry threshold checks, and twin state changes.
+
+--------------------------------------------------------------------------------
+39. ENTERPRISE KNOWLEDGE GRAPH & CAUSAL DECISION INTELLIGENCE (V48)
+--------------------------------------------------------------------------------
+Models enterprise relationship nodes, Bayesian probability causal graphs, root-cause analyses, and Explainable AI (XAI) lineage tracking.
+
+* Database Tables:
+  - platform_knowledge_graph: Nodes and edges modeling resource relationships.
+  - platform_causal_model: Causal dependency models and weights.
+
+* Key Abstractions & Services:
+  - **CausalInferenceEngine**: Evaluates intervention impacts and runs Bayesian inferences.
+  - **XaiLineageTracker**: Generates natural explanations of automated model decisions.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: CausalInferenceTest, KnowledgeGraphTest, PredictiveMaintenanceTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=CausalInferenceTest,KnowledgeGraphTest,PredictiveMaintenanceTest`
+  - Test Scope: Validates semantic graph traversals, causal query runs, and model explainability tracing.
+
+--------------------------------------------------------------------------------
+40. INTELLIGENT LOGISTICS NETWORK & AUTONOMOUS ROUTING TWINS (V49)
+--------------------------------------------------------------------------------
+Integrates supply chain locations as network nodes, vehicle telemetries tracking, transit delays predictions, and routing audit logs.
+
+* Database Tables:
+  - platform_logistics_node: Registry of warehouses, stores, ports.
+  - platform_delay_prediction: Estimated delay duration times and triggers.
+
+* Key Abstractions & Services:
+  - **GeoRoutingEngine**: Computes network route costs and schedules.
+  - **DelayPredictionEngine**: Forecasts arrival delays based on telemetry histories.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: AutonomousRoutingTest, DelayPredictionTest, GeoRoutingEngineTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=AutonomousRoutingTest,DelayPredictionTest,GeoRoutingEngineTest`
+  - Test Scope: Asserts route deviance alerts, delay probability updates, and recalculations.
+
+--------------------------------------------------------------------------------
+41. INDUSTRIAL IOT EDGE, SCADA CONTROLS & TELEMETRY SYSTEMS (V50)
+--------------------------------------------------------------------------------
+Integrates hardware IoT gateways registers, SCADA device profiles, telemetry alerts thresholds, and command writes history log mappings.
+
+* Database Tables:
+  - platform_iot_gateway: Gateway profiles and client telemetry variables.
+  - platform_scada_device: Controller registries (OPC-UA node/modbus register definitions).
+
+* Key Abstractions & Services:
+  - **ScadaControlService**: Sends writes commands and validates physical registries limits.
+  - **TelemetryProcessor**: Processes stream telemetry variables and checks thresholds.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: IotGatewayTest, MachineryTelemetryTest, ScadaControlTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=IotGatewayTest,MachineryTelemetryTest,ScadaControlTest`
+  - Test Scope: Verifies modbus commands audit signatures, telemetry spikes alerts, and PLC states.
+
+--------------------------------------------------------------------------------
+42. SPATIAL ANALYTICS & GEOFENCING TWINS (V51)
+--------------------------------------------------------------------------------
+Features polygonal geofencing definitions registry, route boundaries deviance records, geofencing audit trails, and spatial query performance metrics.
+
+* Database Tables:
+  - platform_geofence_definition: Polygon, Circle, Rectangle geometry spatial nodes.
+  - platform_route_deviancy_log: Logs deviations from shipping lanes.
+
+* Key Abstractions & Services:
+  - **GeofenceService**: Computes coordinate intersections and generates breach events.
+  - **SpatialQueryEngine**: Optimized geometric queries on location states.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: GeofenceTwinTest, RouteDeviancyTest, SpatialQueryTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=GeofenceTwinTest,RouteDeviancyTest,SpatialQueryTest`
+  - Test Scope: Validates geofence exit/entry breaches, route deviations, and spatial audits.
+
+--------------------------------------------------------------------------------
+43. DISTRIBUTED EDGE COMPUTING REGISTRY & STORE-AND-FORWARD SYNC (V52)
+--------------------------------------------------------------------------------
+Orchestrates offline-first store-and-forward edge sync queues, edge node health diagnostics, and firmware version registers.
+
+* Database Tables:
+  - platform_edge_node: Identifies distributed store edge gateways.
+  - platform_edge_sync_queue: Sync updates queue tracking offline transactions.
+
+* Key Abstractions & Services:
+  - **EdgeSyncProcessor**: Dequeues and synchronizes payloads to cloud backend.
+  - **EdgeMonitor**: Evaluates edge nodes heartbeats and network quality levels.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: EdgeHealthMonitorTest, EdgeNodeRegistryTest, StoreAndForwardSyncTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=EdgeHealthMonitorTest,EdgeNodeRegistryTest,StoreAndForwardSyncTest`
+  - Test Scope: Validates store-and-forward queue sequence runs, offline playbacks, and health alerts.
+
+--------------------------------------------------------------------------------
+44. ENTERPRISE IOT FLEET ORCHESTRATION, OTA SOFTWARE UPDATES & DIAGNOSTICS (V53)
+--------------------------------------------------------------------------------
+Provides binary OTA package registries, progressive campaign rollouts orchestrator, hardware diagnostic logs tracker, and remote signed device command dispatchers.
+
+* Database Tables:
+  - platform_ota_package: OTA update binaries profiles with semantic versions and checksums.
+  - platform_ota_campaign: Deployment campaigns configurations.
+  - platform_device_diagnostic: System hardware status logs, thread states, and crash dumps.
+  - platform_device_remote_command: Audit registry of executed commands.
+
+* Key Abstractions & Services:
+  - **CampaignCoordinator**: Executes rollout batches and triggers auto-rollbacks.
+  - **DiagnosticCollector**: Logs hardware logs and formats crash summaries.
+  - **RemoteCommandService**: Validates signatures and dispatches execution targets.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: OtaDeploymentTest, DeviceDiagnosticTest, RemoteCommandTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=OtaDeploymentTest,DeviceDiagnosticTest,RemoteCommandTest`
+  - Test Scope: Asserts package registry, rollout failure counts threshold checks, stack trace logs, and command execution status.
+
+--------------------------------------------------------------------------------
+45. ENTERPRISE FLEET COMPLIANCE, ZERO-TRUST IDENTITY & DEVICE ATTESTATION (V54)
+--------------------------------------------------------------------------------
+Implements edge compliance rules, configuration file drift detectors, TPM quotes validation certificates, and versioned configuration profiles scope mapping.
+
+* Database Tables:
+  - platform_device_compliance_policy: OS/Agent required properties and ports constraints.
+  - platform_device_drift_log: Tracks baseline vs current file hashes drift reports.
+  - platform_device_attestation: Logs TPM pcr values validations.
+  - platform_device_config_profile: Group profiles assignments.
+
+* Key Abstractions & Services:
+  - **TpmAttestationValidator**: Verifies nonces, ak/ek certificates, and secure boot status.
+  - **DriftDetector**: Analyzes baseline configurations and registers changed services/packages.
+  - **ComplianceChecker**: Logs policies run checks results (PASS, FAIL, WARNING, UNKNOWN).
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: DeviceComplianceTest, ZeroTrustAttestationTest, ConfigProfileTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=DeviceComplianceTest,ZeroTrustAttestationTest,ConfigProfileTest`
+  - Test Scope: Validates TPM signatures verification, configuration profiles rollout triggers, and compliance audit log states.
+
+--------------------------------------------------------------------------------
+46. ENTERPRISE FLEET PREDICTIVE MAINTENANCE & FAILURE PROGNOSTICS (V55)
+--------------------------------------------------------------------------------
+Features remaining useful life (RUL) predictive policies registries, failure prognostics triggers, reliability history metrics MTBF/MTTR analytics, and predictive configuration change audits.
+
+* Database Tables:
+  - platform_predictive_maintenance_policy: Strategy, prediction model thresholds.
+  - platform_failure_prognostics_log: Estimated failure times and recommendations.
+  - platform_reliability_failure_log: Calculates availability rates and failure modes.
+  - platform_maintenance_trigger_log: Coordinates scheduled repair work orders.
+
+* Key Abstractions & Services:
+  - **FailurePrognosticsEngine**: Triggers automated maintenance work orders from predictions.
+  - **ReliabilityEngineeringService**: Generates conformed MTBF/MTTR metrics from repair logs.
+  - **PredictiveMaintenancePolicyService**: Configures minimum health parameters.
+
+* Verification Notes:
+  - Status: **PASSED AND VERIFIED**.
+  - Integration Test Suites: FleetPredictiveMaintenanceTest, FailurePrognosticsTest, ReliabilityEngineeringTest
+  - Execution Command: `.\mvnw.cmd test -Dtest=FleetPredictiveMaintenanceTest,FailurePrognosticsTest,ReliabilityEngineeringTest`
+  - Test Scope: Verifies RUL predictions accuracy, automated maintenance scheduling triggers, MTBF/MTTR estimations, and policy audit logs.
+
 
