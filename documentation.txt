@@ -2680,5 +2680,417 @@ V57  AI-Driven Dispatch, Route Simulation & Smart Load Balancing
 This content is based on the V57 implementation details provided in your uploaded log.
 
 
+# V58 — Enterprise Fleet Dynamic Fuel Optimization & Eco-Driving Diagnostics (Release v58.0)
+
+## Status
+
+**Status:** ✅ Completed
+**Release:** `v58.0`
+**Architecture Layer:** Enterprise Fleet Fuel & Driving Intelligence
+
+---
+
+## Objective
+
+V58 introduces dynamic fuel efficiency optimization policies and real-time eco-driving diagnostics behavior logs, tracking vehicle operations metrics, alerts, and emissions.
+
+---
+
+## Database Migrations
+
+### V351 — Fuel Optimization Policies
+
+Created:
+* `platform_fuel_optimization_policy`
+
+Supports:
+* Strategy settings
+* Target consumption
+* Idle thresholds
+* Speed boundaries
+
+---
+
+### V352 — Eco-Driving Diagnostics
+
+Created:
+* `platform_eco_driving_log`
+
+Supports tracking:
+* Harsh acceleration
+* Harsh braking
+* Harsh cornering
+* Overspeeding
+* Driver scores
+
+---
+
+### V353 — Fuel Telemetry
+
+Created:
+* `platform_fuel_telemetry_log`
+
+Supports:
+* RPM ingestion
+* Throttle position
+* Instant/average fuel rates
+* Fuel levels
+* Odometer
+
+---
+
+### V354 — Fuel Efficiency Advisor
+
+Created:
+* `platform_fuel_efficiency_advisor`
+
+Supports:
+* Fuel savings advisor recommendation tips
+* Priority and emissions targets
+
+---
+
+### V355 — Fuel Audit
+
+Created:
+* `platform_fuel_audit_log`
+
+Supports:
+* Configuration change history operator audit logs
+
+---
+
+### V356 — Permissions Seeds
+
+New permissions:
+* `fuel:optimize`
+* `driving:audit`
+* `eco:advisor`
+
+---
+
+# Java Package Structure
+
+```
+com.plus33.erp.routing.fuel
+├── engine
+│   └── FuelOptimizationEngine
+├── diagnostic
+│   └── EcoDrivingDiagnosticService
+├── telemetry
+│   └── FuelTelemetryService
+└── controller
+    └── FuelController
+```
+
+---
+
+# Core Services
+
+* `FuelOptimizationEngine`
+* `EcoDrivingDiagnosticService`
+* `FuelTelemetryService`
+* `FuelController`
+
+---
+
+# Testing
+
+Integration suites:
+* `FuelOptimizationTest`
+* `EcoDrivingTest`
+* `FuelTelemetryTest`
+
+Verification command:
+```powershell
+.\mvnw.cmd test -Dtest=FuelOptimizationTest,EcoDrivingTest,FuelTelemetryTest
+```
+
+---
+
+# V59 — Enterprise EV Fleet Energy Management, Battery Diagnostics & Charging Station Analytics (Release v59.0)
+
+## Status
+
+**Status:** ✅ Completed
+**Release:** `v59.0`
+**Architecture Layer:** Enterprise EV Energy & Charging Infrastructure
+
+---
+
+## Objective
+
+V59 introduces dynamic EV fleet battery state of charge (SoC) management, battery health (SoH) diagnostics, charging station schedules, and energy cost audits.
+
+---
+
+## Database Migrations
+
+### V361 — EV Battery Telemetry
+
+Created:
+* `platform_ev_telemetry_log`
+
+Supports:
+* SoC, battery voltage, current, temperature, and range telemetry
+
+---
+
+### V362 — Battery Health Diagnostics
+
+Created:
+* `platform_ev_battery_health_log`
+
+Supports:
+* SoH degradation, resistance, and cycles tracking
+
+---
+
+### V363 — Charging Station Registry
+
+Created:
+* `platform_ev_charging_station`
+
+Supports:
+* Connector types NACS/CCS2/Type2, charging speeds, tariffs, and green tags
+
+---
+
+### V364 — EV Charging Schedules
+
+Created:
+* `platform_ev_charging_schedule`
+
+Supports:
+* Scheduling charging slots and off-peak charging strategy
+
+---
+
+### V365 — EV Energy Audits
+
+Created:
+* `platform_ev_energy_audit_log`
+
+Supports:
+* Tracking algorithm performance and carbon/cost offsets
+
+---
+
+### V366 — Permissions Seeds
+
+New permissions:
+* `ev:manage`
+* `battery:diagnose`
+* `charging:schedule`
+
+---
+
+# Java Package Structure
+
+```
+com.plus33.erp.routing.ev
+├── energy
+│   └── EvEnergyManagementService
+├── diagnostic
+│   └── BatteryHealthDiagnosticService
+├── scheduler
+│   └── ChargingStationScheduler
+└── controller
+    └── EvController
+```
+
+---
+
+# Core Services
+
+* `EvEnergyManagementService`
+* `BatteryHealthDiagnosticService`
+* `ChargingStationScheduler`
+* `EvController`
+
+---
+
+# Testing
+
+Integration suites:
+* `EvEnergyTest`
+* `BatteryHealthTest`
+* `ChargingSchedulerTest`
+
+Verification command:
+```powershell
+.\mvnw.cmd test -Dtest=EvEnergyTest,BatteryHealthTest,ChargingSchedulerTest
+```
+
+---
+
+# V60 — Enterprise Fleet ESG, Carbon Accounting & ESG Reporting Integration (Release v60.0)
+
+## Status
+
+**Status:** ✅ Completed
+**Release:** `v60.0`
+**Architecture Layer:** Enterprise Sustainability & ESG Reporting Compliance
+
+---
+
+## Objective
+
+V60 introduces direct Scope 1 fuel combustion carbon accounting and indirect Scope 2 EV charging electricity grid-emissions tracking, mapping environmental compliance reporting frameworks (GRI, SASB, CSRD), carbon offsets registry, and immutable digital signatures audits.
+
+---
+
+## Database Migrations
+
+### V371 — Scope 1 Direct Emissions
+
+Created:
+* `platform_esg_scope1_log`
+
+Supports:
+* Calculating and logging direct combustion fuel emissions
+
+---
+
+### V372 — Scope 2 Indirect Grid Emissions
+
+Created:
+* `platform_esg_scope2_log`
+
+Supports:
+* Tracking indirect grid charging electricity consumption emissions
+
+---
+
+### V373 — Carbon Offsets Registry
+
+Created:
+* `platform_esg_carbon_offset`
+
+Supports:
+* Offset certs verification and projects types tracking
+
+---
+
+### V374 — ESG Compliance Framework Mappings
+
+Created:
+* `platform_esg_compliance_log`
+
+Supports:
+* Mapping emission outputs to GRI/SASB compliance scores
+
+---
+
+### V375 — ESG Report Audits
+
+Created:
+* `platform_esg_audit_log`
+
+Supports:
+* Immutable hashes, digital signatures, and operator tracking
+
+---
+
+### V376 — Permissions Seeds
+
+New permissions:
+* `esg:report`
+* `emissions:calculate`
+* `sustainability:audit`
+
+---
+
+# Java Package Structure
+
+```
+com.plus33.erp.routing.esg
+├── carbon
+│   └── CarbonAccountingService
+├── compliance
+│   └── SustainabilityComplianceService
+├── report
+│   └── EsgReportingService
+└── controller
+    └── EsgController
+```
+
+---
+
+# Core Services
+
+* `CarbonAccountingService`
+* `SustainabilityComplianceService`
+* `EsgReportingService`
+* `EsgController`
+
+---
+
+# Testing
+
+Integration suites:
+* `Scope1EmissionsTest`
+* `Scope2EmissionsTest`
+* `EsgComplianceTest`
+
+Verification command:
+```powershell
+.\mvnw.cmd test -Dtest=Scope1EmissionsTest,Scope2EmissionsTest,EsgComplianceTest
+```
+
+---
+
+# Platform Roadmap Progress
+
+```
+V53  Fleet Orchestration & OTA
+      ↓
+V54  Zero-Trust Compliance
+      ↓
+V55  Predictive Maintenance
+      ↓
+V56  Route Optimization
+      ↓
+V57  AI-Driven Dispatch, Route Simulation & Smart Load Balancing
+      ↓
+V58  Dynamic Fuel Optimization & Eco-Driving Diagnostics
+      ↓
+V59  EV Fleet Energy Management & Charging Analytics
+      ↓
+V60  ESG, Carbon Accounting & ESG Reporting Integration
+```
+
+---
+
+# Build Verification
+
+**Build Command**
+```powershell
+.\mvnw.cmd clean verify
+```
+
+Result:
+* BUILD SUCCESS
+* Total Automated Tests: **852**
+* Failures: **0**
+* Errors: **0**
+* Git Working Tree: **Clean**
+
+---
+
+# Git Release
+
+**Commit**
+```
+db95b69 feat(esg): complete V60 Enterprise Fleet ESG, Carbon Accounting & ESG Reporting Integration
+```
+
+**Tag**
+```
+v60.0
+```
+
+
+
 
 
