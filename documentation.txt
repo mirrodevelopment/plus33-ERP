@@ -3090,6 +3090,65 @@ db95b69 feat(esg): complete V60 Enterprise Fleet ESG, Carbon Accounting & ESG Re
 v60.0
 ```
 
+================================================================================
+PLUS33 ERP — ENTERPRISE DEVELOPMENT SEED DATA (V377 - V384)
+================================================================================
+
+We have generated and verified a complete, realistic development dataset for the PLUS33 ERP backend, targeting "PLUS33 Coffee" in France.
+
+## Data Seeding Strategy & Structure
+
+The dataset is seeded across 8 custom Flyway migrations, preserving the existing UAE company (`PLUS33_GLOBAL`) and database constraints:
+
+* **V377__seed_plus33_coffee_company_org.sql**
+  - Company: PLUS33 Coffee (France, EUR, Europe/Paris, English)
+  - Regions: 5 (Île-de-France, Provence-Alpes-Côte d'Azur, Auvergne-Rhône-Alpes, Occitanie, Nouvelle-Aquitaine)
+  - Warehouses: 2 (Paris Central Warehouse, Lyon Distribution Center)
+  - Stores: 10 (2 stores per region)
+  - Departments: 10 (Finance, HR, Sales, Inventory, Warehouse, Procurement, CRM, Customer Support, Administration, IT)
+
+* **V378__seed_plus33_coffee_users_employees.sql**
+  - Users & Employees: 200 (1 Admin, 5 Regional Admins, 10 Store Admins, 10 Warehouse Mgrs, 10 Finance Mgrs, 10 HR Mgrs, 10 Procurement Officers, 10 CRM Executives, 10 Support Execs, 20 Shift Supervisors, and ~104 Store Staff)
+  - Roles, User Regions, User Stores, User Warehouses, Shifts (Morning, Afternoon, Night), and Leave Types.
+
+* **V379__seed_plus33_coffee_products_suppliers.sql**
+  - Product Categories: 15 (Hot/Cold Coffee, Espresso, Tea, Merchandise, etc.)
+  - Units of Measure (UoMs): 5 (PCS, KG, L, BOX, SET)
+  - Products: 250 items with unique SKUs
+  - Suppliers: 30 French suppliers
+
+* **V380__seed_plus33_coffee_customers_crm.sql**
+  - Customers: 100 French customers (B2B and B2C)
+  - CRM Leads (200), CRM Opportunities (150), Customer Cases/Tickets (100), and CRM Timeline Events.
+
+* **V381__seed_plus33_coffee_inventory.sql**
+  - Inventory Stock: ~500 stock records
+  - Stock Movements: ~2,500 movements (INBOUND, OUTBOUND, TRANSFER, ADJUSTMENT)
+  - Stock Transfers (50), Adjustments (50), and Physical Stock Counts (20).
+
+* **V382__seed_plus33_coffee_purchasing.sql**
+  - Purchase Requests: 50 requests
+  - Purchase Orders: 150 orders (DRAFT, SUBMITTED, APPROVED, RECEIVED, CANCELLED, REJECTED)
+  - Supplier Invoices: 150 invoices linked to POs
+
+* **V383__seed_plus33_coffee_sales_finance.sql**
+  - Sales Orders: 3,000 orders over 6 months
+  - Customer Invoices: 500 invoices
+  - Payments: 500 customer payments
+  - Finance: Budgets (50), Budget Lines (200), GL Journal Entries (500), and GL Lines (1000)
+
+* **V384__seed_plus33_coffee_hr_audit_dashboard.sql**
+  - HR Attendance: ~18,000 daily clock-in/out records
+  - Employee Leaves: ~200 leave requests
+  - Payroll: 3 monthly payroll periods and payroll runs
+  - Platform Audit Logs: 3,000 entries
+  - BI Analytics Snapshots: 100 daily KPI snapshots for dashboard visualization
+
+## Verification Results
+
+* **Integration Test:** `CustomerInvoiceControllerIntegrationTest` passes successfully with all 8 new seed migrations applied from scratch on PostgreSQL.
+* **Cleanup and Reset:** `DatabaseCleanTest` programmatically resets the database by removing company-specific data and cleaning Flyway schema history for versions `377` through `384` to guarantee clean re-playability.
+
 
 
 
