@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.etl
+ * File              : ExtractionEngine.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ExtractionEngineController
+ * Related Service   : ExtractionEngine
+ * Related Repository: BiCdcWatermarkRepository, BiEtlJobRunRepository
+ * Related Entity    : ExtractionEngine
+ * Related DTO       : N/A
+ * Related Mapper    : ExtractionEngineMapper
+ * Related DB Table  : extraction_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ExtractionEngineController, ExtractionEngineImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements ExtractionEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.etl;
 
 import com.plus33.erp.bi.entity.BiCdcWatermark;
@@ -29,6 +56,14 @@ public class ExtractionEngine {
         this.jobRunRepo = jobRunRepo;
     }
 
+    /**
+     * Performs the extract operation in this module.
+     *
+     * @param jobId the jobId input value
+     * @param sourceModule the sourceModule input value
+     * @param sourceTable the sourceTable input value
+     * @return the ExtractionResult result
+     */
     @Transactional
     public ExtractionResult extract(Long jobId, String sourceModule, String sourceTable) {
         log.info("[ETL:EXTRACT] Starting extraction: module={} table={}", sourceModule, sourceTable);
@@ -49,6 +84,14 @@ public class ExtractionEngine {
         return new ExtractionResult(batchId, sourceModule, sourceTable, fromEventId);
     }
 
+    /**
+     * Performs the advanceWatermark operation in this module.
+     *
+     * @param sourceModule the sourceModule input value
+     * @param sourceTable the sourceTable input value
+     * @param toEventId the toEventId input value
+     * @param extractedCount the extractedCount input value
+     */
     @Transactional
     public void advanceWatermark(String sourceModule, String sourceTable, Long toEventId, int extractedCount) {
         BiCdcWatermark wm = watermarkRepo.findBySourceModuleAndSourceTable(sourceModule, sourceTable)

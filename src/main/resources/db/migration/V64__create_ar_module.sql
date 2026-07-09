@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 64
+-- File              : V64__create_ar_module.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create ar module
+--
+-- Tables Created    : ar_write_offs
+-- Tables Altered    : N/A
+-- Seed Data For     : chart_of_accounts
+-- Indexes           : IF, IF, IF, IF
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V64__create_ar_module.sql
 -- PLUS33 ERP — Accounts Receivable Module Schema

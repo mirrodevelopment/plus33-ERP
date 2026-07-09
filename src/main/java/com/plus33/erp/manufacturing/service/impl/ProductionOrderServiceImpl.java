@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Manufacturing Module
+ * Package           : com.plus33.erp.manufacturing.service.impl
+ * File              : ProductionOrderServiceImpl.java
+ * Purpose           : Business logic service layer for Manufacturing Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ProductionOrderController
+ * Related Service   : ProductionOrderServiceImpl
+ * Related Repository: ProductionOrderRepository, ProductionOrderOperationRepository, BomHeaderRepository, RoutingHeaderRepository, ProductRepository, UnitOfMeasureRepository, InventoryStockRepository, StockMovementRepository, WarehouseRepository, ProductionCostRepository, WorkCenterRepository, ProductionConfirmationRepository, ProductionScrapRepository, ProductionReworkRepository, ManufacturingBatchGenealogyRepository, ManufacturingSerialGenealogyRepository
+ * Related Entity    : ProductionOrder
+ * Related DTO       : CompleteOperationRequest, CreateProductionOrderOperationRequest, CreateProductionOrderRequest, mapOpToDto, mapToDto
+ * Related Mapper    : ProductionOrderMapper
+ * Related DB Table  : production_orders
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module, Organization Module
+ * Used By           : ProductionOrderController, ProductionOrderServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Manufacturing Module. Implements ProductionOrderService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.manufacturing.service.impl;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -27,6 +54,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Manufacturing Module</b>
+ *
+ * <p><b>Class  :</b> {@code ProductionOrderServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.manufacturing.service.impl}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Manufacturing Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ProductionOrderController
+ *   --> ProductionOrderServiceImpl (this)
+ *   --> Validate business rules
+ *   --> ProductionOrderRepository (read/write 'production_orders')
+ *   --> ProductionOrderMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code production_orders}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Manufacturing</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional
 public class ProductionOrderServiceImpl implements ProductionOrderService {
@@ -88,6 +139,24 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         this.serialGenealogyRepository = serialGenealogyRepository;
     }
 
+    /**
+     * Creates a new production order and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the ProductionOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new production order and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the ProductionOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public ProductionOrderDto createProductionOrder(CreateProductionOrderRequest request) {
         final Long companyId = request.getCompanyId();
@@ -201,6 +270,13 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         return dto;
     }
 
+    /**
+     * Retrieves a single production order by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the ProductionOrderDto result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public ProductionOrderDto getProductionOrderById(Long id) {
@@ -212,6 +288,13 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         return dto;
     }
 
+    /**
+     * Retrieves production orders by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ProductionOrderDto> getProductionOrdersByCompany(Long companyId) {
@@ -219,6 +302,18 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
                 .map(po -> getProductionOrderById(po.getId())).toList();
     }
 
+    /**
+     * Releases previously reserved production order resources back to the available pool.
+     *
+     * @param id the unique database ID of the resource
+     * @return the ProductionOrderDto result
+     */
+    /**
+     * Releases previously reserved production order resources back to the available pool.
+     *
+     * @param id the unique database ID of the resource
+     * @return the ProductionOrderDto result
+     */
     @Override
     public ProductionOrderDto releaseProductionOrder(Long id) {
         ProductionOrder order = orderRepository.findById(id)
@@ -308,6 +403,26 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         return getProductionOrderById(id);
     }
 
+    /**
+     * Completes the operation workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param orderId the orderId input value
+     * @param operationId the operationId input value
+     * @param request the validated request DTO containing input data
+     * @return the ProductionOrderOperationDto result
+     */
+    /**
+     * Completes the operation workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param orderId the orderId input value
+     * @param operationId the operationId input value
+     * @param request the validated request DTO containing input data
+     * @return the ProductionOrderOperationDto result
+     */
     @Override
     public ProductionOrderOperationDto completeOperation(Long orderId, Long operationId, CompleteOperationRequest request) {
         ProductionOrder order = orderRepository.findById(orderId)
@@ -388,6 +503,22 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         return mapOpToDto(op);
     }
 
+    /**
+     * Completes the production order workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the ProductionOrderDto result
+     */
+    /**
+     * Completes the production order workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the ProductionOrderDto result
+     */
     @Override
     public ProductionOrderDto completeProductionOrder(Long id) {
         ProductionOrder order = orderRepository.findById(id)
@@ -481,6 +612,22 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         return getProductionOrderById(id);
     }
 
+    /**
+     * Performs the startOrder operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param orderId the orderId input value
+     * @param userId authenticated user identifier
+     * @return the ProductionOrderDto result
+     */
+    /**
+     * Performs the startOrder operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param orderId the orderId input value
+     * @param userId authenticated user identifier
+     * @return the ProductionOrderDto result
+     */
     @Override
     public ProductionOrderDto startOrder(Long companyId, Long orderId, Long userId) {
         ProductionOrder order = orderRepository.findById(orderId).orElseThrow();
@@ -489,6 +636,22 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         return mapToDto(orderRepository.save(order));
     }
 
+    /**
+     * Completes the order workflow and finalizes the record status.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param orderId the orderId input value
+     * @param userId authenticated user identifier
+     * @return the ProductionOrderDto result
+     */
+    /**
+     * Completes the order workflow and finalizes the record status.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param orderId the orderId input value
+     * @param userId authenticated user identifier
+     * @return the ProductionOrderDto result
+     */
     @Override
     public ProductionOrderDto closeOrder(Long companyId, Long orderId, Long userId) {
         ProductionOrder order = orderRepository.findById(orderId).orElseThrow();
@@ -498,6 +661,30 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         return mapToDto(orderRepository.save(order));
     }
 
+    /**
+     * Cancels the order and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param orderId the orderId input value
+     * @param reason the reason input value
+     * @param userId authenticated user identifier
+     * @return the ProductionOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Cancels the order and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param orderId the orderId input value
+     * @param reason the reason input value
+     * @param userId authenticated user identifier
+     * @return the ProductionOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public ProductionOrderDto cancelOrder(Long companyId, Long orderId, String reason, Long userId) {
         ProductionOrder order = orderRepository.findById(orderId).orElseThrow();
@@ -506,6 +693,14 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
         return mapToDto(orderRepository.save(order));
     }
 
+    /**
+     * Retrieves orders by status data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param status status filter for narrowing query results
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ProductionOrderDto> getOrdersByStatus(Long companyId, String status) {
@@ -514,6 +709,13 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
                 .map(this::mapToDto).toList();
     }
 
+    /**
+     * Retrieves active orders data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ProductionOrderDto> getActiveOrders(Long companyId) {
@@ -522,6 +724,15 @@ public class ProductionOrderServiceImpl implements ProductionOrderService {
                 .map(this::mapToDto).toList();
     }
 
+    /**
+     * Retrieves orders by schedule data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param from the from input value
+     * @param to the to input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ProductionOrderDto> getOrdersBySchedule(Long companyId, LocalDate from, LocalDate to) {

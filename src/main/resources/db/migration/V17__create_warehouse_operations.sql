@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 17
+-- File              : V17__create_warehouse_operations.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create warehouse operations
+--
+-- Tables Created    : stock_transfers, stock_transfer_items, stock_adjustments
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_stock_transfers_src_wh, idx_stock_transfers_src_store, idx_stock_transfers_dest_wh, idx_stock_transfers_dest_store, idx_stock_transfer_items_transfer, idx_stock_transfer_items_product, idx_stock_adjustments_wh, idx_stock_adjustments_store, idx_stock_adjustments_product
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V17__create_warehouse_operations.sql
 -- PLUS33 ERP — Warehouse Operations Tables

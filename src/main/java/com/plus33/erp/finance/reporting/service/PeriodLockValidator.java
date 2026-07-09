@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.reporting.service
+ * File              : PeriodLockValidator.java
+ * Purpose           : Component of Finance Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PeriodLockValidatorController
+ * Related Service   : PeriodLockValidatorService, PeriodLockValidatorServiceImpl
+ * Related Repository: PeriodLockRepository
+ * Related Entity    : PeriodLockValidator
+ * Related DTO       : N/A
+ * Related Mapper    : PeriodLockValidatorMapper
+ * Related DB Table  : period_lock_validators
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Finance Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.finance.reporting.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -12,6 +39,18 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code PeriodLockValidator}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.reporting.service}</p>
+ * <p><b>Layer  :</b> Spring Component: shared utility or infrastructure helper for Finance Module.</p>
+ *
+ * <p><b>Module Deps      :</b> Common, Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Component
 @RequiredArgsConstructor
 public class PeriodLockValidator {
@@ -19,6 +58,14 @@ public class PeriodLockValidator {
     private final PeriodLockRepository periodLockRepository;
     private final PeriodLockOverrideLogger periodLockOverrideLogger;
 
+    /**
+     * Validates business rules and constraints for not locked.
+     *
+     * @param company the company input value
+     * @param date the date input value
+     * @param journalEntry the journalEntry input value
+     * @throws BusinessException if a business rule is violated
+     */
     public void verifyNotLocked(Company company, LocalDate date, JournalEntry journalEntry) {
         if (company == null || date == null) {
             return;

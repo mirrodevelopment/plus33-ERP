@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Esm Module
+ * Package           : com.plus33.erp.esm.service
+ * File              : PreventiveMaintenanceEngine.java
+ * Purpose           : Business logic service layer for Esm Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PreventiveMaintenanceEngineController
+ * Related Service   : PreventiveMaintenanceEngine
+ * Related Repository: PreventiveMaintenancePlanRepository, EsmWorkOrderRepository
+ * Related Entity    : PreventiveMaintenanceEngine
+ * Related DTO       : N/A
+ * Related Mapper    : PreventiveMaintenanceEngineMapper
+ * Related DB Table  : preventive_maintenance_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : PreventiveMaintenanceEngineController, PreventiveMaintenanceEngineImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Esm Module. Implements PreventiveMaintenanceEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.esm.service;
 
 import com.plus33.erp.esm.entity.EsmWorkOrder;
@@ -13,6 +40,30 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Esm Module</b>
+ *
+ * <p><b>Class  :</b> {@code PreventiveMaintenanceEngine}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.esm.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Esm Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * PreventiveMaintenanceEngineController
+ *   --> PreventiveMaintenanceEngine (this)
+ *   --> Validate business rules
+ *   --> PreventiveMaintenanceEngineRepository (read/write 'preventive_maintenance_engines')
+ *   --> PreventiveMaintenanceEngineMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code preventive_maintenance_engines}</p>
+ * <p><b>Module Deps      :</b> Esm</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class PreventiveMaintenanceEngine {
 
@@ -28,6 +79,10 @@ public class PreventiveMaintenanceEngine {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Performs the evaluatePmPlans operation in this module.
+     *
+     */
     @Transactional
     public void evaluatePmPlans() {
         List<PreventiveMaintenancePlan> activePlans = pmPlanRepository.findByActive(true);

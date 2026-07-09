@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Analytics Module
+ * Package           : com.plus33.erp.analytics.service
+ * File              : ProcurementAnalyticsServiceImpl.java
+ * Purpose           : Business logic service layer for Analytics Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ProcurementAnalyticsController
+ * Related Service   : ProcurementAnalyticsServiceImpl
+ * Related Repository: ProcurementAnalyticsRepository
+ * Related Entity    : ProcurementAnalytics
+ * Related DTO       : InvoiceMatchingResponse, PayablesAgingResponse, PoFulfilmentResponse, ProcurementSummaryResponse, SupplierPerformanceResponse
+ * Related Mapper    : ProcurementAnalyticsMapper
+ * Related DB Table  : procurement_analyticss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ProcurementAnalyticsController, ProcurementAnalyticsServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Analytics Module. Implements ProcurementAnalyticsService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.analytics.service;
 
 import com.plus33.erp.analytics.dto.*;
@@ -7,6 +34,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Analytics Module</b>
+ *
+ * <p><b>Class  :</b> {@code ProcurementAnalyticsServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.analytics.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Analytics Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ProcurementAnalyticsController
+ *   --> ProcurementAnalyticsServiceImpl (this)
+ *   --> Validate business rules
+ *   --> ProcurementAnalyticsRepository (read/write 'procurement_analyticss')
+ *   --> ProcurementAnalyticsMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code procurement_analyticss}</p>
+ * <p><b>Module Deps      :</b> Analytics</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class ProcurementAnalyticsServiceImpl implements ProcurementAnalyticsService {
@@ -17,6 +68,20 @@ public class ProcurementAnalyticsServiceImpl implements ProcurementAnalyticsServ
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Retrieves summary data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the ProcurementSummaryResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves summary data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the ProcurementSummaryResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public ProcurementSummaryResponse getSummary(Long companyId) {
         try {
@@ -36,6 +101,20 @@ public class ProcurementAnalyticsServiceImpl implements ProcurementAnalyticsServ
         }
     }
 
+    /**
+     * Retrieves suppliers data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves suppliers data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<SupplierPerformanceResponse> getSuppliers(Long companyId) {
         String sql = "SELECT company_id, supplier_id, supplier_name, total_orders, total_spend, on_time_delivery_rate, avg_lead_time_days FROM mv_supplier_performance WHERE company_id = ? ORDER BY total_spend DESC";
@@ -50,6 +129,20 @@ public class ProcurementAnalyticsServiceImpl implements ProcurementAnalyticsServ
         ), companyId);
     }
 
+    /**
+     * Retrieves payables aging data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves payables aging data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<PayablesAgingResponse> getPayablesAging(Long companyId) {
         String sql = "SELECT company_id, supplier_id, supplier_name, total_outstanding, aging_current, aging_1_30, aging_31_60, aging_61_90, aging_90_plus FROM mv_payables_aging WHERE company_id = ? ORDER BY total_outstanding DESC";
@@ -66,6 +159,20 @@ public class ProcurementAnalyticsServiceImpl implements ProcurementAnalyticsServ
         ), companyId);
     }
 
+    /**
+     * Retrieves purchase orders data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves purchase orders data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<PoFulfilmentResponse> getPurchaseOrders(Long companyId) {
         String sql = "SELECT company_id, purchase_order_id, order_number, supplier_name, status, total_amount, expected_delivery_date, total_items_ordered, total_quantity_ordered, total_quantity_received, fulfillment_rate FROM mv_po_fulfilment WHERE company_id = ? ORDER BY expected_delivery_date DESC";
@@ -84,6 +191,20 @@ public class ProcurementAnalyticsServiceImpl implements ProcurementAnalyticsServ
         ), companyId);
     }
 
+    /**
+     * Retrieves invoice matching data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves invoice matching data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<InvoiceMatchingResponse> getInvoiceMatching(Long companyId) {
         String sql = "SELECT company_id, supplier_invoice_id, invoice_number, purchase_order_id, order_number, supplier_name, invoice_total_amount, po_total_amount, has_quantity_mismatch, has_price_mismatch FROM mv_invoice_matching WHERE company_id = ? ORDER BY invoice_number";

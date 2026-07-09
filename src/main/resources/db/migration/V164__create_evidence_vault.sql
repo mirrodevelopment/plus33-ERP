@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 164
+-- File              : V164__create_evidence_vault.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create evidence vault
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V164: Compliance Evidence Vault
 CREATE TABLE IF NOT EXISTS grc_compliance_evidence (
     id BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.budget.entity
+ * File              : BudgetTemplateLine.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BudgetTemplateLineController
+ * Related Service   : BudgetTemplateLineService, BudgetTemplateLineServiceImpl
+ * Related Repository: BudgetTemplateLineRepository
+ * Related Entity    : BudgetTemplateLine
+ * Related DTO       : N/A
+ * Related Mapper    : BudgetTemplateLineMapper
+ * Related DB Table  : budget_template_lines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : BudgetTemplateLineRepository, BudgetTemplateLineMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'budget_template_lines'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.budget.entity;
 
 import jakarta.persistence.*;
@@ -5,6 +32,19 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code BudgetTemplateLine}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.budget.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'budget_template_lines'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code budget_template_lines}</p>
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity

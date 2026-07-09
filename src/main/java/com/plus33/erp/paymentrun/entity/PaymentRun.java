@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Paymentrun Module
+ * Package           : com.plus33.erp.paymentrun.entity
+ * File              : PaymentRun.java
+ * Purpose           : JPA Entity representing a persistent database record in Paymentrun Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PaymentRunController
+ * Related Service   : PaymentRunService, PaymentRunServiceImpl
+ * Related Repository: PaymentRunRepository
+ * Related Entity    : PaymentRun
+ * Related DTO       : N/A
+ * Related Mapper    : PaymentRunMapper
+ * Related DB Table  : payment_runs
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Procurement Module, Security Module
+ * Used By           : PaymentRunRepository, PaymentRunMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'payment_runs'. Defines persistent domain object for Paymentrun Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.paymentrun.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -13,6 +40,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Paymentrun Module</b>
+ *
+ * <p><b>Class  :</b> {@code PaymentRun}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.paymentrun.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'payment_runs'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code payment_runs}</p>
+ * <p><b>Module Deps      :</b> Organization, Procurement, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity
@@ -144,12 +184,20 @@ public class PaymentRun {
     private List<PaymentRunSupplierResult> supplierResults = new ArrayList<>();
 
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

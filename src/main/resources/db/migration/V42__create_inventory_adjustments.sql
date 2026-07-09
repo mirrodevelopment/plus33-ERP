@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 42
+-- File              : V42__create_inventory_adjustments.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create inventory adjustments
+--
+-- Tables Created    : inventory_adjustments, inventory_adjustment_items
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_adjustments_company, idx_adjustments_status, idx_adjustments_wh, idx_adjustments_store, idx_adjustments_client_ref, idx_adjustment_items_adj, idx_adjustment_items_product
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V42__create_inventory_adjustments.sql
 -- PLUS33 ERP — Inventory Adjustment schema and triggers

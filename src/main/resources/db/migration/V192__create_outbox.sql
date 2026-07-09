@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 192
+-- File              : V192__create_outbox.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create outbox
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V192: Outbox schema DDL
 CREATE TABLE IF NOT EXISTS integration_outbox (
     id                  BIGSERIAL PRIMARY KEY,

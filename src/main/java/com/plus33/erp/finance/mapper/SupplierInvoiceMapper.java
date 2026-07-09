@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.mapper
+ * File              : SupplierInvoiceMapper.java
+ * Purpose           : MapStruct Mapper converting between entities and DTOs in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: SupplierInvoiceController
+ * Related Service   : SupplierInvoiceService, SupplierInvoiceServiceImpl
+ * Related Repository: SupplierInvoiceRepository
+ * Related Entity    : SupplierInvoice
+ * Related DTO       : SupplierInvoiceItemRequest, SupplierInvoiceItemResponse, SupplierInvoiceRequest, SupplierInvoiceResponse, toItemResponse
+ * Related Mapper    : SupplierInvoiceMapper
+ * Related DB Table  : supplier_invoices
+ * Related REST APIs : N/A
+ * Depends On        : Common Module
+ * Used By           : SupplierInvoiceService, SupplierInvoiceServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * MapStruct Mapper for Finance Module. Converts JPA entities to DTOs and vice versa. Generated at compile time. Inherits GlobalMapperConfig.
+ ******************************************************************************/
 package com.plus33.erp.finance.mapper;
 
 import com.plus33.erp.common.mapper.GlobalMapperConfig;
@@ -9,6 +36,18 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code SupplierInvoiceMapper}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.mapper}</p>
+ * <p><b>Layer  :</b> MapStruct Mapper: compile-time Entity to DTO conversion. No runtime reflection.</p>
+ *
+ * <p><b>Module Deps      :</b> Common, Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Mapper(config = GlobalMapperConfig.class)
 public interface SupplierInvoiceMapper {
 

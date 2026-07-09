@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 115
+-- File              : V115__create_esm_spare_parts.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create esm spare parts
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V115: Spare Parts Van Inventory and Consumption
 CREATE TABLE IF NOT EXISTS esm_van_stocks (
     id BIGSERIAL PRIMARY KEY,

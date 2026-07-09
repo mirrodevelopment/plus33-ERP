@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 97
+-- File              : V97__create_wms_rules_and_workflow_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create wms rules and workflow tables
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V97: Rules Engine, Workflow Process Engine & Offline Queue Tables
 CREATE TABLE IF NOT EXISTS warehouse_rules (
     id BIGSERIAL PRIMARY KEY,

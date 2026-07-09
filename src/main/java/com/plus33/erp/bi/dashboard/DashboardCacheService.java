@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.dashboard
+ * File              : DashboardCacheService.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: DashboardCacheController
+ * Related Service   : DashboardCacheService
+ * Related Repository: DashboardCacheRepository
+ * Related Entity    : DashboardCache
+ * Related DTO       : N/A
+ * Related Mapper    : DashboardCacheMapper
+ * Related DB Table  : dashboard_caches
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : DashboardCacheController, DashboardCacheServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements DashboardCacheService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.dashboard;
 
 import org.slf4j.Logger;
@@ -23,6 +50,14 @@ public class DashboardCacheService {
         this.jdbc = jdbc;
     }
 
+    /**
+     * Retrieves bi data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param cacheKey the cacheKey input value
+     * @return Optional containing the entity if found, empty if not the result string value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public Optional<String> get(Long companyId, String cacheKey) {
         String sql = "SELECT cached_value FROM bi_dashboard_cache WHERE company_id=? AND cache_key=? AND expires_at > CURRENT_TIMESTAMP";
         try {
@@ -35,6 +70,14 @@ public class DashboardCacheService {
         }
     }
 
+    /**
+     * Performs the put operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param cacheKey the cacheKey input value
+     * @param value the value input value
+     * @param ttlSeconds the ttlSeconds input value
+     */
     @Transactional
     public void put(Long companyId, String cacheKey, String value, int ttlSeconds) {
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(ttlSeconds);
@@ -46,6 +89,12 @@ public class DashboardCacheService {
             """, companyId, cacheKey, value, ttlSeconds, expiresAt);
     }
 
+    /**
+     * Performs the evictCompany operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the numeric result value
+     */
     @Transactional
     public int evictCompany(Long companyId) {
         int count = jdbc.update("DELETE FROM bi_dashboard_cache WHERE company_id=?", companyId);
@@ -53,6 +102,11 @@ public class DashboardCacheService {
         return count;
     }
 
+    /**
+     * Performs the evictExpired operation in this module.
+     *
+     * @return the numeric result value
+     */
     @Transactional
     public int evictExpired() {
         int count = jdbc.update("DELETE FROM bi_dashboard_cache WHERE expires_at < CURRENT_TIMESTAMP");

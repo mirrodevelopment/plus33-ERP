@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 191
+-- File              : V191__create_event_mesh.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create event mesh
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V191: Event Mesh schema DDL
 CREATE TABLE IF NOT EXISTS bi_event_mesh_registry (
     id                  BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.service
+ * File              : TreasuryClient.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasuryClientController
+ * Related Service   : TreasuryClient
+ * Related Repository: TreasuryClientRepository
+ * Related Entity    : TreasuryClient
+ * Related DTO       : N/A
+ * Related Mapper    : TreasuryClientMapper
+ * Related DB Table  : treasury_clients
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : TreasuryClientController, TreasuryClientImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TreasuryClientService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.service;
 
 import com.plus33.erp.finance.treasury.entity.TreasuryAuditEvent;
@@ -115,16 +142,31 @@ public class TreasuryClient {
 
     // ── AI Advisory ───────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves cash flow forecast data from the database.
+     *
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public List<TreasuryAiAdvisor.CashFlowPrediction> getCashFlowForecast(
             Long companyId, LocalDate from, LocalDate to, List<String> currencies) {
         return aiAdvisor.forecastCashFlow(companyId, from, to, currencies);
     }
 
+    /**
+     * Retrieves anomaly alerts data from the database.
+     *
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public List<TreasuryAiAdvisor.AnomalyAlert> getAnomalyAlerts(
             Long companyId, LocalDate from, LocalDate to) {
         return aiAdvisor.detectAnomalies(companyId, from, to);
     }
 
+    /**
+     * Retrieves hedge recommendations data from the database.
+     *
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public List<TreasuryAiAdvisor.HedgeRecommendation> getHedgeRecommendations(
             Long companyId, Map<String, MoneyAmount> exposures, int horizonDays) {
         return aiAdvisor.recommendHedges(companyId, exposures, horizonDays);

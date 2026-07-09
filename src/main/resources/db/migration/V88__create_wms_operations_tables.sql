@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 88
+-- File              : V88__create_wms_operations_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create wms operations tables
+--
+-- Tables Created    : carriers, advance_shipping_notices, asn_lines, put_away_work, waves, picking_work, shipments, shipment_lines, warehouse_tasks
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_asn_warehouse, idx_asn_supplier, idx_put_away_work_warehouse, idx_picking_work_wave, idx_picking_work_product, idx_picking_work_location, idx_shipments_warehouse, idx_shipments_carrier, idx_warehouse_tasks_warehouse, idx_warehouse_tasks_assignee, idx_warehouse_tasks_type
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V88__create_wms_operations_tables.sql
 -- PLUS33 ERP — Enterprise WMS: Inbound, Outbound, Tasks, Carriers

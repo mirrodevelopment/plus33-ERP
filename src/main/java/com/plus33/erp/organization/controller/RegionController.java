@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Organization Module
+ * Package           : com.plus33.erp.organization.controller
+ * File              : RegionController.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Organization Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: RegionController
+ * Related Service   : RegionControllerService, RegionControllerServiceImpl
+ * Related Repository: RegionControllerRepository
+ * Related Entity    : RegionController
+ * Related DTO       : ApiResponse, PageRequest, PageResponse, RegionRequest, RegionResponse
+ * Related Mapper    : RegionControllerMapper
+ * Related DB Table  : region_controllers
+ * Related REST APIs : POST /api/v1/regions, GET /api/v1/regions/{id}, GET /api/v1/regions, PUT /api/v1/regions/{id}
+ * Depends On        : Common Module
+ * Used By           : Organization Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Organization Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: POST /api/v1/regions, GET /api/v1/regions/{id}, GET /api/v1/regions, PUT /api/v1/regions/{id}
+ ******************************************************************************/
 package com.plus33.erp.organization.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
@@ -17,6 +44,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Organization Module</b>
+ *
+ * <p><b>Class  :</b> {@code RegionController}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.organization.controller}</p>
+ * <p><b>Layer  :</b> REST Controller: HTTP endpoints layer. Secured by JWT + @PreAuthorize. Delegates to RegionService.</p>
+ *
+ * <p><b>Request Flow:</b></p>
+ * <pre>
+ * HTTP Request
+ *   --> JWT Auth Filter (validate Bearer token)
+ *   --> @PreAuthorize (permission check)
+ *   --> RegionController.endpoint()
+ *   --> RegionService.method()
+ *   --> RegionRepository (PostgreSQL)
+ *   --> ApiResponse wrapped in ResponseEntity
+ *   --> JSON response to Frontend
+ * </pre>
+ *
+ * <p><b>REST Endpoints    :</b> POST /api/v1/regions, GET /api/v1/regions/{id}, GET /api/v1/regions, PUT /api/v1/regions/{id}, DELETE /api/v1/regions/{id}</p>
+ * <p><b>Module Deps      :</b> Common, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/api/v1/regions")
 @Tag(name = "Region Management", description = "REST APIs for managing organization regions")
@@ -28,6 +80,15 @@ public class RegionController {
         this.regionService = regionService;
     }
 
+    /**
+     * Creates a new region and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('REGION_CREATE')")
     @Operation(summary = "Create a new region", description = "Adds a new region scoped to a company. Code must be unique within the company.")
@@ -36,6 +97,15 @@ public class RegionController {
         return new ResponseEntity<>(ApiResponse.success("Region created successfully", response), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves a single region by id by its identifier.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('REGION_VIEW')")
     @Operation(summary = "Get region by ID", description = "Retrieves details of a region by its primary key.")
@@ -44,6 +114,13 @@ public class RegionController {
         return ResponseEntity.ok(ApiResponse.success("Region retrieved successfully", response));
     }
 
+    /**
+     * Returns a filtered paginated list of regions records.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('REGION_VIEW')")
     @Operation(summary = "Search regions", description = "Performs dynamic searches and pagination filters for regions.")
@@ -62,6 +139,14 @@ public class RegionController {
         return ResponseEntity.ok(ApiResponse.success("Regions retrieved successfully", response));
     }
 
+    /**
+     * Updates an existing region record in the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('REGION_UPDATE')")
     @Operation(summary = "Update region details", description = "Modifies details of an active region by ID.")
@@ -73,6 +158,14 @@ public class RegionController {
         return ResponseEntity.ok(ApiResponse.success("Region updated successfully", response));
     }
 
+    /**
+     * Permanently deletes the region from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('REGION_DELETE')")
     @Operation(summary = "Delete region", description = "Performs hard-delete of a region by ID if no active stores, warehouses, or employees depend on it.")

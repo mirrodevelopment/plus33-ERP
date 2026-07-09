@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 214
+-- File              : V214__create_multi_region_ha.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create multi region ha
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V214: Multi-Region HA DDL
 CREATE TABLE IF NOT EXISTS platform_region_profile (
     id                  BIGSERIAL PRIMARY KEY,

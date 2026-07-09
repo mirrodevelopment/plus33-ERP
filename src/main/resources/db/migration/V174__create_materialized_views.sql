@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 174
+-- File              : V174__create_materialized_views.sql
+-- Operation Type    : DDL
+-- Purpose           : create materialized views
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V174: BI Materialized Views
 -- Purpose: Precomputed OLAP aggregations for high-performance dashboard queries.
 -- These are standard PostgreSQL VIEWs (not MATERIALIZED VIEWs) for portability

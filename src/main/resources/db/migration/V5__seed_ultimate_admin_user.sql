@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 5
+-- File              : V5__seed_ultimate_admin_user.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed ultimate admin user
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : user_roles, users
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V5__seed_ultimate_admin_user.sql
 -- PLUS33 ERP — First system administrator account

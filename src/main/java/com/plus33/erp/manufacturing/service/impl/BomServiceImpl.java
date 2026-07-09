@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Manufacturing Module
+ * Package           : com.plus33.erp.manufacturing.service.impl
+ * File              : BomServiceImpl.java
+ * Purpose           : Business logic service layer for Manufacturing Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BomController
+ * Related Service   : BomServiceImpl
+ * Related Repository: BomHeaderRepository, BomLineRepository, ProductRepository, UnitOfMeasureRepository, BomSubstituteRepository
+ * Related Entity    : Bom
+ * Related DTO       : BomHeaderDto, BomLineDto, CreateBomLineRequest, CreateBomRequest, mapToHeaderDto
+ * Related Mapper    : BomMapper
+ * Related DB Table  : boms
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module
+ * Used By           : BomController, BomServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Manufacturing Module. Implements BomService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.manufacturing.service.impl;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -19,6 +46,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Manufacturing Module</b>
+ *
+ * <p><b>Class  :</b> {@code BomServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.manufacturing.service.impl}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Manufacturing Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * BomController
+ *   --> BomServiceImpl (this)
+ *   --> Validate business rules
+ *   --> BomRepository (read/write 'boms')
+ *   --> BomMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code boms}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Manufacturing</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional
 public class BomServiceImpl implements BomService {
@@ -41,6 +92,24 @@ public class BomServiceImpl implements BomService {
         this.bomSubstituteRepository = bomSubstituteRepository;
     }
 
+    /**
+     * Creates a new bom and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the BomHeaderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new bom and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the BomHeaderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public BomHeaderDto createBom(CreateBomRequest request) {
         if (bomHeaderRepository.existsByCompanyIdAndBomNumber(request.getCompanyId(), request.getBomNumber())) {
@@ -70,6 +139,22 @@ public class BomServiceImpl implements BomService {
         return mapToHeaderDto(header);
     }
 
+    /**
+     * Creates a new bom line and persists it to the database.
+     *
+     * @param bomHeaderId the bomHeaderId input value
+     * @param request the validated request DTO containing input data
+     * @return the BomHeaderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new bom line and persists it to the database.
+     *
+     * @param bomHeaderId the bomHeaderId input value
+     * @param request the validated request DTO containing input data
+     * @return the BomHeaderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public BomHeaderDto addBomLine(Long bomHeaderId, CreateBomLineRequest request) {
         BomHeader header = bomHeaderRepository.findById(bomHeaderId)
@@ -116,6 +201,13 @@ public class BomServiceImpl implements BomService {
         return mapToHeaderDto(header);
     }
 
+    /**
+     * Retrieves a single bom by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BomHeaderDto result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public BomHeaderDto getBomById(Long id) {
@@ -124,6 +216,13 @@ public class BomServiceImpl implements BomService {
         return mapToHeaderDto(header);
     }
 
+    /**
+     * Retrieves boms by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<BomHeaderDto> getBomsByCompany(Long companyId) {
@@ -131,6 +230,14 @@ public class BomServiceImpl implements BomService {
                 .map(this::mapToHeaderDto).toList();
     }
 
+    /**
+     * Retrieves active bom for product data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param productId the productId input value
+     * @return the BomHeaderDto result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public BomHeaderDto getActiveBomForProduct(Long companyId, Long productId) {
@@ -140,6 +247,26 @@ public class BomServiceImpl implements BomService {
                 .orElseThrow(() -> new NoSuchElementException("No active BOM found for product ID: " + productId));
     }
 
+    /**
+     * Approves the bom, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param bomId the bomId input value
+     * @param reviewerName the reviewerName input value
+     * @return the BomHeaderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Approves the bom, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param bomId the bomId input value
+     * @param reviewerName the reviewerName input value
+     * @return the BomHeaderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public BomHeaderDto approveBom(Long bomId, String reviewerName) {
         BomHeader header = bomHeaderRepository.findById(bomId)
@@ -149,6 +276,22 @@ public class BomServiceImpl implements BomService {
         return mapToHeaderDto(bomHeaderRepository.save(header));
     }
 
+    /**
+     * Permanently deletes the bom from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param bomId the bomId input value
+     */
+    /**
+     * Permanently deletes the bom from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param bomId the bomId input value
+     */
     @Override
     public void deleteBom(Long companyId, Long bomId) {
         BomHeader header = bomHeaderRepository.findById(bomId)

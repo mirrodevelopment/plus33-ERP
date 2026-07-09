@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.budget.entity
+ * File              : BudgetRevision.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BudgetRevisionController
+ * Related Service   : BudgetRevisionService, BudgetRevisionServiceImpl
+ * Related Repository: BudgetRevisionRepository
+ * Related Entity    : BudgetRevision
+ * Related DTO       : N/A
+ * Related Mapper    : BudgetRevisionMapper
+ * Related DB Table  : budget_revisions
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : BudgetRevisionRepository, BudgetRevisionMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'budget_revisions'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.budget.entity;
 
 import jakarta.persistence.*;
@@ -6,6 +33,19 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code BudgetRevision}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.budget.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'budget_revisions'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code budget_revisions}</p>
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity

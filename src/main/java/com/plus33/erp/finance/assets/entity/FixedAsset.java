@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.assets.entity
+ * File              : FixedAsset.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: FixedAssetController
+ * Related Service   : FixedAssetService, FixedAssetServiceImpl
+ * Related Repository: FixedAssetRepository
+ * Related Entity    : FixedAsset
+ * Related DTO       : N/A
+ * Related Mapper    : FixedAssetMapper
+ * Related DB Table  : fixed_assets
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Workforce Module
+ * Used By           : FixedAssetRepository, FixedAssetMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'fixed_assets'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.assets.entity;
 
 import com.plus33.erp.finance.entity.Account;
@@ -19,6 +46,19 @@ import java.time.LocalDateTime;
 @Table(name = "fixed_assets", uniqueConstraints = {
     @UniqueConstraint(name = "uk_fixed_asset_company_code", columnNames = {"company_id", "asset_code"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code FixedAsset}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.assets.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'fixed_assets'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code fixed_assets}</p>
+ * <p><b>Module Deps      :</b> Finance, Organization, Workforce</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -270,12 +310,20 @@ public class FixedAsset {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

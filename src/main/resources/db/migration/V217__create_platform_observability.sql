@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 217
+-- File              : V217__create_platform_observability.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create platform observability
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V217: Observability DDL
 CREATE TABLE IF NOT EXISTS platform_trace_span (
     id                  BIGSERIAL PRIMARY KEY,

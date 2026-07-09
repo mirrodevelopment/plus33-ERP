@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Integration Module
+ * Package           : com.plus33.erp.integration.gateway
+ * File              : ApiGatewayService.java
+ * Purpose           : Business logic service layer for Integration Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ApiGatewayController
+ * Related Service   : ApiGatewayService
+ * Related Repository: ApiGatewayRepository
+ * Related Entity    : ApiGateway
+ * Related DTO       : N/A
+ * Related Mapper    : ApiGatewayMapper
+ * Related DB Table  : api_gateways
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ApiGatewayController, ApiGatewayServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Integration Module. Implements ApiGatewayService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.integration.gateway;
 
 import com.plus33.erp.integration.entity.IntegrationGatewayKey;
@@ -10,11 +37,42 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Integration Module</b>
+ *
+ * <p><b>Class  :</b> {@code ApiGatewayService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.integration.gateway}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Integration Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ApiGatewayController
+ *   --> ApiGatewayService (this)
+ *   --> Validate business rules
+ *   --> ApiGatewayRepository (read/write 'api_gateways')
+ *   --> ApiGatewayMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code api_gateways}</p>
+ * <p><b>Module Deps      :</b> Integration</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class ApiGatewayService {
     @Autowired IntegrationGatewayKeyRepository gatewayKeyRepo;
     @Autowired IntegrationGatewayUsageLogRepository usageLogRepo;
-
+    /**
+     * Performs the authorizeAndRateLimit operation in this module.
+     *
+     * @param apiKey the apiKey input value
+     * @param path the path input value
+     * @param method the method input value
+     * @return true if operation succeeded, false otherwise
+     */
     @Transactional
     public boolean authorizeAndRateLimit(String apiKey, String path, String method) {
         IntegrationGatewayKey key = gatewayKeyRepo.findAll().stream()

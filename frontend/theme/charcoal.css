@@ -1,0 +1,45 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Frontend Design System
+ * File              : charcoal.css
+ * Path              : frontend/theme/charcoal.css
+ * Purpose           : CSS Theme/Stylesheet: charcoal design tokens and visual styles
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * CSS Variables     : 17 custom properties defined
+ * Responsive Queries: None
+ * Depends On        : theme/variables.css (root CSS custom properties)
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * CSS Theme/Stylesheet: charcoal design tokens and visual styles. Part of the PLUS33 Coffee ERP CSS custom-property design system.
+ * Applied via link tags in index.html across all UI components.
+ ******************************************************************************/
+/* --- Charcoal Noir Theme Skin --- */
+html[data-theme="charcoal"] {
+  --bg-app: #121212;
+  --bg-sidebar: #181818;
+  --bg-header: #181818;
+  --bg-card: #1e1e1e;
+  --bg-card-hover: #262626;
+  
+  --border-color: #2e2e2e;
+  --border-color-hover: #3f3f3f;
+  
+  --text-primary: #f5f5f5;      /* Half white / Off-white primary text */
+  --text-secondary: #d4d4d8;    /* Muted off-white secondary text */
+  --text-muted: #71717a;        /* Gray/Muted text */
+  
+  --accent-primary: #e5e5e5;    /* Premium half-white accent highlight */
+  --accent-secondary: #c9a46a;  /* Warm PLUS33 Coffee gold accent for matching */
+  --accent-glow: rgba(229, 229, 229, 0.15);
+  
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger: #ef4444;
+  --status-info: #38bdf8;
+}

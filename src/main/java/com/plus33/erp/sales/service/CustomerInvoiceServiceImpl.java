@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.service
+ * File              : CustomerInvoiceServiceImpl.java
+ * Purpose           : Business logic service layer for Sales Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CustomerInvoiceController
+ * Related Service   : CustomerInvoiceServiceImpl
+ * Related Repository: CustomerInvoiceRepository, CustomerInvoiceItemRepository, CompanyRepository, CustomerRepository, SalesOrderRepository, SalesOrderItemRepository, ProductRepository, PickListItemRepository, AccountRepository, JournalEntryRepository, UserRepository
+ * Related Entity    : CustomerInvoice
+ * Related DTO       : CustomerInvoiceItemRequest, CustomerInvoiceRequest, CustomerInvoiceResponse, CustomerInvoiceSearchRequest, CustomerInvoiceUpdateRequest
+ * Related Mapper    : CustomerInvoiceMapper
+ * Related DB Table  : customer_invoices
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Finance Module, Inventory Module, Organization Module, Security Module
+ * Used By           : CustomerInvoiceController, CustomerInvoiceServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Sales Module. Implements CustomerInvoiceService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.sales.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -42,6 +69,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code CustomerInvoiceServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Sales Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * CustomerInvoiceController
+ *   --> CustomerInvoiceServiceImpl (this)
+ *   --> Validate business rules
+ *   --> CustomerInvoiceRepository (read/write 'customer_invoices')
+ *   --> CustomerInvoiceMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code customer_invoices}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Inventory, Organization, Sales, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
@@ -95,6 +146,15 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         this.taxJournalService = taxJournalService;
     }
 
+    /**
+     * Creates a new invoice and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the CustomerInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CustomerInvoiceResponse createInvoice(CustomerInvoiceRequest request) {
@@ -165,6 +225,16 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return customerInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Updates an existing invoice record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CustomerInvoiceResponse updateInvoice(Long id, CustomerInvoiceUpdateRequest request) {
@@ -194,6 +264,20 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return customerInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single invoice by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerInvoiceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single invoice by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerInvoiceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public CustomerInvoiceResponse getInvoiceById(Long id) {
         CustomerInvoice invoice = customerInvoiceRepository.findById(id)
@@ -201,6 +285,20 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return customerInvoiceMapper.toResponse(invoice);
     }
 
+    /**
+     * Returns a filtered paginated list of invoices records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of invoices records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<CustomerInvoiceResponse> searchInvoices(CustomerInvoiceSearchRequest searchRequest, Pageable pageable) {
         Specification<CustomerInvoice> spec = (root, query, cb) -> {
@@ -245,6 +343,15 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         );
     }
 
+    /**
+     * Submits the invoice for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CustomerInvoiceResponse submitInvoice(Long id) {
@@ -263,6 +370,15 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return customerInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Approves the invoice, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CustomerInvoiceResponse approveInvoice(Long id) {
@@ -324,6 +440,16 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return customerInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the invoice and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the CustomerInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CustomerInvoiceResponse cancelInvoice(Long id, String reason) {
@@ -376,6 +502,14 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return customerInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Permanently voids the invoice. This action cannot be undone.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerInvoiceResponse result
+     */
     @Override
     @Transactional
     public CustomerInvoiceResponse voidInvoice(Long id) {
@@ -391,6 +525,13 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return customerInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Reserves payment resources (budget or stock) for downstream processing.
+     *
+     * @param id the unique database ID of the resource
+     * @param amount the amount input value
+     * @return the CustomerInvoiceResponse result
+     */
     @Override
     @Transactional
     public CustomerInvoiceResponse allocatePayment(Long id, BigDecimal amount) {
@@ -423,6 +564,13 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return customerInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the deallocatePayment operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param amount the amount input value
+     * @return the CustomerInvoiceResponse result
+     */
     @Override
     @Transactional
     public CustomerInvoiceResponse deallocatePayment(Long id, BigDecimal amount) {

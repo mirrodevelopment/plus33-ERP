@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 133
+-- File              : V133__create_resources_and_timesheets.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create resources and timesheets
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V133: Project Resources and Timesheets
 CREATE TABLE IF NOT EXISTS project_resources (
     id BIGSERIAL PRIMARY KEY,

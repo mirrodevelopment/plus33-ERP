@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 379
+-- File              : V379__seed_plus33_coffee_products_suppliers.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed plus33 coffee products suppliers
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : product_categories, products, suppliers, units_of_measure
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V379__seed_plus33_coffee_products_suppliers.sql
 -- PLUS33 ERP — Product Categories, UoM, Products, Suppliers

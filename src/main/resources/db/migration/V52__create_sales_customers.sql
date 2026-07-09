@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 52
+-- File              : V52__create_sales_customers.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create sales customers
+--
+-- Tables Created    : customers
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_customers_company, idx_customers_status
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V52__create_sales_customers.sql
 -- PLUS33 ERP — Sales Customer Schema

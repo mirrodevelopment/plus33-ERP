@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 305
+-- File              : V305__create_device_remote_commands.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create device remote commands
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V305: Device Remote Commands
 CREATE TABLE IF NOT EXISTS platform_device_remote_command (
     id                      BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.contract
+ * File              : DataContractValidator.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: DataContractValidatorController
+ * Related Service   : DataContractValidator
+ * Related Repository: DataContractValidatorRepository
+ * Related Entity    : DataContractValidator
+ * Related DTO       : N/A
+ * Related Mapper    : DataContractValidatorMapper
+ * Related DB Table  : data_contract_validators
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : DataContractValidatorController, DataContractValidatorImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements DataContractValidatorService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.contract;
 
 import com.plus33.erp.bi.entity.BiDataContract;
@@ -13,12 +40,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Bi Module</b>
+ *
+ * <p><b>Class  :</b> {@code DataContractValidator}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.bi.contract}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Bi Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * DataContractValidatorController
+ *   --> DataContractValidator (this)
+ *   --> Validate business rules
+ *   --> DataContractValidatorRepository (read/write 'data_contract_validators')
+ *   --> DataContractValidatorMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code data_contract_validators}</p>
+ * <p><b>Module Deps      :</b> Bi</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class DataContractValidator {
 
     @Autowired BiDataContractRepository contractRepo;
     @Autowired BiSchemaEvolutionHistoryRepository evolutionRepo;
-
+    /**
+     * Validates business rules and constraints for contract.
+     *
+     * @param contractName the contractName input value
+     * @param actualColumns the actualColumns input value
+     * @return true if operation succeeded, false otherwise
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public boolean validateContract(String contractName, List<ColumnMetadata> actualColumns) {
         BiDataContract contract = contractRepo.findAll().stream()

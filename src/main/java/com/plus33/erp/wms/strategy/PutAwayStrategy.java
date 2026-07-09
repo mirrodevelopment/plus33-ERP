@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.strategy
+ * File              : PutAwayStrategy.java
+ * Purpose           : Service interface contract defining the API for Wms Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PutAwayStrategyController
+ * Related Service   : PutAwayStrategyService, PutAwayStrategyServiceImpl
+ * Related Repository: PutAwayStrategyRepository
+ * Related Entity    : PutAwayStrategy
+ * Related DTO       : N/A
+ * Related Mapper    : PutAwayStrategyMapper
+ * Related DB Table  : put_away_strategys
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Wms Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Wms Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.wms.strategy;
 
 import com.plus33.erp.wms.entity.AsnLine;

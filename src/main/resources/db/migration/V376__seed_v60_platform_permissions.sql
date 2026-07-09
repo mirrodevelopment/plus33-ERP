@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 376
+-- File              : V376__seed_v60_platform_permissions.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed v60 platform permissions
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : permissions, role_permissions
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V376: Permissions
 INSERT INTO permissions (code, name) VALUES
 ('esg:report', 'Generate enterprise fleet greenhouse gas ESG compliance report mapping outputs'),

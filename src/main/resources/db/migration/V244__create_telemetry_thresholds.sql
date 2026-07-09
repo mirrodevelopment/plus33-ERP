@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 244
+-- File              : V244__create_telemetry_thresholds.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create telemetry thresholds
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V244: Telemetry & anomaly thresholds
 CREATE TABLE IF NOT EXISTS platform_twin_telemetry (
     id                  BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 180
+-- File              : V180__seed_bi_permissions.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed bi permissions
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : permissions
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V180: BI Permissions Seed
 -- Purpose: Seeds system permissions for all BI analytical roles in the
 --          main permissions table used throughout the ERP platform.

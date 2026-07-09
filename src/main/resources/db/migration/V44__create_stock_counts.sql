@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 44
+-- File              : V44__create_stock_counts.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create stock counts
+--
+-- Tables Created    : stock_counts, stock_count_items
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_stock_counts_company, idx_stock_counts_status, idx_stock_counts_wh, idx_stock_counts_store, idx_stock_counts_client_ref, idx_stock_counts_assigned, idx_stock_count_items_sc, idx_stock_count_items_product
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V44__create_stock_counts.sql
 -- PLUS33 ERP — Stock Count & Cycle Count schema, constraints, and triggers

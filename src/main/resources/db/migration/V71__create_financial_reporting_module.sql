@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 71
+-- File              : V71__create_financial_reporting_module.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create financial reporting module
+--
+-- Tables Created    : fiscal_years, period_locks, period_lock_overrides, exchange_rates
+-- Tables Altered    : companies, companies, companies, companies, journal_entries, journal_entries, journal_entries
+-- Seed Data For     : chart_of_accounts
+-- Indexes           : idx_je_company_status_date, idx_je_company_currency, idx_jel_account_entry, idx_ex_rate_lookup
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V71__create_financial_reporting_module.sql
 -- PLUS33 ERP — Financial Reporting & Locking Tables

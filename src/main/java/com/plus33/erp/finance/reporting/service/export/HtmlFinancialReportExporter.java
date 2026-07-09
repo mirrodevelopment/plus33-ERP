@@ -1,16 +1,81 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.reporting.service.export
+ * File              : HtmlFinancialReportExporter.java
+ * Purpose           : Component of Finance Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: HtmlFinancialReportExporterController
+ * Related Service   : HtmlFinancialReportExporterService, HtmlFinancialReportExporterServiceImpl
+ * Related Repository: HtmlFinancialReportExporterRepository
+ * Related Entity    : HtmlFinancialReportExporter
+ * Related DTO       : BalanceSheetResponse, FinancialReportExportRequest, IncomeStatementResponse, TrialBalanceResponse
+ * Related Mapper    : HtmlFinancialReportExporterMapper
+ * Related DB Table  : html_financial_report_exporters
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Finance Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.finance.reporting.service.export;
 
 import com.plus33.erp.finance.reporting.dto.*;
 import org.springframework.stereotype.Component;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code HtmlFinancialReportExporter}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.reporting.service.export}</p>
+ * <p><b>Layer  :</b> Data Transfer Object: serializes API request/response data for Finance Module.</p>
+ *
+ * <p><b>Module Deps      :</b> Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Component
 public class HtmlFinancialReportExporter implements FinancialReportExporter {
 
+    /**
+     * Retrieves format data from the database.
+     *
+     * @return the result string value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves format data from the database.
+     *
+     * @return the result string value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public String getFormat() {
         return "HTML";
     }
 
+    /**
+     * Exports trial balance data as a report or downloadable file.
+     *
+     * @param data the data input value
+     * @param context the context input value
+     * @return the result string value
+     */
+    /**
+     * Exports trial balance data as a report or downloadable file.
+     *
+     * @param data the data input value
+     * @param context the context input value
+     * @return the result string value
+     */
     @Override
     public String exportTrialBalance(TrialBalanceResponse data, FinancialReportExportRequest context) {
         StringBuilder sb = new StringBuilder();
@@ -83,6 +148,20 @@ public class HtmlFinancialReportExporter implements FinancialReportExporter {
         return sb.toString();
     }
 
+    /**
+     * Exports income statement data as a report or downloadable file.
+     *
+     * @param data the data input value
+     * @param context the context input value
+     * @return the result string value
+     */
+    /**
+     * Exports income statement data as a report or downloadable file.
+     *
+     * @param data the data input value
+     * @param context the context input value
+     * @return the result string value
+     */
     @Override
     public String exportIncomeStatement(IncomeStatementResponse data, FinancialReportExportRequest context) {
         StringBuilder sb = new StringBuilder();
@@ -121,6 +200,20 @@ public class HtmlFinancialReportExporter implements FinancialReportExporter {
         return sb.toString();
     }
 
+    /**
+     * Exports balance sheet data as a report or downloadable file.
+     *
+     * @param data the data input value
+     * @param context the context input value
+     * @return the result string value
+     */
+    /**
+     * Exports balance sheet data as a report or downloadable file.
+     *
+     * @param data the data input value
+     * @param context the context input value
+     * @return the result string value
+     */
     @Override
     public String exportBalanceSheet(BalanceSheetResponse data, FinancialReportExportRequest context) {
         StringBuilder sb = new StringBuilder();

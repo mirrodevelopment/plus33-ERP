@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 172
+-- File              : V172__create_data_quality.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create data quality
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V172: Data Quality, Lineage & SCD Infrastructure
 -- Purpose: Validation rules, quality issues, data lineage tracking,
 --          transformation versioning, and SCD change history.

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 79
+-- File              : V79__treasury_advanced_services.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : treasury advanced services
+--
+-- Tables Created    : treasury_journal_entries, treasury_risk_policies, treasury_audit_events
+-- Tables Altered    : N/A
+-- Seed Data For     : treasury_risk_policies
+-- Indexes           : idx_tje_reference, idx_tje_event, idx_tje_account, idx_tje_company_date, idx_trp_company_category, idx_trp_active, idx_trp_lookup, idx_tae_aggregate, idx_tae_actor, idx_tae_company
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V79__treasury_advanced_services.sql
 -- Phase 8 enterprise additions: Journal Ledger, Risk Policies, Audit Events
 

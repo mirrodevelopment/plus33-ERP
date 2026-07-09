@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 33
+-- File              : V33__create_goods_receipts_schema.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create goods receipts schema
+--
+-- Tables Created    : goods_receipts, goods_receipt_items
+-- Tables Altered    : stock_movements, stock_movements, stock_movements, purchase_orders, purchase_order_items, inventory_stock
+-- Seed Data For     : N/A
+-- Indexes           : idx_gr_company_status, idx_gr_po, idx_gr_received_at, idx_gr_warehouse, idx_gr_store, idx_gr_client_reference, idx_gr_status_received_at, idx_stock_movements_reference
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V33__create_goods_receipts_schema.sql
 -- PLUS33 ERP — Goods Receipt Management Tables & Trigger logic

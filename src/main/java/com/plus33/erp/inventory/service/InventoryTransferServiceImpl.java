@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Inventory Module
+ * Package           : com.plus33.erp.inventory.service
+ * File              : InventoryTransferServiceImpl.java
+ * Purpose           : Business logic service layer for Inventory Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryTransferController
+ * Related Service   : InventoryTransferServiceImpl
+ * Related Repository: InventoryTransferRepository, InventoryTransferItemRepository, InventoryStockRepository, StockMovementRepository, CompanyRepository, WarehouseRepository, StoreRepository, ProductRepository, UserRepository
+ * Related Entity    : InventoryTransfer
+ * Related DTO       : InventoryTransferItemRequest, InventoryTransferRequest, InventoryTransferResponse, InventoryTransferSearchRequest, InventoryTransferUpdateRequest
+ * Related Mapper    : InventoryTransferMapper
+ * Related DB Table  : inventory_transfers
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Security Module
+ * Used By           : InventoryTransferController, InventoryTransferServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Inventory Module. Implements InventoryTransferService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.inventory.service;
 
 import com.plus33.erp.common.dto.IdempotentCreateResult;
@@ -31,6 +58,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Inventory Module</b>
+ *
+ * <p><b>Class  :</b> {@code InventoryTransferServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.inventory.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Inventory Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * InventoryTransferController
+ *   --> InventoryTransferServiceImpl (this)
+ *   --> Validate business rules
+ *   --> InventoryTransferRepository (read/write 'inventory_transfers')
+ *   --> InventoryTransferMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code inventory_transfers}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class InventoryTransferServiceImpl implements InventoryTransferService {
@@ -75,6 +126,15 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         this.inventoryTraceabilityService = inventoryTraceabilityService;
     }
 
+    /**
+     * Creates a new transfer and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the IdempotentCreateResult result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public IdempotentCreateResult<InventoryTransferResponse> createTransfer(InventoryTransferRequest request) {
@@ -132,6 +192,16 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         return new IdempotentCreateResult<>(inventoryTransferMapper.toResponse(saved), true);
     }
 
+    /**
+     * Updates an existing transfer record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the InventoryTransferResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryTransferResponse updateTransfer(Long id, InventoryTransferUpdateRequest request) {
@@ -174,6 +244,20 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         return inventoryTransferMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single transfer by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryTransferResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single transfer by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryTransferResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public InventoryTransferResponse getTransferById(Long id) {
         InventoryTransfer transfer = inventoryTransferRepository.findById(id)
@@ -181,6 +265,20 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         return inventoryTransferMapper.toResponse(transfer);
     }
 
+    /**
+     * Returns a filtered paginated list of transfers records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of transfers records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<InventoryTransferResponse> searchTransfers(InventoryTransferSearchRequest searchRequest, Pageable pageable) {
         Specification<InventoryTransfer> spec = (root, query, cb) -> {
@@ -240,6 +338,15 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         );
     }
 
+    /**
+     * Submits the transfer for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryTransferResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryTransferResponse submitTransfer(Long id) {
@@ -262,6 +369,15 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         return inventoryTransferMapper.toResponse(saved);
     }
 
+    /**
+     * Approves the transfer, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryTransferResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryTransferResponse approveTransfer(Long id) {
@@ -304,6 +420,12 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         return inventoryTransferMapper.toResponse(saved);
     }
 
+    /**
+     * Publishes a domain event to notify dependent modules of the state change.
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryTransferResponse result
+     */
     @Override
     @Transactional
     public InventoryTransferResponse dispatchTransfer(Long id) {
@@ -368,6 +490,12 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         return inventoryTransferMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the receiveTransfer operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryTransferResponse result
+     */
     @Override
     @Transactional
     public InventoryTransferResponse receiveTransfer(Long id) {
@@ -428,6 +556,16 @@ public class InventoryTransferServiceImpl implements InventoryTransferService {
         return inventoryTransferMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the transfer and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the InventoryTransferResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryTransferResponse cancelTransfer(Long id, String reason) {

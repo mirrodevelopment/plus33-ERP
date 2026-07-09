@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 333
+-- File              : V333__create_route_cost_metrics.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create route cost metrics
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V333: Route Cost Metrics
 CREATE TABLE IF NOT EXISTS platform_route_cost_log (
     id                      BIGSERIAL PRIMARY KEY,

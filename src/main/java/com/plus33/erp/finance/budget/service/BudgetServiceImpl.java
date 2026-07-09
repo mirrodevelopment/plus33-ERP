@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.budget.service
+ * File              : BudgetServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BudgetController
+ * Related Service   : BudgetServiceImpl
+ * Related Repository: BudgetRepository, BudgetVersionRepository, BudgetLineRepository, BudgetControlCacheRepository, BudgetPolicyRepository, BudgetWorkflowTemplateRepository, BudgetDriverRepository, BudgetRevisionRepository, BudgetReservationRepository, BudgetConsumptionRepository, BudgetSnapshotRepository, BudgetSnapshotLineRepository, BudgetApprovalRepository, BudgetAuditLogRepository, CompanyRepository, FiscalYearRepository, AccountRepository, BudgetDimensionSetRepository
+ * Related Entity    : Budget
+ * Related DTO       : BudgetComparisonResponse, BudgetConsumptionResponse, BudgetDimensionSetRequest, BudgetDimensionSetResponse, BudgetDrilldownResponse
+ * Related Mapper    : BudgetMapper
+ * Related DB Table  : budgets
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : BudgetController, BudgetServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements BudgetService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.budget.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -28,6 +55,30 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code BudgetServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.budget.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * BudgetController
+ *   --> BudgetServiceImpl (this)
+ *   --> Validate business rules
+ *   --> BudgetRepository (read/write 'budgets')
+ *   --> BudgetMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code budgets}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -56,6 +107,17 @@ public class BudgetServiceImpl implements BudgetService {
     private final BudgetDimensionSetRepository dimensionSetRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * Creates a new budget and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the BudgetResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BudgetResponse createBudget(Long companyId, BudgetRequest request, String username) {
@@ -129,6 +191,17 @@ public class BudgetServiceImpl implements BudgetService {
         return mapToResponse(savedBudget, savedLines);
     }
 
+    /**
+     * Updates an existing budget record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the BudgetResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BudgetResponse updateBudget(Long id, BudgetRequest request, String username) {
@@ -179,6 +252,13 @@ public class BudgetServiceImpl implements BudgetService {
         return mapToResponse(savedBudget, savedLines);
     }
 
+    /**
+     * Retrieves budget data from the database.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BudgetResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public BudgetResponse getBudget(Long id) {
@@ -188,6 +268,13 @@ public class BudgetServiceImpl implements BudgetService {
         return mapToResponse(budget, lines);
     }
 
+    /**
+     * Retrieves budgets by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<BudgetResponse> getBudgetsByCompany(Long companyId) {
@@ -197,6 +284,16 @@ public class BudgetServiceImpl implements BudgetService {
             .toList();
     }
 
+    /**
+     * Submits the budget for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param username the username input value
+     * @return the BudgetResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BudgetResponse submitBudget(Long id, String username) {
@@ -246,6 +343,17 @@ public class BudgetServiceImpl implements BudgetService {
         return mapToResponse(savedBudget, budgetLineRepository.findAllByBudgetId(id));
     }
 
+    /**
+     * Approves the budget step, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param remarks the remarks input value
+     * @param username the username input value
+     * @return the BudgetResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BudgetResponse approveBudgetStep(Long id, String remarks, String username) {
@@ -289,6 +397,14 @@ public class BudgetServiceImpl implements BudgetService {
         return mapToResponse(budget, budgetLineRepository.findAllByBudgetId(id));
     }
 
+    /**
+     * Performs the rejectBudget operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param remarks the remarks input value
+     * @param username the username input value
+     * @return the BudgetResponse result
+     */
     @Override
     @Transactional
     public BudgetResponse rejectBudget(Long id, String remarks, String username) {
@@ -306,6 +422,14 @@ public class BudgetServiceImpl implements BudgetService {
         return mapToResponse(savedBudget, budgetLineRepository.findAllByBudgetId(id));
     }
 
+    /**
+     * Performs the freezeBudget operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param isFrozen the isFrozen input value
+     * @param username the username input value
+     * @return the BudgetResponse result
+     */
     @Override
     @Transactional
     public BudgetResponse freezeBudget(Long id, Boolean isFrozen, String username) {
@@ -320,6 +444,14 @@ public class BudgetServiceImpl implements BudgetService {
         return mapToResponse(savedBudget, budgetLineRepository.findAllByBudgetId(id));
     }
 
+    /**
+     * Performs the lockBudgetLine operation in this module.
+     *
+     * @param lineId the lineId input value
+     * @param isLocked the isLocked input value
+     * @param username the username input value
+     * @return the BudgetLineResponse result
+     */
     @Override
     @Transactional
     public BudgetLineResponse lockBudgetLine(Long lineId, Boolean isLocked, String username) {
@@ -334,6 +466,17 @@ public class BudgetServiceImpl implements BudgetService {
         return mapLineToResponse(savedLine);
     }
 
+    /**
+     * Creates a new revision and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the BudgetRevisionResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BudgetRevisionResponse createRevision(Long companyId, BudgetRevisionRequest request, String username) {
@@ -385,6 +528,17 @@ public class BudgetServiceImpl implements BudgetService {
         );
     }
 
+    /**
+     * Performs the transferFunds operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param sourceLineId the sourceLineId input value
+     * @param targetLineId the targetLineId input value
+     * @param amount the amount input value
+     * @param reason the reason input value
+     * @param username the username input value
+     * @return the BudgetRevisionResponse result
+     */
     @Override
     @Transactional
     public BudgetRevisionResponse transferFunds(Long companyId, Long sourceLineId, Long targetLineId, BigDecimal amount, String reason, String username) {
@@ -464,6 +618,16 @@ public class BudgetServiceImpl implements BudgetService {
         );
     }
 
+    /**
+     * Creates a new reservation and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the BudgetReservationResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BudgetReservationResponse createReservation(Long companyId, BudgetReservationRequest request) {
@@ -527,6 +691,16 @@ public class BudgetServiceImpl implements BudgetService {
         );
     }
 
+    /**
+     * Performs the consumeReservation operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param sourceModule the sourceModule input value
+     * @param sourceReferenceId the sourceReferenceId input value
+     * @param consumeAmount the consumeAmount input value
+     * @param referenceNumber the referenceNumber input value
+     * @return the BudgetConsumptionResponse result
+     */
     @Override
     @Transactional
     public BudgetConsumptionResponse consumeReservation(Long companyId, String sourceModule, Long sourceReferenceId, BigDecimal consumeAmount, String referenceNumber) {
@@ -569,6 +743,22 @@ public class BudgetServiceImpl implements BudgetService {
         );
     }
 
+    /**
+     * Creates a new direct consumption and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param accountId the accountId input value
+     * @param dimensionSet the dimensionSet input value
+     * @param amount the amount input value
+     * @param sourceModule the sourceModule input value
+     * @param sourceReferenceId the sourceReferenceId input value
+     * @param referenceNumber the referenceNumber input value
+     * @param transactionDate the transactionDate input value
+     * @return the BudgetConsumptionResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BudgetConsumptionResponse createDirectConsumption(Long companyId, Long accountId, BudgetDimensionSetRequest dimensionSet, BigDecimal amount, String sourceModule, Long sourceReferenceId, String referenceNumber, LocalDate transactionDate) {
@@ -622,6 +812,12 @@ public class BudgetServiceImpl implements BudgetService {
         );
     }
 
+    /**
+     * Releases previously reserved reservation resources back to the available pool.
+     *
+     * @param sourceModule the sourceModule input value
+     * @param sourceReferenceId the sourceReferenceId input value
+     */
     @Override
     @Transactional
     public void releaseReservation(String sourceModule, Long sourceReferenceId) {
@@ -640,6 +836,12 @@ public class BudgetServiceImpl implements BudgetService {
         }
     }
 
+    /**
+     * Releases previously reserved consumption resources back to the available pool.
+     *
+     * @param sourceModule the sourceModule input value
+     * @param sourceReferenceId the sourceReferenceId input value
+     */
     @Override
     @Transactional
     public void releaseConsumption(String sourceModule, Long sourceReferenceId) {
@@ -655,6 +857,14 @@ public class BudgetServiceImpl implements BudgetService {
         }
     }
 
+    /**
+     * Performs the massUpdateBudgetLines operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return List of matching records
+     */
     @Override
     @Transactional
     public List<BudgetLineResponse> massUpdateBudgetLines(Long companyId, BudgetMassUpdateRequest request, String username) {
@@ -693,6 +903,14 @@ public class BudgetServiceImpl implements BudgetService {
         return updated.stream().map(this::mapLineToResponse).toList();
     }
 
+    /**
+     * Performs the compareBudgets operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param budgetId1 the budgetId1 input value
+     * @param budgetId2 the budgetId2 input value
+     * @return the BudgetComparisonResponse result
+     */
     @Override
     @Transactional(readOnly = true)
     public BudgetComparisonResponse compareBudgets(Long companyId, Long budgetId1, Long budgetId2) {
@@ -748,6 +966,15 @@ public class BudgetServiceImpl implements BudgetService {
         return new BudgetComparisonResponse(budgetId1, b1.getCode(), budgetId2, b2.getCode(), items);
     }
 
+    /**
+     * Performs the drilldownBudget operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param budgetId the budgetId input value
+     * @param dimensionName the dimensionName input value
+     * @param parentValue the parentValue input value
+     * @return List of matching records
+     */
     @Override
     @Transactional(readOnly = true)
     public List<BudgetDrilldownResponse> drilldownBudget(Long companyId, Long budgetId, String dimensionName, String parentValue) {
@@ -791,6 +1018,18 @@ public class BudgetServiceImpl implements BudgetService {
         return results;
     }
 
+    /**
+     * Performs the copyBudget operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param sourceBudgetId the sourceBudgetId input value
+     * @param targetFiscalYearId the targetFiscalYearId input value
+     * @param targetCode the targetCode input value
+     * @param targetName the targetName input value
+     * @param percentageMultiplier the percentageMultiplier input value
+     * @param username the username input value
+     * @return the BudgetResponse result
+     */
     @Override
     @Transactional
     public BudgetResponse copyBudget(Long companyId, Long sourceBudgetId, Long targetFiscalYearId, String targetCode, String targetName, BigDecimal percentageMultiplier, String username) {

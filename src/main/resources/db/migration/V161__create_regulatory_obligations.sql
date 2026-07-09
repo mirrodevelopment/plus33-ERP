@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 161
+-- File              : V161__create_regulatory_obligations.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create regulatory obligations
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V161: Regulatory Obligations & Compliance Calendar
 CREATE TABLE IF NOT EXISTS grc_regulatory_obligations (
     id BIGSERIAL PRIMARY KEY,

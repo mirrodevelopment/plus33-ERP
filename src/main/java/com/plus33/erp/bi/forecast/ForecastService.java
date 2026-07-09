@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.forecast
+ * File              : ForecastService.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ForecastController
+ * Related Service   : ForecastService
+ * Related Repository: BiForecastModelRegistryRepository
+ * Related Entity    : Forecast
+ * Related DTO       : N/A
+ * Related Mapper    : ForecastMapper
+ * Related DB Table  : forecasts
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ForecastController, ForecastServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements ForecastService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.forecast;
 
 import com.plus33.erp.bi.entity.BiForecastModelRegistry;
@@ -31,6 +58,14 @@ public class ForecastService {
         this.jdbc = jdbc;
     }
 
+    /**
+     * Performs the executeForecast operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param domain the domain input value
+     * @param horizonMonths the horizonMonths input value
+     * @return the ForecastRunResult result
+     */
     @Transactional
     public ForecastRunResult executeForecast(Long companyId, String domain, int horizonMonths) {
         List<BiForecastModelRegistry> models = modelRepo.findByIsActiveTrueAndForecastDomain(domain);

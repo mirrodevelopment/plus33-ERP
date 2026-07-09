@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Paymentrun Module
+ * Package           : com.plus33.erp.paymentrun.service
+ * File              : PaymentRunServiceImpl.java
+ * Purpose           : Business logic service layer for Paymentrun Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PaymentRunController
+ * Related Service   : PaymentRunServiceImpl
+ * Related Repository: PaymentRunRepository, PaymentRunInvoiceRepository, PaymentRunSupplierResultRepository, SupplierInvoiceRepository, CompanyRepository, SupplierRepository, UserRepository
+ * Related Entity    : PaymentRun
+ * Related DTO       : paymentResponse, PaymentRunDashboardResponse, PaymentRunInvoiceRequest, PaymentRunRequest, PaymentRunResponse
+ * Related Mapper    : PaymentRunMapper
+ * Related DB Table  : payment_runs
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Finance Module, Organization Module, Procurement Module, Security Module
+ * Used By           : PaymentRunController, PaymentRunServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Paymentrun Module. Implements PaymentRunService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.paymentrun.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -34,6 +61,30 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Paymentrun Module</b>
+ *
+ * <p><b>Class  :</b> {@code PaymentRunServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.paymentrun.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Paymentrun Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * PaymentRunController
+ *   --> PaymentRunServiceImpl (this)
+ *   --> Validate business rules
+ *   --> PaymentRunRepository (read/write 'payment_runs')
+ *   --> PaymentRunMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code payment_runs}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization, Paymentrun, Procurement, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class PaymentRunServiceImpl implements PaymentRunService {
 
@@ -80,6 +131,15 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         this.csvExportGenerator = csvExportGenerator;
     }
 
+    /**
+     * Creates a new payment run and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the PaymentRunResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PaymentRunResponse createPaymentRun(PaymentRunRequest request) {
@@ -115,6 +175,12 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         return paymentRunMapper.toResponse(saved);
     }
 
+    /**
+     * Calculates payment run totals including subtotal, tax, discounts, and net amount.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentRunResponse result
+     */
     @Override
     @Transactional
     public PaymentRunResponse calculatePaymentRun(Long id) {
@@ -165,6 +231,16 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         return paymentRunMapper.toResponse(saved);
     }
 
+    /**
+     * Updates an existing payment run invoices record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param requests the requests input value
+     * @return the PaymentRunResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PaymentRunResponse updatePaymentRunInvoices(Long id, List<PaymentRunInvoiceRequest> requests) {
@@ -217,6 +293,15 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         return paymentRunMapper.toResponse(saved);
     }
 
+    /**
+     * Approves the payment run, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentRunResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PaymentRunResponse approvePaymentRun(Long id) {
@@ -235,6 +320,12 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         return paymentRunMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the executePaymentRun operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentRunResponse result
+     */
     @Override
     @Transactional
     public PaymentRunResponse executePaymentRun(Long id) {
@@ -376,6 +467,15 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         return paymentRunMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the payment run and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentRunResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PaymentRunResponse cancelPaymentRun(Long id) {
@@ -400,6 +500,13 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         return paymentRunMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves payment run dashboard data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the PaymentRunDashboardResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public PaymentRunDashboardResponse getPaymentRunDashboard(Long companyId) {
@@ -501,6 +608,13 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         );
     }
 
+    /**
+     * Retrieves a single payment run by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentRunResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public PaymentRunResponse getPaymentRunById(Long id) {
@@ -509,6 +623,13 @@ public class PaymentRunServiceImpl implements PaymentRunService {
         return paymentRunMapper.toResponse(run);
     }
 
+    /**
+     * Returns a filtered paginated list of payment runs records.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param status status filter for narrowing query results
+     * @return List of matching records
+     */
     @Override
     @Transactional(readOnly = true)
     public List<PaymentRunResponse> searchPaymentRuns(Long companyId, String status) {

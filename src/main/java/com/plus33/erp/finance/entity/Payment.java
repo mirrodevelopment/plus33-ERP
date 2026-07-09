@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.entity
+ * File              : Payment.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PaymentController
+ * Related Service   : PaymentService, PaymentServiceImpl
+ * Related Repository: PaymentRepository
+ * Related Entity    : Payment
+ * Related DTO       : N/A
+ * Related Mapper    : PaymentMapper
+ * Related DB Table  : payments
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Procurement Module, Security Module
+ * Used By           : PaymentRepository, PaymentMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'payments'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -18,6 +45,19 @@ import java.util.List;
 @Table(name = "payments", uniqueConstraints = {
     @UniqueConstraint(name = "uk_payment_company_number", columnNames = {"company_id", "payment_number"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code Payment}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'payments'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code payments}</p>
+ * <p><b>Module Deps      :</b> Organization, Procurement, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -96,12 +136,20 @@ public class Payment {
     @Builder.Default
     private List<PaymentAllocation> allocations = new ArrayList<>();
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

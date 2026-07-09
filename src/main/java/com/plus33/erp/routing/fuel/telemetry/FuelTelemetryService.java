@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Routing Module
+ * Package           : com.plus33.erp.routing.fuel.telemetry
+ * File              : FuelTelemetryService.java
+ * Purpose           : Business logic service layer for Routing Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: FuelTelemetryController
+ * Related Service   : FuelTelemetryService
+ * Related Repository: FuelTelemetryRepository
+ * Related Entity    : FuelTelemetry
+ * Related DTO       : N/A
+ * Related Mapper    : FuelTelemetryMapper
+ * Related DB Table  : fuel_telemetrys
+ * Related REST APIs : N/A
+ * Depends On        : Platform Module
+ * Used By           : FuelTelemetryController, FuelTelemetryServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Routing Module. Implements FuelTelemetryService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.routing.fuel.telemetry;
 
 import com.plus33.erp.platform.entity.*;
@@ -8,10 +35,40 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Routing Module</b>
+ *
+ * <p><b>Class  :</b> {@code FuelTelemetryService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.routing.fuel.telemetry}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Routing Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * FuelTelemetryController
+ *   --> FuelTelemetryService (this)
+ *   --> Validate business rules
+ *   --> FuelTelemetryRepository (read/write 'fuel_telemetrys')
+ *   --> FuelTelemetryMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code fuel_telemetrys}</p>
+ * <p><b>Module Deps      :</b> Platform</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class FuelTelemetryService {
     @Autowired PlatformFuelTelemetryLogRepository telemetryRepo;
-
+    /**
+     * Performs the recordTelemetry operation in this module.
+     *
+     * @param vehicleId the vehicleId input value
+     * @param gatewayId the gatewayId input value
+     * @return the PlatformFuelTelemetryLog result
+     */
     @Transactional
     public PlatformFuelTelemetryLog recordTelemetry(Long vehicleId, Long gatewayId) {
         PlatformFuelTelemetryLog log = new PlatformFuelTelemetryLog();

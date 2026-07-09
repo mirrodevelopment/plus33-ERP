@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.carrier
+ * File              : CarrierProvider.java
+ * Purpose           : Service interface contract defining the API for Wms Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CarrierProviderController
+ * Related Service   : CarrierProviderService, CarrierProviderServiceImpl
+ * Related Repository: CarrierProviderRepository
+ * Related Entity    : CarrierProvider
+ * Related DTO       : labelRequest, rateRequest
+ * Related Mapper    : CarrierProviderMapper
+ * Related DB Table  : carrier_providers
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Wms Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Wms Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.wms.carrier;
 
 import java.math.BigDecimal;

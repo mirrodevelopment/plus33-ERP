@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 378
+-- File              : V378__seed_plus33_coffee_users_employees.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed plus33 coffee users employees
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : employee_shifts, employees, leave_types, shifts, tmp_employees, user_regions, user_roles, user_stores, user_warehouses, users
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V378__seed_plus33_coffee_users_employees.sql
 -- PLUS33 ERP — Users, Employees, Shifts, Leave Types

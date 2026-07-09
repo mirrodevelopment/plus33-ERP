@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.carrier
+ * File              : CarrierProviderImpls.java
+ * Purpose           : Component of Wms Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CarrierProviderImplsController
+ * Related Service   : CarrierProviderImplsService, CarrierProviderImplsServiceImpl
+ * Related Repository: CarrierProviderImplsRepository
+ * Related Entity    : CarrierProviderImpls
+ * Related DTO       : N/A
+ * Related Mapper    : CarrierProviderImplsMapper
+ * Related DB Table  : carrier_provider_implss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Wms Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Wms Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.wms.carrier;
 
 import org.springframework.stereotype.Component;

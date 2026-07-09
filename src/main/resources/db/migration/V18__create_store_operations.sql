@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 18
+-- File              : V18__create_store_operations.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create store operations
+--
+-- Tables Created    : recipes, recipe_items, sales_transactions, sales_transaction_items, waste_records
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_recipes_company, idx_recipes_product, idx_recipes_active, idx_recipe_items_recipe, idx_recipe_items_ingredient, idx_sales_transactions_company, idx_sales_transactions_store, idx_sales_transactions_cashier, idx_sales_transactions_time, idx_sales_transaction_items_tx, idx_sales_transaction_items_prod, idx_sales_transaction_items_sm, idx_waste_records_company, idx_waste_records_store, idx_waste_records_product, idx_waste_records_recorder, idx_waste_records_approved_by, idx_waste_records_sm, idx_waste_records_time
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V18__create_store_operations.sql
 -- PLUS33 ERP — Store Operations module schema

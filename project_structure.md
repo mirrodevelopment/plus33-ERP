@@ -147,3 +147,4 @@ The database schema spans version migrations from `V1` up to `V376`:
 * **`V351`–`V360`**: V58 Dynamic fuel optimization and Eco-Driving driver behaviors logs.
 * **`V361`–`V370`**: V59 EV Battery telemetry status and Charging reservation schedule allocations.
 * **`V371`–`V376`**: V60 ESG Greenhouse Gas Scope 1/2 carbon emissions logs and auditing verification signatures.
+* **`V377`–`V384`**: Complete Enterprise development seed dataset representing a French Coffee company (PLUS33 Coffee) with ~200 employees, 250 products, 3000 sales orders, CRM logs, stock counts, payroll records, and BI KPI analytics snapshots.

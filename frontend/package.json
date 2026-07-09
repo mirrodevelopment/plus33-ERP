@@ -1,0 +1,13 @@
+{
+  "name": "plus33-erp-frontend",
+  "version": "1.0.0",
+  "description": "PLUS33 Enterprise ERP Frontend Foundation",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "npx http-server -p 3000 -c-1 --cors -o",
+    "lint": "echo \"Ready for linting.\"",
+    "format": "echo \"Ready for formatting.\"",
+    "build": "echo \"Ready for production bundling.\""
+  }
+}

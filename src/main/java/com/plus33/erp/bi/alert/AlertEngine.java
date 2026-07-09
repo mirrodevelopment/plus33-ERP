@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.alert
+ * File              : AlertEngine.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: AlertEngineController
+ * Related Service   : AlertEngine
+ * Related Repository: BiAlertRuleRepository
+ * Related Entity    : AlertEngine
+ * Related DTO       : N/A
+ * Related Mapper    : AlertEngineMapper
+ * Related DB Table  : alert_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : AlertEngineController, AlertEngineImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements AlertEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.alert;
 
 import com.plus33.erp.bi.entity.BiAlertRule;
@@ -28,6 +55,14 @@ public class AlertEngine {
         this.jdbc = jdbc;
     }
 
+    /**
+     * Performs the evaluateRules operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param kpiCode the kpiCode input value
+     * @param actualValue the actualValue input value
+     * @return List of matching records the numeric result value
+     */
     @Transactional
     public List<Long> evaluateRules(Long companyId, String kpiCode, BigDecimal actualValue) {
         List<BiAlertRule> rules = ruleRepo.findByIsActiveTrue();

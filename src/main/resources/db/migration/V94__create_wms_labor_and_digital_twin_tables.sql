@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 94
+-- File              : V94__create_wms_labor_and_digital_twin_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create wms labor and digital twin tables
+--
+-- Tables Created    : IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V94: Labor Management, Digital Twin Spatial Graph & Slotting Tables
 CREATE TABLE IF NOT EXISTS warehouse_labor_logs (
     id BIGSERIAL PRIMARY KEY,

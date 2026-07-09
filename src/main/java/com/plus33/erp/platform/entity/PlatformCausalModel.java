@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Platform Module
+ * Package           : com.plus33.erp.platform.entity
+ * File              : PlatformCausalModel.java
+ * Purpose           : JPA Entity representing a persistent database record in Platform Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PlatformCausalModelController
+ * Related Service   : PlatformCausalModelService, PlatformCausalModelServiceImpl
+ * Related Repository: PlatformCausalModelRepository
+ * Related Entity    : PlatformCausalModel
+ * Related DTO       : N/A
+ * Related Mapper    : PlatformCausalModelMapper
+ * Related DB Table  : platform_causal_model
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : PlatformCausalModelRepository, PlatformCausalModelMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'platform_causal_model'. Defines persistent domain object for Platform Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.platform.entity;
 
 import jakarta.persistence.*;
@@ -5,6 +32,19 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Platform Module</b>
+ *
+ * <p><b>Class  :</b> {@code PlatformCausalModel}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.platform.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'platform_causal_model'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code platform_causal_model}</p>
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Entity
 @Table(name = "platform_causal_model")
 public class PlatformCausalModel {
@@ -34,16 +74,82 @@ public class PlatformCausalModel {
     @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    /**
+     * Retrieves id data from the database.
+     *
+     * @return the numeric result value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public Long getId() { return id; }
+    /**
+     * Performs the setId operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     */
     public void setId(Long id) { this.id = id; }
+    /**
+     * Retrieves version data from the database.
+     *
+     * @return the numeric result value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public Integer getVersion() { return version; }
+    /**
+     * Performs the setVersion operation in this module.
+     *
+     * @param version the version input value
+     */
     public void setVersion(Integer version) { this.version = version; }
+    /**
+     * Retrieves model code data from the database.
+     *
+     * @return the result string value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public String getModelCode() { return modelCode; }
+    /**
+     * Performs the setModelCode operation in this module.
+     *
+     * @param modelCode the modelCode input value
+     */
     public void setModelCode(String modelCode) { this.modelCode = modelCode; }
+    /**
+     * Retrieves model name data from the database.
+     *
+     * @return the result string value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public String getModelName() { return modelName; }
+    /**
+     * Performs the setModelName operation in this module.
+     *
+     * @param modelName the modelName input value
+     */
     public void setModelName(String modelName) { this.modelName = modelName; }
+    /**
+     * Retrieves structure json data from the database.
+     *
+     * @return the result string value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public String getStructureJson() { return structureJson; }
+    /**
+     * Performs the setStructureJson operation in this module.
+     *
+     * @param structureJson the structureJson input value
+     */
     public void setStructureJson(String structureJson) { this.structureJson = structureJson; }
+    /**
+     * Retrieves created at data from the database.
+     *
+     * @return the LocalDateTime result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public LocalDateTime getCreatedAt() { return createdAt; }
+    /**
+     * Performs the setCreatedAt operation in this module.
+     *
+     * @param createdAt the createdAt input value
+     */
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

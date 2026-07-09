@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 75
+-- File              : V75__fixed_asset_enterprise_refinements.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : fixed asset enterprise refinements
+--
+-- Tables Created    : depreciation_books, fixed_asset_books, fixed_asset_revaluations, fixed_asset_impairments, fixed_asset_leases, fixed_asset_relations, fixed_asset_maintenance_plans, fixed_asset_utilization, fixed_asset_attachments, fixed_asset_attachment_versions, fixed_asset_reservations, fixed_asset_insurance_claims, fixed_asset_downtimes, fixed_asset_work_orders, fixed_asset_notifications, fixed_asset_fx_logs, fixed_asset_history
+-- Tables Altered    : fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, fixed_assets, asset_categories, fixed_asset_transfers, fixed_asset_transfers, fixed_asset_transfers, fixed_asset_transfers, fixed_asset_audits, fixed_asset_audits, fixed_asset_audit_items, fixed_asset_audit_items
+-- Seed Data For     : depreciation_books, permissions, role_permissions
+-- Indexes           : idx_fa_books_lookup, idx_fa_history_timeline, idx_fa_relations_lookup, idx_fa_maint_plan_date, idx_fa_utilization_lookup, idx_fa_attachments_lookup, idx_fa_reservations_lookup, idx_fa_downtimes_lookup, idx_fa_work_orders_lookup, idx_fa_notifications_lookup
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V75__fixed_asset_enterprise_refinements.sql
 -- PLUS33 ERP — Fixed Asset Management Enterprise Refinements

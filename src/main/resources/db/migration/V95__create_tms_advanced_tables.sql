@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 95
+-- File              : V95__create_tms_advanced_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create tms advanced tables
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V95: Advanced TMS Route Optimization, Load Planning & GPS Telemetry Tables
 CREATE TABLE IF NOT EXISTS delivery_routes (
     id BIGSERIAL PRIMARY KEY,

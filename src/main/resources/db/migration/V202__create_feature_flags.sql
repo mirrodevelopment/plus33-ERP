@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 202
+-- File              : V202__create_feature_flags.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create feature flags
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V202: Feature Flags DDL
 CREATE TABLE IF NOT EXISTS platform_feature_flag (
     id                  BIGSERIAL PRIMARY KEY,

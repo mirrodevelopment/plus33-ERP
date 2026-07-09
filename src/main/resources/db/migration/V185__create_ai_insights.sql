@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 185
+-- File              : V185__create_ai_insights.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create ai insights
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V185: AI Generative Insights and Performance Commentary DDL
 CREATE TABLE IF NOT EXISTS bi_ai_insight_generation (
     id                  BIGSERIAL PRIMARY KEY,

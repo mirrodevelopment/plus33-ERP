@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Workforce Module
+ * Package           : com.plus33.erp.workforce.service
+ * File              : EmployeeServiceImpl.java
+ * Purpose           : Business logic service layer for Workforce Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: EmployeeController
+ * Related Service   : EmployeeServiceImpl
+ * Related Repository: EmployeeRepository, CompanyRepository, RegionRepository, StoreRepository, UserRepository, UserRegionRepository, UserStoreRepository
+ * Related Entity    : Employee
+ * Related DTO       : EmployeeRequest, EmployeeResponse, EmployeeSearchRequest, mapToResponse, PageResponse
+ * Related Mapper    : EmployeeMapper
+ * Related DB Table  : employees
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Security Module
+ * Used By           : EmployeeController, EmployeeServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Workforce Module. Implements EmployeeService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.workforce.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -34,6 +61,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Workforce Module</b>
+ *
+ * <p><b>Class  :</b> {@code EmployeeServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.workforce.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Workforce Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * EmployeeController
+ *   --> EmployeeServiceImpl (this)
+ *   --> Validate business rules
+ *   --> EmployeeRepository (read/write 'employees')
+ *   --> EmployeeMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code employees}</p>
+ * <p><b>Module Deps      :</b> Common, Organization, Security, Workforce</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class EmployeeServiceImpl implements EmployeeService {
@@ -65,6 +116,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeMapper = employeeMapper;
     }
 
+    /**
+     * Creates a new employee and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the EmployeeResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public EmployeeResponse createEmployee(EmployeeRequest request) {
@@ -106,6 +166,10 @@ public class EmployeeServiceImpl implements EmployeeService {
             if (!store.getRegion().getCompany().getId().equals(request.companyId())) {
                 throw new BusinessException("Cannot assign employee: Store does not belong to the selected company");
             }
+            long currentCount = userStoreRepository.countByStoreId(store.getId());
+            if (currentCount >= 30) {
+                throw new BusinessException("Store has reached its maximum capacity of 30 employees");
+            }
         }
 
         User user = null;
@@ -136,6 +200,20 @@ public class EmployeeServiceImpl implements EmployeeService {
         return mapToResponse(saved);
     }
 
+    /**
+     * Retrieves a single employee by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the EmployeeResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single employee by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the EmployeeResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public EmployeeResponse getEmployeeById(Long id) {
         Employee employee = employeeRepository.findById(id)
@@ -143,6 +221,20 @@ public class EmployeeServiceImpl implements EmployeeService {
         return mapToResponse(employee);
     }
 
+    /**
+     * Returns a filtered paginated list of employees records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of employees records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<EmployeeResponse> searchEmployees(EmployeeSearchRequest searchRequest, Pageable pageable) {
         Specification<Employee> spec = (root, query, cb) -> {
@@ -206,6 +298,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         );
     }
 
+    /**
+     * Updates an existing employee record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the EmployeeResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
@@ -235,6 +337,18 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new DuplicateResourceException("Employee with email " + request.email() + " already exists in company " + company.getName());
         }
 
+        User user = null;
+        if (request.userId() != null) {
+            user = userRepository.findById(request.userId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User account not found with ID: " + request.userId()));
+            if (!user.getActive()) {
+                throw new BusinessException("Cannot assign employee: User account is inactive");
+            }
+            if (employeeRepository.existsByUserIdAndIdNot(request.userId(), id)) {
+                throw new DuplicateResourceException("User account is already assigned to another employee");
+            }
+        }
+
         Region region = null;
         if (request.regionId() != null) {
             region = regionRepository.findById(request.regionId())
@@ -257,17 +371,18 @@ public class EmployeeServiceImpl implements EmployeeService {
             if (!store.getRegion().getCompany().getId().equals(request.companyId())) {
                 throw new BusinessException("Cannot assign employee: Store does not belong to the selected company");
             }
-        }
-
-        User user = null;
-        if (request.userId() != null) {
-            user = userRepository.findById(request.userId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User account not found with ID: " + request.userId()));
-            if (!user.getActive()) {
-                throw new BusinessException("Cannot assign employee: User account is inactive");
+            boolean alreadyAssigned = false;
+            User targetUser = (user != null) ? user : employee.getUser();
+            final Long targetStoreId = store.getId();
+            if (targetUser != null) {
+                alreadyAssigned = userStoreRepository.findByIdUserId(targetUser.getId()).stream()
+                        .anyMatch(us -> us.getId().getStoreId().equals(targetStoreId));
             }
-            if (employeeRepository.existsByUserIdAndIdNot(request.userId(), id)) {
-                throw new DuplicateResourceException("User account is already assigned to another employee");
+            if (!alreadyAssigned) {
+                long currentCount = userStoreRepository.countByStoreId(targetStoreId);
+                if (currentCount >= 30) {
+                    throw new BusinessException("Store has reached its maximum capacity of 30 employees");
+                }
             }
         }
 
@@ -293,6 +408,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         return mapToResponse(saved);
     }
 
+    /**
+     * Permanently deletes the employee from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     */
     @Override
     @Transactional
     public void deleteEmployee(Long id) {
@@ -310,6 +432,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.save(employee);
     }
 
+    /**
+     * Performs the activateEmployee operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the EmployeeResponse result
+     */
     @Override
     @Transactional
     public EmployeeResponse activateEmployee(Long id) {
@@ -323,6 +451,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         return mapToResponse(saved);
     }
 
+    /**
+     * Performs the deactivateEmployee operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the EmployeeResponse result
+     */
     @Override
     @Transactional
     public EmployeeResponse deactivateEmployee(Long id) {

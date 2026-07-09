@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.service
+ * File              : PurchaseOrderServiceImpl.java
+ * Purpose           : Business logic service layer for Procurement Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PurchaseOrderController
+ * Related Service   : PurchaseOrderServiceImpl
+ * Related Repository: PurchaseOrderRepository, PurchaseRequestRepository, CompanyRepository, SupplierRepository, ProductRepository, UserRepository, BudgetDimensionSetRepository, AccountRepository
+ * Related Entity    : PurchaseOrder
+ * Related DTO       : BudgetDimensionSetRequest, BudgetReservationRequest, getPurchaseRequest, PageResponse, PurchaseOrderItemRequest
+ * Related Mapper    : PurchaseOrderMapper
+ * Related DB Table  : purchase_orders
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module, Organization Module, Security Module, Analytics Module
+ * Used By           : PurchaseOrderController, PurchaseOrderServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Procurement Module. Implements PurchaseOrderService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.procurement.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -37,6 +64,30 @@ import com.plus33.erp.finance.repository.AccountRepository;
 import com.plus33.erp.finance.entity.Account;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code PurchaseOrderServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Procurement Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * PurchaseOrderController
+ *   --> PurchaseOrderServiceImpl (this)
+ *   --> Validate business rules
+ *   --> PurchaseOrderRepository (read/write 'purchase_orders')
+ *   --> PurchaseOrderMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code purchase_orders}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Procurement, Security, Analytics</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -78,6 +129,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         this.accountRepository = accountRepository;
     }
 
+    /**
+     * Creates a new purchase order and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the PurchaseOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseOrderResponse createPurchaseOrder(PurchaseOrderRequest request) {
@@ -131,6 +191,20 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         return purchaseOrderMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single purchase order by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseOrderResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single purchase order by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseOrderResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public PurchaseOrderResponse getPurchaseOrderById(Long id) {
         PurchaseOrder po = purchaseOrderRepository.findById(id)
@@ -138,6 +212,20 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         return purchaseOrderMapper.toResponse(po);
     }
 
+    /**
+     * Returns a filtered paginated list of purchase orders records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of purchase orders records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<PurchaseOrderResponse> searchPurchaseOrders(PurchaseOrderSearchRequest searchRequest, Pageable pageable) {
         Specification<PurchaseOrder> spec = (root, query, cb) -> {
@@ -185,6 +273,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         );
     }
 
+    /**
+     * Updates an existing purchase order record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the PurchaseOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseOrderResponse updatePurchaseOrder(Long id, PurchaseOrderRequest request) {
@@ -242,6 +340,13 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         return purchaseOrderMapper.toResponse(saved);
     }
 
+    /**
+     * Permanently deletes the purchase order from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     */
     @Override
     @Transactional
     public void deletePurchaseOrder(Long id) {
@@ -255,6 +360,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         purchaseOrderRepository.delete(po);
     }
 
+    /**
+     * Approves the purchase order, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseOrderResponse approvePurchaseOrder(Long id) {
@@ -322,6 +436,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         return purchaseOrderMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the purchase order and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the PurchaseOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseOrderResponse cancelPurchaseOrder(Long id, String reason) {
@@ -364,6 +488,12 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         return !type.equals("SERVICE") && !type.equals("EXPENSE");
     }
 
+    /**
+     * Completes the purchase order workflow and finalizes the record status.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseOrderResponse result
+     */
     @Override
     @Transactional
     public PurchaseOrderResponse closePurchaseOrder(Long id) {

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.reporting.service
+ * File              : FinancialReportingServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: FinancialReportingController
+ * Related Service   : FinancialReportingServiceImpl
+ * Related Repository: FiscalYearRepository, PeriodLockRepository, CompanyRepository, AccountRepository, JournalEntryRepository, UserRepository
+ * Related Entity    : FinancialReporting
+ * Related DTO       : BalanceSheetResponse, FinancialReportExportRequest, FiscalYearCloseRequest, FiscalYearCloseResponse, IncomeStatementResponse
+ * Related Mapper    : FinancialReportingMapper
+ * Related DB Table  : financial_reportings
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Security Module
+ * Used By           : FinancialReportingController, FinancialReportingServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements FinancialReportingService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.reporting.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -29,6 +56,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code FinancialReportingServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.reporting.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * FinancialReportingController
+ *   --> FinancialReportingServiceImpl (this)
+ *   --> Validate business rules
+ *   --> FinancialReportingRepository (read/write 'financial_reportings')
+ *   --> FinancialReportingMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code financial_reportings}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -44,6 +95,12 @@ public class FinancialReportingServiceImpl implements FinancialReportingService 
     private final List<FinancialReportExporter> exporters;
     private final EntityManager entityManager;
 
+    /**
+     * Retrieves trial balance data from the database.
+     *
+     * @return the TrialBalanceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public TrialBalanceResponse getTrialBalance(
@@ -180,6 +237,12 @@ public class FinancialReportingServiceImpl implements FinancialReportingService 
         );
     }
 
+    /**
+     * Retrieves income statement data from the database.
+     *
+     * @return the IncomeStatementResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public IncomeStatementResponse getIncomeStatement(
@@ -235,6 +298,12 @@ public class FinancialReportingServiceImpl implements FinancialReportingService 
         );
     }
 
+    /**
+     * Retrieves balance sheet data from the database.
+     *
+     * @return the BalanceSheetResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public BalanceSheetResponse getBalanceSheet(
@@ -316,6 +385,11 @@ public class FinancialReportingServiceImpl implements FinancialReportingService 
         );
     }
 
+    /**
+     * Exports report data as a report or downloadable file.
+     *
+     * @return the result string value
+     */
     @Override
     @Transactional(readOnly = true)
     public String exportReport(
@@ -351,6 +425,13 @@ public class FinancialReportingServiceImpl implements FinancialReportingService 
         }
     }
 
+    /**
+     * Performs the lockPeriod operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the PeriodLockResponse result
+     */
     @Override
     @Transactional
     public PeriodLockResponse lockPeriod(Long companyId, PeriodLockRequest request) {
@@ -381,6 +462,13 @@ public class FinancialReportingServiceImpl implements FinancialReportingService 
         );
     }
 
+    /**
+     * Retrieves period lock data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the PeriodLockResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public PeriodLockResponse getPeriodLock(Long companyId) {
@@ -393,6 +481,13 @@ public class FinancialReportingServiceImpl implements FinancialReportingService 
         );
     }
 
+    /**
+     * Completes the fiscal year workflow and finalizes the record status.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the FiscalYearCloseResponse result
+     */
     @Override
     @Transactional
     public FiscalYearCloseResponse closeFiscalYear(Long companyId, FiscalYearCloseRequest request) {
@@ -548,6 +643,12 @@ public class FinancialReportingServiceImpl implements FinancialReportingService 
         );
     }
 
+    /**
+     * Performs the reopenFiscalYear operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param fiscalYear the fiscalYear input value
+     */
     @Override
     @Transactional
     public void reopenFiscalYear(Long companyId, Integer fiscalYear) {

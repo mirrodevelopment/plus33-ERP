@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.selfservice
+ * File              : SelfServiceAnalyticsService.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: SelfServiceAnalyticsController
+ * Related Service   : SelfServiceAnalyticsService
+ * Related Repository: SelfServiceAnalyticsRepository
+ * Related Entity    : SelfServiceAnalytics
+ * Related DTO       : N/A
+ * Related Mapper    : SelfServiceAnalyticsMapper
+ * Related DB Table  : self_service_analyticss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : SelfServiceAnalyticsController, SelfServiceAnalyticsServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements SelfServiceAnalyticsService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.selfservice;
 
 import com.plus33.erp.bi.entity.BiSelfServiceWorkspace;
@@ -10,12 +37,45 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Bi Module</b>
+ *
+ * <p><b>Class  :</b> {@code SelfServiceAnalyticsService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.bi.selfservice}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Bi Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * SelfServiceAnalyticsController
+ *   --> SelfServiceAnalyticsService (this)
+ *   --> Validate business rules
+ *   --> SelfServiceAnalyticsRepository (read/write 'self_service_analyticss')
+ *   --> SelfServiceAnalyticsMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code self_service_analyticss}</p>
+ * <p><b>Module Deps      :</b> Bi</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class SelfServiceAnalyticsService {
 
     @Autowired BiSelfServiceWorkspaceRepository workspaceRepo;
     @Autowired BiUsageLogRepository usageLogRepo;
-
+    /**
+     * Persists the workspace entity to the database.
+     *
+     * @param code the code input value
+     * @param name the name input value
+     * @param user the user input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param configJson the configJson input value
+     * @return the BiSelfServiceWorkspace result
+     */
     @Transactional
     public BiSelfServiceWorkspace saveWorkspace(String code, String name, String user, Long companyId, String configJson) {
         BiSelfServiceWorkspace ws = workspaceRepo.findAll().stream()
@@ -35,6 +95,14 @@ public class SelfServiceAnalyticsService {
         return workspaceRepo.save(ws);
     }
 
+    /**
+     * Performs the executeQuery operation in this module.
+     *
+     * @param user the user input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param querySql the querySql input value
+     * @return the QueryResult result
+     */
     public QueryResult executeQuery(String user, Long companyId, String querySql) {
         long startTime = System.currentTimeMillis();
 

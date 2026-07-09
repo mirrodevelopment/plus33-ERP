@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Manufacturing Module
+ * Package           : com.plus33.erp.manufacturing.service.impl
+ * File              : MrpServiceImpl.java
+ * Purpose           : Business logic service layer for Manufacturing Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: MrpController
+ * Related Service   : MrpServiceImpl
+ * Related Repository: MrpRunRepository, MrpPlannedOrderRepository, BomHeaderRepository, ProductRepository, UnitOfMeasureRepository, InventoryStockRepository, MrpPeggingLinkRepository, RoutingHeaderRepository, CapacityPlanRepository, WorkCenterRepository
+ * Related Entity    : Mrp
+ * Related DTO       : CreateProductionOrderRequest, ExecuteMrpRunRequest, mapRunToDto, mapToPlannedOrderDto, mapToSuggestionDto
+ * Related Mapper    : MrpMapper
+ * Related DB Table  : mrps
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module
+ * Used By           : MrpController, MrpServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Manufacturing Module. Implements MrpService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.manufacturing.service.impl;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -23,6 +50,30 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Manufacturing Module</b>
+ *
+ * <p><b>Class  :</b> {@code MrpServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.manufacturing.service.impl}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Manufacturing Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * MrpController
+ *   --> MrpServiceImpl (this)
+ *   --> Validate business rules
+ *   --> MrpRepository (read/write 'mrps')
+ *   --> MrpMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code mrps}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Manufacturing</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional
 public class MrpServiceImpl implements MrpService {
@@ -73,6 +124,18 @@ public class MrpServiceImpl implements MrpService {
         this.workCenterRepository = workCenterRepository;
     }
 
+    /**
+     * Performs the runMrp operation in this module.
+     *
+     * @param request the validated request DTO containing input data
+     * @return List of matching records
+     */
+    /**
+     * Performs the runMrp operation in this module.
+     *
+     * @param request the validated request DTO containing input data
+     * @return List of matching records
+     */
     @Override
     public List<MrpSuggestionDto> runMrp(MrpRunRequest request) {
         MrpRun run = new MrpRun();
@@ -303,6 +366,13 @@ public class MrpServiceImpl implements MrpService {
         return current;
     }
 
+    /**
+     * Retrieves mrp suggestions by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<MrpSuggestionDto> getMrpSuggestionsByCompany(Long companyId) {
@@ -314,6 +384,18 @@ public class MrpServiceImpl implements MrpService {
                 .map(this::mapToSuggestionDto).toList();
     }
 
+    /**
+     * Performs the executeMrpRun operation in this module.
+     *
+     * @param request the validated request DTO containing input data
+     * @return the MrpRunDto result
+     */
+    /**
+     * Performs the executeMrpRun operation in this module.
+     *
+     * @param request the validated request DTO containing input data
+     * @return the MrpRunDto result
+     */
     @Override
     public MrpRunDto executeMrpRun(ExecuteMrpRunRequest request) {
         MrpRunRequest runReq = new MrpRunRequest();
@@ -332,6 +414,14 @@ public class MrpServiceImpl implements MrpService {
         return mapRunToDto(run);
     }
 
+    /**
+     * Retrieves mrp run data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param runId the runId input value
+     * @return the MrpRunDto result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public MrpRunDto getMrpRun(Long companyId, Long runId) {
@@ -340,6 +430,13 @@ public class MrpServiceImpl implements MrpService {
         return mapRunToDto(run);
     }
 
+    /**
+     * Retrieves mrp run history data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<MrpRunDto> getMrpRunHistory(Long companyId) {
@@ -347,6 +444,14 @@ public class MrpServiceImpl implements MrpService {
                 .stream().map(this::mapRunToDto).toList();
     }
 
+    /**
+     * Retrieves planned orders data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param runId the runId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<MrpPlannedOrderDto> getPlannedOrders(Long companyId, Long runId) {
@@ -354,6 +459,15 @@ public class MrpServiceImpl implements MrpService {
                 .map(this::mapToPlannedOrderDto).toList();
     }
 
+    /**
+     * Retrieves actionable planned orders data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param from the from input value
+     * @param to the to input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<MrpPlannedOrderDto> getActionablePlannedOrders(Long companyId, LocalDate from, LocalDate to) {
@@ -361,6 +475,22 @@ public class MrpServiceImpl implements MrpService {
                 .map(this::mapToPlannedOrderDto).toList();
     }
 
+    /**
+     * Performs the firmPlannedOrder operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param plannedOrderId the plannedOrderId input value
+     * @param userId authenticated user identifier
+     * @return the MrpPlannedOrderDto result
+     */
+    /**
+     * Performs the firmPlannedOrder operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param plannedOrderId the plannedOrderId input value
+     * @param userId authenticated user identifier
+     * @return the MrpPlannedOrderDto result
+     */
     @Override
     public MrpPlannedOrderDto firmPlannedOrder(Long companyId, Long plannedOrderId, Long userId) {
         MrpPlannedOrder plannedOrder = mrpPlannedOrderRepository.findById(plannedOrderId)
@@ -370,6 +500,22 @@ public class MrpServiceImpl implements MrpService {
         return mapToPlannedOrderDto(mrpPlannedOrderRepository.save(plannedOrder));
     }
 
+    /**
+     * Releases previously reserved planned order resources back to the available pool.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param plannedOrderId the plannedOrderId input value
+     * @param userId authenticated user identifier
+     * @return the ProductionOrderDto result
+     */
+    /**
+     * Releases previously reserved planned order resources back to the available pool.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param plannedOrderId the plannedOrderId input value
+     * @param userId authenticated user identifier
+     * @return the ProductionOrderDto result
+     */
     @Override
     public ProductionOrderDto releasePlannedOrder(Long companyId, Long plannedOrderId, Long userId) {
         MrpPlannedOrder plannedOrder = mrpPlannedOrderRepository.findById(plannedOrderId)
@@ -403,6 +549,26 @@ public class MrpServiceImpl implements MrpService {
         return poDto;
     }
 
+    /**
+     * Cancels the mrp run and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param runId the runId input value
+     * @param userId authenticated user identifier
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Cancels the mrp run and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param runId the runId input value
+     * @param userId authenticated user identifier
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public void cancelMrpRun(Long companyId, Long runId, Long userId) {
         MrpRun run = mrpRunRepository.findById(runId)

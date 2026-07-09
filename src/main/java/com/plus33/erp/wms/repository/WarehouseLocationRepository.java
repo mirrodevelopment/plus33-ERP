@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.repository
+ * File              : WarehouseLocationRepository.java
+ * Purpose           : JPA Repository providing database CRUD for Wms Module entities
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: WarehouseLocationController
+ * Related Service   : WarehouseLocationService, WarehouseLocationServiceImpl
+ * Related Repository: WarehouseLocationRepository
+ * Related Entity    : WarehouseLocation
+ * Related DTO       : N/A
+ * Related Mapper    : WarehouseLocationMapper
+ * Related DB Table  : warehouse_locations
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : WarehouseLocationService, WarehouseLocationServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Repository for Wms Module against the 'warehouse_locations' table. Provides CRUD, Specification-based queries, and paginated results.
+ ******************************************************************************/
 package com.plus33.erp.wms.repository;
 
 import com.plus33.erp.wms.entity.WarehouseLocation;
@@ -8,6 +35,19 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Wms Module</b>
+ *
+ * <p><b>Class  :</b> {@code WarehouseLocationRepository}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.wms.repository}</p>
+ * <p><b>Layer  :</b> JPA Repository: database access for table 'warehouse_locations' via Spring Data JPA.</p>
+ *
+ * <p><b>Database Table   :</b> {@code warehouse_locations}</p>
+ * <p><b>Module Deps      :</b> Wms</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 public interface WarehouseLocationRepository extends JpaRepository<WarehouseLocation, Long> {
 
     Optional<WarehouseLocation> findByWarehouseIdAndLocationCode(Long warehouseId, String locationCode);

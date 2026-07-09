@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.entity
+ * File              : InHouseBankAccount.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InHouseBankAccountController
+ * Related Service   : InHouseBankAccountService, InHouseBankAccountServiceImpl
+ * Related Repository: InHouseBankAccountRepository
+ * Related Entity    : InHouseBankAccount
+ * Related DTO       : N/A
+ * Related Mapper    : InHouseBankAccountMapper
+ * Related DB Table  : in_house_bank_accounts
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : InHouseBankAccountRepository, InHouseBankAccountMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'in_house_bank_accounts'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.entity;
 
 import com.plus33.erp.finance.entity.Account;
@@ -7,6 +34,19 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code InHouseBankAccount}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'in_house_bank_accounts'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code in_house_bank_accounts}</p>
+ * <p><b>Module Deps      :</b> Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity

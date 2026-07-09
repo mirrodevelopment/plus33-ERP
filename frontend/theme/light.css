@@ -1,0 +1,45 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Frontend Design System
+ * File              : light.css
+ * Path              : frontend/theme/light.css
+ * Purpose           : CSS Theme/Stylesheet: light design tokens and visual styles
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * CSS Variables     : 17 custom properties defined
+ * Responsive Queries: None
+ * Depends On        : theme/variables.css (root CSS custom properties)
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * CSS Theme/Stylesheet: light design tokens and visual styles. Part of the PLUS33 Coffee ERP CSS custom-property design system.
+ * Applied via link tags in index.html across all UI components.
+ ******************************************************************************/
+/* --- Light Mode Stylesheet --- */
+html[data-theme="light"] {
+  --bg-app: #f1f5f9;
+  --bg-sidebar: #ffffff;
+  --bg-header: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  
+  --border-color: #e2e8f0;
+  --border-color-hover: #cbd5e1;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  
+  --accent-primary: #2563eb;
+  --accent-secondary: #0284c7;
+  --accent-glow: rgba(37, 99, 235, 0.15);
+  
+  --status-success: #059669;
+  --status-warning: #d97706;
+  --status-danger: #dc2626;
+  --status-info: #0284c7;
+}

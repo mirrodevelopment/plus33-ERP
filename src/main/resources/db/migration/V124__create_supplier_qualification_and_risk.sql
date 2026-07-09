@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 124
+-- File              : V124__create_supplier_qualification_and_risk.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create supplier qualification and risk
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V124: Supplier Qualification and Risk Analysis
 CREATE TABLE IF NOT EXISTS procurement_supplier_qualifications (
     id BIGSERIAL PRIMARY KEY,

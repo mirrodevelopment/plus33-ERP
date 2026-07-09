@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 60
+-- File              : V60__create_customer_returns.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create customer returns
+--
+-- Tables Created    : customer_returns, customer_return_items, credit_notes, credit_note_items
+-- Tables Altered    : customer_invoice_items, customer_invoices, inventory_trace_events, inventory_trace_events
+-- Seed Data For     : N/A
+-- Indexes           : IF, IF, IF, IF, IF, IF
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V60__create_customer_returns.sql
 -- PLUS33 ERP — Customer Returns & Credit Notes Schema

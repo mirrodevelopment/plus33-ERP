@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Hcm Module
+ * Package           : com.plus33.erp.hcm.service
+ * File              : Employee360Service.java
+ * Purpose           : Business logic service layer for Hcm Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: Employee360Controller
+ * Related Service   : Employee360Service
+ * Related Repository: EmployeeRepository, EmployeeLifecycleRepository, HcmGoalRepository
+ * Related Entity    : Employee360
+ * Related DTO       : N/A
+ * Related Mapper    : Employee360Mapper
+ * Related DB Table  : employee360s
+ * Related REST APIs : N/A
+ * Depends On        : Workforce Module
+ * Used By           : Employee360Controller, Employee360ServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Hcm Module. Implements Employee360Service. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.hcm.service;
 
 import com.plus33.erp.workforce.entity.Employee;
@@ -13,6 +40,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Hcm Module</b>
+ *
+ * <p><b>Class  :</b> {@code Employee360Service}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.hcm.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Hcm Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * Employee360Controller
+ *   --> Employee360Service (this)
+ *   --> Validate business rules
+ *   --> Employee360Repository (read/write 'employee360s')
+ *   --> Employee360Mapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code employee360s}</p>
+ * <p><b>Module Deps      :</b> Workforce, Hcm</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class Employee360Service {
 
@@ -28,6 +79,12 @@ public class Employee360Service {
         this.goalRepository = goalRepository;
     }
 
+    /**
+     * Performs the compileProfileSnapshot operation in this module.
+     *
+     * @param employeeId the employeeId input value
+     * @return the result string value
+     */
     @Transactional(readOnly = true)
     public Map<String, Object> compileProfileSnapshot(Long employeeId) {
         Employee emp = employeeRepository.findById(employeeId)

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Inventory Module
+ * Package           : com.plus33.erp.inventory.entity
+ * File              : StockCount.java
+ * Purpose           : JPA Entity representing a persistent database record in Inventory Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: StockCountController
+ * Related Service   : StockCountService, StockCountServiceImpl
+ * Related Repository: StockCountRepository
+ * Related Entity    : StockCount
+ * Related DTO       : N/A
+ * Related Mapper    : StockCountMapper
+ * Related DB Table  : stock_counts
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Security Module
+ * Used By           : StockCountRepository, StockCountMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'stock_counts'. Defines persistent domain object for Inventory Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.inventory.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -13,6 +40,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Inventory Module</b>
+ *
+ * <p><b>Class  :</b> {@code StockCount}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.inventory.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'stock_counts'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code stock_counts}</p>
+ * <p><b>Module Deps      :</b> Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity
@@ -137,6 +177,10 @@ public class StockCount {
     @Version
     private Long version;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

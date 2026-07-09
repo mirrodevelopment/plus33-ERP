@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 134
+-- File              : V134__create_budgets_and_forecasts.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create budgets and forecasts
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V134: Project Budgeting and Forecasts
 CREATE TABLE IF NOT EXISTS project_budgets (
     id BIGSERIAL PRIMARY KEY,

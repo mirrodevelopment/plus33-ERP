@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Security Module
+ * Package           : com.plus33.erp.security.filter
+ * File              : JwtAuthFilter.java
+ * Purpose           : Spring Security filter for JWT authentication and authorization
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: JwtAuthFilterController
+ * Related Service   : JwtAuthFilterService, JwtAuthFilterServiceImpl
+ * Related Repository: JwtAuthFilterRepository
+ * Related Entity    : JwtAuthFilter
+ * Related DTO       : HttpServletRequest, HttpServletResponse
+ * Related Mapper    : JwtAuthFilterMapper
+ * Related DB Table  : jwt_auth_filters
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Security Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Security Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.security.filter;
 
 import jakarta.servlet.FilterChain;
@@ -16,6 +43,29 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Security Module</b>
+ *
+ * <p><b>Class  :</b> {@code JwtAuthFilter}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.security.filter}</p>
+ * <p><b>Layer  :</b> Spring Security Filter: validates JWT Bearer token on every HTTP request.</p>
+ *
+ * <p><b>JWT Security Flow:</b></p>
+ * <pre>
+ * Every HTTP Request
+ *   --> JwtAuthFilter.doFilterInternal()
+ *   --> Extract Authorization: Bearer token
+ *   --> Decode and verify HMAC-SHA256 signature
+ *   --> Extract subject (email) + authorities (permissions)
+ *   --> SecurityContextHolder.setAuthentication(...)
+ *   --> @PreAuthorize checks succeed --> Controller executes
+ * </pre>
+ *
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -25,6 +75,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         this.jwtDecoder = jwtDecoder;
     }
 
+    /**
+     * Performs the doFilterInternal operation in this module.
+     *
+     */
+    /**
+     * Performs the doFilterInternal operation in this module.
+     *
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -33,7 +91,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // Skip filter for public endpoints
         String path = request.getServletPath();
         log.debug("JwtAuthFilter invoked for path: {}", path);
-        if (path.startsWith("/api/v1/auth/")
+        if (path.equals("/api/v1/auth/login")
                 || path.startsWith("/swagger-ui/")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/api-docs")) {

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.entity
+ * File              : CustomerInvoice.java
+ * Purpose           : JPA Entity representing a persistent database record in Sales Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CustomerInvoiceController
+ * Related Service   : CustomerInvoiceService, CustomerInvoiceServiceImpl
+ * Related Repository: CustomerInvoiceRepository
+ * Related Entity    : CustomerInvoice
+ * Related DTO       : N/A
+ * Related Mapper    : CustomerInvoiceMapper
+ * Related DB Table  : customer_invoices
+ * Related REST APIs : N/A
+ * Depends On        : Finance Module, Organization Module, Security Module
+ * Used By           : CustomerInvoiceRepository, CustomerInvoiceMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'customer_invoices'. Defines persistent domain object for Sales Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.sales.entity;
 
 import com.plus33.erp.finance.entity.JournalEntry;
@@ -21,6 +48,19 @@ import java.util.UUID;
     @UniqueConstraint(name = "uk_customer_invoice_client_reference", columnNames = {"company_id", "client_reference_id"}),
     @UniqueConstraint(name = "uk_customer_invoice_journal_entry", columnNames = {"journal_entry_id"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code CustomerInvoice}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'customer_invoices'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code customer_invoices}</p>
+ * <p><b>Module Deps      :</b> Finance, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -133,6 +173,10 @@ public class CustomerInvoice {
     @Builder.Default
     private List<CustomerInvoiceItem> items = new ArrayList<>();
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 362
+-- File              : V362__create_ev_battery_health.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create ev battery health
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V362: EV Battery Health Diagnostics
 CREATE TABLE IF NOT EXISTS platform_ev_battery_health_log (
     id                          BIGSERIAL PRIMARY KEY,

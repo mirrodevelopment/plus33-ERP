@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 262
+-- File              : V262__create_vehicle_telemetry.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create vehicle telemetry
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V262: Vehicle Telemetry
 CREATE TABLE IF NOT EXISTS platform_vehicle (
     id                  BIGSERIAL PRIMARY KEY,

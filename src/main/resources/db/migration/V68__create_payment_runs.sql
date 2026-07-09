@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 68
+-- File              : V68__create_payment_runs.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create payment runs
+--
+-- Tables Created    : payment_runs, payment_run_invoices
+-- Tables Altered    : suppliers, suppliers, suppliers, suppliers, supplier_invoices
+-- Seed Data For     : N/A
+-- Indexes           : idx_payment_runs_company, idx_payment_runs_status, idx_payment_run_invoices_run, idx_payment_run_invoices_invoice, idx_supplier_invoices_payment_run
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V68__create_payment_runs.sql
 -- PLUS33 ERP — Supplier Payments & Payment Runs Schema

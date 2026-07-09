@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 39
+-- File              : V39__create_inventory_transfers.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create inventory transfers
+--
+-- Tables Created    : inventory_transfers, inventory_transfer_items
+-- Tables Altered    : inventory_stock, inventory_stock
+-- Seed Data For     : N/A
+-- Indexes           : idx_transfers_company, idx_transfers_status, idx_transfers_source_wh, idx_transfers_source_store, idx_transfers_dest_wh, idx_transfers_dest_store, idx_transfers_client_ref, idx_transfer_items_transfer
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V39__create_inventory_transfers.sql
 -- PLUS33 ERP — Inventory Transfer schema and triggers

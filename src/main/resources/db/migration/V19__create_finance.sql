@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 19
+-- File              : V19__create_finance.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create finance
+--
+-- Tables Created    : chart_of_accounts, journal_entries, journal_entry_lines, supplier_invoices, payments, payment_allocations
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_coa_company, idx_coa_parent, idx_journal_entries_company, idx_journal_entries_created_by, idx_journal_entries_reversal, idx_journal_lines_entry, idx_journal_lines_account, idx_supplier_invoice_company, idx_supplier_invoice_supplier, idx_supplier_invoice_po, idx_payments_company, idx_payments_journal, idx_payments_user, idx_payment_allocations_payment, idx_payment_allocations_invoice
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V19__create_finance.sql
 -- PLUS33 ERP — Finance & Accounting Tables

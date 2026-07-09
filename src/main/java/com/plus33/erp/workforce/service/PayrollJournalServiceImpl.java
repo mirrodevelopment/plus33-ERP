@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Workforce Module
+ * Package           : com.plus33.erp.workforce.service
+ * File              : PayrollJournalServiceImpl.java
+ * Purpose           : Business logic service layer for Workforce Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PayrollJournalController
+ * Related Service   : PayrollJournalServiceImpl
+ * Related Repository: AccountRepository, JournalEntryRepository, CompanyRepository, UserRepository
+ * Related Entity    : PayrollJournal
+ * Related DTO       : N/A
+ * Related Mapper    : PayrollJournalMapper
+ * Related DB Table  : payroll_journals
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Finance Module, Organization Module, Security Module
+ * Used By           : PayrollJournalController, PayrollJournalServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Workforce Module. Implements PayrollJournalService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.workforce.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -20,6 +47,30 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Workforce Module</b>
+ *
+ * <p><b>Class  :</b> {@code PayrollJournalServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.workforce.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Workforce Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * PayrollJournalController
+ *   --> PayrollJournalServiceImpl (this)
+ *   --> Validate business rules
+ *   --> PayrollJournalRepository (read/write 'payroll_journals')
+ *   --> PayrollJournalMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code payroll_journals}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization, Workforce, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class PayrollJournalServiceImpl implements PayrollJournalService {
 
@@ -38,6 +89,15 @@ public class PayrollJournalServiceImpl implements PayrollJournalService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Posts payroll journal entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param payrollRun the payrollRun input value
+     * @return the JournalEntry result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public JournalEntry postPayrollJournal(PayrollRun payrollRun) {

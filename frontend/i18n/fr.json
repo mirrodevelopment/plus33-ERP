@@ -1,0 +1,15 @@
+{
+  "app": {
+    "title": "PLUS33 ERP",
+    "dashboard": "Tableau de Bord Exécutif",
+    "docs": "Documentation de la Plateforme",
+    "stock": "Registre des Stocks",
+    "topology": "Topologie Physique"
+  },
+  "login": {
+    "welcome": "Portail du Système d'Exploitation de l'Entreprise",
+    "button": "Authentifier la Clé de Sécurité",
+    "username": "Nom de l'Opérateur",
+    "password": "Mot de Passe Secret"
+  }
+}

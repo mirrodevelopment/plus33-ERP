@@ -1,0 +1,69 @@
+﻿<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Frontend Application Shell
+ * File              : index.html
+ * Path              : frontend/index.html
+ * Purpose           : Application shell that bootstraps the PLUS33 Coffee ERP SPA
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Script Entry      : app/main.js
+ * Theme CSS         : theme/variables.css, theme/coffee-dark.css
+ * Related API       : POST /api/v1/auth/login
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Application shell that bootstraps the PLUS33 Coffee ERP SPA. The PLUS33 Coffee ERP is a Vanilla JS SPA.
+ * The JavaScript router dynamically injects page components into #app div.
+ ******************************************************************************
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLUS33 Coffee Enterprise ERP</title>
+    
+    <!-- Google Fonts Montserrat & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- CSS Theme System imports -->
+    <link rel="stylesheet" href="theme/variables.css">
+    <link rel="stylesheet" href="theme/spacing.css">
+    <link rel="stylesheet" href="theme/typography.css">
+    <link rel="stylesheet" href="theme/animations.css">
+    <link rel="stylesheet" href="theme/colors.css">
+    <!-- Theme skins -->
+    <link rel="stylesheet" href="theme/coffee-dark.css">
+    <link rel="stylesheet" href="theme/light.css">
+    <link rel="stylesheet" href="theme/dark.css">
+    <link rel="stylesheet" href="theme/corporate.css">
+    <link rel="stylesheet" href="theme/france.css">
+    <link rel="stylesheet" href="theme/charcoal.css">
+
+    
+    <!-- Lucide CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- Dynamic App Entry wrapper -->
+    <div id="app"></div>
+    
+    <!-- Global dynamic loading state wrapper -->
+    <div id="global-loader" class="global-loader">
+        <div class="loader-content">
+            <div class="logo-spinner" style="margin: 0 auto var(--spacing-lg) auto;"></div>
+            <h3 class="loader-title">LOADING...</h3>
+            <p class="loader-subtitle" style="font-size: 0.8rem; margin: 0;">Syncing enterprise ledger metrics</p>
+        </div>
+    </div>
+    
+    <script type="module" src="app/main.js"></script>
+</body>
+</html>

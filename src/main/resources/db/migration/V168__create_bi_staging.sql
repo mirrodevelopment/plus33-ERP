@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 168
+-- File              : V168__create_bi_staging.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create bi staging
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF, IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V168: BI Analytical Staging Layer
 -- Purpose: Transient staging tables (stg_*) for raw extraction from operational modules.
 -- Data lands here first, is validated, then promoted to DWH dimension/fact tables.

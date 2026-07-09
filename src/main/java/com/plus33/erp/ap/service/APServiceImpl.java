@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Ap Module
+ * Package           : com.plus33.erp.ap.service
+ * File              : APServiceImpl.java
+ * Purpose           : Business logic service layer for Ap Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: APController
+ * Related Service   : APServiceImpl
+ * Related Repository: SupplierInvoiceRepository, SupplierRepository, PaymentRepository, PaymentAllocationRepository, CompanyRepository
+ * Related Entity    : AP
+ * Related DTO       : APAgingResponse, APAnalyticsResponse, APDashboardResponse, APOverdueBillResponse, CashRequirementDTO
+ * Related Mapper    : APMapper
+ * Related DB Table  : a_ps
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Finance Module, Organization Module, Procurement Module
+ * Used By           : APController, APServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Ap Module. Implements APService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.ap.service;
 
 import com.plus33.erp.ap.dto.*;
@@ -24,6 +51,30 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Ap Module</b>
+ *
+ * <p><b>Class  :</b> {@code APServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.ap.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Ap Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * APController
+ *   --> APServiceImpl (this)
+ *   --> Validate business rules
+ *   --> APRepository (read/write 'a_ps')
+ *   --> APMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code a_ps}</p>
+ * <p><b>Module Deps      :</b> Ap, Common, Finance, Organization, Procurement</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class APServiceImpl implements APService {
@@ -51,6 +102,20 @@ public class APServiceImpl implements APService {
     // AP Dashboard
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves a p dashboard data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the APDashboardResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a p dashboard data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the APDashboardResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public APDashboardResponse getAPDashboard(Long companyId) {
         validateCompany(companyId);
@@ -157,6 +222,24 @@ public class APServiceImpl implements APService {
     // Configurable Aging Report
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves aging report data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param supplierId the supplierId input value
+     * @param intervals the intervals input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves aging report data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param supplierId the supplierId input value
+     * @param intervals the intervals input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<APAgingResponse> getAgingReport(Long companyId, Long supplierId, List<Integer> intervals) {
         validateCompany(companyId);
@@ -257,6 +340,22 @@ public class APServiceImpl implements APService {
     // Supplier AP Balance
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves supplier a p balance data from the database.
+     *
+     * @param supplierId the supplierId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the SupplierAPBalanceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves supplier a p balance data from the database.
+     *
+     * @param supplierId the supplierId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the SupplierAPBalanceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public SupplierAPBalanceResponse getSupplierAPBalance(Long supplierId, Long companyId) {
         validateCompany(companyId);
@@ -313,6 +412,26 @@ public class APServiceImpl implements APService {
     // Supplier Chronological Statement
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves supplier statement data from the database.
+     *
+     * @param supplierId the supplierId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param from the from input value
+     * @param to the to input value
+     * @return the SupplierStatementResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves supplier statement data from the database.
+     *
+     * @param supplierId the supplierId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param from the from input value
+     * @param to the to input value
+     * @return the SupplierStatementResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public SupplierStatementResponse getSupplierStatement(Long supplierId, Long companyId, LocalDate from, LocalDate to) {
         validateCompany(companyId);
@@ -434,6 +553,22 @@ public class APServiceImpl implements APService {
     // Overdue Bills
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves overdue bills data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves overdue bills data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public PageResponse<APOverdueBillResponse> getOverdueBills(Long companyId, Pageable pageable) {
         validateCompany(companyId);
@@ -481,6 +616,20 @@ public class APServiceImpl implements APService {
     // AP Analytics
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves a p analytics data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the APAnalyticsResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a p analytics data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the APAnalyticsResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public APAnalyticsResponse getAPAnalytics(Long companyId) {
         validateCompany(companyId);

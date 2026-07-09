@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.budget.entity
+ * File              : BudgetSnapshot.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BudgetSnapshotController
+ * Related Service   : BudgetSnapshotService, BudgetSnapshotServiceImpl
+ * Related Repository: BudgetSnapshotRepository
+ * Related Entity    : BudgetSnapshot
+ * Related DTO       : N/A
+ * Related Mapper    : BudgetSnapshotMapper
+ * Related DB Table  : budget_snapshots
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : BudgetSnapshotRepository, BudgetSnapshotMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'budget_snapshots'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.budget.entity;
 
 import jakarta.persistence.*;
@@ -7,6 +34,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code BudgetSnapshot}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.budget.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'budget_snapshots'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code budget_snapshots}</p>
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity
@@ -43,6 +83,10 @@ public class BudgetSnapshot {
     @Builder.Default
     private List<BudgetSnapshotLine> lines = new ArrayList<>();
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         snapshotDate = LocalDateTime.now();

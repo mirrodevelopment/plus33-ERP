@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.service
+ * File              : CustomerServiceImpl.java
+ * Purpose           : Business logic service layer for Sales Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CustomerController
+ * Related Service   : CustomerServiceImpl
+ * Related Repository: CustomerRepository, CompanyRepository
+ * Related Entity    : Customer
+ * Related DTO       : CustomerRequest, CustomerResponse, CustomerSearchRequest, PageResponse, searchRequest
+ * Related Mapper    : CustomerMapper
+ * Related DB Table  : customers
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : CustomerController, CustomerServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Sales Module. Implements CustomerService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.sales.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -25,6 +52,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code CustomerServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Sales Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * CustomerController
+ *   --> CustomerServiceImpl (this)
+ *   --> Validate business rules
+ *   --> CustomerRepository (read/write 'customers')
+ *   --> CustomerMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code customers}</p>
+ * <p><b>Module Deps      :</b> Common, Organization, Sales</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class CustomerServiceImpl implements CustomerService {
@@ -42,6 +93,15 @@ public class CustomerServiceImpl implements CustomerService {
         this.customerMapper = customerMapper;
     }
 
+    /**
+     * Creates a new customer and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the CustomerResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CustomerResponse createCustomer(CustomerRequest request) {
@@ -83,6 +143,16 @@ public class CustomerServiceImpl implements CustomerService {
         return customerMapper.toResponse(saved);
     }
 
+    /**
+     * Updates an existing customer record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CustomerResponse updateCustomer(Long id, CustomerRequest request) {
@@ -122,6 +192,20 @@ public class CustomerServiceImpl implements CustomerService {
         return customerMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single customer by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single customer by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public CustomerResponse getCustomerById(Long id) {
         Customer customer = customerRepository.findById(id)
@@ -129,6 +213,20 @@ public class CustomerServiceImpl implements CustomerService {
         return customerMapper.toResponse(customer);
     }
 
+    /**
+     * Returns a filtered paginated list of customers records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of customers records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<CustomerResponse> searchCustomers(CustomerSearchRequest searchRequest, Pageable pageable) {
         Specification<Customer> spec = (root, query, cb) -> {
@@ -185,6 +283,12 @@ public class CustomerServiceImpl implements CustomerService {
         );
     }
 
+    /**
+     * Performs the activateCustomer operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerResponse result
+     */
     @Override
     @Transactional
     public CustomerResponse activateCustomer(Long id) {
@@ -195,6 +299,12 @@ public class CustomerServiceImpl implements CustomerService {
         return customerMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the deactivateCustomer operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerResponse result
+     */
     @Override
     @Transactional
     public CustomerResponse deactivateCustomer(Long id) {
@@ -205,6 +315,13 @@ public class CustomerServiceImpl implements CustomerService {
         return customerMapper.toResponse(saved);
     }
 
+    /**
+     * Permanently deletes the customer from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     */
     @Override
     @Transactional
     public void deleteCustomer(Long id) {

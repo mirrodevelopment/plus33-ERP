@@ -1,0 +1,49 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Frontend Design System
+ * File              : variables.css
+ * Path              : frontend/theme/variables.css
+ * Purpose           : CSS Theme/Stylesheet: variables design tokens and visual styles
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * CSS Variables     : 21 custom properties defined
+ * Responsive Queries: None
+ * Depends On        : theme/variables.css (root CSS custom properties)
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * CSS Theme/Stylesheet: variables design tokens and visual styles. Part of the PLUS33 Coffee ERP CSS custom-property design system.
+ * Applied via link tags in index.html across all UI components.
+ ******************************************************************************/
+/* --- Global Layout variables & Design Tokens --- */
+:root {
+  --font-sans: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Montserrat', sans-serif;
+  --font-mono: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+  
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}

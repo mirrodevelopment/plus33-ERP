@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 321
+-- File              : V321__create_predictive_policies.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create predictive policies
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V321: Predictive Maintenance Policies
 CREATE TABLE IF NOT EXISTS platform_predictive_maintenance_policy (
     id                              BIGSERIAL PRIMARY KEY,

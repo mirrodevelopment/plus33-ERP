@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Organization Module
+ * Package           : com.plus33.erp.organization.service
+ * File              : RegionServiceImpl.java
+ * Purpose           : Business logic service layer for Organization Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: RegionController
+ * Related Service   : RegionServiceImpl
+ * Related Repository: RegionRepository, CompanyRepository, WarehouseRepository, StoreRepository, UserRegionRepository
+ * Related Entity    : Region
+ * Related DTO       : PageResponse, RegionRequest, RegionResponse, RegionSearchRequest, searchRequest
+ * Related Mapper    : OrganizationMapper
+ * Related DB Table  : regions
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Workforce Module
+ * Used By           : RegionController, RegionServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Organization Module. Implements RegionService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.organization.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -25,6 +52,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Organization Module</b>
+ *
+ * <p><b>Class  :</b> {@code RegionServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.organization.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Organization Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * RegionController
+ *   --> RegionServiceImpl (this)
+ *   --> Validate business rules
+ *   --> RegionRepository (read/write 'regions')
+ *   --> RegionMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code regions}</p>
+ * <p><b>Module Deps      :</b> Common, Organization, Workforce</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class RegionServiceImpl implements RegionService {
@@ -50,6 +101,15 @@ public class RegionServiceImpl implements RegionService {
         this.organizationMapper = organizationMapper;
     }
 
+    /**
+     * Creates a new region and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the RegionResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public RegionResponse createRegion(RegionRequest request) {
@@ -62,11 +122,30 @@ public class RegionServiceImpl implements RegionService {
 
         Region region = organizationMapper.toEntity(request);
         region.setCompany(company);
+        if (request.parentId() != null) {
+            Region parentRegion = regionRepository.findById(request.parentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Parent region not found with ID: " + request.parentId()));
+            region.setParent(parentRegion);
+        }
 
         Region saved = regionRepository.save(region);
         return organizationMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single region by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the RegionResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single region by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the RegionResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public RegionResponse getRegionById(Long id) {
         Region region = regionRepository.findById(id)
@@ -74,6 +153,20 @@ public class RegionServiceImpl implements RegionService {
         return organizationMapper.toResponse(region);
     }
 
+    /**
+     * Returns a filtered paginated list of regions records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of regions records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<RegionResponse> searchRegions(RegionSearchRequest searchRequest, Pageable pageable) {
         Specification<Region> spec = (root, query, cb) -> {
@@ -108,6 +201,16 @@ public class RegionServiceImpl implements RegionService {
         );
     }
 
+    /**
+     * Updates an existing region record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the RegionResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public RegionResponse updateRegion(Long id, RegionRequest request) {
@@ -126,16 +229,34 @@ public class RegionServiceImpl implements RegionService {
 
         organizationMapper.updateEntity(request, region);
         region.setCompany(company);
+        if (request.parentId() != null) {
+            Region parentRegion = regionRepository.findById(request.parentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Parent region not found with ID: " + request.parentId()));
+            region.setParent(parentRegion);
+        } else {
+            region.setParent(null);
+        }
 
         Region saved = regionRepository.save(region);
         return organizationMapper.toResponse(saved);
     }
 
+    /**
+     * Permanently deletes the region from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     */
     @Override
     @Transactional
     public void deleteRegion(Long id) {
         Region region = regionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Region not found with ID: " + id));
+
+        if (regionRepository.existsByParentId(id)) {
+            throw new BusinessException("Cannot delete country: active sub-regions are mapped to this country");
+        }
 
         if (warehouseRepository.existsByRegionIdAndActiveTrue(id)) {
             throw new BusinessException("Cannot delete region: active warehouses exist in this region");

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.service
+ * File              : TreasuryJournalServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasuryJournalController
+ * Related Service   : TreasuryJournalServiceImpl
+ * Related Repository: TreasuryJournalEntryRepository
+ * Related Entity    : TreasuryJournal
+ * Related DTO       : N/A
+ * Related Mapper    : TreasuryJournalMapper
+ * Related DB Table  : treasury_journals
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : TreasuryJournalController, TreasuryJournalServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TreasuryJournalService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.service;
 
 import com.plus33.erp.finance.entity.Account;
@@ -35,6 +62,14 @@ public class TreasuryJournalServiceImpl implements TreasuryJournalService {
 
     // ── Public Methods ────────────────────────────────────────────────────────
 
+    /**
+     * Posts cash transfer entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @return List of matching records
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public List<TreasuryJournalEntry> postCashTransfer(Long companyId, Long cashTransferId,
@@ -66,6 +101,14 @@ public class TreasuryJournalServiceImpl implements TreasuryJournalService {
         return saved;
     }
 
+    /**
+     * Posts fx deal booking entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @return List of matching records
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public List<TreasuryJournalEntry> postFxDealBooking(Long companyId, Long fxDealId,
@@ -98,6 +141,14 @@ public class TreasuryJournalServiceImpl implements TreasuryJournalService {
         return saved;
     }
 
+    /**
+     * Posts fx revaluation entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @return List of matching records
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public List<TreasuryJournalEntry> postFxRevaluation(Long companyId, Long bankAccountId,
@@ -132,6 +183,14 @@ public class TreasuryJournalServiceImpl implements TreasuryJournalService {
         return saved;
     }
 
+    /**
+     * Posts investment purchase entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @return List of matching records
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public List<TreasuryJournalEntry> postInvestmentPurchase(Long companyId, Long investmentId,
@@ -160,6 +219,14 @@ public class TreasuryJournalServiceImpl implements TreasuryJournalService {
         return journalRepo.saveAll(entries);
     }
 
+    /**
+     * Posts investment maturity entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @return List of matching records
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public List<TreasuryJournalEntry> postInvestmentMaturity(Long companyId, Long investmentId,
@@ -198,6 +265,14 @@ public class TreasuryJournalServiceImpl implements TreasuryJournalService {
         return journalRepo.saveAll(entries);
     }
 
+    /**
+     * Posts interest accrual entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @return List of matching records
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public List<TreasuryJournalEntry> postInterestAccrual(Long companyId, Long sourceId,
@@ -225,6 +300,14 @@ public class TreasuryJournalServiceImpl implements TreasuryJournalService {
         return journalRepo.saveAll(entries);
     }
 
+    /**
+     * Posts bank fee entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @return List of matching records
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public List<TreasuryJournalEntry> postBankFee(Long companyId, Long bankAccountId,
@@ -252,6 +335,14 @@ public class TreasuryJournalServiceImpl implements TreasuryJournalService {
         return journalRepo.saveAll(entries);
     }
 
+    /**
+     * Retrieves entries for event data from the database.
+     *
+     * @param eventType the eventType input value
+     * @param eventId the eventId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<TreasuryJournalEntry> getEntriesForEvent(String eventType, Long eventId) {

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.queue
+ * File              : ComplianceQueueWorker.java
+ * Purpose           : Component of Finance Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ComplianceQueueWorkerController
+ * Related Service   : ComplianceQueueWorkerService, ComplianceQueueWorkerServiceImpl
+ * Related Repository: ComplianceQueueRepository
+ * Related Entity    : ComplianceQueueWorker
+ * Related DTO       : N/A
+ * Related Mapper    : ComplianceQueueWorkerMapper
+ * Related DB Table  : compliance_queue_workers
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Finance Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.queue;
 
 import com.plus33.erp.finance.tax.compliance.ComplianceProvider;
@@ -33,6 +60,10 @@ public class ComplianceQueueWorker {
     private final ComplianceProviderRegistry providerRegistry;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * Processes the queue business workflow end-to-end.
+     *
+     */
     @Scheduled(fixedDelay = 5000)
     @Transactional
     public void processQueue() {

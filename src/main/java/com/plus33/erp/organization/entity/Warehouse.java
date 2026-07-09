@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Organization Module
+ * Package           : com.plus33.erp.organization.entity
+ * File              : Warehouse.java
+ * Purpose           : JPA Entity representing a persistent database record in Organization Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: WarehouseController
+ * Related Service   : WarehouseService, WarehouseServiceImpl
+ * Related Repository: WarehouseRepository
+ * Related Entity    : Warehouse
+ * Related DTO       : N/A
+ * Related Mapper    : WarehouseMapper
+ * Related DB Table  : warehouses
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : WarehouseRepository, WarehouseMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'warehouses'. Defines persistent domain object for Organization Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.organization.entity;
 
 import jakarta.persistence.*;
@@ -7,6 +34,19 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Organization Module</b>
+ *
+ * <p><b>Class  :</b> {@code Warehouse}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.organization.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'warehouses'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code warehouses}</p>
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity
@@ -51,12 +91,20 @@ public class Warehouse {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

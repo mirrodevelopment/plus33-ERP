@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 273
+-- File              : V273__create_machinery_telemetry.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create machinery telemetry
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : IF
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V273: Machinery Telemetry
 CREATE TABLE IF NOT EXISTS platform_machinery_telemetry (
     id                  BIGSERIAL PRIMARY KEY,

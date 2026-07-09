@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 183
+-- File              : V183__create_data_classification.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create data classification
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V183: Data Classification & Privacy Governance Schema
 CREATE TABLE IF NOT EXISTS bi_governance_classification (
     id                  BIGSERIAL PRIMARY KEY,

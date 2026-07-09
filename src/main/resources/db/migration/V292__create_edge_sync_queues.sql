@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 292
+-- File              : V292__create_edge_sync_queues.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create edge sync queues
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V292: Store-and-Forward Sync Queue
 CREATE TABLE IF NOT EXISTS platform_edge_sync_queue (
     id                  BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 16
+-- File              : V16__create_procurement.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create procurement
+--
+-- Tables Created    : suppliers, purchase_requests, purchase_request_items, purchase_orders, purchase_order_items
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_purchase_requests_user, idx_purchase_requests_warehouse, idx_purchase_requests_store, idx_purchase_request_items_request, idx_purchase_request_items_product, idx_purchase_orders_supplier, idx_purchase_orders_request, idx_purchase_orders_user, idx_purchase_order_items_order, idx_purchase_order_items_product
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V16__create_procurement.sql
 -- PLUS33 ERP — Procurement Management Tables

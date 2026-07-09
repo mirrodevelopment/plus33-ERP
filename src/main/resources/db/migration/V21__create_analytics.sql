@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 21
+-- File              : V21__create_analytics.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create analytics
+--
+-- Tables Created    : dashboard_configs
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_dashboard_configs_company, idx_dashboard_role, uidx_mv_sales_daily, uidx_mv_inventory_levels, uidx_mv_attendance_daily, uidx_mv_financial_summary, idx_mv_sales_daily_date, idx_mv_financial_summary_date, idx_mv_attendance_daily_status
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V21__create_analytics.sql
 -- PLUS33 ERP — Analytics & Dashboards module schema

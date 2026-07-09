@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.service
+ * File              : SalesOrderServiceImpl.java
+ * Purpose           : Business logic service layer for Sales Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: SalesOrderController
+ * Related Service   : SalesOrderServiceImpl
+ * Related Repository: SalesOrderRepository, CustomerRepository, CompanyRepository, ProductRepository, UserRepository
+ * Related Entity    : SalesOrder
+ * Related DTO       : PageResponse, SalesOrderItemRequest, SalesOrderRequest, SalesOrderResponse, SalesOrderSearchRequest
+ * Related Mapper    : SalesOrderMapper
+ * Related DB Table  : sales_orders
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module, Organization Module, Security Module
+ * Used By           : SalesOrderController, SalesOrderServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Sales Module. Implements SalesOrderService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.sales.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -34,6 +61,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code SalesOrderServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Sales Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * SalesOrderController
+ *   --> SalesOrderServiceImpl (this)
+ *   --> Validate business rules
+ *   --> SalesOrderRepository (read/write 'sales_orders')
+ *   --> SalesOrderMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code sales_orders}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Sales, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class SalesOrderServiceImpl implements SalesOrderService {
@@ -60,6 +111,15 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         this.salesOrderMapper = salesOrderMapper;
     }
 
+    /**
+     * Creates a new sales order and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the SalesOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SalesOrderResponse createSalesOrder(SalesOrderRequest request) {
@@ -133,6 +193,16 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         return salesOrderMapper.toResponse(saved);
     }
 
+    /**
+     * Updates an existing sales order record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the SalesOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SalesOrderResponse updateSalesOrder(Long id, SalesOrderRequest request) {
@@ -187,6 +257,20 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         return salesOrderMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single sales order by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the SalesOrderResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single sales order by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the SalesOrderResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public SalesOrderResponse getSalesOrderById(Long id) {
         SalesOrder salesOrder = salesOrderRepository.findById(id)
@@ -194,6 +278,20 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         return salesOrderMapper.toResponse(salesOrder);
     }
 
+    /**
+     * Returns a filtered paginated list of sales orders records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of sales orders records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<SalesOrderResponse> searchSalesOrders(SalesOrderSearchRequest searchRequest, Pageable pageable) {
         Specification<SalesOrder> spec = (root, query, cb) -> {
@@ -261,6 +359,15 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         );
     }
 
+    /**
+     * Submits the sales order for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the SalesOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SalesOrderResponse submitSalesOrder(Long id) {
@@ -281,6 +388,15 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         return salesOrderMapper.toResponse(saved);
     }
 
+    /**
+     * Approves the sales order, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the SalesOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SalesOrderResponse approveSalesOrder(Long id) {
@@ -324,6 +440,16 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         return salesOrderMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the sales order and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the SalesOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SalesOrderResponse cancelSalesOrder(Long id, String reason) {

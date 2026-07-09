@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 332
+-- File              : V332__create_carbon_footprints.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create carbon footprints
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V332: Carbon Footprints
 CREATE TABLE IF NOT EXISTS platform_carbon_footprint_log (
     id                      BIGSERIAL PRIMARY KEY,

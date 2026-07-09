@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Workforce Module
+ * Package           : com.plus33.erp.workforce.entity
+ * File              : Employee.java
+ * Purpose           : JPA Entity representing a persistent database record in Workforce Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: EmployeeController
+ * Related Service   : EmployeeService, EmployeeServiceImpl
+ * Related Repository: EmployeeRepository
+ * Related Entity    : Employee
+ * Related DTO       : N/A
+ * Related Mapper    : EmployeeMapper
+ * Related DB Table  : employees
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Security Module
+ * Used By           : EmployeeRepository, EmployeeMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'employees'. Defines persistent domain object for Workforce Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.workforce.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -18,6 +45,19 @@ import java.time.LocalDateTime;
         @UniqueConstraint(name = "uk_employees_company_email", columnNames = {"company_id", "email"})
     }
 )
+/**
+ * <b>PLUS33 Coffee ERP -- Workforce Module</b>
+ *
+ * <p><b>Class  :</b> {@code Employee}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.workforce.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'employees'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code employees}</p>
+ * <p><b>Module Deps      :</b> Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 public class Employee {
@@ -73,12 +113,20 @@ public class Employee {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

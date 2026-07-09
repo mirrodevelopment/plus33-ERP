@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.controller
+ * File              : SalesOrderController.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Sales Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: SalesOrderController
+ * Related Service   : SalesOrderControllerService, SalesOrderControllerServiceImpl
+ * Related Repository: SalesOrderControllerRepository
+ * Related Entity    : SalesOrderController
+ * Related DTO       : ApiResponse, PageRequest, PageResponse, reasonRequest, SalesOrderCancelRequest
+ * Related Mapper    : SalesOrderControllerMapper
+ * Related DB Table  : sales_order_controllers
+ * Related REST APIs : POST /api/v1/sales-orders, PUT /api/v1/sales-orders/{id}, GET /api/v1/sales-orders/{id}, GET /api/v1/sales-orders
+ * Depends On        : Common Module
+ * Used By           : Sales Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Sales Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: POST /api/v1/sales-orders, PUT /api/v1/sales-orders/{id}, GET /api/v1/sales-orders/{id}, GET /api/v1/sales-orders
+ ******************************************************************************/
 package com.plus33.erp.sales.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
@@ -22,6 +49,31 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code SalesOrderController}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.controller}</p>
+ * <p><b>Layer  :</b> REST Controller: HTTP endpoints layer. Secured by JWT + @PreAuthorize. Delegates to SalesOrderService.</p>
+ *
+ * <p><b>Request Flow:</b></p>
+ * <pre>
+ * HTTP Request
+ *   --> JWT Auth Filter (validate Bearer token)
+ *   --> @PreAuthorize (permission check)
+ *   --> SalesOrderController.endpoint()
+ *   --> SalesOrderService.method()
+ *   --> SalesOrderRepository (PostgreSQL)
+ *   --> ApiResponse wrapped in ResponseEntity
+ *   --> JSON response to Frontend
+ * </pre>
+ *
+ * <p><b>REST Endpoints    :</b> POST /api/v1/sales-orders, PUT /api/v1/sales-orders/{id}, GET /api/v1/sales-orders/{id}, GET /api/v1/sales-orders, POST /api/v1/sales-orders/{id}/submit</p>
+ * <p><b>Module Deps      :</b> Common, Sales</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/api/v1/sales-orders")
 @Tag(name = "Sales Order Management", description = "REST APIs for managing sales orders and workflows")
@@ -33,6 +85,15 @@ public class SalesOrderController {
         this.salesOrderService = salesOrderService;
     }
 
+    /**
+     * Creates a new sales order and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('SALES_ORDER_CREATE')")
     @Operation(summary = "Create a new sales order", description = "Initializes a sales order in DRAFT status. Enforces customer and company validation, snapshots pricing, terms, and billing/shipping addresses. Idempotent check applied on clientReferenceId.")
@@ -41,6 +102,14 @@ public class SalesOrderController {
         return new ResponseEntity<>(ApiResponse.success("Sales order created successfully", response), HttpStatus.CREATED);
     }
 
+    /**
+     * Updates an existing sales order record in the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('SALES_ORDER_UPDATE')")
     @Operation(summary = "Update draft sales order", description = "Modifies items and delivery dates for an order that is in DRAFT status.")
@@ -52,6 +121,15 @@ public class SalesOrderController {
         return ResponseEntity.ok(ApiResponse.success("Sales order updated successfully", response));
     }
 
+    /**
+     * Retrieves a single sales order by id by its identifier.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('SALES_ORDER_VIEW')")
     @Operation(summary = "Get sales order by ID", description = "Retrieves sales order details and its line items by ID.")
@@ -60,6 +138,13 @@ public class SalesOrderController {
         return ResponseEntity.ok(ApiResponse.success("Sales order retrieved successfully", response));
     }
 
+    /**
+     * Returns a filtered paginated list of sales orders records.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('SALES_ORDER_VIEW')")
     @Operation(summary = "Search sales orders", description = "Filter, search, and paginate sales orders dynamically.")
@@ -89,6 +174,15 @@ public class SalesOrderController {
         return ResponseEntity.ok(ApiResponse.success("Sales orders retrieved successfully", response));
     }
 
+    /**
+     * Submits the sales order for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/submit")
     @PreAuthorize("hasAuthority('SALES_ORDER_SUBMIT')")
     @Operation(summary = "Submit sales order", description = "Transitions sales order from DRAFT to SUBMITTED status.")
@@ -97,6 +191,15 @@ public class SalesOrderController {
         return ResponseEntity.ok(ApiResponse.success("Sales order submitted successfully", response));
     }
 
+    /**
+     * Approves the sales order, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('SALES_ORDER_APPROVE')")
     @Operation(summary = "Approve sales order", description = "Transitions sales order from SUBMITTED to APPROVED status. Runs credit checks, updating the customer's outstanding balance.")
@@ -105,6 +208,14 @@ public class SalesOrderController {
         return ResponseEntity.ok(ApiResponse.success("Sales order approved successfully", response));
     }
 
+    /**
+     * Cancels the sales order and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('SALES_ORDER_CANCEL')")
     @Operation(summary = "Cancel sales order", description = "Cancels a sales order in DRAFT, SUBMITTED, or APPROVED status. Reverts customer outstanding balance increment if approved.")

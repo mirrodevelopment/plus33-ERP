@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Inventory Module
+ * Package           : com.plus33.erp.inventory.service
+ * File              : InventoryAdjustmentServiceImpl.java
+ * Purpose           : Business logic service layer for Inventory Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryAdjustmentController
+ * Related Service   : InventoryAdjustmentServiceImpl
+ * Related Repository: InventoryAdjustmentRepository, InventoryStockRepository, StockMovementRepository, CompanyRepository, WarehouseRepository, StoreRepository, ProductRepository, UserRepository
+ * Related Entity    : InventoryAdjustment
+ * Related DTO       : InventoryAdjustmentItemRequest, InventoryAdjustmentRequest, InventoryAdjustmentResponse, InventoryAdjustmentSearchRequest, InventoryAdjustmentUpdateRequest
+ * Related Mapper    : InventoryAdjustmentMapper
+ * Related DB Table  : inventory_adjustments
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Security Module
+ * Used By           : InventoryAdjustmentController, InventoryAdjustmentServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Inventory Module. Implements InventoryAdjustmentService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.inventory.service;
 
 import com.plus33.erp.common.dto.IdempotentCreateResult;
@@ -31,6 +58,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Inventory Module</b>
+ *
+ * <p><b>Class  :</b> {@code InventoryAdjustmentServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.inventory.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Inventory Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * InventoryAdjustmentController
+ *   --> InventoryAdjustmentServiceImpl (this)
+ *   --> Validate business rules
+ *   --> InventoryAdjustmentRepository (read/write 'inventory_adjustments')
+ *   --> InventoryAdjustmentMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code inventory_adjustments}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentService {
@@ -72,6 +123,15 @@ public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentServic
         this.inventoryTraceabilityService = inventoryTraceabilityService;
     }
 
+    /**
+     * Creates a new adjustment and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the IdempotentCreateResult result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public IdempotentCreateResult<InventoryAdjustmentResponse> createAdjustment(InventoryAdjustmentRequest request) {
@@ -130,6 +190,16 @@ public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentServic
         return new IdempotentCreateResult<>(inventoryAdjustmentMapper.toResponse(saved), true);
     }
 
+    /**
+     * Updates an existing adjustment record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the InventoryAdjustmentResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryAdjustmentResponse updateAdjustment(Long id, InventoryAdjustmentUpdateRequest request) {
@@ -173,6 +243,20 @@ public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentServic
         return inventoryAdjustmentMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single adjustment by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryAdjustmentResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single adjustment by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryAdjustmentResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public InventoryAdjustmentResponse getAdjustmentById(Long id) {
         InventoryAdjustment adjustment = inventoryAdjustmentRepository.findById(id)
@@ -180,6 +264,20 @@ public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentServic
         return inventoryAdjustmentMapper.toResponse(adjustment);
     }
 
+    /**
+     * Returns a filtered paginated list of adjustments records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of adjustments records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<InventoryAdjustmentResponse> searchAdjustments(InventoryAdjustmentSearchRequest searchRequest, Pageable pageable) {
         Specification<InventoryAdjustment> spec = (root, query, cb) -> {
@@ -236,6 +334,15 @@ public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentServic
         );
     }
 
+    /**
+     * Submits the adjustment for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryAdjustmentResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryAdjustmentResponse submitAdjustment(Long id) {
@@ -277,6 +384,15 @@ public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentServic
         return inventoryAdjustmentMapper.toResponse(saved);
     }
 
+    /**
+     * Approves the adjustment, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryAdjustmentResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryAdjustmentResponse approveAdjustment(Long id) {
@@ -296,6 +412,15 @@ public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentServic
         return inventoryAdjustmentMapper.toResponse(saved);
     }
 
+    /**
+     * Posts adjustment entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryAdjustmentResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryAdjustmentResponse postAdjustment(Long id) {
@@ -356,6 +481,16 @@ public class InventoryAdjustmentServiceImpl implements InventoryAdjustmentServic
         return inventoryAdjustmentMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the adjustment and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the InventoryAdjustmentResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryAdjustmentResponse cancelAdjustment(Long id, String reason) {

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.entity
+ * File              : Supplier.java
+ * Purpose           : JPA Entity representing a persistent database record in Procurement Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: SupplierController
+ * Related Service   : SupplierService, SupplierServiceImpl
+ * Related Repository: SupplierRepository
+ * Related Entity    : Supplier
+ * Related DTO       : N/A
+ * Related Mapper    : SupplierMapper
+ * Related DB Table  : suppliers
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : SupplierRepository, SupplierMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'suppliers'. Defines persistent domain object for Procurement Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.procurement.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -13,6 +40,19 @@ import java.time.LocalDateTime;
     @UniqueConstraint(name = "uk_supplier_company_code", columnNames = {"company_id", "code"}),
     @UniqueConstraint(name = "uk_supplier_company_email", columnNames = {"company_id", "email"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code Supplier}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'suppliers'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code suppliers}</p>
+ * <p><b>Module Deps      :</b> Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -69,12 +109,20 @@ public class Supplier {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

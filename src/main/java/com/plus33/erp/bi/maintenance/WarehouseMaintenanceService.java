@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.maintenance
+ * File              : WarehouseMaintenanceService.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: WarehouseMaintenanceController
+ * Related Service   : WarehouseMaintenanceService
+ * Related Repository: WarehouseMaintenanceRepository
+ * Related Entity    : WarehouseMaintenance
+ * Related DTO       : N/A
+ * Related Mapper    : WarehouseMaintenanceMapper
+ * Related DB Table  : warehouse_maintenances
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : WarehouseMaintenanceController, WarehouseMaintenanceServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements WarehouseMaintenanceService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.maintenance;
 
 import org.slf4j.Logger;
@@ -25,6 +52,12 @@ public class WarehouseMaintenanceService {
         this.jdbc = jdbc;
     }
 
+    /**
+     * Permanently deletes the staging data from the database.
+     *
+     * @param retentionDays the retentionDays input value
+     * @return the numeric result value
+     */
     @Transactional
     public MaintenanceResult purgeStagingData(int retentionDays) {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(retentionDays);
@@ -44,6 +77,11 @@ public class WarehouseMaintenanceService {
         return new MaintenanceResult("STAGING_PURGE", totalPurged, duration);
     }
 
+    /**
+     * Permanently deletes the expired cache from the database.
+     *
+     * @return the numeric result value
+     */
     @Transactional
     public MaintenanceResult purgeExpiredCache() {
         LocalDateTime started = LocalDateTime.now();
@@ -54,6 +92,12 @@ public class WarehouseMaintenanceService {
         return new MaintenanceResult("CACHE_EVICTION", count, duration);
     }
 
+    /**
+     * Permanently deletes the old etl logs from the database.
+     *
+     * @param retentionDays the retentionDays input value
+     * @return the numeric result value
+     */
     @Transactional
     public MaintenanceResult purgeOldEtlLogs(int retentionDays) {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(retentionDays);

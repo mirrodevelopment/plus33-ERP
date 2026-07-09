@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.reporting.controller
+ * File              : FinancialReportingController.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: FinancialReportingController
+ * Related Service   : FinancialReportingControllerService, FinancialReportingControllerServiceImpl
+ * Related Repository: FinancialReportingControllerRepository
+ * Related Entity    : FinancialReportingController
+ * Related DTO       : ApiResponse, BalanceSheetResponse, FiscalYearCloseRequest, FiscalYearCloseResponse, IncomeStatementResponse
+ * Related Mapper    : FinancialReportingControllerMapper
+ * Related DB Table  : financial_reporting_controllers
+ * Related REST APIs : GET /api/v1/financial-reports/trial-balance, GET /api/v1/financial-reports/income-statement, GET /api/v1/financial-reports/balance-sheet, GET /api/v1/financial-reports/export
+ * Depends On        : Common Module
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Finance Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: GET /api/v1/financial-reports/trial-balance, GET /api/v1/financial-reports/income-statement, GET /api/v1/financial-reports/balance-sheet, GET /api/v1/financial-reports/export
+ ******************************************************************************/
 package com.plus33.erp.finance.reporting.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
@@ -15,6 +42,31 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code FinancialReportingController}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.reporting.controller}</p>
+ * <p><b>Layer  :</b> REST Controller: HTTP endpoints layer. Secured by JWT + @PreAuthorize. Delegates to FinancialReportingService.</p>
+ *
+ * <p><b>Request Flow:</b></p>
+ * <pre>
+ * HTTP Request
+ *   --> JWT Auth Filter (validate Bearer token)
+ *   --> @PreAuthorize (permission check)
+ *   --> FinancialReportingController.endpoint()
+ *   --> FinancialReportingService.method()
+ *   --> FinancialReportingRepository (PostgreSQL)
+ *   --> ApiResponse wrapped in ResponseEntity
+ *   --> JSON response to Frontend
+ * </pre>
+ *
+ * <p><b>REST Endpoints    :</b> GET /api/v1/financial-reports/trial-balance, GET /api/v1/financial-reports/income-statement, GET /api/v1/financial-reports/balance-sheet, GET /api/v1/financial-reports/export, POST /api/v1/financial-reports/period-lock</p>
+ * <p><b>Module Deps      :</b> Common, Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/api/v1/financial-reports")
 @RequiredArgsConstructor
@@ -23,6 +75,14 @@ public class FinancialReportingController {
 
     private final FinancialReportingService financialReportingService;
 
+    /**
+     * Retrieves trial balance data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/trial-balance")
     @PreAuthorize("hasAuthority('FINANCIAL_REPORT_VIEW')")
     @Operation(summary = "Get Trial Balance", description = "Generates a dynamic, mathematically validated Trial Balance statement.")
@@ -38,6 +98,14 @@ public class FinancialReportingController {
         return ResponseEntity.ok(ApiResponse.success("Trial Balance generated successfully", response));
     }
 
+    /**
+     * Retrieves income statement data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/income-statement")
     @PreAuthorize("hasAuthority('FINANCIAL_REPORT_VIEW')")
     @Operation(summary = "Get Income Statement", description = "Generates a dynamic Profit & Loss statement for a specific period.")
@@ -53,6 +121,14 @@ public class FinancialReportingController {
         return ResponseEntity.ok(ApiResponse.success("Income Statement generated successfully", response));
     }
 
+    /**
+     * Retrieves balance sheet data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/balance-sheet")
     @PreAuthorize("hasAuthority('FINANCIAL_REPORT_VIEW')")
     @Operation(summary = "Get Balance Sheet", description = "Generates a dynamic Balance Sheet statement as of a specific date.")
@@ -67,6 +143,13 @@ public class FinancialReportingController {
         return ResponseEntity.ok(ApiResponse.success("Balance Sheet generated successfully", response));
     }
 
+    /**
+     * Exports report data as a report or downloadable file.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data the result string value
+     */
     @GetMapping("/export")
     @PreAuthorize("hasAuthority('FINANCIAL_REPORT_EXPORT')")
     @Operation(summary = "Export Financial Report", description = "Exports Trial Balance, Income Statement, or Balance Sheet to CSV or print-friendly HTML.")
@@ -95,6 +178,13 @@ public class FinancialReportingController {
                 .body(exported);
     }
 
+    /**
+     * Performs the lockPeriod operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/period-lock")
     @PreAuthorize("hasAuthority('PERIOD_LOCK_CREATE')")
     @Operation(summary = "Lock Accounting Period", description = "Locks or unlocks an accounting period for a company (supports SOFT and HARD locks).")
@@ -106,6 +196,14 @@ public class FinancialReportingController {
         return ResponseEntity.ok(ApiResponse.success("Period lock updated successfully", response));
     }
 
+    /**
+     * Retrieves period lock data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/period-lock")
     @PreAuthorize("hasAuthority('PERIOD_LOCK_VIEW')")
     @Operation(summary = "Get Period Lock Status", description = "Retrieves the current period lock settings for a company.")
@@ -116,6 +214,13 @@ public class FinancialReportingController {
         return ResponseEntity.ok(ApiResponse.success("Period lock settings retrieved successfully", response));
     }
 
+    /**
+     * Completes the fiscal year workflow and finalizes the record status.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/fiscal-year-close")
     @PreAuthorize("hasAuthority('FISCAL_YEAR_CLOSE')")
     @Operation(summary = "Close Fiscal Year", description = "Performs year-end closing, zeroing out temporary accounts and posting net income to Retained Earnings.")
@@ -127,6 +232,13 @@ public class FinancialReportingController {
         return ResponseEntity.ok(ApiResponse.success("Fiscal year closed successfully", response));
     }
 
+    /**
+     * Performs the reopenFiscalYear operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/fiscal-year-reopen/{fiscalYear}")
     @PreAuthorize("hasAuthority('FISCAL_YEAR_REOPEN')")
     @Operation(summary = "Reopen Fiscal Year", description = "Reopens a closed fiscal year by posting an automatic reversing journal entry and shifting the period lock.")

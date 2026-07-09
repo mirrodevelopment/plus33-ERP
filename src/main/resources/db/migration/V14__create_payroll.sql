@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 14
+-- File              : V14__create_payroll.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create payroll
+--
+-- Tables Created    : payroll_periods, employee_payrolls, overtime_rules
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V14__create_payroll.sql
 -- PLUS33 ERP — Payroll Management Tables

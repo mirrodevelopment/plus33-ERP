@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 78
+-- File              : V78__treasury_enterprise_blueprint.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : treasury enterprise blueprint
+--
+-- Tables Created    : treasury_entities, treasury_authorization_matrices, bank_relationships, credit_facilities, credit_drawdowns, credit_repayments, fx_deals, fx_deal_settlements, hedge_effectiveness_tests, positive_pay_files, positive_pay_items, payment_transmission_queue, payment_transmission_history, treasury_alerts, intercompany_interest_logs, treasury_counterparties, interest_rate_indices, interest_rate_history, payment_sanctions_logs, treasury_workflow_escalations, company_treasury_policies, forecast_accuracy_logs, scheduler_job_runs, treasury_calendar, intercompany_netting_runs, intercompany_netting_lines, treasury_exceptions, cash_position_snapshot_audits, treasury_risk_limits, treasury_documents, treasury_accounting_profiles, bank_account_signatories, treasury_event_store
+-- Tables Altered    : companies, bank_accounts, bank_accounts, bank_accounts, bank_accounts, payment_files, payment_files, payment_files, treasury_investments, treasury_investments, treasury_investments, treasury_investments, treasury_investments, treasury_investments, treasury_investments, treasury_investments, treasury_investments, treasury_investments, treasury_investments, bank_statements, bank_statements, cash_position_snapshots, cash_position_snapshot_lines, cash_position_snapshots, cash_position_snapshots, cash_position_snapshots, cash_position_snapshots, cash_position_snapshots, cash_position_snapshots, cash_position_snapshots, cash_position_snapshots, payment_batches, payment_batches
+-- Seed Data For     : N/A
+-- Indexes           : idx_treasury_entities_parent, idx_tam_lookup, idx_br_bank, idx_het_deal, idx_ppi_file, idx_ptq_status_next, idx_pth_queue, idx_alerts_lookup, idx_irh_date, idx_psl_payment, idx_fal_lookup, idx_sjr_lookup, idx_calendar_date, idx_exceptions_lookup, idx_trl_policy, idx_td_lookup, idx_bas_lookup, idx_tes_aggregate, idx_mv_cash_positions_id, idx_mv_bank_balances_id, idx_mv_liquidity_forecast_composite, idx_mv_bank_reconciliation_stmt, idx_mv_treasury_dashboard_comp
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V78__treasury_enterprise_blueprint.sql
 
 -- 1. Multi-Level Treasury Entities

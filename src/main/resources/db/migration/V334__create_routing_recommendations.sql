@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 334
+-- File              : V334__create_routing_recommendations.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create routing recommendations
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V334: Optimization Recommendations
 CREATE TABLE IF NOT EXISTS platform_routing_optimization_recommendation (
     id                      BIGSERIAL PRIMARY KEY,

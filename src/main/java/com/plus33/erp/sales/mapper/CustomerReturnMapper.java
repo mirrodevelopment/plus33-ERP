@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.mapper
+ * File              : CustomerReturnMapper.java
+ * Purpose           : MapStruct Mapper converting between entities and DTOs in Sales Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CustomerReturnController
+ * Related Service   : CustomerReturnService, CustomerReturnServiceImpl
+ * Related Repository: CustomerReturnRepository
+ * Related Entity    : CustomerReturn
+ * Related DTO       : CustomerReturnItemResponse, CustomerReturnResponse, toItemResponse, toResponse
+ * Related Mapper    : CustomerReturnMapper
+ * Related DB Table  : customer_returns
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : CustomerReturnService, CustomerReturnServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * MapStruct Mapper for Sales Module. Converts JPA entities to DTOs and vice versa. Generated at compile time. Inherits GlobalMapperConfig.
+ ******************************************************************************/
 package com.plus33.erp.sales.mapper;
 
 import com.plus33.erp.sales.dto.CustomerReturnItemResponse;
@@ -7,6 +34,18 @@ import com.plus33.erp.sales.entity.CustomerReturnItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code CustomerReturnMapper}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.mapper}</p>
+ * <p><b>Layer  :</b> MapStruct Mapper: compile-time Entity to DTO conversion. No runtime reflection.</p>
+ *
+ * <p><b>Module Deps      :</b> Sales</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Mapper(componentModel = "spring")
 public interface CustomerReturnMapper {
 

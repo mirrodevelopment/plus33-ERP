@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.service.impl
+ * File              : ReplenishmentEngineImpl.java
+ * Purpose           : Business logic service layer for Wms Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ReplenishmentEngineController
+ * Related Service   : ReplenishmentEngineImpl
+ * Related Repository: ReplenishmentPlanRepository, ReplenishmentTaskRepository, LocationStockRepository
+ * Related Entity    : ReplenishmentEngine
+ * Related DTO       : N/A
+ * Related Mapper    : ReplenishmentEngineMapper
+ * Related DB Table  : replenishment_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ReplenishmentEngineController, ReplenishmentEngineImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Wms Module. Implements ReplenishmentEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.wms.service.impl;
 
 import com.plus33.erp.wms.entity.*;
@@ -40,6 +67,15 @@ public class ReplenishmentEngineImpl {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Creates a new plan and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param plan the plan input value
+     * @return the ReplenishmentPlan result
+     * @throws BusinessException if a business rule is violated
+     */
     public ReplenishmentPlan createPlan(ReplenishmentPlan plan) {
         return planRepo.save(plan);
     }
@@ -92,6 +128,16 @@ public class ReplenishmentEngineImpl {
         return null;
     }
 
+    /**
+     * Completes the task workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param taskId the taskId input value
+     * @param movedQty the movedQty input value
+     * @param operatorId the operatorId input value
+     * @return the ReplenishmentTask result
+     */
     public ReplenishmentTask completeTask(Long taskId, BigDecimal movedQty, Long operatorId) {
         ReplenishmentTask task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Replenishment task not found: " + taskId));
@@ -102,6 +148,14 @@ public class ReplenishmentEngineImpl {
         return taskRepo.save(task);
     }
 
+    /**
+     * Retrieves open tasks data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Transactional(readOnly = true)
     public List<ReplenishmentTask> getOpenTasks(Long companyId, Long warehouseId) {
         return taskRepo.findByCompanyIdAndWarehouseIdAndStatus(companyId, warehouseId, "PENDING");

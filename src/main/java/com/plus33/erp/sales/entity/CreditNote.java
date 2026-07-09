@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.entity
+ * File              : CreditNote.java
+ * Purpose           : JPA Entity representing a persistent database record in Sales Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CreditNoteController
+ * Related Service   : CreditNoteService, CreditNoteServiceImpl
+ * Related Repository: CreditNoteRepository
+ * Related Entity    : CreditNote
+ * Related DTO       : N/A
+ * Related Mapper    : CreditNoteMapper
+ * Related DB Table  : credit_notes
+ * Related REST APIs : N/A
+ * Depends On        : Finance Module, Organization Module, Security Module
+ * Used By           : CreditNoteRepository, CreditNoteMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'credit_notes'. Defines persistent domain object for Sales Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.sales.entity;
 
 import com.plus33.erp.finance.entity.JournalEntry;
@@ -19,6 +46,19 @@ import java.util.UUID;
     @UniqueConstraint(name = "uk_credit_notes_number", columnNames = {"company_id", "credit_note_number"}),
     @UniqueConstraint(name = "uk_credit_notes_client_ref", columnNames = {"company_id", "client_reference_id"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code CreditNote}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'credit_notes'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code credit_notes}</p>
+ * <p><b>Module Deps      :</b> Finance, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -109,22 +149,41 @@ public class CreditNote {
     @OneToMany(mappedBy = "creditNote", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CreditNoteItem> items = new ArrayList<>();
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Creates a new item and persists it to the database.
+     *
+     * @param item the item input value
+     * @throws BusinessException if a business rule is violated
+     */
     public void addItem(CreditNoteItem item) {
         items.add(item);
         item.setCreditNote(this);
     }
 
+    /**
+     * Permanently deletes the item from the database.
+     *
+     * @param item the item input value
+     */
     public void removeItem(CreditNoteItem item) {
         items.remove(item);
         item.setCreditNote(null);

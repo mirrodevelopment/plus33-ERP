@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 83
+-- File              : V83__create_payroll_enterprise_module.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create payroll enterprise module
+--
+-- Tables Created    : payroll_policies, payroll_policy_versions, salary_components, employee_salary_structures, employee_salary_structure_items, payroll_runs, payroll_run_items, payroll_item_breakdowns, payroll_cost_allocations, leave_accrual_logs, attendance_sync_logs, payroll_approval_workflows, payroll_audit_events
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_mv_payroll_dashboard, idx_mv_payroll_dept
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V83__create_payroll_enterprise_module.sql
 -- PLUS33 ERP — Enterprise Payroll & Human Capital Finance

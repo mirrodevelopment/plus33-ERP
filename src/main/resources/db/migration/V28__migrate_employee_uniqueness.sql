@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 28
+-- File              : V28__migrate_employee_uniqueness.sql
+-- Operation Type    : Schema Alteration
+-- Purpose           : migrate employee uniqueness
+--
+-- Tables Created    : N/A
+-- Tables Altered    : employees, employees, employees
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V28__migrate_employee_uniqueness.sql
 -- PLUS33 ERP — Employee management uniqueness constraints migration

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 24
+-- File              : V24__migrate_suppliers_to_company_scope.sql
+-- Operation Type    : Schema Alteration
+-- Purpose           : migrate suppliers to company scope
+--
+-- Tables Created    : N/A
+-- Tables Altered    : suppliers, suppliers, suppliers, suppliers, suppliers, suppliers
+-- Seed Data For     : N/A
+-- Indexes           : idx_suppliers_company
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V24__migrate_suppliers_to_company_scope.sql
 -- PLUS33 ERP — Schema alteration for company scoping of suppliers

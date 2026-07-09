@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Inventory Module
+ * Package           : com.plus33.erp.inventory.service
+ * File              : InventoryTraceabilityServiceImpl.java
+ * Purpose           : Business logic service layer for Inventory Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryTraceabilityController
+ * Related Service   : InventoryTraceabilityServiceImpl
+ * Related Repository: InventoryLotRepository, InventorySerialRepository, InventoryTraceEventRepository, InventoryRecallRepository, CompanyRepository, ProductRepository, WarehouseRepository, StoreRepository, UserRepository
+ * Related Entity    : InventoryTraceability
+ * Related DTO       : InventoryLotRequest, InventoryLotResponse, InventoryRecallRequest, InventoryRecallResponse, InventorySerialResponse
+ * Related Mapper    : InventoryTraceabilityMapper
+ * Related DB Table  : inventory_traceabilitys
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Security Module
+ * Used By           : InventoryTraceabilityController, InventoryTraceabilityServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Inventory Module. Implements InventoryTraceabilityService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.inventory.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -30,6 +57,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Inventory Module</b>
+ *
+ * <p><b>Class  :</b> {@code InventoryTraceabilityServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.inventory.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Inventory Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * InventoryTraceabilityController
+ *   --> InventoryTraceabilityServiceImpl (this)
+ *   --> Validate business rules
+ *   --> InventoryTraceabilityRepository (read/write 'inventory_traceabilitys')
+ *   --> InventoryTraceabilityMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code inventory_traceabilitys}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 public class InventoryTraceabilityServiceImpl implements InventoryTraceabilityService {
@@ -46,6 +97,15 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
     private final InventoryTraceabilityMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * Creates a new lot and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the InventoryLotResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryLotResponse createLot(InventoryLotRequest request) {
@@ -80,6 +140,13 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
         return mapper.toResponse(lot);
     }
 
+    /**
+     * Retrieves a single lot by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the InventoryLotResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public InventoryLotResponse getLotById(Long id) {
@@ -88,6 +155,12 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
         return mapper.toResponse(lot);
     }
 
+    /**
+     * Retrieves a paginated list of all lots records.
+     *
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryLotResponse> getAllLots() {
@@ -96,6 +169,12 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves a paginated list of all serials records.
+     *
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventorySerialResponse> getAllSerials() {
@@ -104,6 +183,14 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Performs the transitionSerialStatus operation in this module.
+     *
+     * @param serialId the serialId input value
+     * @param newStatus the newStatus input value
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     */
     @Override
     @Transactional
     public void transitionSerialStatus(Long serialId, InventorySerialStatus newStatus, Long warehouseId, Long storeId) {
@@ -160,6 +247,13 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
         }
     }
 
+    /**
+     * Retrieves product trace data from the database.
+     *
+     * @param productId the productId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryTraceEventResponse> getProductTrace(Long productId) {
@@ -168,6 +262,13 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves lot trace data from the database.
+     *
+     * @param lotNumber the lotNumber input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryTraceEventResponse> getLotTrace(String lotNumber) {
@@ -176,6 +277,13 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves serial trace data from the database.
+     *
+     * @param serialNumber the serialNumber input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryTraceEventResponse> getSerialTrace(String serialNumber) {
@@ -184,6 +292,15 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Creates a new recall and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the InventoryRecallResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public InventoryRecallResponse createRecall(InventoryRecallRequest request) {
@@ -288,6 +405,12 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
         return mapper.toResponse(recall);
     }
 
+    /**
+     * Retrieves a paginated list of all recalls records.
+     *
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryRecallResponse> getAllRecalls() {
@@ -296,6 +419,13 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves a paginated list of lots for fefo allocation records.
+     *
+     * @param productId the productId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryLotResponse> getLotsForFefoAllocation(Long productId) {
@@ -304,6 +434,10 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Processes the expired lots business workflow end-to-end.
+     *
+     */
     @Scheduled(cron = "0 15 1 * * *")
     @Override
     @Transactional
@@ -323,6 +457,10 @@ public class InventoryTraceabilityServiceImpl implements InventoryTraceabilitySe
         }
     }
 
+    /**
+     * Performs the recordTraceEvent operation in this module.
+     *
+     */
     @Override
     @Transactional
     public void recordTraceEvent(

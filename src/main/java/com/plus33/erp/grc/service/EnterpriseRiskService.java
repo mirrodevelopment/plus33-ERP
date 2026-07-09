@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Grc Module
+ * Package           : com.plus33.erp.grc.service
+ * File              : EnterpriseRiskService.java
+ * Purpose           : Business logic service layer for Grc Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: EnterpriseRiskController
+ * Related Service   : EnterpriseRiskService
+ * Related Repository: EnterpriseRiskRepository, RiskAssessmentRepository, RiskKriRepository, RiskAppetiteStatementRepository
+ * Related Entity    : EnterpriseRisk
+ * Related DTO       : N/A
+ * Related Mapper    : EnterpriseRiskMapper
+ * Related DB Table  : enterprise_risks
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : EnterpriseRiskController, EnterpriseRiskServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Grc Module. Implements EnterpriseRiskService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.grc.service;
 
 import com.plus33.erp.grc.entity.*;
@@ -10,6 +37,30 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Grc Module</b>
+ *
+ * <p><b>Class  :</b> {@code EnterpriseRiskService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.grc.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Grc Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * EnterpriseRiskController
+ *   --> EnterpriseRiskService (this)
+ *   --> Validate business rules
+ *   --> EnterpriseRiskRepository (read/write 'enterprise_risks')
+ *   --> EnterpriseRiskMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code enterprise_risks}</p>
+ * <p><b>Module Deps      :</b> Grc</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional
 public class EnterpriseRiskService {
@@ -44,6 +95,14 @@ public class EnterpriseRiskService {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Creates a new risk and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @return the EnterpriseRisk result
+     * @throws BusinessException if a business rule is violated
+     */
     public EnterpriseRisk createRisk(Long companyId, String category, String domain, String title,
                                      BigDecimal inherentScore) {
         EnterpriseRisk risk = new EnterpriseRisk();
@@ -60,6 +119,15 @@ public class EnterpriseRiskService {
         return risk;
     }
 
+    /**
+     * Performs the assessRisk operation in this module.
+     *
+     * @param riskId the riskId input value
+     * @param probability the probability input value
+     * @param impact the impact input value
+     * @param assessorId the assessorId input value
+     * @return the RiskAssessment result
+     */
     public RiskAssessment assessRisk(Long riskId, BigDecimal probability, BigDecimal impact, Long assessorId) {
         EnterpriseRisk risk = riskRepo.findById(riskId)
             .orElseThrow(() -> new IllegalArgumentException("Risk not found: " + riskId));
@@ -82,6 +150,12 @@ public class EnterpriseRiskService {
         return assessment;
     }
 
+    /**
+     * Performs the transitionStatus operation in this module.
+     *
+     * @param risk the risk input value
+     * @param newStatus the newStatus input value
+     */
     public void transitionStatus(EnterpriseRisk risk, String newStatus) {
         List<String> allowed = ALLOWED_TRANSITIONS.getOrDefault(risk.getStatus(), List.of());
         if (!allowed.contains(newStatus)) {
@@ -94,6 +168,17 @@ public class EnterpriseRiskService {
         }
     }
 
+    /**
+     * Creates a new kri and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param riskId the riskId input value
+     * @param name the name input value
+     * @param threshold the threshold input value
+     * @return the RiskKri result
+     * @throws BusinessException if a business rule is violated
+     */
     public RiskKri createKri(Long riskId, String name, BigDecimal threshold) {
         RiskKri kri = new RiskKri();
         kri.setRiskId(riskId);
@@ -103,6 +188,15 @@ public class EnterpriseRiskService {
         return kriRepo.save(kri);
     }
 
+    /**
+     * Updates an existing kri value record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param kriId the kriId input value
+     * @param currentValue the currentValue input value
+     * @throws BusinessException if a business rule is violated
+     */
     public void updateKriValue(Long kriId, BigDecimal currentValue) {
         RiskKri kri = kriRepo.findById(kriId)
             .orElseThrow(() -> new IllegalArgumentException("KRI not found: " + kriId));
@@ -117,6 +211,11 @@ public class EnterpriseRiskService {
         }
     }
 
+    /**
+     * Performs the defineAppetite operation in this module.
+     *
+     * @return the RiskAppetiteStatement result
+     */
     public RiskAppetiteStatement defineAppetite(Long companyId, String riskCategory,
                                                 BigDecimal maxResidual, BigDecimal escalationThreshold,
                                                 String approvalAuthority,
@@ -144,6 +243,14 @@ public class EnterpriseRiskService {
         });
     }
 
+    /**
+     * Retrieves risks by status data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param status status filter for narrowing query results
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public List<EnterpriseRisk> getRisksByStatus(Long companyId, String status) {
         return riskRepo.findByCompanyIdAndStatus(companyId, status);
     }

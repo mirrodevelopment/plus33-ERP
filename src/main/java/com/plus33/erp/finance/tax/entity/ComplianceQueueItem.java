@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.entity
+ * File              : ComplianceQueueItem.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ComplianceQueueItemController
+ * Related Service   : ComplianceQueueItemService, ComplianceQueueItemServiceImpl
+ * Related Repository: ComplianceQueueItemRepository
+ * Related Entity    : ComplianceQueueItem
+ * Related DTO       : N/A
+ * Related Mapper    : ComplianceQueueItemMapper
+ * Related DB Table  : compliance_queue_items
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ComplianceQueueItemRepository, ComplianceQueueItemMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'compliance_queue_items'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.entity;
 
 import jakarta.persistence.*;
@@ -5,6 +32,19 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code ComplianceQueueItem}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.tax.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'compliance_queue_items'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code compliance_queue_items}</p>
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity
@@ -56,12 +96,20 @@ public class ComplianceQueueItem {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

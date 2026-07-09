@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.service
+ * File              : JournalEntryServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: JournalEntryController
+ * Related Service   : JournalEntryServiceImpl
+ * Related Repository: JournalEntryRepository, CompanyRepository, AccountRepository, UserRepository, BudgetDimensionSetRepository
+ * Related Entity    : JournalEntry
+ * Related DTO       : BudgetDimensionSetRequest, JournalEntryLineRequest, JournalEntryRequest, JournalEntryResponse, toResponse
+ * Related Mapper    : JournalEntryMapper
+ * Related DB Table  : journal_entrys
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Security Module
+ * Used By           : JournalEntryController, JournalEntryServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements JournalEntryService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -27,6 +54,30 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code JournalEntryServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * JournalEntryController
+ *   --> JournalEntryServiceImpl (this)
+ *   --> Validate business rules
+ *   --> JournalEntryRepository (read/write 'journal_entrys')
+ *   --> JournalEntryMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code journal_entrys}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,6 +92,15 @@ public class JournalEntryServiceImpl implements JournalEntryService {
     private final BudgetService budgetService;
     private final JournalEntryMapper journalEntryMapper;
 
+    /**
+     * Creates a new journal entry and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the JournalEntryResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public JournalEntryResponse createJournalEntry(JournalEntryRequest request) {
@@ -89,6 +149,15 @@ public class JournalEntryServiceImpl implements JournalEntryService {
         return journalEntryMapper.toResponse(saved);
     }
 
+    /**
+     * Posts journal entry entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the JournalEntryResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public JournalEntryResponse postJournalEntry(Long id) {
@@ -136,6 +205,20 @@ public class JournalEntryServiceImpl implements JournalEntryService {
         return journalEntryMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single journal entry by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the JournalEntryResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single journal entry by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the JournalEntryResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public JournalEntryResponse getJournalEntryById(Long id) {
         JournalEntry je = journalEntryRepository.findById(id)
@@ -143,6 +226,20 @@ public class JournalEntryServiceImpl implements JournalEntryService {
         return journalEntryMapper.toResponse(je);
     }
 
+    /**
+     * Retrieves journal entries by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves journal entries by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<JournalEntryResponse> getJournalEntriesByCompany(Long companyId) {
         List<JournalEntry> list = journalEntryRepository.findAll().stream()

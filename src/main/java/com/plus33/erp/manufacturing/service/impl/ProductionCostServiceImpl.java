@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Manufacturing Module
+ * Package           : com.plus33.erp.manufacturing.service.impl
+ * File              : ProductionCostServiceImpl.java
+ * Purpose           : Business logic service layer for Manufacturing Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ProductionCostController
+ * Related Service   : ProductionCostServiceImpl
+ * Related Repository: ProductionCostRepository, ProductionOrderRepository, JournalEntryRepository, AccountRepository, CompanyRepository, UserRepository
+ * Related Entity    : ProductionCost
+ * Related DTO       : mapToDto, ProductionCostDto, ProductionCostSummaryDto
+ * Related Mapper    : ProductionCostMapper
+ * Related DB Table  : production_costs
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Finance Module, Organization Module, Security Module
+ * Used By           : ProductionCostController, ProductionCostServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Manufacturing Module. Implements ProductionCostService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.manufacturing.service.impl;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -23,6 +50,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Manufacturing Module</b>
+ *
+ * <p><b>Class  :</b> {@code ProductionCostServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.manufacturing.service.impl}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Manufacturing Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ProductionCostController
+ *   --> ProductionCostServiceImpl (this)
+ *   --> Validate business rules
+ *   --> ProductionCostRepository (read/write 'production_costs')
+ *   --> ProductionCostMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code production_costs}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Manufacturing, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional
 public class ProductionCostServiceImpl implements ProductionCostService {
@@ -48,6 +99,14 @@ public class ProductionCostServiceImpl implements ProductionCostService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Retrieves cost by order data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param productionOrderId the productionOrderId input value
+     * @return the ProductionCostDto result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public ProductionCostDto getCostByOrder(Long companyId, Long productionOrderId) {
@@ -56,6 +115,22 @@ public class ProductionCostServiceImpl implements ProductionCostService {
         return mapToDto(cost);
     }
 
+    /**
+     * Performs the finalizeProductionCosts operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param productionOrderId the productionOrderId input value
+     * @param userId authenticated user identifier
+     * @return the ProductionCostDto result
+     */
+    /**
+     * Performs the finalizeProductionCosts operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param productionOrderId the productionOrderId input value
+     * @param userId authenticated user identifier
+     * @return the ProductionCostDto result
+     */
     @Override
     public ProductionCostDto finalizeProductionCosts(Long companyId, Long productionOrderId, Long userId) {
         ProductionOrder order = orderRepository.findById(productionOrderId)
@@ -95,6 +170,24 @@ public class ProductionCostServiceImpl implements ProductionCostService {
         return mapToDto(cost);
     }
 
+    /**
+     * Performs the reverseProductionCosts operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param productionOrderId the productionOrderId input value
+     * @param reversalReason the reversalReason input value
+     * @param userId authenticated user identifier
+     * @return the ProductionCostDto result
+     */
+    /**
+     * Performs the reverseProductionCosts operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param productionOrderId the productionOrderId input value
+     * @param reversalReason the reversalReason input value
+     * @param userId authenticated user identifier
+     * @return the ProductionCostDto result
+     */
     @Override
     public ProductionCostDto reverseProductionCosts(Long companyId, Long productionOrderId, String reversalReason, Long userId) {
         ProductionOrder order = orderRepository.findById(productionOrderId)
@@ -112,6 +205,14 @@ public class ProductionCostServiceImpl implements ProductionCostService {
         return mapToDto(cost);
     }
 
+    /**
+     * Retrieves cost variance summary data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param productionOrderId the productionOrderId input value
+     * @return the ProductionCostSummaryDto result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public ProductionCostSummaryDto getCostVarianceSummary(Long companyId, Long productionOrderId) {
@@ -129,6 +230,13 @@ public class ProductionCostServiceImpl implements ProductionCostService {
         return summary;
     }
 
+    /**
+     * Retrieves open wip costs data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<ProductionCostDto> getOpenWipCosts(Long companyId) {

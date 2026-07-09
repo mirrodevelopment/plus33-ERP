@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 175
+-- File              : V175__create_dashboard_security.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create dashboard security
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : bi_analytics_role, bi_export_permission, bi_feature_flag
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V175: BI Dashboard Security
 -- Purpose: Row-level access filters, dataset permissions, KPI permissions,
 --          export permissions, and cube/drill-through permissions.

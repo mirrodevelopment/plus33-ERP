@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.assets.controller
+ * File              : FixedAssetController.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: FixedAssetController
+ * Related Service   : FixedAssetControllerService, FixedAssetControllerServiceImpl
+ * Related Repository: FixedAssetControllerRepository
+ * Related Entity    : FixedAssetController
+ * Related DTO       : ApiResponse, AssetAssignmentRequest, AssetAssignmentResponse, AssetAuditRequest, AssetAuditResponse
+ * Related Mapper    : FixedAssetControllerMapper
+ * Related DB Table  : fixed_asset_controllers
+ * Related REST APIs : POST /api/v1/fixed-assets/categories, GET /api/v1/fixed-assets/categories, POST /api/v1/fixed-assets, GET /api/v1/fixed-assets/{id}
+ * Depends On        : Common Module
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Finance Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: POST /api/v1/fixed-assets/categories, GET /api/v1/fixed-assets/categories, POST /api/v1/fixed-assets, GET /api/v1/fixed-assets/{id}
+ ******************************************************************************/
 package com.plus33.erp.finance.assets.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
@@ -16,6 +43,31 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code FixedAssetController}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.assets.controller}</p>
+ * <p><b>Layer  :</b> REST Controller: HTTP endpoints layer. Secured by JWT + @PreAuthorize. Delegates to FixedAssetService.</p>
+ *
+ * <p><b>Request Flow:</b></p>
+ * <pre>
+ * HTTP Request
+ *   --> JWT Auth Filter (validate Bearer token)
+ *   --> @PreAuthorize (permission check)
+ *   --> FixedAssetController.endpoint()
+ *   --> FixedAssetService.method()
+ *   --> FixedAssetRepository (PostgreSQL)
+ *   --> ApiResponse wrapped in ResponseEntity
+ *   --> JSON response to Frontend
+ * </pre>
+ *
+ * <p><b>REST Endpoints    :</b> POST /api/v1/fixed-assets/categories, GET /api/v1/fixed-assets/categories, POST /api/v1/fixed-assets, GET /api/v1/fixed-assets/{id}, GET /api/v1/fixed-assets</p>
+ * <p><b>Module Deps      :</b> Common, Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/api/v1/fixed-assets")
 @RequiredArgsConstructor
@@ -24,6 +76,14 @@ public class FixedAssetController {
 
     private final FixedAssetService fixedAssetService;
 
+    /**
+     * Creates a new category and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/categories")
     @PreAuthorize("hasAuthority('FIXED_ASSET_CREATE')")
     @Operation(summary = "Create Asset Category", description = "Create a new fixed asset category with configured GL account codes.")
@@ -35,6 +95,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset category created successfully", response));
     }
 
+    /**
+     * Retrieves categories data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/categories")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Asset Categories", description = "Retrieve all asset categories for a specific company.")
@@ -45,6 +113,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset categories retrieved successfully", response));
     }
 
+    /**
+     * Creates a new asset and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('FIXED_ASSET_CREATE')")
     @Operation(summary = "Register Fixed Asset", description = "Register a new fixed asset in DRAFT status. Asset code is automatically generated.")
@@ -58,6 +134,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Fixed asset registered successfully in DRAFT", response));
     }
 
+    /**
+     * Retrieves asset data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Fixed Asset Details", description = "Retrieve comprehensive details of a fixed asset, including nested active components.")
@@ -69,6 +153,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Fixed asset details retrieved successfully", response));
     }
 
+    /**
+     * Returns a filtered paginated list of assets records.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Search Fixed Assets", description = "Search and page fixed assets with multi-company isolation.")
@@ -83,6 +174,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Fixed assets searched successfully", response));
     }
 
+    /**
+     * Performs the acquireAsset operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/acquire")
     @PreAuthorize("hasAuthority('FIXED_ASSET_ACQUIRE')")
     @Operation(summary = "Acquire/Capitalize Fixed Asset", description = "Capitalize the draft asset, post a balanced General Ledger journal entry, and transition status to ACTIVE.")
@@ -96,6 +194,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Fixed asset capitalized and posted to GL successfully", response));
     }
 
+    /**
+     * Performs the assignAsset operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/assign")
     @PreAuthorize("hasAuthority('FIXED_ASSET_ASSIGN')")
     @Operation(summary = "Assign Fixed Asset", description = "Assign the asset to an employee, department, store, or warehouse and log to history.")
@@ -110,6 +215,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Fixed asset assigned successfully", response));
     }
 
+    /**
+     * Performs the transferAsset operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/transfer")
     @PreAuthorize("hasAuthority('FIXED_ASSET_TRANSFER')")
     @Operation(summary = "Transfer Fixed Asset", description = "Transfer physical location of the asset and log to transfer history.")
@@ -124,6 +236,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Fixed asset transferred successfully", response));
     }
 
+    /**
+     * Performs the maintainAsset operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data the numeric result value
+     */
     @PostMapping("/{id}/maintain")
     @PreAuthorize("hasAuthority('FIXED_ASSET_MAINTAIN')")
     @Operation(summary = "Log Asset Maintenance", description = "Log maintenance details. Optionally capitalize maintenance costs and adjust GL book values.")
@@ -138,6 +257,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Maintenance logged successfully", response));
     }
 
+    /**
+     * Performs the disposeAsset operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/dispose")
     @PreAuthorize("hasAuthority('FIXED_ASSET_DISPOSE')")
     @Operation(summary = "Dispose/Sell Fixed Asset", description = "Sell or write off a fixed asset. Calculates gains/losses and posts balanced double-entry adjustments to the GL.")
@@ -152,6 +278,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Fixed asset disposed successfully", response));
     }
 
+    /**
+     * Performs the runDepreciation operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/depreciate")
     @PreAuthorize("hasAuthority('FIXED_ASSET_DEPRECIATE')")
     @Operation(summary = "Run Monthly Depreciation", description = "Run depreciation calculations. Support dryRun = true for preview and projected GL entries.")
@@ -165,6 +298,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Depreciation run completed successfully", response));
     }
 
+    /**
+     * Submits the audit for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/audits")
     @PreAuthorize("hasAuthority('FIXED_ASSET_AUDIT')")
     @Operation(summary = "Submit Physical Verification Audit", description = "Log physical audits. Triggers automatic status transitions for damaged/missing assets.")
@@ -176,6 +317,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Physical verification audit submitted successfully", response));
     }
 
+    /**
+     * Retrieves dashboard data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/dashboard")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Dashboard KPIs", description = "Retrieve high-fidelity operational asset management metrics and charts.")
@@ -188,6 +337,13 @@ public class FixedAssetController {
 
     // ── Enterprise Endpoints ────────────────────────────────────────────────
 
+    /**
+     * Performs the revalueAsset operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/revalue")
     @PreAuthorize("hasAuthority('FIXED_ASSET_REVALUE')")
     @Operation(summary = "Revalue Fixed Asset", description = "Record asset revaluation (IAS 16) and post revaluation equity reserve GL adjustments.")
@@ -202,6 +358,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset revalued successfully", response));
     }
 
+    /**
+     * Retrieves revaluations data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/revaluations")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Asset Revaluations", description = "Retrieve revaluation history for a specific asset.")
@@ -213,6 +377,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset revaluations retrieved successfully", response));
     }
 
+    /**
+     * Performs the impairAsset operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/impair")
     @PreAuthorize("hasAuthority('FIXED_ASSET_IMPAIR')")
     @Operation(summary = "Impair Fixed Asset", description = "Record asset impairment loss (IAS 36) and post GL adjustments.")
@@ -227,6 +398,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset impairment recorded successfully", response));
     }
 
+    /**
+     * Retrieves impairments data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/impairments")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Asset Impairments", description = "Retrieve impairment history for a specific asset.")
@@ -238,6 +417,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset impairments retrieved successfully", response));
     }
 
+    /**
+     * Performs the partialDispose operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/partial-dispose")
     @PreAuthorize("hasAuthority('FIXED_ASSET_DISPOSE')")
     @Operation(summary = "Partially Dispose Fixed Asset", description = "Perform partial asset disposal, adjust book values, and post GL adjustments.")
@@ -252,6 +438,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset partial disposal recorded successfully", response));
     }
 
+    /**
+     * Performs the capitalizeCwip operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/capitalize-cwip")
     @PreAuthorize("hasAuthority('FIXED_ASSET_ACQUIRE')")
     @Operation(summary = "Capitalize CWIP", description = "Capitalize a Construction Work-in-Progress asset to ACTIVE status.")
@@ -266,6 +459,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("CWIP capitalized successfully", response));
     }
 
+    /**
+     * Creates a new lease and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/leases")
     @PreAuthorize("hasAuthority('FIXED_ASSET_LEASE')")
     @Operation(summary = "Add Lease Terms", description = "Record lease details (operating or finance) and map lease liability accounts.")
@@ -280,6 +481,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset lease recorded successfully", response));
     }
 
+    /**
+     * Retrieves leases data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/leases")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Asset Leases", description = "Retrieve lease history/details for a specific asset.")
@@ -291,6 +500,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset leases retrieved successfully", response));
     }
 
+    /**
+     * Performs the splitAsset operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     */
     @PostMapping("/{id}/split")
     @PreAuthorize("hasAuthority('FIXED_ASSET_SPLIT_MERGE')")
     @Operation(summary = "Split Fixed Asset", description = "Split an asset into multiple components, distributing cost and depreciation.")
@@ -305,6 +521,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset split successfully", response));
     }
 
+    /**
+     * Performs the mergeAssets operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/merge")
     @PreAuthorize("hasAuthority('FIXED_ASSET_SPLIT_MERGE')")
     @Operation(summary = "Merge Fixed Assets", description = "Merge multiple component assets into a single target asset.")
@@ -318,6 +541,13 @@ public class FixedAssetController {
           return ResponseEntity.ok(ApiResponse.success("Assets merged successfully", response));
       }
 
+    /**
+     * Performs the recordUtilization operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/utilization")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Log Utilization", description = "Record usage readings (runtime hours, mileage, production units).")
@@ -330,6 +560,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset utilization recorded successfully", response));
     }
 
+    /**
+     * Retrieves utilization data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/utilization")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Utilization History", description = "Retrieve usage readings history for a specific asset.")
@@ -341,6 +579,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset utilization history retrieved successfully", response));
     }
 
+    /**
+     * Retrieves tco data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/tco")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get TCO Analysis", description = "Retrieve total cost of ownership (TCO) and operating cost analysis.")
@@ -352,6 +598,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("TCO analysis retrieved successfully", response));
     }
 
+    /**
+     * Creates a new maintenance plan and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data the numeric result value
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/maintenance-plans")
     @PreAuthorize("hasAuthority('FIXED_ASSET_MAINTAIN')")
     @Operation(summary = "Create Maintenance Plan", description = "Set up preventive maintenance intervals and vendor details.")
@@ -363,6 +617,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Maintenance plan created successfully", response));
     }
 
+    /**
+     * Retrieves maintenance plans data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records the numeric result value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/maintenance-plans")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Maintenance Plans", description = "Retrieve scheduled maintenance plans for a specific asset.")
@@ -374,6 +636,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Maintenance plans retrieved successfully", response));
     }
 
+    /**
+     * Creates a new reservation and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/reservations")
     @PreAuthorize("hasAuthority('FIXED_ASSET_RESERVE')")
     @Operation(summary = "Reserve Shared Asset", description = "Request checkout / reservation for shared company assets.")
@@ -387,6 +657,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset reservation created successfully", response));
     }
 
+    /**
+     * Retrieves reservations data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/reservations")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Asset Reservations", description = "Retrieve reservations history for a specific asset.")
@@ -398,6 +676,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset reservations retrieved successfully", response));
     }
 
+    /**
+     * Creates a new work order and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/work-orders")
     @PreAuthorize("hasAuthority('FIXED_ASSET_WORK_ORDER')")
     @Operation(summary = "Create Maintenance Work Order", description = "Create a new maintenance work order for technician/vendor assignment.")
@@ -411,6 +697,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Work order created successfully", response));
     }
 
+    /**
+     * Completes the work order workflow and finalizes the record status.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/work-orders/{workOrderId}/complete")
     @PreAuthorize("hasAuthority('FIXED_ASSET_WORK_ORDER')")
     @Operation(summary = "Complete Work Order", description = "Mark a maintenance work order as completed with actual labor/parts cost tracking.")
@@ -425,6 +718,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Work order marked complete successfully", response));
     }
 
+    /**
+     * Retrieves work orders data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/work-orders")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Asset Work Orders", description = "Retrieve work orders history for a specific asset.")
@@ -436,6 +737,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Work orders retrieved successfully", response));
     }
 
+    /**
+     * Retrieves asset history data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/history")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Asset History Log", description = "Retrieve complete, chronological audit timeline for a specific asset.")
@@ -447,6 +756,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset history log retrieved successfully", response));
     }
 
+    /**
+     * Performs the toggleLegalHold operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/legal-hold")
     @PreAuthorize("hasAuthority('FIXED_ASSET_COMPLIANCE')")
     @Operation(summary = "Toggle Legal Hold", description = "Toggle legal hold status on an asset to prevent disposals, transfers, or edits.")
@@ -461,6 +777,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset legal hold toggled successfully", response));
     }
 
+    /**
+     * Approves the transfer, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/transfers/{transferId}/approve")
     @PreAuthorize("hasAuthority('FIXED_ASSET_TRANSFER_APPROVE')")
     @Operation(summary = "Approve Transfer Request", description = "Approve a physical asset transfer request.")
@@ -474,6 +798,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset transfer approved successfully", response));
     }
 
+    /**
+     * Performs the receiveTransfer operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/transfers/{transferId}/receive")
     @PreAuthorize("hasAuthority('FIXED_ASSET_TRANSFER')")
     @Operation(summary = "Mark Transfer as Received", description = "Mark an approved asset transfer as physically received at destination.")
@@ -487,6 +818,14 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Asset transfer received successfully", response));
     }
 
+    /**
+     * Retrieves hierarchy rollup data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}/rollup")
     @PreAuthorize("hasAuthority('FIXED_ASSET_VIEW')")
     @Operation(summary = "Get Hierarchy Rollup KPIs", description = "Retrieve rolled-up costs, values, and health scores for asset tree.")
@@ -498,6 +837,13 @@ public class FixedAssetController {
         return ResponseEntity.ok(ApiResponse.success("Hierarchy rollup dashboard retrieved successfully", response));
     }
 
+    /**
+     * Permanently deletes the asset from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('FIXED_ASSET_CREATE')")
     @Operation(summary = "Soft Delete Fixed Asset", description = "Soft delete an asset, hiding it from standard queries while keeping it archived.")

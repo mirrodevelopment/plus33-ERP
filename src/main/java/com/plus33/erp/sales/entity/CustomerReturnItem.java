@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.entity
+ * File              : CustomerReturnItem.java
+ * Purpose           : JPA Entity representing a persistent database record in Sales Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CustomerReturnItemController
+ * Related Service   : CustomerReturnItemService, CustomerReturnItemServiceImpl
+ * Related Repository: CustomerReturnItemRepository
+ * Related Entity    : CustomerReturnItem
+ * Related DTO       : N/A
+ * Related Mapper    : CustomerReturnItemMapper
+ * Related DB Table  : customer_return_items
+ * Related REST APIs : N/A
+ * Depends On        : Inventory Module
+ * Used By           : CustomerReturnItemRepository, CustomerReturnItemMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'customer_return_items'. Defines persistent domain object for Sales Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.sales.entity;
 
 import com.plus33.erp.inventory.entity.InventoryLot;
@@ -14,6 +41,19 @@ import java.math.BigDecimal;
 @Table(name = "customer_return_items", uniqueConstraints = {
     @UniqueConstraint(name = "uq_customer_return_item_product", columnNames = {"customer_return_id", "product_id"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code CustomerReturnItem}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'customer_return_items'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code customer_return_items}</p>
+ * <p><b>Module Deps      :</b> Inventory</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

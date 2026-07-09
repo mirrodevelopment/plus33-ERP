@@ -1,0 +1,1518 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    PLUS33 Coffee ERP — Enterprise Documentation File Generator
+.DESCRIPTION
+    Generates all 23 enterprise .md documentation files in frontend/docs/.
+    Run this separately or call from doc_automation.ps1.
+
+    Project     : PLUS33 Coffee ERP
+    Developed By: Haulo  |  For: PLUS33 Coffee  |  Developer: Sivasurya
+#>
+
+$ProjectRoot   = $PSScriptRoot
+$BackendSrc    = Join-Path $ProjectRoot "src\main\java\com\plus33\erp"
+$FrontendDir   = Join-Path $ProjectRoot "frontend"
+$DocsOutputDir = Join-Path $FrontendDir "docs"
+$ProjectVersion = "0.0.1-SNAPSHOT"
+
+if (-not (Test-Path $DocsOutputDir)) { New-Item -ItemType Directory -Path $DocsOutputDir -Force | Out-Null }
+
+# Gather module file counts
+$moduleStats = @{}
+if (Test-Path $BackendSrc) {
+    Get-ChildItem -Path $BackendSrc -Directory | ForEach-Object {
+        $moduleStats[$_.Name] = (Get-ChildItem -Path $_.FullName -Filter "*.java" -Recurse -ErrorAction SilentlyContinue).Count
+    }
+}
+function G($mod) { if ($moduleStats[$mod]) { $moduleStats[$mod] } else { "---" } }
+
+$totalJava = if (Test-Path $BackendSrc) { (Get-ChildItem -Path $BackendSrc -Filter "*.java" -Recurse).Count } else { 2215 }
+$totalSQL  = if (Test-Path (Join-Path $ProjectRoot "src\main\resources\db\migration")) { (Get-ChildItem -Path (Join-Path $ProjectRoot "src\main\resources\db\migration") -Filter "*.sql").Count } else { 331 }
+$totalJS   = if (Test-Path $FrontendDir) { (Get-ChildItem -Path $FrontendDir -Filter "*.js" -Recurse | Where-Object { $_.FullName -notmatch '\\node_modules\\' }).Count } else { 106 }
+
+Write-Host "`n  Generating enterprise documentation files in frontend/docs/..." -ForegroundColor Cyan
+
+$docCount = 0
+
+# =============================================================================
+# 1. Complete_Project_Index.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Complete Project Index
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Project Scale
+
+| Metric | Count |
+|--------|-------|
+| Java Source Files | $totalJava |
+| Flyway SQL Migrations | $totalSQL |
+| Frontend JS Files | $totalJS |
+| Backend Modules | $($moduleStats.Count) |
+
+## Backend Module Index
+
+| Module | Files | Domain |
+|--------|-------|--------|
+| auth | $(G 'auth') | Authentication, JWT |
+| security | $(G 'security') | JWT Filter, RBAC, Security Config |
+| organization | $(G 'organization') | Company, Region, Store, Department |
+| finance | $(G 'finance') | AP, AR, GL, Payments, Tax, Treasury, Budget, Fixed Assets |
+| procurement | $(G 'procurement') | PO, PR, GRN, Supplier |
+| inventory | $(G 'inventory') | Stock, Transfers, Adjustments, Traceability |
+| sales | $(G 'sales') | SO, Pick List, Customer Invoice, Returns |
+| workforce | $(G 'workforce') | Employee, HCM, Payroll |
+| manufacturing | $(G 'manufacturing') | BOM, Work Orders, MRP II |
+| wms | $(G 'wms') | WMS, Locations, Reservations, Cycle Counts |
+| crm | $(G 'crm') | Customers, CRM |
+| analytics | $(G 'analytics') | KPI Dashboards |
+| bi | $(G 'bi') | Business Intelligence |
+| treasury | $(G 'treasury') | Cash Management, Investments |
+| tax | $(G 'tax') | Tax Engine, VAT, ZATCA, Filings |
+| grc | $(G 'grc') | Governance, Risk, Compliance |
+| hcm | $(G 'hcm') | Human Capital Management |
+| project | $(G 'project') | Project Management |
+| integration | $(G 'integration') | Platform Integrations |
+| platform | $(G 'platform') | Cloud Ops, OTA, Edge, DevOps (386 files) |
+| iot | $(G 'iot') | IoT Gateway, SCADA, Telemetry |
+| twin | $(G 'twin') | Digital Twin |
+| routing | $(G 'routing') | Fleet Routing, ESG, Fuel, EV |
+| agent | $(G 'agent') | AI Agents, Autonomous Decisions |
+| esm | $(G 'esm') | Enterprise Service Management |
+| predictive | $(G 'predictive') | Predictive Maintenance |
+| edge | $(G 'edge') | Edge Computing |
+| compliance | $(G 'compliance') | Regulatory Compliance |
+| common | $(G 'common') | Shared DTOs, Exceptions, Utilities |
+| ap | $(G 'ap') | Accounts Payable Module |
+| ar | $(G 'ar') | Accounts Receivable Module |
+| paymentrun | $(G 'paymentrun') | Payment Run Batches |
+| dashboard | $(G 'dashboard') | Executive Dashboard |
+
+## Frontend Module Index
+
+| Path | Purpose |
+|------|---------|
+| pages/ | Page-level SPA components per business module (19 routes) |
+| modules/ | Feature-specific page modules (inventory, warehouse) |
+| services/ | API service wrappers calling backend REST endpoints |
+| theme/ | Design system: 11 CSS files (6 themes + spacing/typography/animations) |
+| boot/ | Bootstrap, router, auth, stores, event bus |
+| core/ | Logger, lifecycle, eventBus, storage |
+| api/ | HTTP apiClient (interceptors, auth header injection) |
+| navigation/ | Hash-based route definitions |
+| components/ | Reusable UI components |
+| store/ | UI state management (notification, theme) |
+| ai/ | AI Copilot chat widget |
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Complete_Project_Index.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 2. Project_Architecture.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Project Architecture
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## System Overview
+
+```
+PLUS33 COFFEE ERP PLATFORM
+|
++-- FRONTEND (Vanilla JS SPA -- no framework, no build step)
+|   +-- index.html                 Application shell entry point
+|   +-- app/main.js                Bootstrap + AI Copilot launcher
+|   +-- boot/router.js             Hash-based client-side router
+|   +-- boot/auth.js               JWT token management
+|   +-- api/client.js              HTTP client (Authorization header injection)
+|   +-- pages/**/page.js           Page-level SPA components (19 routes)
+|   +-- services/**Service.js      Backend REST API wrappers
+|   +-- theme/*.css                6 visual themes
+|   +-- ai/chat/                   AI Copilot float widget
+|
++-- BACKEND (Spring Boot 4.x -- Java 17)
+|   +-- SecurityConfig             JwtAuthFilter + permission RBAC
+|   +-- AuthController             POST /api/v1/auth/login
+|   +-- [39 Domain Modules]        Controller -> Service -> Repository -> DB
+|   +-- Flyway Migrations          V1 -- V384 (331 SQL files, auto-applied at startup)
+|
++-- DATABASE (PostgreSQL 15+)
+    +-- 200+ tables                Normalized enterprise schema
+    +-- Flyway-managed DDL         Versioned, immutable migration history
+```
+
+## Technology Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Backend | Spring Boot | 4.0.8-SNAPSHOT |
+| Language | Java | 17 |
+| Security | Spring Security + OAuth2 JOSE | 6.x |
+| ORM | Spring Data JPA / Hibernate | 6.x |
+| Database | PostgreSQL | 15+ |
+| Migration | Flyway | 10.x |
+| Mapping | MapStruct | 1.6.3 |
+| Boilerplate | Lombok | Latest |
+| API Docs | SpringDoc OpenAPI | 3.0.2 |
+| Frontend | Vanilla JS (ES Modules) | ES2022 |
+
+## Backend Request Lifecycle
+
+```
+HTTP Request
+  -> JwtAuthFilter         (validate Bearer JWT, extract authorities)
+  -> @PreAuthorize         (permission-level authorization guard)
+  -> REST Controller       (route, validate DTO, delegate)
+  -> Service / ServiceImpl (business logic, @Transactional)
+     -> Repository         (JPA queries, persistence)
+     -> Mapper             (Entity <-> DTO, MapStruct compile-time)
+     -> EventPublisher     (domain events -> async listeners)
+  -> ApiResponse<T>        (standardized JSON wrapper)
+```
+
+## Security Flow
+
+```
+POST /api/v1/auth/login { email, password }
+  -> AuthenticationManager.authenticate()
+  -> UserDetailsServiceImpl.loadUserByUsername() [DB: users + roles + permissions]
+  -> BCrypt verify
+  -> JwtService.generateToken() [HMAC-SHA256, sub=email, authorities=[...]]
+  -> TokenResponse { token, "Bearer", 3600 }
+
+Subsequent requests: Authorization: Bearer <token>
+  -> JwtAuthFilter.doFilterInternal()
+  -> jwtDecoder.decode(token) -> subject + authorities
+  -> SecurityContextHolder.setAuthentication(...)
+  -> @PreAuthorize("hasAuthority('PERM')") -> HTTP 403 if denied
+```
+
+## Module Dependency Map
+
+```
+finance ---------> procurement (PurchaseOrder, Supplier, GoodsReceipt)
+finance ---------> organization (Company)
+finance ---------> security (User -- current user for GL entries)
+finance ---------> inventory (Product -- account code determination)
+sales -----------> organization (Company, Customer)
+sales -----------> inventory (Product, Stock)
+workforce -------> organization (Department)
+manufacturing ---> inventory (Product, BOM)
+manufacturing ---> procurement (Supplier)
+wms -------------> inventory (Stock, Product, Location)
+analytics -------> All modules (read-only KPI aggregation)
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Project_Architecture.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 3. Security_Reference.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Security Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## JWT Authentication
+
+| Property | Value |
+|----------|-------|
+| Algorithm | HMAC-SHA256 (HS256) |
+| Issuer | plus33-erp |
+| Expiry | 3600 seconds (60 minutes) |
+| Claims | sub (email), authorities (flat permission list) |
+| Transport | Authorization: Bearer token header |
+
+## Security Filter Chain
+
+```
+All API Requests
+  +-- /api/v1/auth/**   -> PERMIT ALL
+  +-- /swagger-ui/**    -> PERMIT ALL
+  +-- /v3/api-docs/**   -> PERMIT ALL
+  +-- All other paths   -> JwtAuthFilter
+        +-- No token      -> pass through (401 from controller guards)
+        +-- Invalid JWT   -> warn + clear context (401)
+        +-- Valid JWT     -> set SecurityContextHolder
+              -> @PreAuthorize("hasAuthority('PERM')") -> 403 if denied
+```
+
+## RBAC Model
+
+Each User has Roles. Each Role has Permissions.
+JWT encodes the flat permission list as the `authorities` claim.
+Controllers use @PreAuthorize at method level.
+
+## Permission Naming Convention
+
+```
+Format: <DOMAIN>_<ACTION>
+Examples:
+  SUPPLIER_INVOICE_VIEW, SUPPLIER_INVOICE_CREATE, SUPPLIER_INVOICE_APPROVE
+  PURCHASE_ORDER_APPROVE, INVENTORY_TRANSFER_CREATE
+  PAYROLL_RUN_APPROVE, CUSTOMER_INVOICE_APPROVE
+```
+
+## Security Files
+
+| File | Purpose |
+|------|---------|
+| SecurityConfig.java | SecurityFilterChain, HTTP rules, CORS, stateless session |
+| SecurityBeansConfig.java | AuthenticationManager, BCryptPasswordEncoder beans |
+| JwtConfig.java | Binds jwt.* and app.jwt.* properties |
+| JwtService.java | generateToken(), getExpirationSeconds() |
+| JwtAuthFilter.java | OncePerRequestFilter: decode JWT, set SecurityContext |
+| UserDetailsServiceImpl.java | loadUserByUsername() loads User + Roles + Permissions |
+| User.java | Entity: email, BCrypt password, roles, active flag |
+| Role.java | Entity: name, permissions set |
+| Permission.java | Entity: authority string |
+
+## Database Tables
+
+| Table | Purpose |
+|-------|---------|
+| users | User accounts (email, hashed password, active) |
+| roles | Role definitions |
+| permissions | Authority string names |
+| user_roles | users <-> roles (many-to-many) |
+| role_permissions | roles <-> permissions (many-to-many) |
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Security_Reference.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 4. API_Reference.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- REST API Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+> Interactive docs: http://localhost:8080/swagger-ui.html
+
+## Global Conventions
+
+| Convention | Value |
+|-----------|-------|
+| Base URL | http://localhost:8080 |
+| API Prefix | /api/v1/ |
+| Authentication | Authorization: Bearer JWT |
+| Content-Type | application/json |
+| Response Wrapper | { success, message, data } |
+| Pagination | ?page=0&size=10&sort=id&direction=asc |
+| Date Format | yyyy-MM-dd (ISO-8601) |
+
+## Authentication
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | /api/v1/auth/login | None | Login and get JWT token |
+
+## Finance -- Supplier Invoices
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|-----------|-------------|
+| POST | /api/v1/supplier-invoices | SUPPLIER_INVOICE_CREATE | Create draft invoice |
+| PUT | /api/v1/supplier-invoices/{id} | SUPPLIER_INVOICE_UPDATE | Update draft invoice |
+| GET | /api/v1/supplier-invoices/{id} | SUPPLIER_INVOICE_VIEW | Get by ID |
+| GET | /api/v1/supplier-invoices | SUPPLIER_INVOICE_VIEW | Search/list paginated |
+| POST | /api/v1/supplier-invoices/{id}/submit | SUPPLIER_INVOICE_UPDATE | DRAFT -> SUBMITTED |
+| POST | /api/v1/supplier-invoices/{id}/approve | SUPPLIER_INVOICE_APPROVE | SUBMITTED -> APPROVED + GL |
+| POST | /api/v1/supplier-invoices/{id}/cancel | SUPPLIER_INVOICE_CANCEL | Cancel + reverse GL |
+| POST | /api/v1/supplier-invoices/{id}/void | VENDOR_BILL_VOID | DRAFT/SUBMITTED -> VOID |
+
+## Procurement
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|-----------|-------------|
+| POST | /api/v1/purchase-requests | PR_CREATE | Create PR |
+| GET | /api/v1/purchase-requests | PR_VIEW | List PRs |
+| POST | /api/v1/purchase-orders | PO_CREATE | Create PO |
+| POST | /api/v1/purchase-orders/{id}/approve | PO_APPROVE | Approve PO |
+| POST | /api/v1/goods-receipts | GR_CREATE | Create GRN |
+| POST | /api/v1/goods-receipts/{id}/complete | GR_COMPLETE | Complete GRN |
+
+## Inventory
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|-----------|-------------|
+| GET | /api/v1/products | INVENTORY_VIEW | List products |
+| POST | /api/v1/inventory-transfers | INVENTORY_TRANSFER_CREATE | Create transfer |
+| POST | /api/v1/inventory-adjustments | INVENTORY_ADJUSTMENT_CREATE | Create adjustment |
+
+## Sales
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|-----------|-------------|
+| POST | /api/v1/sales-orders | SALES_ORDER_CREATE | Create SO |
+| POST | /api/v1/sales-orders/{id}/approve | SALES_ORDER_APPROVE | Approve SO |
+| POST | /api/v1/customer-invoices | CUSTOMER_INVOICE_CREATE | Create invoice |
+| POST | /api/v1/customer-invoices/{id}/approve | CUSTOMER_INVOICE_APPROVE | Approve + GL |
+
+## Workforce
+
+| Method | Endpoint | Permission | Description |
+|--------|----------|-----------|-------------|
+| POST | /api/v1/employees | EMPLOYEE_CREATE | Create employee |
+| GET | /api/v1/employees | EMPLOYEE_VIEW | List employees |
+
+## HTTP Status Codes
+
+| Code | Meaning |
+|------|---------|
+| 200 | OK |
+| 201 | CREATED |
+| 400 | BAD REQUEST -- validation error |
+| 401 | UNAUTHORIZED -- invalid JWT |
+| 403 | FORBIDDEN -- permission denied |
+| 404 | NOT FOUND |
+| 409 | CONFLICT -- duplicate |
+| 500 | INTERNAL SERVER ERROR |
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "API_Reference.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 5. Workflow_Reference.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Business Workflow Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## 1. Authentication Workflow
+
+```
+POST /api/v1/auth/login { email, password }
+  -> AuthController.login()
+  -> AuthenticationManager.authenticate()
+  -> UserDetailsServiceImpl.loadUserByUsername() [DB: users + roles + permissions]
+  -> BCrypt password verification
+  -> JwtService.generateToken() [HMAC-SHA256, sub=email, authorities=[...]]
+  -> TokenResponse { token, "Bearer", 3600 }
+Frontend stores token, injects Authorization: Bearer on every API call
+```
+
+## 2. Supplier Invoice Lifecycle (Procure-to-Pay)
+
+```
+[1] Procurement creates approved PO
+[2] Supplier delivers goods -> Goods Receipt (receivedQuantity updated on PO items)
+[3] Finance creates Invoice  POST /api/v1/supplier-invoices
+    Status: DRAFT
+    Validates: active company, active supplier, unique invoice number per supplier
+    Validates: invoice qty <= received qty per PO item
+[4] Submit Invoice            POST /{id}/submit
+    Status: SUBMITTED
+[5] Approve Invoice           POST /{id}/approve
+    Revalidates qty <= remaining received
+    Updates PO item invoicedQuantity
+    Generates Journal Entry:
+      DR: Inventory (1300) or Expense (5200) per product type
+      CR: Accounts Payable (2100)  [sum of all debits]
+    Posts Journal Entry to General Ledger
+    Transitions budget reservation -> consumption
+    Status: APPROVED
+[6] Payment allocated -> PARTIALLY_PAID or PAID
+[Cancel] Reverts PO invoiced quantities
+        Posts reversing Journal Entry (swaps DR/CR)
+        Restores budget reservation
+        Status: CANCELLED
+```
+
+## 3. Sales Invoice Lifecycle (Order-to-Cash)
+
+```
+[1] Sales Order created (DRAFT)
+[2] Sales Order Approved
+[3] Pick List generated -> items picked from warehouse
+[4] Customer Invoice created (DRAFT)
+[5] Invoice Approved:
+    DR: Accounts Receivable (1100)
+    CR: Revenue Account (4000)
+[6] Customer pays -> Invoice PAID
+[Return] Customer Return -> Credit Note -> Reversing GL entry
+```
+
+## 4. Manufacturing Workflow (MRP II)
+
+```
+Bill of Materials defined
+  -> Work Order created (MRP demand signal)
+  -> Material Reservation (inventory reserved)
+  -> Production started (materials consumed from stock)
+  -> Finished Goods received into inventory
+  -> Work Order Completed (cost variance posted to GL)
+```
+
+## 5. Payment Run Workflow
+
+```
+Finance generates Payment Run (batch of APPROVED invoices)
+  -> Payment Run Approved
+  -> Payment File generated (bank transmission)
+  -> Payments transmitted
+  -> Supplier invoices updated: PARTIALLY_PAID or PAID
+```
+
+## 6. Frontend Navigation Workflow
+
+```
+Browser loads index.html
+  -> app/main.js loaded
+  -> auth.restoreSession() checks localStorage for JWT
+  -> If token valid: navigate to #dashboard
+  -> If no token: navigate to #login
+On hash change:
+  -> router.js resolves route from navigation/routes.js
+  -> Dynamic import of page module
+  -> page.mount(container, lifecycle) called
+  -> lifecycle.onCleanup() called on next navigation
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Workflow_Reference.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 6. Developer_Guide.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Developer Guide
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Prerequisites
+
+| Tool | Version |
+|------|---------|
+| Java JDK | 17+ |
+| Maven | 3.8+ |
+| PostgreSQL | 15+ |
+
+## Setup
+
+```sql
+-- 1. Create database
+CREATE DATABASE plus33_erp;
+```
+
+```properties
+# 2. application.properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/plus33_erp
+spring.datasource.username=postgres
+spring.datasource.password=your_password
+```
+
+```bash
+# 3. Run (Flyway auto-applies all 331 migrations)
+mvnw spring-boot:run
+```
+
+- Frontend: http://localhost:8080/frontend/index.html
+- Swagger:  http://localhost:8080/swagger-ui.html
+- Login:    admin@plus33.com / Admin@123
+
+## Naming Conventions
+
+| Artifact | Convention |
+|----------|-----------|
+| Package | com.plus33.erp.{module}.{layer} |
+| Entity | PascalCase |
+| Repository | {Entity}Repository |
+| Service interface | {Entity}Service |
+| Service impl | {Entity}ServiceImpl |
+| Controller | {Entity}Controller |
+| Mapper | {Entity}Mapper |
+| Request DTO | {Entity}Request, {Entity}UpdateRequest |
+| Response DTO | {Entity}Response |
+| REST path | /api/v1/{module-plural} |
+
+## Adding a New Module
+
+1. Create package: src/main/java/com/plus33/erp/{module}/
+2. Create subpackages: entity/, dto/, repository/, service/, mapper/, controller/
+3. Create Entity with @Entity @Table(name="table_name")
+4. Create Repository extending JpaRepository<Entity, Long>
+5. Create Service interface + ServiceImpl (@Service @Transactional)
+6. Create @Mapper(config=GlobalMapperConfig.class) interface
+7. Create @RestController @RequestMapping("/api/v1/...")
+8. Create Flyway migration: V{next}__create_{module}_tables.sql
+9. Create permission seed: V{next+1}__seed_{module}_permissions.sql
+
+## Code Patterns
+
+### Controller
+```java
+@RestController @RequestMapping("/api/v1/resources")
+public class ResourceController {
+    @PostMapping
+    @PreAuthorize("hasAuthority('RESOURCE_CREATE')")
+    public ResponseEntity<ApiResponse<ResourceResponse>> create(
+            @Valid @RequestBody ResourceRequest request) {
+        return new ResponseEntity<>(
+            ApiResponse.success("Created", service.create(request)), CREATED);
+    }
+}
+```
+
+### ServiceImpl
+```java
+@Slf4j @Service @Transactional(readOnly = true)
+public class ResourceServiceImpl implements ResourceService {
+    @Override @Transactional
+    public ResourceResponse create(ResourceRequest request) {
+        Resource saved = repository.save(mapper.toEntity(request));
+        eventPublisher.publishEvent(new ResourceRefreshEvent(this));
+        return mapper.toResponse(saved);
+    }
+}
+```
+
+### Mapper
+```java
+@Mapper(config = GlobalMapperConfig.class)
+public interface ResourceMapper {
+    @Mapping(target = "id", ignore = true)
+    Resource toEntity(ResourceRequest request);
+    ResourceResponse toResponse(Resource entity);
+}
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Developer_Guide.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 7. Database_Reference.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Database Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Technology
+
+| Property | Value |
+|----------|-------|
+| Engine | PostgreSQL 15+ |
+| Migration | Flyway (331 migrations, V1-V384) |
+| DDL Strategy | spring.jpa.hibernate.ddl-auto=validate |
+
+## Key Tables
+
+### users
+| Column | Type | Purpose |
+|--------|------|---------|
+| id | bigserial PK | |
+| email | varchar UNIQUE NOT NULL | Login identifier |
+| password | varchar NOT NULL | BCrypt hash |
+| active | boolean DEFAULT true | Account status |
+
+### supplier_invoices
+| Column | Type | Purpose |
+|--------|------|---------|
+| id | bigserial PK | |
+| company_id | bigint FK | Owning company |
+| supplier_id | bigint FK | Invoice supplier |
+| purchase_order_id | bigint FK | Linked PO (optional) |
+| invoice_number | varchar | Unique per supplier |
+| status | varchar | DRAFT/SUBMITTED/APPROVED/CANCELLED/PAID |
+| total_amount | numeric(15,2) | Total inc. tax |
+| outstanding_balance | numeric(15,2) | Remaining unpaid |
+| journal_entry_id | bigint FK | GL posting reference |
+
+### journal_entries
+| Column | Type | Purpose |
+|--------|------|---------|
+| id | bigserial PK | |
+| entry_number | varchar UNIQUE | JE-{company}-{year}-{seq} |
+| source_module | varchar | SUPPLIER_INVOICE, PAYMENT, etc. |
+| status | varchar | DRAFT or POSTED |
+| posted_at | timestamp | When GL was posted |
+
+### purchase_orders
+| Column | Type | Purpose |
+|--------|------|---------|
+| id | bigserial PK | |
+| order_number | varchar UNIQUE | PO reference |
+| status | varchar | DRAFT/APPROVED/RECEIVED/CANCELLED |
+
+## Flyway Migration Summary
+
+| Version Range | Domain |
+|--------------|--------|
+| V1-V10 | Foundation: roles, permissions, users, organizations |
+| V11-V30 | Procurement: suppliers, POs, goods receipts |
+| V31-V50 | Finance: invoices, payments, inventory transfers |
+| V51-V70 | Sales: customers, orders, picking, customer invoices |
+| V71-V82 | Finance Advanced: reporting, fixed assets, budgets, tax |
+| V83-V100 | Payroll, Manufacturing (MRP II), WMS |
+| V100-V200 | Platform: BI, GRC, HCM, ESG, Integration |
+| V200-V300 | Advanced: IoT, Edge, Digital Twin, Fleet, AI Agents |
+| V300-V384 | OTA, Device, Routing, Predictive, ESG, Seed Data |
+| V377-V384 | Seed Data: PLUS33 Coffee company, employees, products |
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Database_Reference.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 8. Configuration_Reference.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Configuration Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## application.properties
+
+```properties
+spring.application.name=plus33-erp
+spring.datasource.url=jdbc:postgresql://localhost:5432/plus33_erp
+spring.datasource.username=postgres
+spring.datasource.password=<password>
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.open-in-view=false
+spring.flyway.enabled=true
+spring.flyway.clean-on-validation-error=true   # DEV ONLY
+spring.flyway.clean-disabled=false             # DEV ONLY -- set true in production
+app.jwt.secret=<256-bit HMAC key>
+app.jwt.expiration-minutes=60
+jwt.secret=<32+ char key>
+jwt.issuer=plus33-erp
+jwt.expiration-seconds=3600
+server.address=127.0.0.1
+```
+
+## Configuration Classes
+
+| Class | Purpose |
+|-------|---------|
+| JwtConfig.java | Binds jwt.* and app.jwt.* properties |
+| SecurityConfig.java | SecurityFilterChain, CORS, stateless session |
+| SecurityBeansConfig.java | AuthenticationManager, BCrypt beans |
+
+## Key Dependencies (pom.xml)
+
+| Artifact | Purpose |
+|----------|---------|
+| spring-boot-starter-web | Spring MVC REST |
+| spring-boot-starter-security | Spring Security |
+| spring-security-oauth2-jose | Nimbus JWT |
+| spring-boot-starter-data-jpa | Hibernate JPA |
+| spring-boot-starter-flyway | DB migration |
+| springdoc-openapi-starter-webmvc-ui | Swagger UI 3.0.2 |
+| spring-boot-starter-actuator | Health + metrics |
+| micrometer-registry-prometheus | Prometheus export |
+| mapstruct 1.6.3 | DTO-entity mapping |
+| lombok | Boilerplate reduction |
+
+## Production Checklist
+
+- Set spring.flyway.clean-disabled=true
+- Remove spring.flyway.clean-on-validation-error
+- Use environment variables for all secrets
+- Set server.address=0.0.0.0 (or reverse proxy)
+- Configure HTTPS / SSL certificates
+- Configure CORS for production frontend domain
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Configuration_Reference.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 9. Testing_Guide.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Testing Guide
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Test Overview
+
+| Category | Count |
+|----------|-------|
+| Application Context | 1 |
+| Module Integration Tests | 35+ |
+| Controller Integration Tests | 30+ |
+| Advanced/Platform Tests | 29+ |
+| Total | 95 |
+
+## Running Tests
+
+```bash
+mvnw test
+mvnw test -Dtest=SupplierInvoiceControllerIntegrationTest
+mvnw package -DskipTests
+```
+
+## Key Test Files
+
+| File | Domain |
+|------|--------|
+| Plus33ErpApplicationTests | Bootstrap context load |
+| SupplierInvoiceControllerIntegrationTest | Finance -- invoice lifecycle |
+| PaymentControllerIntegrationTest | Finance -- payment lifecycle |
+| TreasuryControllerIntegrationTest | Finance -- treasury ops |
+| TaxManagementIntegrationTest | Finance -- tax engine |
+| BudgetControllerIntegrationTest | Finance -- budget forecasting |
+| FixedAssetControllerIntegrationTest | Finance -- fixed assets |
+| PurchaseOrderControllerIntegrationTest | Procurement -- PO lifecycle |
+| GoodsReceiptControllerIntegrationTest | Procurement -- GRN workflow |
+| InventoryTransferControllerIntegrationTest | Inventory -- transfer lifecycle |
+| SalesOrderControllerIntegrationTest | Sales -- SO workflow |
+| CustomerInvoiceControllerIntegrationTest | Sales -- customer billing |
+| EmployeeControllerIntegrationTest | Workforce -- employee CRUD |
+| ManufacturingIntegrationTest | Manufacturing -- BOM, work orders |
+| DigitalTwinTest | Advanced -- digital twin |
+| IotGatewayTest | Advanced -- IoT device mgmt |
+| AgentConversationTest | Advanced -- AI agents |
+| EsgComplianceTest | Advanced -- ESG reporting |
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Testing_Guide.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 10. Deployment_Guide.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Deployment Guide
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Local Development
+
+```bash
+mvnw spring-boot:run
+# http://localhost:8080/frontend/index.html
+```
+
+## Production Build
+
+```bash
+mvnw clean package -DskipTests
+# Output: target/plus33-erp-0.0.1-SNAPSHOT.jar
+```
+
+## Run in Production
+
+```bash
+java -jar target/plus33-erp-0.0.1-SNAPSHOT.jar \
+  --spring.datasource.url=jdbc:postgresql://DB_HOST:5432/plus33_erp \
+  --spring.datasource.username=DB_USER \
+  --spring.datasource.password=DB_PASS \
+  --app.jwt.secret=PROD_SECRET \
+  --spring.flyway.clean-disabled=true \
+  --server.address=0.0.0.0
+```
+
+## Docker
+
+```dockerfile
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY target/plus33-erp-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","app.jar"]
+```
+
+## Database Backup
+
+```bash
+pg_dump -U postgres -d plus33_erp -F c -f backup.dump
+pg_restore -U postgres -d plus33_erp backup.dump
+```
+
+## Health Endpoints
+
+| Endpoint | Purpose |
+|----------|---------|
+| /actuator/health | Health check |
+| /actuator/prometheus | Prometheus metrics |
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Deployment_Guide.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 11. Integration_Guide.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Frontend Integration Guide
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Authentication
+
+```javascript
+const res = await apiClient.post('/api/v1/auth/login', {
+  email: 'admin@plus33.com', password: 'Admin@123'
+});
+localStorage.setItem('auth_token', res.data.token);
+// apiClient auto-injects Authorization: Bearer <token>
+```
+
+## Paginated Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "content": [...],
+    "number": 0, "size": 10, "totalElements": 150, "totalPages": 15
+  }
+}
+```
+
+## Page Component Pattern
+
+```javascript
+export default class ModulePage {
+  async mount(container, lifecycle) {
+    await this.fetchData();
+    container.innerHTML = '<div>...</div>';
+    this.bindEvents(container, lifecycle);
+  }
+  async fetchData() {
+    try {
+      const res = await apiClient.get('/api/v1/...');
+      if (res?.success) this.data = res.data.content;
+    } catch (err) {
+      this.data = [...fallbackSeedData]; // graceful offline fallback
+    }
+  }
+  bindEvents(container, lifecycle) {
+    const handler = () => {};
+    container.querySelector('#btn').addEventListener('click', handler);
+    lifecycle.onCleanup(() =>
+      container.querySelector('#btn').removeEventListener('click', handler));
+  }
+}
+```
+
+## Notifications
+
+```javascript
+import { notificationStore } from '../../store/notificationStore.js';
+notificationStore.success('Approved!', 5000);
+notificationStore.danger('Validation failed.');
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Integration_Guide.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# 12. Module_Reference.md
+# =============================================================================
+@"
+# PLUS33 Coffee ERP -- Module Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Module Summary
+
+| Module | Files | Domain |
+|--------|-------|--------|
+| auth | $(G 'auth') | JWT Login, Token |
+| security | $(G 'security') | Filter Chain, RBAC, User, Role, Permission |
+| organization | $(G 'organization') | Company, Region, Store, Department |
+| finance | $(G 'finance') | AP, GL, Payments, Tax, Treasury, Budget, Fixed Assets |
+| procurement | $(G 'procurement') | PO, PR, GRN, Supplier |
+| inventory | $(G 'inventory') | Stock, Transfers, Adjustments, Traceability |
+| sales | $(G 'sales') | SO, Picking, Customer Invoice, Returns |
+| workforce | $(G 'workforce') | Employee, HCM, Payroll |
+| manufacturing | $(G 'manufacturing') | BOM, Work Orders, MRP II |
+| wms | $(G 'wms') | WMS, Locations, Reservations, Cycle Counts |
+| crm | $(G 'crm') | Customers, Contacts |
+| analytics | $(G 'analytics') | KPI, Dashboards |
+| bi | $(G 'bi') | Business Intelligence |
+| treasury | $(G 'treasury') | Cash, Investments, Forecasting |
+| tax | $(G 'tax') | Tax Engine, VAT, ZATCA, Filings |
+| grc | $(G 'grc') | Governance, Risk, Compliance |
+| hcm | $(G 'hcm') | Human Capital Management |
+| project | $(G 'project') | Project Management |
+| integration | $(G 'integration') | Platform Integrations |
+| platform | $(G 'platform') | Cloud Ops, OTA, Edge, DevOps |
+| iot | $(G 'iot') | IoT Gateway, SCADA, Telemetry |
+| twin | $(G 'twin') | Digital Twin |
+| routing | $(G 'routing') | Fleet Routing, ESG, Fuel, EV |
+| agent | $(G 'agent') | AI Agents |
+| esm | $(G 'esm') | Enterprise Service Management |
+| predictive | $(G 'predictive') | Predictive Maintenance |
+| edge | $(G 'edge') | Edge Computing |
+| compliance | $(G 'compliance') | Regulatory Compliance |
+| common | $(G 'common') | Shared DTOs, Exceptions, Utilities |
+| ap | $(G 'ap') | Accounts Payable |
+| ar | $(G 'ar') | Accounts Receivable |
+| paymentrun | $(G 'paymentrun') | Payment Run Batches |
+
+## Finance Module Business Rules
+
+1. Only DRAFT invoices can be updated
+2. Only SUBMITTED invoices can be approved
+3. Approval generates a balanced Journal Entry (total DR == total CR)
+4. Cancellation posts a reversing Journal Entry (DR/CR swapped)
+5. Invoice quantity must not exceed received GRN quantity
+6. Invoice number is unique per supplier
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@ | Set-Content -Path (Join-Path $DocsOutputDir "Module_Reference.md") -Encoding UTF8
+$docCount++
+
+# =============================================================================
+# Remaining docs: 13-23
+# =============================================================================
+$remaining = @{
+
+"Source_Code_Guide.md" = @"
+# PLUS33 Coffee ERP -- Source Code Guide
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Controller Pattern
+```java
+@RestController @RequestMapping("/api/v1/resources")
+public class ResourceController {
+    @PostMapping
+    @PreAuthorize("hasAuthority('RESOURCE_CREATE')")
+    @Operation(summary = "Create resource")
+    public ResponseEntity<ApiResponse<ResourceResponse>> create(
+            @Valid @RequestBody ResourceRequest request) {
+        return new ResponseEntity<>(
+            ApiResponse.success("Created", service.create(request)), CREATED);
+    }
+}
+```
+
+## ServiceImpl Pattern
+```java
+@Slf4j @Service @Transactional(readOnly = true)
+public class ResourceServiceImpl implements ResourceService {
+    @Override @Transactional
+    public ResourceResponse create(ResourceRequest request) {
+        Resource saved = repository.save(entity);
+        eventPublisher.publishEvent(new ResourceRefreshEvent(this));
+        return mapper.toResponse(saved);
+    }
+}
+```
+
+## MapStruct Mapper Pattern
+```java
+@Mapper(config = GlobalMapperConfig.class)
+public interface ResourceMapper {
+    @Mapping(target = "id", ignore = true)
+    Resource toEntity(ResourceRequest request);
+    @Mapping(target = "companyId", source = "company.id")
+    ResourceResponse toResponse(Resource entity);
+}
+```
+
+## Exception Handling
+- ResourceNotFoundException -> HTTP 404
+- BusinessException -> HTTP 400
+- DuplicateResourceException -> HTTP 409
+- GlobalExceptionHandler maps all exceptions to ApiResponse
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"Maintenance_Guide.md" = @"
+# PLUS33 Coffee ERP -- Maintenance Guide
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Database Backup
+```bash
+pg_dump -U postgres -d plus33_erp -F c -f backup_`$(date +%Y%m%d).dump
+pg_restore -U postgres -d plus33_erp backup.dump
+psql -U postgres -d plus33_erp -c "VACUUM ANALYZE;"
+```
+
+## Flyway Management
+```bash
+mvnw flyway:info
+mvnw flyway:migrate
+mvnw flyway:validate
+```
+
+## Adding a New Migration
+1. Create V{next}__description.sql
+2. Never modify applied migrations
+3. Test in development first
+
+## Common Issues
+
+| Issue | Resolution |
+|-------|-----------|
+| Flyway validation error | Never modify applied migrations |
+| JWT 401 | User must re-login |
+| 403 Forbidden | Check user roles/permissions in DB |
+| DB pool exhausted | Tune HikariCP pool size |
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"Entity_Relationships.md" = @"
+# PLUS33 Coffee ERP -- Entity Relationship Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Core Relationships
+
+```
+Company (1) ---< Department, Region, Store, Supplier, Customer, PurchaseOrder, SupplierInvoice, JournalEntry
+
+User (M) >---< Role (M) [user_roles]
+Role (M) >---< Permission (M) [role_permissions]
+
+Supplier (1) ---< PurchaseOrder (M) ---< PurchaseOrderItem (M)
+PurchaseOrder (1) ---< GoodsReceipt (M) ---< GoodsReceiptItem (M)
+PurchaseOrder (1) ---< SupplierInvoice (M) ---< SupplierInvoiceItem (M)
+SupplierInvoice (1) --- JournalEntry (1) ---< JournalEntryLine (M)
+JournalEntryLine (M) >--- Account (1)
+
+Customer (1) ---< SalesOrder (M) ---< SalesOrderItem (M)
+SalesOrder (1) ---< PickList (M) ---< PickListItem (M)
+SalesOrder (1) ---< CustomerInvoice (M) ---< CustomerInvoiceItem (M)
+
+Employee (1) --- Department (M)
+Employee (1) ---< PayrollEntry (M)
+
+Product (1) ---< BOM (M) ---< BOMItem (M)
+WorkOrder (M) >--- BOM (1)
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"Package_Reference.md" = @"
+# PLUS33 Coffee ERP -- Package Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Package Hierarchy
+
+```
+com.plus33.erp
+  auth.controller        AuthController, TestController
+  auth.dto               LoginRequest, TokenResponse
+  security.config        SecurityConfig, SecurityBeansConfig, JwtConfig
+  security.entity        User, Role, Permission
+  security.filter        JwtAuthFilter
+  security.jwt           JwtService
+  security.repository    UserRepository, RoleRepository, PermissionRepository
+  security.service       UserDetailsServiceImpl
+  common.dto             ApiResponse<T>, PageResponse<T>
+  common.exception       ResourceNotFoundException, BusinessException, DuplicateResourceException
+  common.mapper          GlobalMapperConfig
+  exception              GlobalExceptionHandler
+  finance.controller     SupplierInvoiceController, PaymentController, ...
+  finance.entity         SupplierInvoice, Payment, JournalEntry, Account, ...
+  finance.dto            SupplierInvoiceRequest/Response, PaymentRequest/Response, ...
+  finance.repository     SupplierInvoiceRepository, PaymentRepository, ...
+  finance.service        SupplierInvoiceService/Impl, PaymentService/Impl, ...
+  finance.mapper         SupplierInvoiceMapper, PaymentMapper
+  finance.event          SupplierInvoiceRefreshEvent
+  finance.tax            TaxCalculationEngine, TaxJournalService
+  finance.treasury       Treasury sub-module
+  finance.budget         Budget & forecasting sub-module
+  finance.reporting      TrialBalance, P&L reporting
+  finance.assets         Fixed asset management
+  procurement.*          PurchaseOrder, GoodsReceipt, Supplier, PR
+  inventory.*            Stock, Transfer, Adjustment, Traceability
+  sales.*                SalesOrder, CustomerInvoice, PickList, Returns
+  workforce.*            Employee, HCM, Payroll
+  manufacturing.*        BOM, WorkOrder, MRP II
+  wms.*                  Warehouse, Location, Reservation
+  crm.*                  Customer management
+  organization.*         Company, Region, Store, Department
+  analytics.*            KPI analytics
+  bi.*                   Business intelligence
+  grc.*                  Governance, risk, compliance
+  hcm.*                  Human capital management
+  project.*              Project management
+  integration.*          Platform integrations
+  platform.*             Cloud, OTA, Edge, DevOps (386 files)
+  iot.*                  IoT Gateway, SCADA
+  twin.*                 Digital twin
+  routing.*              Fleet routing, ESG, Fuel, EV
+  agent.*                AI agents
+  esm.*                  Enterprise service management
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"File_Dependency_Map.md" = @"
+# PLUS33 Coffee ERP -- File Dependency Map
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Backend Dependency Chain (Finance Example)
+
+```
+SupplierInvoiceController
+  -> SupplierInvoiceServiceImpl
+    -> SupplierInvoiceRepository        [DB: supplier_invoices]
+    -> SupplierInvoiceItemRepository    [DB: supplier_invoice_items]
+    -> CompanyRepository                [DB: companies]
+    -> SupplierRepository               [DB: suppliers]
+    -> PurchaseOrderRepository          [DB: purchase_orders]
+    -> PurchaseOrderItemRepository      [DB: purchase_order_items]
+    -> GoodsReceiptItemRepository       [DB: goods_receipt_items]
+    -> AccountRepository                [DB: accounts]
+    -> JournalEntryRepository           [DB: journal_entries]
+    -> UserRepository                   [DB: users]
+    -> SupplierInvoiceMapper            [MapStruct]
+    -> TaxCalculationEngine             [tax sub-module]
+    -> TaxJournalService                [tax journal posting]
+    -> BudgetService                    [budget reservation/consumption]
+    -> ApplicationEventPublisher        -> SupplierInvoiceRefreshEvent
+                                           -> AnalyticsDashboard listeners
+```
+
+## Frontend Dependency Chain
+
+```
+index.html
+  -> app/main.js
+    -> boot/app.js
+      -> boot/auth.js      (JWT token management)
+      -> boot/router.js    (hash routing)
+        -> navigation/routes.js
+        -> pages/**/page.js     (dynamic import)
+          -> api/client.js      (HTTP calls)
+          -> store/notificationStore.js
+          -> core/logger.js
+    -> ai/chat/assistant.js  (AI Copilot widget)
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"Module_Dependency_Map.md" = @"
+# PLUS33 Coffee ERP -- Module Dependency Map
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Backend Module Dependencies
+
+| Module | Depends On |
+|--------|-----------|
+| auth | security |
+| security | (none -- foundation layer) |
+| common | (none -- shared utilities) |
+| organization | security, common |
+| finance | organization, security, procurement, inventory, common |
+| procurement | organization, security, inventory, common |
+| inventory | organization, security, common |
+| sales | organization, security, inventory, procurement, common |
+| workforce | organization, security, common |
+| manufacturing | organization, security, inventory, procurement, common |
+| wms | organization, security, inventory, common |
+| crm | organization, security, sales, common |
+| analytics | finance, procurement, inventory, sales, workforce, common |
+| bi | analytics, finance, sales, common |
+| treasury | finance, organization, security, common |
+| tax | finance, organization, common |
+| grc | organization, security, common |
+| platform | All modules (orchestration layer) |
+
+## Rules
+
+1. common and security are the foundation -- no dependencies on domain modules
+2. finance depends on procurement and inventory
+3. sales depends on inventory and procurement
+4. analytics is read-only aggregation from all domain modules
+5. platform is the orchestration/infrastructure layer
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"Flyway_Migration_Reference.md" = @"
+# PLUS33 Coffee ERP -- Flyway Migration Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Overview
+
+| Total Migrations | Version Range |
+|-----------------|--------------|
+| 331 | V1 -- V384 |
+
+## Convention
+
+```
+V{version}__{description}.sql
+V1__create_schema.sql
+V3__seed_roles_and_permissions.sql
+V377__seed_plus33_coffee_company_org.sql
+```
+
+## Migration Registry
+
+| Range | Domain | Notes |
+|-------|--------|-------|
+| V1-V3 | Foundation | Schema, roles, permissions |
+| V4-V6 | Users | users, user_roles, role_permissions |
+| V7-V9 | Organization | companies, departments, regions |
+| V11-V20 | Procurement | purchase_requests, purchase_orders |
+| V21-V34 | Procurement cont. | goods_receipts, gr_items |
+| V35-V37 | Finance | supplier_invoices, payments |
+| V38-V51 | Inventory | analytics, transfers, adjustments |
+| V52-V63 | Sales | customers, orders, pick_lists, invoices |
+| V64-V82 | Finance Advanced | AR, AP, payment_runs, tax, budget, treasury |
+| V83-V86 | Payroll, Manufacturing | work_orders, bom |
+| V87-V100 | WMS | locations, reservations, cycle_counts |
+| V101-V200 | Platform | BI, GRC, HCM, ESM, Integration, Project |
+| V201-V296 | Advanced | IoT, Edge, Digital Twin, SCADA, OTA |
+| V297-V376 | Fleet & ESG | Routing, fuel, EV, ESG scope 1-2-3 |
+| V377-V384 | Seed Data | PLUS33 Coffee company, demo data |
+
+## Rules
+
+1. Never modify a migration that has been applied
+2. Flyway validates checksums on every startup
+3. spring.flyway.clean-disabled=true MUST be set in production
+4. Migrations run in strict version order
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"REST_API_Workflow.md" = @"
+# PLUS33 Coffee ERP -- REST API Workflow
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Full API Call Trace: POST /api/v1/supplier-invoices
+
+```
+Browser -> POST /api/v1/supplier-invoices
+  Headers: Authorization: Bearer <JWT>, Content-Type: application/json
+  Body: SupplierInvoiceRequest JSON
+
+-> Spring DispatcherServlet
+
+-> JwtAuthFilter.doFilterInternal()
+     jwtDecoder.decode(token) -> JWT claims
+     SecurityContextHolder.setAuthentication(subject + authorities)
+
+-> @PreAuthorize("hasAuthority('SUPPLIER_INVOICE_CREATE')")
+     If denied -> HTTP 403 Forbidden immediately
+
+-> SupplierInvoiceController.createInvoice()
+     @Valid validates SupplierInvoiceRequest
+     If invalid -> HTTP 400 Bad Request + validation errors
+     Delegates to: supplierInvoiceService.createInvoice(request)
+
+-> SupplierInvoiceServiceImpl.createInvoice() [@Transactional]
+     Validates company exists + active
+     Validates supplier exists, active, belongs to company
+     Validates unique invoice number per supplier
+     Validates purchase order if provided
+     Builds SupplierInvoice entity
+     processItems() -> builds line items with tax calculation
+     calculateTotals() -> subtotal, tax, discount, total, outstanding
+     supplierInvoiceRepository.save(invoice)
+       -> Hibernate: INSERT INTO supplier_invoices (...)
+       -> INSERT INTO supplier_invoice_items (...)
+       -> PostgreSQL assigns id (bigserial)
+       -> Transaction commits
+     publishEvent(new SupplierInvoiceRefreshEvent(this))
+     supplierInvoiceMapper.toResponse(saved) -> DTO
+
+-> Controller: ApiResponse.success("Created", response)
+-> HTTP 201 CREATED { "success": true, "data": { invoice JSON } }
+
+-> Frontend apiClient receives response
+     if (res?.success) { update UI }
+     notificationStore.success('Invoice created!', 5000)
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"Code_Reference.md" = @"
+# PLUS33 Coffee ERP -- Code Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Journal Entry Algorithm
+
+```java
+// SupplierInvoiceServiceImpl.generateJournalEntry()
+// For each invoice item:
+//   isInventoryProduct() -> DR account "1300" (Inventory Asset)
+//   else                 -> DR account "5200" (Expense)
+//   Non-recoverable tax: added to item debit (capitalize)
+// CR: Accounts Payable "2100" = sum of all debits - other credits
+// Invariant: total DR == total CR (balanced journal)
+```
+
+## Tax Calculation Priority
+
+```java
+// 1. TaxCalculationEngine (rules-based engine)
+// 2. Fallback: stored taxRate on invoice item
+// 3. Recoverable tax   -> 2200 (Tax Receivable)
+//    Non-recoverable   -> capitalized into debit line
+//    Reverse charge    -> reverseChargeAccountId
+```
+
+## Budget Lifecycle
+
+```java
+// PO Approval:        createReservation(companyId, request)
+// Invoice Approval:   consumeReservation(companyId, "PROCUREMENT_PO", poItemId, amount)
+// Invoice Cancel:     releaseConsumption() + createReservation() (restore)
+```
+
+## JWT Structure
+
+```json
+{
+  "sub": "admin@plus33.com",
+  "iss": "plus33-erp",
+  "iat": 1720000000,
+  "exp": 1720003600,
+  "authorities": ["SUPPLIER_INVOICE_VIEW", "SUPPLIER_INVOICE_APPROVE"]
+}
+```
+
+## Frontend Router Algorithm
+
+```javascript
+// On window.hashchange:
+// 1. Match hash to route in navigation/routes.js
+// 2. Check requiresAuth -> redirect #login if no token
+// 3. Dynamic import(route.page)
+// 4. page.mount(container, lifecycle)
+// 5. lifecycle.onCleanup() called before next navigation
+```
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"Project_Workflow.md" = @"
+# PLUS33 Coffee ERP -- Project Workflow Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Application Startup
+
+```
+[1] JVM starts Plus33ErpApplication (@SpringBootApplication)
+[2] Spring ApplicationContext loads all beans
+[3] Flyway runs pending migrations (V1 - V384)
+[4] Spring Security configures JWT filter chain
+[5] Embedded Tomcat starts on port 8080
+[6] Application ready for requests
+```
+
+## Frontend Startup
+
+```
+[1] Browser loads index.html
+[2] Theme CSS files loaded (6 themes)
+[3] app/main.js ES module loaded
+[4] initializeApplication() called
+[5] auth.restoreSession() checks localStorage for JWT
+[6] If authenticated: navigate to #dashboard
+[7] If not authenticated: navigate to #login
+[8] AI Copilot widget initialized
+```
+
+## User Session
+
+```
+Login -> JWT stored in localStorage (3600s TTL)
+JWT expires -> next API call returns 401
+Frontend detects 401 -> redirects to #login
+User re-authenticates -> new JWT issued
+```
+
+See Workflow_Reference.md for detailed business process workflows.
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+
+"Project_File_Reference.md" = @"
+# PLUS33 Coffee ERP -- File Type Reference
+
+> Project: PLUS33 Coffee ERP | Developed By: Haulo | Developer: Sivasurya
+
+## Backend File Types
+
+| Pattern | Type | Layer | Purpose |
+|---------|------|-------|---------|
+| *Controller.java | REST Controller | Web | HTTP endpoints |
+| *Service.java | Interface | Business | Service contract |
+| *ServiceImpl.java | Implementation | Business | Business logic |
+| *Repository.java | JPA Repository | Data | Database access |
+| @Entity *.java | Entity | Domain | DB table mapping |
+| *Mapper.java @Mapper | Mapper | Conversion | Entity <-> DTO |
+| *Request.java | Request DTO | Transfer | API input |
+| *Response.java | Response DTO | Transfer | API output |
+| *Event.java | Domain Event | Event | Async messaging |
+| *Exception.java | Exception | Error | Domain errors |
+
+## Frontend File Types
+
+| Pattern | Type | Purpose |
+|---------|------|---------|
+| pages/**/page.js | Page Component | SPA page, mounts UI, binds events |
+| services/**Service.js | API Service | Wraps backend REST calls |
+| store/*Store.js | State Store | UI state management |
+| theme/*.css | Theme | CSS variables, visual design tokens |
+| boot/*.js | Bootstrap | App startup, routing, auth |
+| core/*.js | Core Utility | Logger, lifecycle, eventBus |
+| api/client.js | HTTP Client | Fetch wrapper with auth injection |
+| navigation/routes.js | Router Config | Hash route definitions |
+
+---
+*Generated by doc_generate_docs.ps1 -- PLUS33 Coffee ERP*
+"@
+}
+
+foreach ($doc in $remaining.GetEnumerator()) {
+    $outPath = Join-Path $DocsOutputDir $doc.Key
+    [System.IO.File]::WriteAllText($outPath, $doc.Value, [System.Text.Encoding]::UTF8)
+    $docCount++
+    Write-Host "  Generated: $($doc.Key)" -ForegroundColor Gray
+}
+
+Write-Host "`n  Documentation files generated: $docCount" -ForegroundColor Green
+Write-Host "  Output: frontend/docs/" -ForegroundColor Cyan

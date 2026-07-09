@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.service
+ * File              : GoodsReceiptServiceImpl.java
+ * Purpose           : Business logic service layer for Procurement Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: GoodsReceiptController
+ * Related Service   : GoodsReceiptServiceImpl
+ * Related Repository: GoodsReceiptRepository, PurchaseOrderRepository, CompanyRepository, WarehouseRepository, StoreRepository, UserRepository, InventoryStockRepository, StockMovementRepository
+ * Related Entity    : GoodsReceipt
+ * Related DTO       : getPurchaseRequest, GoodsReceiptItemRequest, GoodsReceiptRequest, GoodsReceiptResponse, GoodsReceiptSearchRequest
+ * Related Mapper    : GoodsReceiptMapper
+ * Related DB Table  : goods_receipts
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module, Analytics Module, Organization Module, Security Module
+ * Used By           : GoodsReceiptController, GoodsReceiptServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Procurement Module. Implements GoodsReceiptService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.procurement.service;
 
 import com.plus33.erp.common.dto.IdempotentCreateResult;
@@ -43,6 +70,30 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code GoodsReceiptServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Procurement Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * GoodsReceiptController
+ *   --> GoodsReceiptServiceImpl (this)
+ *   --> Validate business rules
+ *   --> GoodsReceiptRepository (read/write 'goods_receipts')
+ *   --> GoodsReceiptMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code goods_receipts}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Analytics, Organization, Procurement, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class GoodsReceiptServiceImpl implements GoodsReceiptService {
@@ -83,6 +134,15 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
         this.inventoryTraceabilityService = inventoryTraceabilityService;
     }
 
+    /**
+     * Creates a new goods receipt and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the IdempotentCreateResult result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public IdempotentCreateResult<GoodsReceiptResponse> createGoodsReceipt(GoodsReceiptRequest request) {
@@ -244,6 +304,20 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
         return new IdempotentCreateResult<>(goodsReceiptMapper.toResponse(saved), true);
     }
 
+    /**
+     * Retrieves a single goods receipt by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the GoodsReceiptResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single goods receipt by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the GoodsReceiptResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public GoodsReceiptResponse getGoodsReceiptById(Long id) {
         GoodsReceipt gr = goodsReceiptRepository.findById(id)
@@ -251,6 +325,20 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
         return goodsReceiptMapper.toResponse(gr);
     }
 
+    /**
+     * Returns a filtered paginated list of goods receipts records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of goods receipts records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<GoodsReceiptResponse> searchGoodsReceipts(GoodsReceiptSearchRequest searchRequest, Pageable pageable) {
         Specification<GoodsReceipt> spec = (root, query, cb) -> {
@@ -298,6 +386,16 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
         );
     }
 
+    /**
+     * Updates an existing goods receipt record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the GoodsReceiptResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public GoodsReceiptResponse updateGoodsReceipt(Long id, GoodsReceiptUpdateRequest request) {
@@ -322,6 +420,16 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
         return goodsReceiptMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the goods receipt and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the GoodsReceiptResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public GoodsReceiptResponse cancelGoodsReceipt(Long id, String reason) {

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 13
+-- File              : V13__create_leave_management.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create leave management
+--
+-- Tables Created    : leave_types, employee_leaves
+-- Tables Altered    : N/A
+-- Seed Data For     : leave_types
+-- Indexes           : idx_employee_leaves_employee, idx_employee_leaves_status, idx_employee_leaves_dates
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V13__create_leave_management.sql
 -- PLUS33 ERP — Leave Management Tables

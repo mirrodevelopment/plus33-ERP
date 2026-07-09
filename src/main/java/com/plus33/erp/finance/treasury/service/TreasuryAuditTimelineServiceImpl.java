@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.service
+ * File              : TreasuryAuditTimelineServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasuryAuditTimelineController
+ * Related Service   : TreasuryAuditTimelineServiceImpl
+ * Related Repository: TreasuryAuditEventRepository
+ * Related Entity    : TreasuryAuditTimeline
+ * Related DTO       : N/A
+ * Related Mapper    : TreasuryAuditTimelineMapper
+ * Related DB Table  : treasury_audit_timelines
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : TreasuryAuditTimelineController, TreasuryAuditTimelineServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TreasuryAuditTimelineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.service;
 
 import com.plus33.erp.finance.treasury.entity.TreasuryAuditEvent;
@@ -29,6 +56,11 @@ public class TreasuryAuditTimelineServiceImpl implements TreasuryAuditTimelineSe
     private final TreasuryAuditEventRepository auditEventRepository;
     private final EntityManager entityManager;
 
+    /**
+     * Performs the record operation in this module.
+     *
+     * @return the TreasuryAuditEvent result
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public TreasuryAuditEvent record(Long companyId, String aggregateType, Long aggregateId,
@@ -51,6 +83,14 @@ public class TreasuryAuditTimelineServiceImpl implements TreasuryAuditTimelineSe
         return saved;
     }
 
+    /**
+     * Retrieves timeline data from the database.
+     *
+     * @param aggregateType the aggregateType input value
+     * @param aggregateId the aggregateId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<TreasuryAuditEvent> getTimeline(String aggregateType, Long aggregateId) {
@@ -58,6 +98,12 @@ public class TreasuryAuditTimelineServiceImpl implements TreasuryAuditTimelineSe
                 .findByAggregateTypeAndAggregateIdOrderByOccurredAtAsc(aggregateType, aggregateId);
     }
 
+    /**
+     * Retrieves company timeline data from the database.
+     *
+     * @return Spring Page of matching records with pagination metadata
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<TreasuryAuditEvent> getCompanyTimeline(Long companyId,
@@ -67,6 +113,12 @@ public class TreasuryAuditTimelineServiceImpl implements TreasuryAuditTimelineSe
         return auditEventRepository.findByCompanyAndTimeRange(companyId, from, to, pageable);
     }
 
+    /**
+     * Retrieves actor timeline data from the database.
+     *
+     * @return Spring Page of matching records with pagination metadata
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<TreasuryAuditEvent> getActorTimeline(Long companyId, String actor,

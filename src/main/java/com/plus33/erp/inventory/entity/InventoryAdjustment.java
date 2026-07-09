@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Inventory Module
+ * Package           : com.plus33.erp.inventory.entity
+ * File              : InventoryAdjustment.java
+ * Purpose           : JPA Entity representing a persistent database record in Inventory Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryAdjustmentController
+ * Related Service   : InventoryAdjustmentService, InventoryAdjustmentServiceImpl
+ * Related Repository: InventoryAdjustmentRepository
+ * Related Entity    : InventoryAdjustment
+ * Related DTO       : N/A
+ * Related Mapper    : InventoryAdjustmentMapper
+ * Related DB Table  : inventory_adjustments
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Security Module
+ * Used By           : InventoryAdjustmentRepository, InventoryAdjustmentMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'inventory_adjustments'. Defines persistent domain object for Inventory Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.inventory.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -12,6 +39,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Inventory Module</b>
+ *
+ * <p><b>Class  :</b> {@code InventoryAdjustment}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.inventory.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'inventory_adjustments'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code inventory_adjustments}</p>
+ * <p><b>Module Deps      :</b> Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity
@@ -99,6 +139,10 @@ public class InventoryAdjustment {
     @Version
     private Long version;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

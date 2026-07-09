@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.entity
+ * File              : PaymentBatch.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PaymentBatchController
+ * Related Service   : PaymentBatchService, PaymentBatchServiceImpl
+ * Related Repository: PaymentBatchRepository
+ * Related Entity    : PaymentBatch
+ * Related DTO       : N/A
+ * Related Mapper    : PaymentBatchMapper
+ * Related DB Table  : payment_batches
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : PaymentBatchRepository, PaymentBatchMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'payment_batches'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -13,6 +40,19 @@ import java.time.LocalDateTime;
 @Table(name = "payment_batches", uniqueConstraints = {
     @UniqueConstraint(name = "uk_batches_number", columnNames = {"company_id", "batch_number"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code PaymentBatch}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'payment_batches'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code payment_batches}</p>
+ * <p><b>Module Deps      :</b> Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -54,6 +94,10 @@ public class PaymentBatch {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

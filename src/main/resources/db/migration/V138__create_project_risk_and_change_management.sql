@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 138
+-- File              : V138__create_project_risk_and_change_management.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create project risk and change management
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V138: Project Risks and Change Management
 CREATE TABLE IF NOT EXISTS project_risks (
     id BIGSERIAL PRIMARY KEY,

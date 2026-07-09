@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.strategy
+ * File              : WarehouseStrategyImpls.java
+ * Purpose           : Component of Wms Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: WarehouseStrategyImplsController
+ * Related Service   : WarehouseStrategyImplsService, WarehouseStrategyImplsServiceImpl
+ * Related Repository: WarehouseLocationRepository, LocationStockRepository, WarehouseLocationRepository, WarehouseLocationRepository, LocationStockRepository, WarehouseLocationRepository, LocationStockRepository, LocationStockRepository, WarehouseLocationRepository, WarehouseLocationRepository, LocationStockRepository, LocationStockRepository, LocationStockRepository, LocationStockRepository, LocationStockRepository, LocationStockRepository, LocationStockRepository, LocationStockRepository
+ * Related Entity    : WarehouseStrategyImpls
+ * Related DTO       : N/A
+ * Related Mapper    : WarehouseStrategyImplsMapper
+ * Related DB Table  : warehouse_strategy_implss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Wms Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Wms Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.wms.strategy;
 
 import com.plus33.erp.wms.entity.AsnLine;
@@ -30,9 +57,35 @@ class NearestEmptyBinStrategy implements PutAwayStrategy {
         this.stockRepo = stockRepo;
     }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "NEAREST_EMPTY_BIN"; }
 
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
     @Override
     public Optional<WarehouseLocation> resolve(AsnLine asnLine, Long warehouseId, Long companyId) {
         return locationRepo.findEmptyReceivableLocations(warehouseId, companyId)
@@ -53,9 +106,35 @@ class CapacityBasedStrategy implements PutAwayStrategy {
         this.locationRepo = locationRepo;
     }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "CAPACITY_BASED"; }
 
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
     @Override
     public Optional<WarehouseLocation> resolve(AsnLine asnLine, Long warehouseId, Long companyId) {
         return locationRepo.findLocationsWithMostCapacity(warehouseId, companyId)
@@ -78,9 +157,35 @@ class ZoneBasedStrategy implements PutAwayStrategy {
         this.stockRepo = stockRepo;
     }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "ZONE_BASED"; }
 
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
     @Override
     public Optional<WarehouseLocation> resolve(AsnLine asnLine, Long warehouseId, Long companyId) {
         // Default to BULK zone; subclass can override with product velocity lookup
@@ -103,9 +208,35 @@ class AbcClassStrategy implements PutAwayStrategy {
         this.stockRepo = stockRepo;
     }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "ABC_CLASS"; }
 
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
     @Override
     public Optional<WarehouseLocation> resolve(AsnLine asnLine, Long warehouseId, Long companyId) {
         // Resolve existing stock ABC class or default to 'C'
@@ -133,9 +264,35 @@ class FixedBinStrategy implements PutAwayStrategy {
         this.locationRepo = locationRepo;
     }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "FIXED_BIN"; }
 
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
     @Override
     public Optional<WarehouseLocation> resolve(AsnLine asnLine, Long warehouseId, Long companyId) {
         // Find the existing primary bin for this product (first existing stock location)
@@ -159,9 +316,35 @@ class VelocityBasedStrategy implements PutAwayStrategy {
         this.stockRepo = stockRepo;
     }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "VELOCITY_BASED"; }
 
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
+    /**
+     * Performs the resolve operation in this module.
+     *
+     * @param asnLine the asnLine input value
+     * @param warehouseId the warehouseId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return Optional containing the entity if found, empty if not
+     */
     @Override
     public Optional<WarehouseLocation> resolve(AsnLine asnLine, Long warehouseId, Long companyId) {
         String abcClass = stockRepo.findByCompanyIdAndProductId(companyId, asnLine.getProductId())
@@ -189,9 +372,29 @@ class FefoPickingStrategy implements PickingStrategy {
 
     FefoPickingStrategy(LocationStockRepository stockRepo) { this.stockRepo = stockRepo; }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "FEFO"; }
 
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
     @Override
     public List<LocationStock> allocate(com.plus33.erp.wms.entity.PickingWork pw,
                                          Long warehouseId, Long companyId) {
@@ -209,9 +412,29 @@ class FifoPickingStrategy implements PickingStrategy {
 
     FifoPickingStrategy(LocationStockRepository stockRepo) { this.stockRepo = stockRepo; }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "FIFO"; }
 
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
     @Override
     public List<LocationStock> allocate(com.plus33.erp.wms.entity.PickingWork pw,
                                          Long warehouseId, Long companyId) {
@@ -229,9 +452,29 @@ class LifoPickingStrategy implements PickingStrategy {
 
     LifoPickingStrategy(LocationStockRepository stockRepo) { this.stockRepo = stockRepo; }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "LIFO"; }
 
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
     @Override
     public List<LocationStock> allocate(com.plus33.erp.wms.entity.PickingWork pw,
                                          Long warehouseId, Long companyId) {
@@ -250,9 +493,29 @@ class BatchPickingStrategy implements PickingStrategy {
 
     BatchPickingStrategy(LocationStockRepository stockRepo) { this.stockRepo = stockRepo; }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "BATCH"; }
 
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
     @Override
     public List<LocationStock> allocate(com.plus33.erp.wms.entity.PickingWork pw,
                                          Long warehouseId, Long companyId) {
@@ -270,9 +533,29 @@ class ClusterPickingStrategy implements PickingStrategy {
 
     ClusterPickingStrategy(LocationStockRepository stockRepo) { this.stockRepo = stockRepo; }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "CLUSTER"; }
 
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
     @Override
     public List<LocationStock> allocate(com.plus33.erp.wms.entity.PickingWork pw,
                                          Long warehouseId, Long companyId) {
@@ -290,9 +573,29 @@ class ZonePickingStrategy implements PickingStrategy {
 
     ZonePickingStrategy(LocationStockRepository stockRepo) { this.stockRepo = stockRepo; }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "ZONE"; }
 
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
     @Override
     public List<LocationStock> allocate(com.plus33.erp.wms.entity.PickingWork pw,
                                          Long warehouseId, Long companyId) {
@@ -311,9 +614,29 @@ class SerialControlledPickingStrategy implements PickingStrategy {
 
     SerialControlledPickingStrategy(LocationStockRepository stockRepo) { this.stockRepo = stockRepo; }
 
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
+    /**
+     * Performs the strategyKey operation in this module.
+     *
+     * @return the result string value
+     */
     @Override
     public String strategyKey() { return "SERIAL_CONTROLLED"; }
 
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
+    /**
+     * Reserves wms resources (budget or stock) for downstream processing.
+     *
+     * @return List of matching records
+     */
     @Override
     public List<LocationStock> allocate(com.plus33.erp.wms.entity.PickingWork pw,
                                          Long warehouseId, Long companyId) {

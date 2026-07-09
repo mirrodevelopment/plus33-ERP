@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 373
+-- File              : V373__create_esg_offsets.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create esg offsets
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V373: Carbon Offsets Registry
 CREATE TABLE IF NOT EXISTS platform_esg_carbon_offset (
     id                          BIGSERIAL PRIMARY KEY,

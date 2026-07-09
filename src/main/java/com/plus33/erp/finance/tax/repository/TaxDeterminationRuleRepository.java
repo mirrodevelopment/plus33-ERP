@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.repository
+ * File              : TaxDeterminationRuleRepository.java
+ * Purpose           : JPA Repository providing database CRUD for Finance Module entities
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TaxDeterminationRuleController
+ * Related Service   : TaxDeterminationRuleService, TaxDeterminationRuleServiceImpl
+ * Related Repository: TaxDeterminationRuleRepository
+ * Related Entity    : TaxDeterminationRule
+ * Related DTO       : N/A
+ * Related Mapper    : TaxDeterminationRuleMapper
+ * Related DB Table  : tax_determination_rules
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : TaxDeterminationRuleService, TaxDeterminationRuleServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Repository for Finance Module against the 'tax_determination_rules' table. Provides CRUD, Specification-based queries, and paginated results.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.repository;
 
 import com.plus33.erp.finance.tax.entity.TaxDeterminationRule;
@@ -9,6 +36,19 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code TaxDeterminationRuleRepository}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.tax.repository}</p>
+ * <p><b>Layer  :</b> JPA Repository: database access for table 'tax_determination_rules' via Spring Data JPA.</p>
+ *
+ * <p><b>Database Table   :</b> {@code tax_determination_rules}</p>
+ * <p><b>Module Deps      :</b> Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Repository
 public interface TaxDeterminationRuleRepository extends JpaRepository<TaxDeterminationRule, Long> {
     @Query("SELECT r FROM TaxDeterminationRule r WHERE r.company.id = :companyId AND r.active = true " +

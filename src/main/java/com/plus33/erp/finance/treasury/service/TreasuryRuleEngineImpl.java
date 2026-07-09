@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.service
+ * File              : TreasuryRuleEngineImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasuryRuleEngineController
+ * Related Service   : TreasuryRuleEngineImpl
+ * Related Repository: TreasuryRuleEngineRepository
+ * Related Entity    : TreasuryRuleEngine
+ * Related DTO       : N/A
+ * Related Mapper    : TreasuryRuleEngineMapper
+ * Related DB Table  : treasury_rule_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : TreasuryRuleEngineController, TreasuryRuleEngineImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TreasuryRuleEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.service;
 
 import com.plus33.erp.finance.treasury.entity.TreasuryRiskPolicy;
@@ -29,6 +56,13 @@ public class TreasuryRuleEngineImpl implements TreasuryRuleEngine {
 
     private final TreasuryConfigurationRegistry configRegistry;
 
+    /**
+     * Performs the evaluatePayment operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param amount the amount input value
+     * @param paymentDate the paymentDate input value
+     */
     @Override
     @Transactional(readOnly = true)
     public void evaluatePayment(Long companyId, MoneyAmount amount, LocalDate paymentDate) {
@@ -43,6 +77,10 @@ public class TreasuryRuleEngineImpl implements TreasuryRuleEngine {
         throwIfBlocked(results);
     }
 
+    /**
+     * Performs the evaluateFxTrade operation in this module.
+     *
+     */
     @Override
     @Transactional(readOnly = true)
     public void evaluateFxTrade(Long companyId, String buyCurrency,
@@ -53,6 +91,10 @@ public class TreasuryRuleEngineImpl implements TreasuryRuleEngine {
         throwIfBlocked(results);
     }
 
+    /**
+     * Performs the evaluateInvestment operation in this module.
+     *
+     */
     @Override
     @Transactional(readOnly = true)
     public void evaluateInvestment(Long companyId, String investmentType,
@@ -63,6 +105,10 @@ public class TreasuryRuleEngineImpl implements TreasuryRuleEngine {
         throwIfBlocked(results);
     }
 
+    /**
+     * Performs the evaluateBankExposure operation in this module.
+     *
+     */
     @Override
     @Transactional(readOnly = true)
     public void evaluateBankExposure(Long companyId, Long bankId,
@@ -72,6 +118,11 @@ public class TreasuryRuleEngineImpl implements TreasuryRuleEngine {
         throwIfBlocked(results);
     }
 
+    /**
+     * Performs the evaluateAll operation in this module.
+     *
+     * @return List of matching records
+     */
     @Override
     @Transactional(readOnly = true)
     public List<PolicyEvaluationResult> evaluateAll(Long companyId, String operationType,

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.scheduler
+ * File              : TreasurySchedulerJob.java
+ * Purpose           : Component of Finance Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasurySchedulerJobController
+ * Related Service   : TreasurySchedulerJobService, TreasurySchedulerJobServiceImpl
+ * Related Repository: CashPoolRepository
+ * Related Entity    : TreasurySchedulerJob
+ * Related DTO       : N/A
+ * Related Mapper    : TreasurySchedulerJobMapper
+ * Related DB Table  : treasury_scheduler_jobs
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Finance Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.scheduler;
 
 import com.plus33.erp.finance.treasury.entity.CashPool;
@@ -12,6 +39,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code TreasurySchedulerJob}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.scheduler}</p>
+ * <p><b>Layer  :</b> Scheduled Task: runs periodic background jobs via @Scheduled annotation.</p>
+ *
+ * <p><b>Module Deps      :</b> Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

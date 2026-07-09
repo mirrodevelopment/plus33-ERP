@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 206
+-- File              : V206__create_service_discovery.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create service discovery
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V206: Service Discovery & Maintenance Window DDL
 CREATE TABLE IF NOT EXISTS platform_discovery_node (
     id                  BIGSERIAL PRIMARY KEY,

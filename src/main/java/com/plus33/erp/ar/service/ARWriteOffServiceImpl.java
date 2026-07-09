@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Ar Module
+ * Package           : com.plus33.erp.ar.service
+ * File              : ARWriteOffServiceImpl.java
+ * Purpose           : Business logic service layer for Ar Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ARWriteOffController
+ * Related Service   : ARWriteOffServiceImpl
+ * Related Repository: ARWriteOffRepository, CustomerInvoiceRepository, CustomerRepository, CompanyRepository, AccountRepository, JournalEntryRepository, UserRepository
+ * Related Entity    : ARWriteOff
+ * Related DTO       : ARWriteOffRequest, ARWriteOffResponse, PageResponse, toResponse
+ * Related Mapper    : ARWriteOffMapper
+ * Related DB Table  : a_r_write_offs
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Finance Module, Organization Module, Sales Module, Security Module
+ * Used By           : ARWriteOffController, ARWriteOffServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Ar Module. Implements ARWriteOffService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.ar.service;
 
 import com.plus33.erp.ar.dto.ARWriteOffRequest;
@@ -39,6 +66,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Ar Module</b>
+ *
+ * <p><b>Class  :</b> {@code ARWriteOffServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.ar.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Ar Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ARWriteOffController
+ *   --> ARWriteOffServiceImpl (this)
+ *   --> Validate business rules
+ *   --> ARWriteOffRepository (read/write 'a_r_write_offs')
+ *   --> ARWriteOffMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code a_r_write_offs}</p>
+ * <p><b>Module Deps      :</b> Ar, Common, Finance, Organization, Sales, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class ARWriteOffServiceImpl implements ARWriteOffService {
@@ -81,6 +132,15 @@ public class ARWriteOffServiceImpl implements ARWriteOffService {
     // Create Write-off
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a new write off and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the ARWriteOffResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public ARWriteOffResponse createWriteOff(ARWriteOffRequest request) {
@@ -165,6 +225,20 @@ public class ARWriteOffServiceImpl implements ARWriteOffService {
     // Read operations
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves a single write off by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the ARWriteOffResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single write off by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the ARWriteOffResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public ARWriteOffResponse getWriteOffById(Long id) {
         ARWriteOff writeOff = arWriteOffRepository.findById(id)
@@ -172,6 +246,22 @@ public class ARWriteOffServiceImpl implements ARWriteOffService {
         return toResponse(writeOff);
     }
 
+    /**
+     * Returns a filtered paginated list of write offs records.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param customerId the customerId input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of write offs records.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param customerId the customerId input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<ARWriteOffResponse> searchWriteOffs(Long companyId, Long customerId, Pageable pageable) {
         Specification<ARWriteOff> spec = (root, query, cb) -> {

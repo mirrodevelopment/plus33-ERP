@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.budget.service
+ * File              : BudgetDimensionSetServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BudgetDimensionSetController
+ * Related Service   : BudgetDimensionSetServiceImpl
+ * Related Repository: CompanyRepository, DepartmentRepository, CostCenterRepository, ProjectRepository, WarehouseRepository, AssetCategoryRepository, RegionRepository, StoreRepository, BudgetDimensionSetRepository
+ * Related Entity    : BudgetDimensionSet
+ * Related DTO       : BudgetDimensionSetRequest
+ * Related Mapper    : BudgetDimensionSetMapper
+ * Related DB Table  : budget_dimension_sets
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : BudgetDimensionSetController, BudgetDimensionSetServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements BudgetDimensionSetService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.budget.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -17,6 +44,30 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code BudgetDimensionSetServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.budget.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * BudgetDimensionSetController
+ *   --> BudgetDimensionSetServiceImpl (this)
+ *   --> Validate business rules
+ *   --> BudgetDimensionSetRepository (read/write 'budget_dimension_sets')
+ *   --> BudgetDimensionSetMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code budget_dimension_sets}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 public class BudgetDimensionSetServiceImpl implements BudgetDimensionSetService {
@@ -31,6 +82,14 @@ public class BudgetDimensionSetServiceImpl implements BudgetDimensionSetService 
     private final StoreRepository storeRepository;
     private final BudgetDimensionSetRepository budgetDimensionSetRepository;
 
+    /**
+     * Retrieves or create dimension set data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the BudgetDimensionSet result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional
     public BudgetDimensionSet getOrCreateDimensionSet(Long companyId, BudgetDimensionSetRequest request) {
@@ -49,6 +108,12 @@ public class BudgetDimensionSetServiceImpl implements BudgetDimensionSetService 
         );
     }
 
+    /**
+     * Retrieves or create dimension set data from the database.
+     *
+     * @return the BudgetDimensionSet result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional
     public BudgetDimensionSet getOrCreateDimensionSet(

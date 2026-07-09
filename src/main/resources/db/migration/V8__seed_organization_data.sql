@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 8
+-- File              : V8__seed_organization_data.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed organization data
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : companies, regions, stores, warehouses
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V8__seed_organization_data.sql
 -- PLUS33 ERP — Initial Organization seed data

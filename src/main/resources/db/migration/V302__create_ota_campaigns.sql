@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 302
+-- File              : V302__create_ota_campaigns.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create ota campaigns
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V302: OTA Campaigns & Node Executions
 CREATE TABLE IF NOT EXISTS platform_ota_campaign (
     id                      BIGSERIAL PRIMARY KEY,

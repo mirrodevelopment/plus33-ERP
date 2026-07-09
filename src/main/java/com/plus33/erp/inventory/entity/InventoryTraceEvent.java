@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Inventory Module
+ * Package           : com.plus33.erp.inventory.entity
+ * File              : InventoryTraceEvent.java
+ * Purpose           : JPA Entity representing a persistent database record in Inventory Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryTraceEventController
+ * Related Service   : InventoryTraceEventService, InventoryTraceEventServiceImpl
+ * Related Repository: InventoryTraceEventRepository
+ * Related Entity    : InventoryTraceEvent
+ * Related DTO       : N/A
+ * Related Mapper    : InventoryTraceEventMapper
+ * Related DB Table  : inventory_trace_events
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Security Module
+ * Used By           : InventoryTraceEventRepository, InventoryTraceEventMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'inventory_trace_events'. Defines persistent domain object for Inventory Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.inventory.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -10,6 +37,19 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Inventory Module</b>
+ *
+ * <p><b>Class  :</b> {@code InventoryTraceEvent}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.inventory.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'inventory_trace_events'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code inventory_trace_events}</p>
+ * <p><b>Module Deps      :</b> Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity
@@ -74,6 +114,10 @@ public class InventoryTraceEvent {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.event
+ * File              : WmsEventListener.java
+ * Purpose           : Component of Wms Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: WmsEventListenerController
+ * Related Service   : WmsEventListenerService, WmsEventListenerServiceImpl
+ * Related Repository: WmsEventListenerRepository
+ * Related Entity    : WmsEventListener
+ * Related DTO       : N/A
+ * Related Mapper    : WmsEventListenerMapper
+ * Related DB Table  : wms_event_listeners
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Wms Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Wms Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.wms.event;
 
 import org.slf4j.Logger;
@@ -22,6 +49,11 @@ public class WmsEventListener {
 
     public WmsEventListener(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
+    /**
+     * Handles the movement created event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onMovementCreated(WmsEventBus.InventoryMovementCreatedEvent event) {
@@ -31,6 +63,11 @@ public class WmsEventListener {
         log.info("WMS: Movement ledger event processed - type={}, movementId={}", event.movementType(), event.movementId());
     }
 
+    /**
+     * Handles the picking completed event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onPickingCompleted(WmsEventBus.PickingCompletedEvent event) {
@@ -38,6 +75,11 @@ public class WmsEventListener {
         log.info("WMS: Picking completed event - pickingWorkId={}", event.pickingWorkId());
     }
 
+    /**
+     * Handles the put away completed event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onPutAwayCompleted(WmsEventBus.PutAwayCompletedEvent event) {
@@ -46,6 +88,11 @@ public class WmsEventListener {
         log.info("WMS: Put-away completed event - putAwayWorkId={}", event.putAwayWorkId());
     }
 
+    /**
+     * Handles the shipment dispatched event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onShipmentDispatched(WmsEventBus.ShipmentDispatchedEvent event) {
@@ -53,6 +100,11 @@ public class WmsEventListener {
         log.info("WMS: Shipment dispatched - shipmentId={}, tracking={}", event.shipmentId(), event.trackingNumber());
     }
 
+    /**
+     * Handles the cycle count completed event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onCycleCountCompleted(WmsEventBus.CycleCountCompletedEvent event) {
@@ -61,6 +113,11 @@ public class WmsEventListener {
         log.info("WMS: Cycle count completed - planId={}", event.planId());
     }
 
+    /**
+     * Handles the inventory adjusted event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onInventoryAdjusted(WmsEventBus.InventoryAdjustedEvent event) {
@@ -69,6 +126,11 @@ public class WmsEventListener {
         log.info("WMS: Inventory adjusted - locationId={}, productId={}, variance={}", event.locationId(), event.productId(), event.varianceQty());
     }
 
+    /**
+     * Handles the manufacturing material issued event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onManufacturingMaterialIssued(WmsEventBus.ManufacturingMaterialIssuedEvent event) {

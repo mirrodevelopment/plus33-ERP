@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.service
+ * File              : TaxCalculationEngineImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TaxCalculationEngineController
+ * Related Service   : TaxCalculationEngineImpl
+ * Related Repository: TaxExemptionCertificateRepository, TaxOverrideRequestRepository, TaxCalculationLogRepository, TaxConfigurationVersionRepository
+ * Related Entity    : TaxCalculationEngine
+ * Related DTO       : TaxCalculationLineRequest, TaxCalculationRequest, TaxOverrideRequest
+ * Related Mapper    : ObjectMapper
+ * Related DB Table  : tax_calculation_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : TaxCalculationEngineController, TaxCalculationEngineImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TaxCalculationEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +46,30 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code TaxCalculationEngineImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.tax.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * TaxCalculationEngineController
+ *   --> TaxCalculationEngineImpl (this)
+ *   --> Validate business rules
+ *   --> TaxCalculationEngineRepository (read/write 'tax_calculation_engines')
+ *   --> TaxCalculationEngineMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code tax_calculation_engines}</p>
+ * <p><b>Module Deps      :</b> Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,6 +86,12 @@ public class TaxCalculationEngineImpl implements TaxCalculationEngine {
     private final ObjectMapper objectMapper;
     private final TaxMetricsRegistry metricsRegistry;
 
+    /**
+     * Calculates tax totals including subtotal, tax, discounts, and net amount.
+     *
+     * @param request the validated request DTO containing input data
+     * @return the TaxCalculationResult result
+     */
     @Override
     @Transactional
     public TaxCalculationResult calculateTax(TaxCalculationRequest request) {
@@ -161,6 +218,10 @@ public class TaxCalculationEngineImpl implements TaxCalculationEngine {
                 .build();
     }
 
+    /**
+     * Performs the logCalculation operation in this module.
+     *
+     */
     @Transactional
     protected void logCalculation(TaxCalculationRequest request, TaxCalculationResult result,
                                    TaxGroup taxGroup, long startTime, boolean overrideApplied) {

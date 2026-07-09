@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 102
+-- File              : V102__create_crm_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create crm tables
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V102: Enterprise CRM and Omnichannel tables, event store, forecasts, and commissions
 CREATE TABLE IF NOT EXISTS crm_leads (
     id BIGSERIAL PRIMARY KEY,

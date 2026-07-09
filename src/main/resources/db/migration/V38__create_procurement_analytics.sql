@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 38
+-- File              : V38__create_procurement_analytics.sql
+-- Operation Type    : DDL
+-- Purpose           : create procurement analytics
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : permissions, role_permissions, roles
+-- Indexes           : uidx_mv_procurement_summary, uidx_mv_supplier_performance, uidx_mv_payables_aging, uidx_mv_po_fulfilment, uidx_mv_invoice_matching
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V38__create_procurement_analytics.sql
 -- PLUS33 ERP — Procurement Analytics & Dashboards Materialized Views

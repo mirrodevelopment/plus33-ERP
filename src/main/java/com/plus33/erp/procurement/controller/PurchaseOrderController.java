@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.controller
+ * File              : PurchaseOrderController.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Procurement Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PurchaseOrderController
+ * Related Service   : PurchaseOrderControllerService, PurchaseOrderControllerServiceImpl
+ * Related Repository: PurchaseOrderControllerRepository
+ * Related Entity    : PurchaseOrderController
+ * Related DTO       : ApiResponse, PageRequest, PageResponse, PurchaseOrderRequest, PurchaseOrderResponse
+ * Related Mapper    : PurchaseOrderControllerMapper
+ * Related DB Table  : purchase_order_controllers
+ * Related REST APIs : POST /api/v1/purchase-orders, GET /api/v1/purchase-orders/{id}, GET /api/v1/purchase-orders, PUT /api/v1/purchase-orders/{id}
+ * Depends On        : Common Module
+ * Used By           : Procurement Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Procurement Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: POST /api/v1/purchase-orders, GET /api/v1/purchase-orders/{id}, GET /api/v1/purchase-orders, PUT /api/v1/purchase-orders/{id}
+ ******************************************************************************/
 package com.plus33.erp.procurement.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
@@ -19,6 +46,31 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code PurchaseOrderController}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.controller}</p>
+ * <p><b>Layer  :</b> REST Controller: HTTP endpoints layer. Secured by JWT + @PreAuthorize. Delegates to PurchaseOrderService.</p>
+ *
+ * <p><b>Request Flow:</b></p>
+ * <pre>
+ * HTTP Request
+ *   --> JWT Auth Filter (validate Bearer token)
+ *   --> @PreAuthorize (permission check)
+ *   --> PurchaseOrderController.endpoint()
+ *   --> PurchaseOrderService.method()
+ *   --> PurchaseOrderRepository (PostgreSQL)
+ *   --> ApiResponse wrapped in ResponseEntity
+ *   --> JSON response to Frontend
+ * </pre>
+ *
+ * <p><b>REST Endpoints    :</b> POST /api/v1/purchase-orders, GET /api/v1/purchase-orders/{id}, GET /api/v1/purchase-orders, PUT /api/v1/purchase-orders/{id}, DELETE /api/v1/purchase-orders/{id}</p>
+ * <p><b>Module Deps      :</b> Common, Procurement</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/api/v1/purchase-orders")
 @Tag(name = "Purchase Order Management", description = "REST APIs for managing purchase orders and procurement lifecycle")
@@ -30,6 +82,14 @@ public class PurchaseOrderController {
         this.purchaseOrderService = purchaseOrderService;
     }
 
+    /**
+     * Creates a new purchase order and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_CREATE')")
     @Operation(summary = "Create a new purchase order", description = "Initiates a purchase order in DRAFT status.")
@@ -40,6 +100,15 @@ public class PurchaseOrderController {
         return new ResponseEntity<>(ApiResponse.success("Purchase order created successfully", response), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves a single purchase order by id by its identifier.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_VIEW')")
     @Operation(summary = "Get purchase order by ID", description = "Retrieves details of a purchase order by primary key.")
@@ -48,6 +117,13 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(ApiResponse.success("Purchase order retrieved successfully", response));
     }
 
+    /**
+     * Returns a filtered paginated list of purchase orders records.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_VIEW')")
     @Operation(summary = "Search purchase orders", description = "Performs dynamic searches and pagination filters for purchase orders.")
@@ -74,6 +150,14 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(ApiResponse.success("Purchase orders retrieved successfully", response));
     }
 
+    /**
+     * Updates an existing purchase order record in the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_UPDATE')")
     @Operation(summary = "Update purchase order details", description = "Modifies details of a purchase order while it is in DRAFT status.")
@@ -85,6 +169,14 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(ApiResponse.success("Purchase order updated successfully", response));
     }
 
+    /**
+     * Permanently deletes the purchase order from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_UPDATE')")
     @Operation(summary = "Delete purchase order", description = "Deletes a purchase order if it is in DRAFT status.")
@@ -93,6 +185,15 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(ApiResponse.success("Purchase order deleted successfully", null));
     }
 
+    /**
+     * Approves the purchase order, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_APPROVE')")
     @Operation(summary = "Approve purchase order", description = "Approves a purchase order draft and transitions it to ISSUED.")
@@ -101,6 +202,14 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(ApiResponse.success("Purchase order approved successfully", response));
     }
 
+    /**
+     * Cancels the purchase order and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_CANCEL')")
     @Operation(summary = "Cancel purchase order", description = "Cancels an issued purchase order with a reason.")
@@ -112,6 +221,14 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(ApiResponse.success("Purchase order cancelled successfully", response));
     }
 
+    /**
+     * Completes the purchase order workflow and finalizes the record status.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/close")
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_CLOSE')")
     @Operation(summary = "Close purchase order", description = "Closes a fully received purchase order.")

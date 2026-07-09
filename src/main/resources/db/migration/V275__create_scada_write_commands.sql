@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 275
+-- File              : V275__create_scada_write_commands.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create scada write commands
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V275: Secure SCADA Write Commands
 CREATE TABLE IF NOT EXISTS platform_scada_write_command (
     id                  BIGSERIAL PRIMARY KEY,

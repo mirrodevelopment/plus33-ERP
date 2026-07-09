@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 181
+-- File              : V181__create_master_data_management.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create master data management
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V181: Master Data Management (MDM) DDL Schema
 CREATE TABLE IF NOT EXISTS bi_mdm_golden_record (
     id                  BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 178
+-- File              : V178__create_forecasting.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create forecasting
+--
+-- Tables Created    : IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : bi_forecast_model_registry
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V178: Forecasting Framework
 -- Purpose: Forecast model registry, execution runs, predictions storage,
 --          and accuracy/backtesting tracking.

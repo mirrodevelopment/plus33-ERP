@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Workforce Module
+ * Package           : com.plus33.erp.workforce.controller
+ * File              : EmployeeController.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Workforce Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: EmployeeController
+ * Related Service   : EmployeeControllerService, EmployeeControllerServiceImpl
+ * Related Repository: EmployeeControllerRepository
+ * Related Entity    : EmployeeController
+ * Related DTO       : ApiResponse, EmployeeRequest, EmployeeResponse, EmployeeSearchRequest, PageRequest
+ * Related Mapper    : EmployeeControllerMapper
+ * Related DB Table  : employee_controllers
+ * Related REST APIs : POST /api/v1/employees, GET /api/v1/employees/{id}, GET /api/v1/employees, PUT /api/v1/employees/{id}
+ * Depends On        : Common Module
+ * Used By           : Workforce Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Workforce Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: POST /api/v1/employees, GET /api/v1/employees/{id}, GET /api/v1/employees, PUT /api/v1/employees/{id}
+ ******************************************************************************/
 package com.plus33.erp.workforce.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
@@ -17,6 +44,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Workforce Module</b>
+ *
+ * <p><b>Class  :</b> {@code EmployeeController}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.workforce.controller}</p>
+ * <p><b>Layer  :</b> REST Controller: HTTP endpoints layer. Secured by JWT + @PreAuthorize. Delegates to EmployeeService.</p>
+ *
+ * <p><b>Request Flow:</b></p>
+ * <pre>
+ * HTTP Request
+ *   --> JWT Auth Filter (validate Bearer token)
+ *   --> @PreAuthorize (permission check)
+ *   --> EmployeeController.endpoint()
+ *   --> EmployeeService.method()
+ *   --> EmployeeRepository (PostgreSQL)
+ *   --> ApiResponse wrapped in ResponseEntity
+ *   --> JSON response to Frontend
+ * </pre>
+ *
+ * <p><b>REST Endpoints    :</b> POST /api/v1/employees, GET /api/v1/employees/{id}, GET /api/v1/employees, PUT /api/v1/employees/{id}, DELETE /api/v1/employees/{id}</p>
+ * <p><b>Module Deps      :</b> Common, Workforce</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/api/v1/employees")
 @Tag(name = "Employee Management", description = "REST APIs for managing workforce employees")
@@ -28,6 +80,15 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
+    /**
+     * Creates a new employee and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('EMPLOYEE_CREATE')")
     @Operation(summary = "Create a new employee", description = "Adds a new employee profile. Code and email must be unique within the company.")
@@ -36,6 +97,15 @@ public class EmployeeController {
         return new ResponseEntity<>(ApiResponse.success("Employee created successfully", response), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves a single employee by id by its identifier.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('EMPLOYEE_VIEW')")
     @Operation(summary = "Get employee by ID", description = "Retrieves details of an employee by primary key.")
@@ -44,6 +114,13 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success("Employee retrieved successfully", response));
     }
 
+    /**
+     * Returns a filtered paginated list of employees records.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('EMPLOYEE_VIEW')")
     @Operation(summary = "Search employees", description = "Performs dynamic searches and pagination filters for employees.")
@@ -68,6 +145,14 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success("Employees retrieved successfully", response));
     }
 
+    /**
+     * Updates an existing employee record in the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('EMPLOYEE_UPDATE')")
     @Operation(summary = "Update employee details", description = "Modifies details of an active employee profile by ID.")
@@ -79,6 +164,14 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success("Employee updated successfully", response));
     }
 
+    /**
+     * Permanently deletes the employee from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('EMPLOYEE_DELETE')")
     @Operation(summary = "Soft delete employee", description = "Flags active field to false and removes user regional/store assignments.")
@@ -87,6 +180,14 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success("Employee deleted successfully", null));
     }
 
+    /**
+     * Performs the activateEmployee operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PatchMapping("/{id}/activate")
     @PreAuthorize("hasAuthority('EMPLOYEE_UPDATE')")
     @Operation(summary = "Activate employee", description = "Activates a soft-deleted or inactive employee profile.")
@@ -95,6 +196,14 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success("Employee activated successfully", response));
     }
 
+    /**
+     * Performs the deactivateEmployee operation in this module.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasAuthority('EMPLOYEE_UPDATE')")
     @Operation(summary = "Deactivate employee", description = "Deactivates an employee profile and removes user assignments.")

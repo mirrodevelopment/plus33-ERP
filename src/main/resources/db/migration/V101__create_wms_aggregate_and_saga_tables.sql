@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 101
+-- File              : V101__create_wms_aggregate_and_saga_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create wms aggregate and saga tables
+--
+-- Tables Created    : IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V101: Enterprise Event Store, Inventory Snapshots, Saga Tracking, Retention & Universal Document References
 CREATE TABLE IF NOT EXISTS warehouse_event_store (
     id BIGSERIAL PRIMARY KEY,

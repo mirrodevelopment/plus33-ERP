@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.service.impl
+ * File              : CycleCountEngineImpl.java
+ * Purpose           : Business logic service layer for Wms Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CycleCountEngineController
+ * Related Service   : CycleCountEngineImpl
+ * Related Repository: CycleCountPlanRepository, CycleCountTaskRepository, CycleCountResultRepository, LocationStockRepository
+ * Related Entity    : CycleCountEngine
+ * Related DTO       : N/A
+ * Related Mapper    : CycleCountEngineMapper
+ * Related DB Table  : cycle_count_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : CycleCountEngineController, CycleCountEngineImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Wms Module. Implements CycleCountEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.wms.service.impl;
 
 import com.plus33.erp.wms.entity.*;
@@ -50,6 +77,15 @@ public class CycleCountEngineImpl {
         this.jdbc = jdbc;
     }
 
+    /**
+     * Creates a new plan and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param plan the plan input value
+     * @return the CycleCountPlan result
+     * @throws BusinessException if a business rule is violated
+     */
     public CycleCountPlan createPlan(CycleCountPlan plan) {
         return planRepo.save(plan);
     }
@@ -171,6 +207,13 @@ public class CycleCountEngineImpl {
                 result.getProductId(), variance);
     }
 
+    /**
+     * Completes the plan workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param planId the planId input value
+     */
     public void completePlan(Long planId) {
         CycleCountPlan plan = planRepo.findById(planId)
                 .orElseThrow(() -> new EntityNotFoundException("Plan not found: " + planId));
@@ -180,11 +223,25 @@ public class CycleCountEngineImpl {
         eventBus.publishCycleCountCompleted(plan.getCompanyId(), planId, plan.getWarehouseId());
     }
 
+    /**
+     * Retrieves tasks by plan data from the database.
+     *
+     * @param planId the planId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Transactional(readOnly = true)
     public List<CycleCountTask> getTasksByPlan(Long planId) {
         return taskRepo.findByPlan_Id(planId);
     }
 
+    /**
+     * Retrieves results by plan data from the database.
+     *
+     * @param planId the planId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Transactional(readOnly = true)
     public List<CycleCountResult> getResultsByPlan(Long planId) {
         return resultRepo.findByPlanId(planId);

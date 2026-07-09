@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 123
+-- File              : V123__create_procurement_rfq_and_versioning.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create procurement rfq and versioning
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V123: RFQ and RFQ Versioning
 CREATE TABLE IF NOT EXISTS procurement_rfqs (
     id BIGSERIAL PRIMARY KEY,

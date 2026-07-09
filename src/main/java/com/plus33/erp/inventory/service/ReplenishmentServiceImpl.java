@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Inventory Module
+ * Package           : com.plus33.erp.inventory.service
+ * File              : ReplenishmentServiceImpl.java
+ * Purpose           : Business logic service layer for Inventory Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ReplenishmentController
+ * Related Service   : ReplenishmentServiceImpl
+ * Related Repository: ReplenishmentRuleRepository, ReplenishmentSuggestionRepository, InventoryStockRepository, CompanyRepository, WarehouseRepository, StoreRepository, ProductRepository, SupplierRepository, PurchaseRequestRepository, InventoryTransferRepository
+ * Related Entity    : Replenishment
+ * Related DTO       : createPurchaseRequest, InventoryTransferItemRequest, InventoryTransferRequest, PageRequest, PageResponse
+ * Related Mapper    : ReplenishmentMapper
+ * Related DB Table  : replenishments
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Procurement Module
+ * Used By           : ReplenishmentController, ReplenishmentServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Inventory Module. Implements ReplenishmentService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.inventory.service;
 
 import com.plus33.erp.common.dto.IdempotentCreateResult;
@@ -33,6 +60,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Inventory Module</b>
+ *
+ * <p><b>Class  :</b> {@code ReplenishmentServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.inventory.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Inventory Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ReplenishmentController
+ *   --> ReplenishmentServiceImpl (this)
+ *   --> Validate business rules
+ *   --> ReplenishmentRepository (read/write 'replenishments')
+ *   --> ReplenishmentMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code replenishments}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Procurement</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class ReplenishmentServiceImpl implements ReplenishmentService {
@@ -83,6 +134,15 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Creates a new rule and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the IdempotentCreateResult result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public IdempotentCreateResult<ReplenishmentRuleResponse> createRule(ReplenishmentRuleRequest request) {
@@ -161,6 +221,16 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return new IdempotentCreateResult<>(replenishmentMapper.toResponse(saved), true);
     }
 
+    /**
+     * Updates an existing rule record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param ruleId the ruleId input value
+     * @param request the validated request DTO containing input data
+     * @return the ReplenishmentRuleResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public ReplenishmentRuleResponse updateRule(Long ruleId, ReplenishmentRuleUpdateRequest request) {
@@ -192,6 +262,13 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return replenishmentMapper.toResponse(saved);
     }
 
+    /**
+     * Permanently deletes the rule from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param ruleId the ruleId input value
+     */
     @Override
     @Transactional
     public void deleteRule(Long ruleId) {
@@ -211,6 +288,20 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         eventPublisher.publishEvent(new ReplenishmentRefreshEvent(this));
     }
 
+    /**
+     * Retrieves rule data from the database.
+     *
+     * @param ruleId the ruleId input value
+     * @return the ReplenishmentRuleResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves rule data from the database.
+     *
+     * @param ruleId the ruleId input value
+     * @return the ReplenishmentRuleResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public ReplenishmentRuleResponse getRule(Long ruleId) {
         ReplenishmentRule rule = replenishmentRuleRepository.findById(ruleId)
@@ -218,6 +309,28 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return replenishmentMapper.toResponse(rule);
     }
 
+    /**
+     * Returns a filtered paginated list of rules records.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @param productId the productId input value
+     * @param active the active input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of rules records.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @param productId the productId input value
+     * @param active the active input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<ReplenishmentRuleResponse> listRules(Long companyId, Long warehouseId, Long storeId, Long productId, Boolean active, Pageable pageable) {
         Specification<ReplenishmentRule> spec = (root, query, cb) -> {
@@ -254,6 +367,12 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         );
     }
 
+    /**
+     * Performs the evaluateAll operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     */
     @Override
     @Transactional
     public List<ReplenishmentSuggestionResponse> evaluateAll(Long companyId) {
@@ -274,6 +393,12 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return results;
     }
 
+    /**
+     * Performs the evaluateRule operation in this module.
+     *
+     * @param ruleId the ruleId input value
+     * @return the ReplenishmentSuggestionResponse result
+     */
     @Override
     @Transactional
     public ReplenishmentSuggestionResponse evaluateRule(Long ruleId) {
@@ -350,6 +475,12 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return null;
     }
 
+    /**
+     * Performs the acknowledgeSuggestion operation in this module.
+     *
+     * @param suggestionId the suggestionId input value
+     * @return the ReplenishmentSuggestionResponse result
+     */
     @Override
     @Transactional
     public ReplenishmentSuggestionResponse acknowledgeSuggestion(Long suggestionId) {
@@ -369,6 +500,16 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return replenishmentMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the suggestion and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param suggestionId the suggestionId input value
+     * @param notes the notes input value
+     * @return the ReplenishmentSuggestionResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public ReplenishmentSuggestionResponse cancelSuggestion(Long suggestionId, String notes) {
@@ -390,6 +531,15 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return replenishmentMapper.toResponse(saved);
     }
 
+    /**
+     * Creates a new purchase request from suggestion and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param suggestionId the suggestionId input value
+     * @return the ReplenishmentSuggestionResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public ReplenishmentSuggestionResponse createPurchaseRequestFromSuggestion(Long suggestionId) {
@@ -449,6 +599,15 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return replenishmentMapper.toResponse(saved);
     }
 
+    /**
+     * Creates a new transfer from suggestion and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param suggestionId the suggestionId input value
+     * @return the ReplenishmentSuggestionResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public ReplenishmentSuggestionResponse createTransferFromSuggestion(Long suggestionId) {
@@ -505,6 +664,24 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         return replenishmentMapper.toResponse(saved);
     }
 
+    /**
+     * Returns a filtered paginated list of suggestions records.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param status status filter for narrowing query results
+     * @param productId the productId input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of suggestions records.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param status status filter for narrowing query results
+     * @param productId the productId input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<ReplenishmentSuggestionResponse> listSuggestions(Long companyId, ReplenishmentSuggestionStatus status, Long productId, Pageable pageable) {
         Specification<ReplenishmentSuggestion> spec = (root, query, cb) -> {
@@ -535,6 +712,20 @@ public class ReplenishmentServiceImpl implements ReplenishmentService {
         );
     }
 
+    /**
+     * Retrieves suggestion data from the database.
+     *
+     * @param suggestionId the suggestionId input value
+     * @return the ReplenishmentSuggestionResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves suggestion data from the database.
+     *
+     * @param suggestionId the suggestionId input value
+     * @return the ReplenishmentSuggestionResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public ReplenishmentSuggestionResponse getSuggestion(Long suggestionId) {
         ReplenishmentSuggestion suggestion = replenishmentSuggestionRepository.findById(suggestionId)

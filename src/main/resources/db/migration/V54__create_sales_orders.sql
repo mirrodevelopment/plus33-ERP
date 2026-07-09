@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 54
+-- File              : V54__create_sales_orders.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create sales orders
+--
+-- Tables Created    : sales_orders, sales_order_items
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_sales_orders_company, idx_sales_orders_customer, idx_sales_orders_status, idx_sales_items_order
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V54__create_sales_orders.sql
 -- PLUS33 ERP — Sales Order Schema

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.service
+ * File              : TaxJournalServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TaxJournalController
+ * Related Service   : TaxJournalServiceImpl
+ * Related Repository: AccountRepository
+ * Related Entity    : TaxJournal
+ * Related DTO       : N/A
+ * Related Mapper    : TaxJournalMapper
+ * Related DB Table  : tax_journals
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : TaxJournalController, TaxJournalServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TaxJournalService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -27,6 +54,20 @@ public class TaxJournalServiceImpl implements TaxJournalService {
 
     private final AccountRepository accountRepository;
 
+    /**
+     * Creates a new tax journal lines and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new tax journal lines and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public void createTaxJournalLines(JournalEntry journalEntry, Company company,
                                        TaxCalculationResult taxResult, boolean isPurchase) {

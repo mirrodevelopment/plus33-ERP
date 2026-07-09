@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Ar Module
+ * Package           : com.plus33.erp.ar.entity
+ * File              : ARWriteOff.java
+ * Purpose           : JPA Entity representing a persistent database record in Ar Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ARWriteOffController
+ * Related Service   : ARWriteOffService, ARWriteOffServiceImpl
+ * Related Repository: ARWriteOffRepository
+ * Related Entity    : ARWriteOff
+ * Related DTO       : N/A
+ * Related Mapper    : ARWriteOffMapper
+ * Related DB Table  : ar_write_offs
+ * Related REST APIs : N/A
+ * Depends On        : Finance Module, Organization Module, Sales Module, Security Module
+ * Used By           : ARWriteOffRepository, ARWriteOffMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'ar_write_offs'. Defines persistent domain object for Ar Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.ar.entity;
 
 import com.plus33.erp.finance.entity.JournalEntry;
@@ -25,6 +52,19 @@ import java.time.LocalDateTime;
 @Table(name = "ar_write_offs", uniqueConstraints = {
     @UniqueConstraint(name = "uk_arwo_company_number", columnNames = {"company_id", "write_off_number"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Ar Module</b>
+ *
+ * <p><b>Class  :</b> {@code ARWriteOff}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.ar.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'ar_write_offs'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code ar_write_offs}</p>
+ * <p><b>Module Deps      :</b> Finance, Organization, Sales, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -69,6 +109,10 @@ public class ARWriteOff {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

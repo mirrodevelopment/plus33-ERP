@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.service
+ * File              : TaxDeterminationRuleEngineImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TaxDeterminationRuleEngineController
+ * Related Service   : TaxDeterminationRuleEngineImpl
+ * Related Repository: TaxDeterminationRuleRepository
+ * Related Entity    : TaxDeterminationRuleEngine
+ * Related DTO       : N/A
+ * Related Mapper    : TaxDeterminationRuleEngineMapper
+ * Related DB Table  : tax_determination_rule_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : TaxDeterminationRuleEngineController, TaxDeterminationRuleEngineImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TaxDeterminationRuleEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.service;
 
 import com.plus33.erp.finance.tax.entity.TaxDeterminationRule;
@@ -32,6 +59,16 @@ public class TaxDeterminationRuleEngineImpl implements TaxDeterminationRuleEngin
     private final TaxDeterminationRuleRepository determinationRuleRepository;
     private final TaxConfigurationCache taxConfigurationCache;
 
+    /**
+     * Performs the determineTaxGroup operation in this module.
+     *
+     * @return the TaxGroup result
+     */
+    /**
+     * Performs the determineTaxGroup operation in this module.
+     *
+     * @return the TaxGroup result
+     */
     @Override
     public TaxGroup determineTaxGroup(
             Long companyId,

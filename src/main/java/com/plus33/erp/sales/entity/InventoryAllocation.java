@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.entity
+ * File              : InventoryAllocation.java
+ * Purpose           : JPA Entity representing a persistent database record in Sales Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryAllocationController
+ * Related Service   : InventoryAllocationService, InventoryAllocationServiceImpl
+ * Related Repository: InventoryAllocationRepository
+ * Related Entity    : InventoryAllocation
+ * Related DTO       : N/A
+ * Related Mapper    : InventoryAllocationMapper
+ * Related DB Table  : inventory_allocations
+ * Related REST APIs : N/A
+ * Depends On        : Inventory Module, Organization Module
+ * Used By           : InventoryAllocationRepository, InventoryAllocationMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'inventory_allocations'. Defines persistent domain object for Sales Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.sales.entity;
 
 import com.plus33.erp.inventory.entity.Product;
@@ -9,6 +36,19 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code InventoryAllocation}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'inventory_allocations'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code inventory_allocations}</p>
+ * <p><b>Module Deps      :</b> Inventory, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity

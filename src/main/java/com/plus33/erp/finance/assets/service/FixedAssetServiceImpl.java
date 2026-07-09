@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.assets.service
+ * File              : FixedAssetServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: FixedAssetController
+ * Related Service   : FixedAssetServiceImpl
+ * Related Repository: CompanyRepository, AssetCategoryRepository, FixedAssetRepository, FixedAssetDepreciationLogRepository, FixedAssetTransferRepository, FixedAssetMaintenanceRepository, FixedAssetAssignmentRepository, FixedAssetAuditRepository, FixedAssetAuditItemRepository, FixedAssetRevaluationRepository, FixedAssetImpairmentRepository, FixedAssetLeaseRepository, FixedAssetHistoryRepository, FixedAssetUtilizationRepository, FixedAssetMaintenancePlanRepository, FixedAssetReservationRepository, FixedAssetWorkOrderRepository, FixedAssetDowntimeRepository, AccountRepository, JournalEntryRepository, UserRepository, WarehouseRepository, StoreRepository, EmployeeRepository, SupplierInvoiceRepository
+ * Related Entity    : FixedAsset
+ * Related DTO       : AssetAssignmentRequest, AssetAssignmentResponse, AssetAuditItemRequest, AssetAuditItemResponse, AssetAuditRequest
+ * Related Mapper    : FixedAssetMapper
+ * Related DB Table  : fixed_assets
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Security Module, Workforce Module
+ * Used By           : FixedAssetController, FixedAssetServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements FixedAssetService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.assets.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -37,6 +64,30 @@ import java.util.stream.Collectors;
 import com.plus33.erp.finance.budget.service.BudgetService;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code FixedAssetServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.assets.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * FixedAssetController
+ *   --> FixedAssetServiceImpl (this)
+ *   --> Validate business rules
+ *   --> FixedAssetRepository (read/write 'fixed_assets')
+ *   --> FixedAssetMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code fixed_assets}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization, Security, Workforce</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -80,6 +131,26 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Category Operations
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a new category and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the AssetCategoryResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new category and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the AssetCategoryResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public AssetCategoryResponse createCategory(Long companyId, AssetCategoryRequest request) {
         Company company = companyRepository.findById(companyId)
@@ -115,6 +186,13 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToCategoryResponse(saved);
     }
 
+    /**
+     * Retrieves categories data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetCategoryResponse> getCategories(Long companyId) {
@@ -127,6 +205,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Asset Register Operations
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a new asset and persists it to the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new asset and persists it to the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public FixedAssetResponse registerAsset(Long companyId, FixedAssetRequest request, String username) {
         Company company = companyRepository.findById(companyId)
@@ -272,6 +368,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToAssetResponse(saved, true);
     }
 
+    /**
+     * Retrieves asset data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @return the FixedAssetResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public FixedAssetResponse getAsset(Long companyId, Long id) {
@@ -283,6 +387,16 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToAssetResponse(asset, true);
     }
 
+    /**
+     * Returns a filtered paginated list of assets records.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param name the name input value
+     * @param status status filter for narrowing query results
+     * @param categoryId the categoryId input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     @Transactional(readOnly = true)
     public PageResponse<FixedAssetResponse> searchAssets(Long companyId, String name, String status, Long categoryId, Pageable pageable) {
@@ -316,6 +430,22 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Capitalization & GL Integration
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the acquireAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     */
+    /**
+     * Performs the acquireAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     */
     @Override
     public FixedAssetResponse acquireAsset(Long companyId, Long id, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -467,6 +597,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Location & Operational Assignments
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the assignAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetAssignmentResponse result
+     */
+    /**
+     * Performs the assignAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetAssignmentResponse result
+     */
     @Override
     public AssetAssignmentResponse assignAsset(Long companyId, Long id, AssetAssignmentRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -538,6 +686,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToAssignmentResponse(saved);
     }
 
+    /**
+     * Performs the transferAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetTransferResponse result
+     */
+    /**
+     * Performs the transferAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetTransferResponse result
+     */
     @Override
     public AssetTransferResponse transferAsset(Long companyId, Long id, AssetTransferRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -589,6 +755,28 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToTransferResponse(saved);
     }
 
+    /**
+     * Approves the transfer, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param transferId the transferId input value
+     * @param username the username input value
+     * @return the AssetTransferResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Approves the transfer, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param transferId the transferId input value
+     * @param username the username input value
+     * @return the AssetTransferResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public AssetTransferResponse approveTransfer(Long companyId, Long transferId, String username) {
         FixedAssetTransfer transfer = fixedAssetTransferRepository.findById(transferId)
@@ -604,6 +792,22 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToTransferResponse(transfer);
     }
 
+    /**
+     * Performs the receiveTransfer operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param transferId the transferId input value
+     * @param username the username input value
+     * @return the AssetTransferResponse result
+     */
+    /**
+     * Performs the receiveTransfer operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param transferId the transferId input value
+     * @param username the username input value
+     * @return the AssetTransferResponse result
+     */
     @Override
     public AssetTransferResponse receiveTransfer(Long companyId, Long transferId, String username) {
         FixedAssetTransfer transfer = fixedAssetTransferRepository.findById(transferId)
@@ -654,6 +858,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Capitalized Maintenance Operations
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the maintainAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the numeric result value
+     */
+    /**
+     * Performs the maintainAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the numeric result value
+     */
     @Override
     public AssetMaintenanceResponse maintainAsset(Long companyId, Long id, AssetMaintenanceRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -750,6 +972,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Non-Destructive Asset Disposal Operations
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the disposeAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetDisposalResponse result
+     */
+    /**
+     * Performs the disposeAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetDisposalResponse result
+     */
     @Override
     public AssetDisposalResponse disposeAsset(Long companyId, Long id, AssetDisposalRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -812,6 +1052,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         );
     }
 
+    /**
+     * Performs the partialDispose operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetDisposalResponse result
+     */
+    /**
+     * Performs the partialDispose operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetDisposalResponse result
+     */
     @Override
     public AssetDisposalResponse partialDispose(Long companyId, Long id, AssetPartialDisposalRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -940,6 +1198,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Revaluation (IAS 16 / IFRS)
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the revalueAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetRevaluationResponse result
+     */
+    /**
+     * Performs the revalueAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetRevaluationResponse result
+     */
     @Override
     public AssetRevaluationResponse revalueAsset(Long companyId, Long id, AssetRevaluationRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -990,6 +1266,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToRevaluationResponse(saved);
     }
 
+    /**
+     * Retrieves revaluations data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetRevaluationResponse> getRevaluations(Long companyId, Long assetId) {
@@ -1046,6 +1330,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Impairment (IAS 36)
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the impairAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetImpairmentResponse result
+     */
+    /**
+     * Performs the impairAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetImpairmentResponse result
+     */
     @Override
     public AssetImpairmentResponse impairAsset(Long companyId, Long id, AssetImpairmentRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -1091,6 +1393,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToImpairmentResponse(saved);
     }
 
+    /**
+     * Retrieves impairments data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetImpairmentResponse> getImpairments(Long companyId, Long assetId) {
@@ -1136,6 +1446,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // CWIP Capitalization
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the capitalizeCwip operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     */
+    /**
+     * Performs the capitalizeCwip operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     */
     @Override
     public FixedAssetResponse capitalizeCwip(Long companyId, Long id, AssetCapitalizeCwipRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -1227,6 +1555,30 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Lease Management
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a new lease and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetLeaseResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new lease and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetLeaseResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public AssetLeaseResponse createLease(Long companyId, Long assetId, AssetLeaseRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, assetId)
@@ -1249,6 +1601,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToLeaseResponse(saved);
     }
 
+    /**
+     * Retrieves leases data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetLeaseResponse> getLeases(Long companyId, Long assetId) {
@@ -1263,6 +1623,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Split & Merge
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the splitAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return List of matching records
+     */
+    /**
+     * Performs the splitAsset operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return List of matching records
+     */
     @Override
     public List<FixedAssetResponse> splitAsset(Long companyId, Long id, AssetSplitRequest request, String username) {
         FixedAsset source = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -1342,6 +1720,22 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return results;
     }
 
+    /**
+     * Performs the mergeAssets operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     */
+    /**
+     * Performs the mergeAssets operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     */
     @Override
     public FixedAssetResponse mergeAssets(Long companyId, AssetMergeRequest request, String username) {
         List<FixedAsset> sources = new ArrayList<>();
@@ -1416,6 +1810,22 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Utilization Tracking
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the recordUtilization operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @param request the validated request DTO containing input data
+     * @return the AssetUtilizationResponse result
+     */
+    /**
+     * Performs the recordUtilization operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @param request the validated request DTO containing input data
+     * @return the AssetUtilizationResponse result
+     */
     @Override
     public AssetUtilizationResponse recordUtilization(Long companyId, Long assetId, AssetUtilizationRequest request) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, assetId)
@@ -1442,6 +1852,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
                 saved.getUsageHours(), BigDecimal.valueOf(saved.getProductionCount()), request.notes());
     }
 
+    /**
+     * Retrieves utilization data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetUtilizationResponse> getUtilization(Long companyId, Long assetId) {
@@ -1457,6 +1875,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // TCO Analysis
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves tco data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return the AssetTcoResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public AssetTcoResponse getTco(Long companyId, Long assetId) {
@@ -1519,6 +1945,26 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Maintenance Plans
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a new maintenance plan and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the numeric result value
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new maintenance plan and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the numeric result value
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public AssetMaintenancePlanResponse createMaintenancePlan(Long companyId, AssetMaintenancePlanRequest request) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, request.fixedAssetId())
@@ -1538,6 +1984,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToMaintenancePlanResponse(saved);
     }
 
+    /**
+     * Retrieves maintenance plans data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return List of matching records the numeric result value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetMaintenancePlanResponse> getMaintenancePlans(Long companyId, Long assetId) {
@@ -1552,6 +2006,28 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Reservations
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a new reservation and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetReservationResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new reservation and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetReservationResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public AssetReservationResponse createReservation(Long companyId, AssetReservationRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, request.fixedAssetId())
@@ -1584,6 +2060,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         );
     }
 
+    /**
+     * Retrieves reservations data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetReservationResponse> getReservations(Long companyId, Long assetId) {
@@ -1603,6 +2087,28 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Work Orders
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a new work order and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetWorkOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new work order and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the AssetWorkOrderResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public AssetWorkOrderResponse createWorkOrder(Long companyId, AssetWorkOrderRequest request, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, request.fixedAssetId())
@@ -1627,6 +2133,28 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToWorkOrderResponse(saved);
     }
 
+    /**
+     * Completes the work order workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param workOrderId the workOrderId input value
+     * @param actualCost the actualCost input value
+     * @param username the username input value
+     * @return the AssetWorkOrderResponse result
+     */
+    /**
+     * Completes the work order workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param workOrderId the workOrderId input value
+     * @param actualCost the actualCost input value
+     * @param username the username input value
+     * @return the AssetWorkOrderResponse result
+     */
     @Override
     public AssetWorkOrderResponse completeWorkOrder(Long companyId, Long workOrderId, BigDecimal actualCost, String username) {
         FixedAssetWorkOrder wo = fixedAssetWorkOrderRepository.findById(workOrderId)
@@ -1641,6 +2169,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         return mapToWorkOrderResponse(wo);
     }
 
+    /**
+     * Retrieves work orders data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetWorkOrderResponse> getWorkOrders(Long companyId, Long assetId) {
@@ -1655,6 +2191,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Asset History
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves asset history data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AssetHistoryResponse> getAssetHistory(Long companyId, Long assetId) {
@@ -1672,6 +2216,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Legal Hold
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the toggleLegalHold operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param hold the hold input value
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     */
+    /**
+     * Performs the toggleLegalHold operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param hold the hold input value
+     * @param username the username input value
+     * @return the FixedAssetResponse result
+     */
     @Override
     public FixedAssetResponse toggleLegalHold(Long companyId, Long id, boolean hold, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)
@@ -1690,6 +2252,14 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Hierarchy Roll-up
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves hierarchy rollup data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param assetId the assetId input value
+     * @return the FixedAssetDashboardResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public FixedAssetDashboardResponse getHierarchyRollup(Long companyId, Long assetId) {
@@ -1736,6 +2306,22 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Depreciation Calculations & Previews (Dry Run)
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Performs the runDepreciation operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the DepreciationRunResponse result
+     */
+    /**
+     * Performs the runDepreciation operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the DepreciationRunResponse result
+     */
     @Override
     public DepreciationRunResponse runDepreciation(Long companyId, DepreciationRunRequest request, String username) {
         Company company = companyRepository.findById(companyId)
@@ -1948,6 +2534,26 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // Physical Verification & Auditing
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Submits the audit for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the AssetAuditResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Submits the audit for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param request the validated request DTO containing input data
+     * @return the AssetAuditResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public AssetAuditResponse submitAudit(Long companyId, AssetAuditRequest request) {
         Company company = companyRepository.findById(companyId)
@@ -2028,6 +2634,13 @@ public class FixedAssetServiceImpl implements FixedAssetService {
     // KPI Dashboard Services
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves dashboard data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the FixedAssetDashboardResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public FixedAssetDashboardResponse getDashboard(Long companyId) {
@@ -2402,6 +3015,24 @@ public class FixedAssetServiceImpl implements FixedAssetService {
         );
     }
 
+    /**
+     * Permanently deletes the asset from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param username the username input value
+     */
+    /**
+     * Permanently deletes the asset from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param id the unique database ID of the resource
+     * @param username the username input value
+     */
     @Override
     public void deleteAsset(Long companyId, Long id, String username) {
         FixedAsset asset = fixedAssetRepository.findByCompanyIdAndId(companyId, id)

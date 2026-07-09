@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Workforce Module
+ * Package           : com.plus33.erp.workforce.service
+ * File              : EmployeeSelfServiceImpl.java
+ * Purpose           : Business logic service layer for Workforce Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: EmployeeSelfController
+ * Related Service   : EmployeeSelfServiceImpl
+ * Related Repository: PayrollRunRepository, PayrollRunItemRepository, EmployeeRepository
+ * Related Entity    : EmployeeSelf
+ * Related DTO       : PayslipResponse
+ * Related Mapper    : EmployeeSelfMapper
+ * Related DB Table  : employee_selfs
+ * Related REST APIs : N/A
+ * Depends On        : Common Module
+ * Used By           : EmployeeSelfController, EmployeeSelfServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Workforce Module. Implements EmployeeSelfService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.workforce.service;
 
 import com.plus33.erp.common.exception.ResourceNotFoundException;
@@ -11,6 +38,30 @@ import com.plus33.erp.workforce.repository.PayrollRunRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Workforce Module</b>
+ *
+ * <p><b>Class  :</b> {@code EmployeeSelfServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.workforce.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Workforce Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * EmployeeSelfController
+ *   --> EmployeeSelfServiceImpl (this)
+ *   --> Validate business rules
+ *   --> EmployeeSelfRepository (read/write 'employee_selfs')
+ *   --> EmployeeSelfMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code employee_selfs}</p>
+ * <p><b>Module Deps      :</b> Common, Workforce</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class EmployeeSelfServiceImpl implements EmployeeSelfService {
 
@@ -26,6 +77,14 @@ public class EmployeeSelfServiceImpl implements EmployeeSelfService {
         this.employeeRepository = employeeRepository;
     }
 
+    /**
+     * Retrieves payslip for employee data from the database.
+     *
+     * @param runId the runId input value
+     * @param employeeId the employeeId input value
+     * @return the PayslipResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public PayslipResponse getPayslipForEmployee(Long runId, Long employeeId) {
@@ -40,6 +99,59 @@ public class EmployeeSelfServiceImpl implements EmployeeSelfService {
                 .orElseThrow(() -> new ResourceNotFoundException("Payslip item not found for employee: " + employeeId));
 
         String fullName = (emp.getFirstName() != null ? emp.getFirstName() : "") + " " + (emp.getLastName() != null ? emp.getLastName() : "");
-        return new PayslipResponse(emp.getId(), fullName.trim(), run.getRunNumber(), item.getGrossPay(), item.getNetPay(), item.getTotalDeductions(), item.getTaxWithheld(), "USD");
+        return new PayslipResponse(
+                emp.getId(),
+                fullName.trim(),
+                run.getRunNumber(),
+                item.getGrossPay(),
+                item.getNetPay(),
+                item.getTotalDeductions(),
+                item.getTaxWithheld(),
+                "EUR",
+                item.getAttendanceSnapshot(),
+                item.getLeaveSnapshot(),
+                item.getSalarySnapshot(),
+                item.getWorkingHourSnapshot(),
+                item.getOvertimeSnapshot(),
+                item.getBenefitSnapshot(),
+                item.getTaxSnapshot(),
+                item.getEmployerContributionSnapshot(),
+                item.getPayrollAudit()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<PayslipResponse> getPayslipsForEmployee(Long employeeId) {
+        Employee emp = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + employeeId));
+        String fullName = (emp.getFirstName() != null ? emp.getFirstName() : "") + " " + (emp.getLastName() != null ? emp.getLastName() : "");
+
+        java.util.List<PayrollRunItem> items = payrollRunItemRepository.findByEmployeeId(employeeId);
+        java.util.List<PayslipResponse> list = new java.util.ArrayList<>();
+        for (PayrollRunItem item : items) {
+            PayrollRun run = payrollRunRepository.findById(item.getPayrollRunId()).orElse(null);
+            String runNum = run != null ? run.getRunNumber() : "RUN-UNKNOWN";
+            list.add(new PayslipResponse(
+                    emp.getId(),
+                    fullName.trim(),
+                    runNum,
+                    item.getGrossPay(),
+                    item.getNetPay(),
+                    item.getTotalDeductions(),
+                    item.getTaxWithheld(),
+                    "EUR",
+                    item.getAttendanceSnapshot(),
+                    item.getLeaveSnapshot(),
+                    item.getSalarySnapshot(),
+                    item.getWorkingHourSnapshot(),
+                    item.getOvertimeSnapshot(),
+                    item.getBenefitSnapshot(),
+                    item.getTaxSnapshot(),
+                    item.getEmployerContributionSnapshot(),
+                    item.getPayrollAudit()
+            ));
+        }
+        return list;
     }
 }

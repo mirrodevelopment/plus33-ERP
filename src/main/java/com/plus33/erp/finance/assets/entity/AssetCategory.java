@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.assets.entity
+ * File              : AssetCategory.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: AssetCategoryController
+ * Related Service   : AssetCategoryService, AssetCategoryServiceImpl
+ * Related Repository: AssetCategoryRepository
+ * Related Entity    : AssetCategory
+ * Related DTO       : N/A
+ * Related Mapper    : AssetCategoryMapper
+ * Related DB Table  : asset_categories
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : AssetCategoryRepository, AssetCategoryMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'asset_categories'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.assets.entity;
 
 import com.plus33.erp.finance.entity.Account;
@@ -13,6 +40,19 @@ import java.math.BigDecimal;
 @Table(name = "asset_categories", uniqueConstraints = {
     @UniqueConstraint(name = "uk_asset_category_company_code", columnNames = {"company_id", "code"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code AssetCategory}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.assets.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'asset_categories'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code asset_categories}</p>
+ * <p><b>Module Deps      :</b> Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 41
+-- File              : V41__fix_invoice_item_constraint_deferrable.sql
+-- Operation Type    : Schema Alteration
+-- Purpose           : fix invoice item constraint deferrable
+--
+-- Tables Created    : N/A
+-- Tables Altered    : supplier_invoice_items, supplier_invoice_items
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V41: Make the supplier_invoice_items unique constraint DEFERRABLE INITIALLY DEFERRED
 --
 -- Background:

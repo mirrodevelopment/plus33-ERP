@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Workforce Module
+ * Package           : com.plus33.erp.workforce.entity
+ * File              : EmployeeShift.java
+ * Purpose           : JPA Entity representing a persistent database record in Workforce Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: EmployeeShiftController
+ * Related Service   : EmployeeShiftService, EmployeeShiftServiceImpl
+ * Related Repository: EmployeeShiftRepository
+ * Related Entity    : EmployeeShift
+ * Related DTO       : N/A
+ * Related Mapper    : EmployeeShiftMapper
+ * Related DB Table  : employee_shifts
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : EmployeeShiftRepository, EmployeeShiftMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'employee_shifts'. Defines persistent domain object for Workforce Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.workforce.entity;
 
 import jakarta.persistence.*;
@@ -6,6 +33,19 @@ import lombok.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Workforce Module</b>
+ *
+ * <p><b>Class  :</b> {@code EmployeeShift}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.workforce.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'employee_shifts'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code employee_shifts}</p>
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity

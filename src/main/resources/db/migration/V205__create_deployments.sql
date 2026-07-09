@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 205
+-- File              : V205__create_deployments.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create deployments
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V205: Deployments DDL
 CREATE TABLE IF NOT EXISTS platform_deployment_group (
     id                  BIGSERIAL PRIMARY KEY,

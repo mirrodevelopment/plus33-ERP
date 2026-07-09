@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 36
+-- File              : V36__seed_supplier_invoice_permissions.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed supplier invoice permissions
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : permissions, role_permissions
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V36__seed_supplier_invoice_permissions.sql
 -- PLUS33 ERP — Supplier Invoice Management Permissions Seeding

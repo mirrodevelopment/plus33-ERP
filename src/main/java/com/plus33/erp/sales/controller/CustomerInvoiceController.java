@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.controller
+ * File              : CustomerInvoiceController.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Sales Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CustomerInvoiceController
+ * Related Service   : CustomerInvoiceControllerService, CustomerInvoiceControllerServiceImpl
+ * Related Repository: CustomerInvoiceControllerRepository
+ * Related Entity    : CustomerInvoiceController
+ * Related DTO       : ApiResponse, CustomerInvoiceRequest, CustomerInvoiceResponse, CustomerInvoiceSearchRequest, CustomerInvoiceUpdateRequest
+ * Related Mapper    : CustomerInvoiceControllerMapper
+ * Related DB Table  : customer_invoice_controllers
+ * Related REST APIs : POST /api/v1/customer-invoices, PUT /api/v1/customer-invoices/{id}, GET /api/v1/customer-invoices/{id}, GET /api/v1/customer-invoices
+ * Depends On        : Common Module
+ * Used By           : Sales Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Sales Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: POST /api/v1/customer-invoices, PUT /api/v1/customer-invoices/{id}, GET /api/v1/customer-invoices/{id}, GET /api/v1/customer-invoices
+ ******************************************************************************/
 package com.plus33.erp.sales.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
@@ -19,6 +46,31 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code CustomerInvoiceController}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.controller}</p>
+ * <p><b>Layer  :</b> REST Controller: HTTP endpoints layer. Secured by JWT + @PreAuthorize. Delegates to CustomerInvoiceService.</p>
+ *
+ * <p><b>Request Flow:</b></p>
+ * <pre>
+ * HTTP Request
+ *   --> JWT Auth Filter (validate Bearer token)
+ *   --> @PreAuthorize (permission check)
+ *   --> CustomerInvoiceController.endpoint()
+ *   --> CustomerInvoiceService.method()
+ *   --> CustomerInvoiceRepository (PostgreSQL)
+ *   --> ApiResponse wrapped in ResponseEntity
+ *   --> JSON response to Frontend
+ * </pre>
+ *
+ * <p><b>REST Endpoints    :</b> POST /api/v1/customer-invoices, PUT /api/v1/customer-invoices/{id}, GET /api/v1/customer-invoices/{id}, GET /api/v1/customer-invoices, POST /api/v1/customer-invoices/{id}/submit</p>
+ * <p><b>Module Deps      :</b> Common, Sales</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/api/v1/customer-invoices")
 @Tag(name = "Customer Invoice Management", description = "REST APIs for managing customer invoices and financial postings")
@@ -30,6 +82,14 @@ public class CustomerInvoiceController {
         this.customerInvoiceService = customerInvoiceService;
     }
 
+    /**
+     * Creates a new invoice and persists it to the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('CUSTOMER_INVOICE_CREATE')")
     @Operation(summary = "Create a new customer invoice", description = "Creates a customer invoice in DRAFT status.")
@@ -40,6 +100,14 @@ public class CustomerInvoiceController {
         return new ResponseEntity<>(ApiResponse.success("Customer invoice created successfully", response), HttpStatus.CREATED);
     }
 
+    /**
+     * Updates an existing invoice record in the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('CUSTOMER_INVOICE_UPDATE')")
     @Operation(summary = "Update an existing customer invoice", description = "Updates details and items of a DRAFT customer invoice.")
@@ -51,6 +119,15 @@ public class CustomerInvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Customer invoice updated successfully", response));
     }
 
+    /**
+     * Retrieves a single invoice by id by its identifier.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('CUSTOMER_INVOICE_VIEW')")
     @Operation(summary = "Get customer invoice by ID", description = "Retrieves details of a customer invoice by ID.")
@@ -59,6 +136,13 @@ public class CustomerInvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Customer invoice retrieved successfully", response));
     }
 
+    /**
+     * Returns a filtered paginated list of invoices records.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('CUSTOMER_INVOICE_VIEW')")
     @Operation(summary = "Search customer invoices", description = "Searches and filters customer invoices with pagination.")
@@ -90,6 +174,15 @@ public class CustomerInvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Customer invoices retrieved successfully", response));
     }
 
+    /**
+     * Submits the invoice for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/submit")
     @PreAuthorize("hasAuthority('CUSTOMER_INVOICE_SUBMIT')")
     @Operation(summary = "Submit a customer invoice", description = "Submits a draft customer invoice for approval.")
@@ -98,6 +191,15 @@ public class CustomerInvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Customer invoice submitted successfully", response));
     }
 
+    /**
+     * Approves the invoice, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('CUSTOMER_INVOICE_APPROVE')")
     @Operation(summary = "Approve a customer invoice", description = "Approves a submitted customer invoice, posts a journal entry, and increments invoiced quantities on sales order items.")
@@ -106,6 +208,14 @@ public class CustomerInvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Customer invoice approved successfully", response));
     }
 
+    /**
+     * Cancels the invoice and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws BusinessException if a business rule is violated
+     */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('CUSTOMER_INVOICE_CANCEL')")
     @Operation(summary = "Cancel a customer invoice", description = "Cancels an approved customer invoice, reverses sales order quantities and posts a reversing journal entry.")
@@ -117,6 +227,14 @@ public class CustomerInvoiceController {
         return ResponseEntity.ok(ApiResponse.success("Customer invoice cancelled successfully", response));
     }
 
+    /**
+     * Permanently voids the invoice. This action cannot be undone.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     */
     @PostMapping("/{id}/void")
     @PreAuthorize("hasAuthority('CUSTOMER_INVOICE_VOID')")
     @Operation(summary = "Void a customer invoice", description = "Voids a draft or submitted customer invoice before approval.")

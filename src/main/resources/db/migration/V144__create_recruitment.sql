@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 144
+-- File              : V144__create_recruitment.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create recruitment
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V144: Recruitment and ATS Job Requisitions
 CREATE TABLE IF NOT EXISTS hcm_job_requisitions (
     id BIGSERIAL PRIMARY KEY,

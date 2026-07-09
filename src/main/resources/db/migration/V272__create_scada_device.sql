@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 272
+-- File              : V272__create_scada_device.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create scada device
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V272: SCADA Devices
 CREATE TABLE IF NOT EXISTS platform_scada_device (
     id                  BIGSERIAL PRIMARY KEY,

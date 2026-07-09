@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 92
+-- File              : V92__create_wms_materialized_views.sql
+-- Operation Type    : DDL
+-- Purpose           : create wms materialized views
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : IF, IF, IF, IF, IF, IF, IF, IF
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V92__create_wms_materialized_views.sql
 -- PLUS33 ERP — WMS Analytics Materialized Views

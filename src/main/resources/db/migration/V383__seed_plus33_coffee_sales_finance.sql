@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 383
+-- File              : V383__seed_plus33_coffee_sales_finance.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed plus33 coffee sales finance
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : budget_dimension_sets, budget_lines, budget_policies, budget_versions, budgets, chart_of_accounts, customer_invoice_items, customer_invoices, fiscal_years, journal_entries, journal_entry_lines, payments, sales_order_items, sales_orders
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V383__seed_plus33_coffee_sales_finance.sql
 -- PLUS33 ERP — CoA, Budgets, Sales Orders, Customer Invoices, Payments, GL

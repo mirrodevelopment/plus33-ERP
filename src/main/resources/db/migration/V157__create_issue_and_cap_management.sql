@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 157
+-- File              : V157__create_issue_and_cap_management.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create issue and cap management
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V157: Enterprise Issue & CAP Management
 CREATE TABLE IF NOT EXISTS grc_enterprise_issues (
     id BIGSERIAL PRIMARY KEY,

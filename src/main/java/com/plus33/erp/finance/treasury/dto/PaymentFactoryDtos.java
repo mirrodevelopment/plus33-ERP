@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.dto
+ * File              : PaymentFactoryDtos.java
+ * Purpose           : Component of Finance Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PaymentFactoryDtosController
+ * Related Service   : PaymentFactoryDtosService, PaymentFactoryDtosServiceImpl
+ * Related Repository: PaymentFactoryDtosRepository
+ * Related Entity    : PaymentFactoryDtos
+ * Related DTO       : CashTransferRequest, CashTransferResponse, PaymentBatchRequest, PaymentBatchResponse, PaymentFileRequest
+ * Related Mapper    : PaymentFactoryDtosMapper
+ * Related DB Table  : payment_factory_dtoss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Finance Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.dto;
 
 import java.math.BigDecimal;
@@ -5,6 +32,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code PaymentFactoryDtos}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.dto}</p>
+ * <p><b>Layer  :</b> Java Record: immutable value object / data carrier for Finance Module.</p>
+ *
+ * <p><b>Module Deps      :</b> None</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 public final class PaymentFactoryDtos {
 
     private PaymentFactoryDtos() {}

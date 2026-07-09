@@ -1,0 +1,27 @@
+{
+  "widgets": [
+    { "version": "1.0", "id": "kpi-revenue",    "type": "kpi", "title": "Total Sales (MTD)",   "metric": "totalSales",      "format": "currency", "trend": "vs Last Month", "trendField": "totalSalesTrend",  "trendStatus": "success", "icon": "euro" },
+    { "version": "1.0", "id": "kpi-profit",     "type": "kpi", "title": "Total Profit (MTD)",  "metric": "totalProfit",     "format": "currency", "trend": "vs Last Month", "trendField": "netRevenueTrend",  "trendStatus": "success", "icon": "trending-up" },
+    { "version": "1.0", "id": "kpi-stores",     "type": "kpi", "title": "Total Stores",        "metric": "totalStores",     "format": "number",   "trend": "vs Last Month", "trendValue": "Stable",           "trendStatus": "info",    "icon": "coffee" },
+    { "version": "1.0", "id": "kpi-employees",  "type": "kpi", "title": "Total Employees",     "metric": "totalEmployees",  "format": "number",   "trend": "vs Last Month", "trendValue": "Stable",           "trendStatus": "info",    "icon": "users" },
+    { "version": "1.0", "id": "kpi-countries",  "type": "kpi", "title": "Total Countries",     "metric": "totalCountries",  "format": "number",   "trend": "vs Last Month", "trendValue": "Stable",           "trendStatus": "info",    "icon": "globe" },
+    { "version": "1.0", "id": "kpi-regions",    "type": "kpi", "title": "Total Regions",       "metric": "totalRegions",    "format": "number",   "trend": "vs Last Month", "trendValue": "Stable",           "trendStatus": "info",    "icon": "map-pin" },
+    { "version": "1.0", "id": "kpi-warehouses", "type": "kpi", "title": "Total Warehouses",    "metric": "totalWarehouses", "format": "number",   "trend": "vs Last Month", "trendValue": "Stable",           "trendStatus": "info",    "icon": "archive" },
+    { "version": "1.0", "id": "kpi-customers",  "type": "kpi", "title": "Total Customers",     "metric": "totalCustomers",  "format": "number",   "trend": "vs Last Month", "trendField": "totalCustomersTrend",  "trendStatus": "success", "icon": "user-check" },
+    { "version": "1.0", "id": "kpi-inventory",  "type": "kpi", "title": "Inventory Value",     "metric": "inventoryValue",  "format": "currency", "trend": "vs Last Month", "trendField": "inventoryValueTrend",  "trendStatus": "success", "icon": "package" },
+    { "version": "1.0", "id": "kpi-compliance", "type": "kpi", "title": "Compliance Score",    "metric": "complianceScore", "format": "percent",  "trend": "vs Last Month", "trendField": "complianceScoreTrend", "trendStatus": "success", "icon": "shield-check" },
+    { "version": "1.0", "id": "chart-sales-trend", "type": "chart-sales", "title": "Sales Overview" },
+    { "version": "1.0", "id": "widget-regional-performance", "type": "regional-performance", "title": "National Performance" },
+    { "version": "1.0", "id": "chart-stock", "type": "chart-stock", "title": "Store Network Overview" },
+    { "version": "1.0", "id": "chart-financial-overview", "type": "chart-financial", "title": "Financial Overview (MTD)" },
+    { "version": "1.0", "id": "widget-inventory-overview", "type": "inventory-overview", "title": "Supply Chain & Inventory" },
+    { "version": "1.0", "id": "widget-workforce-overview", "type": "workforce-overview", "title": "Workforce Overview" },
+    { "version": "1.0", "id": "chart-compliance-gauge", "type": "compliance-gauge", "title": "Compliance & Audit Overview" },
+    { "version": "1.0", "id": "widget-complaints-legal", "type": "complaints-legal", "title": "Complaints & Legal Overview" },
+    { "version": "1.0", "id": "list-pending-approvals", "type": "approvals", "title": "Pending Approvals" },
+    { "version": "1.0", "id": "list-alerts-notifications", "type": "notifications", "title": "Alerts & Notifications" },
+    { "version": "1.0", "id": "table-recent-activities", "type": "activities", "title": "Recent Activities" },
+    { "version": "1.0", "id": "widget-franchise-development", "type": "franchise-development", "title": "Franchise Development" },
+    { "version": "1.0", "id": "widget-quick-actions", "type": "quick-actions", "title": "Quick Actions" }
+  ]
+}

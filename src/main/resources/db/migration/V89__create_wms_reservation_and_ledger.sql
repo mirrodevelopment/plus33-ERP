@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 89
+-- File              : V89__create_wms_reservation_and_ledger.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create wms reservation and ledger
+--
+-- Tables Created    : inventory_reservations, inventory_allocation_logs, inventory_movements, replenishment_plans, replenishment_tasks
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_reservations_product, idx_reservations_source, idx_reservations_location, idx_reservations_expiry, idx_alloc_log_reservation, idx_inv_movements_product, idx_inv_movements_type, idx_inv_movements_from_loc, idx_inv_movements_to_loc, idx_inv_movements_lot, idx_replenishment_tasks_warehouse, idx_replenishment_tasks_product
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V89__create_wms_reservation_and_ledger.sql
 -- PLUS33 ERP — Inventory Reservations, Movement Ledger & Replenishment

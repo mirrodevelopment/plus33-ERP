@@ -1,0 +1,50 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Frontend Design System
+ * File              : spacing.css
+ * Path              : frontend/theme/spacing.css
+ * Purpose           : CSS Theme/Stylesheet: spacing design tokens and visual styles
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * CSS Variables     : 0 custom properties defined
+ * Responsive Queries: None
+ * Depends On        : theme/variables.css (root CSS custom properties)
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * CSS Theme/Stylesheet: spacing design tokens and visual styles. Part of the PLUS33 Coffee ERP CSS custom-property design system.
+ * Applied via link tags in index.html across all UI components.
+ ******************************************************************************/
+/* --- Flex & Grid Helper Utilities --- */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+
+.grid { display: grid; }
+.grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+
+/* --- Spacing classes --- */
+.m-0 { margin: 0; }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+
+.p-0 { padding: 0; }
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }

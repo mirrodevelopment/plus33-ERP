@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 176
+-- File              : V176__create_bi_event_store.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create bi event store
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V176: BI Event Store & Audit Logs
 -- Purpose: Immutable audit trail for all BI platform events, analytics query
 --          history, approval audit trail, and BI alert engine tables.

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.entity
+ * File              : TreasuryAuditEvent.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasuryAuditEventController
+ * Related Service   : TreasuryAuditEventService, TreasuryAuditEventServiceImpl
+ * Related Repository: TreasuryAuditEventRepository
+ * Related Entity    : TreasuryAuditEvent
+ * Related DTO       : N/A
+ * Related Mapper    : TreasuryAuditEventMapper
+ * Related DB Table  : treasury_audit_events
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : TreasuryAuditEventRepository, TreasuryAuditEventMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'treasury_audit_events'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -17,6 +44,19 @@ import java.time.LocalDateTime;
     @Index(name = "idx_tae_actor", columnList = "actor, occurred_at"),
     @Index(name = "idx_tae_company", columnList = "company_id, occurred_at")
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code TreasuryAuditEvent}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'treasury_audit_events'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code treasury_audit_events}</p>
+ * <p><b>Module Deps      :</b> Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -65,6 +105,10 @@ public class TreasuryAuditEvent {
     @Column(name = "occurred_at", nullable = false, updatable = false)
     private LocalDateTime occurredAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         occurredAt = LocalDateTime.now();

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 323
+-- File              : V323__create_reliability_metrics.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create reliability metrics
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V323: Reliability Metrics & Failure Logs
 CREATE TABLE IF NOT EXISTS platform_reliability_failure_log (
     id                              BIGSERIAL PRIMARY KEY,

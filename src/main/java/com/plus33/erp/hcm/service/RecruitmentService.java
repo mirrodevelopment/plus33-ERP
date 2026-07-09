@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Hcm Module
+ * Package           : com.plus33.erp.hcm.service
+ * File              : RecruitmentService.java
+ * Purpose           : Business logic service layer for Hcm Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: RecruitmentController
+ * Related Service   : RecruitmentService
+ * Related Repository: JobRequisitionRepository, JobRequisitionVersionRepository, HcmCandidateRepository, EmployeeRepository, CompanyRepository
+ * Related Entity    : Recruitment
+ * Related DTO       : N/A
+ * Related Mapper    : RecruitmentMapper
+ * Related DB Table  : recruitments
+ * Related REST APIs : N/A
+ * Depends On        : Workforce Module, Organization Module
+ * Used By           : RecruitmentController, RecruitmentServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Hcm Module. Implements RecruitmentService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.hcm.service;
 
 import com.plus33.erp.hcm.entity.*;
@@ -13,6 +40,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Hcm Module</b>
+ *
+ * <p><b>Class  :</b> {@code RecruitmentService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.hcm.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Hcm Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * RecruitmentController
+ *   --> RecruitmentService (this)
+ *   --> Validate business rules
+ *   --> RecruitmentRepository (read/write 'recruitments')
+ *   --> RecruitmentMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code recruitments}</p>
+ * <p><b>Module Deps      :</b> Hcm, Workforce, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class RecruitmentService {
 
@@ -37,6 +88,17 @@ public class RecruitmentService {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Creates a new requisition and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param requisitionNumber the requisitionNumber input value
+     * @param title the title input value
+     * @return the JobRequisition result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public JobRequisition createRequisition(Long companyId, String requisitionNumber, String title) {
         JobRequisition req = new JobRequisition();
@@ -56,6 +118,14 @@ public class RecruitmentService {
         return req;
     }
 
+    /**
+     * Submits the new hiring round for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param requisitionId the requisitionId input value
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public void submitNewHiringRound(Long requisitionId) {
         if (!requisitionRepository.existsById(requisitionId)) {
@@ -76,6 +146,16 @@ public class RecruitmentService {
         versionRepository.save(newVer);
     }
 
+    /**
+     * Creates a new candidate and persists it to the database.
+     *
+     * @param requisitionId the requisitionId input value
+     * @param firstName the firstName input value
+     * @param lastName the lastName input value
+     * @param email the email input value
+     * @return the HcmCandidate result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public HcmCandidate registerCandidate(Long requisitionId, String firstName, String lastName, String email) {
         HcmCandidate c = new HcmCandidate();
@@ -88,6 +168,12 @@ public class RecruitmentService {
         return c;
     }
 
+    /**
+     * Performs the hireCandidate operation in this module.
+     *
+     * @param candidateId the candidateId input value
+     * @return the Employee result
+     */
     @Transactional
     public Employee hireCandidate(Long candidateId) {
         HcmCandidate c = candidateRepository.findById(candidateId)

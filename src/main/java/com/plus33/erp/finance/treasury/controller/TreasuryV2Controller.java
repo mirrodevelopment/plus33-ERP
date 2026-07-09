@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.controller
+ * File              : TreasuryV2Controller.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasuryV2Controller
+ * Related Service   : TreasuryV2ControllerService, TreasuryV2ControllerServiceImpl
+ * Related Repository: TreasuryV2ControllerRepository
+ * Related Entity    : TreasuryV2Controller
+ * Related DTO       : ApiResponse, PageRequest
+ * Related Mapper    : TreasuryV2ControllerMapper
+ * Related DB Table  : treasury_v2_controllers
+ * Related REST APIs : GET /api/v2/treasury/journal/event/{eventType}/{eventId}, POST /api/v2/treasury/journal/cash-transfer/{transferId}, GET /api/v2/treasury/audit/{aggregateType}/{aggregateId}, GET /api/v2/treasury/audit/company/{companyId}
+ * Depends On        : Common Module
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Finance Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: GET /api/v2/treasury/journal/event/{eventType}/{eventId}, POST /api/v2/treasury/journal/cash-transfer/{transferId}, GET /api/v2/treasury/audit/{aggregateType}/{aggregateId}, GET /api/v2/treasury/audit/company/{companyId}
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;

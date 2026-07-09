@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Ar Module
+ * Package           : com.plus33.erp.ar.service
+ * File              : ARServiceImpl.java
+ * Purpose           : Business logic service layer for Ar Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ARController
+ * Related Service   : ARServiceImpl
+ * Related Repository: CustomerRepository, CustomerInvoiceRepository, CreditNoteRepository, PaymentAllocationRepository, ARWriteOffRepository
+ * Related Entity    : AR
+ * Related DTO       : ARAgingResponse, AROverdueInvoiceResponse, ARSummaryResponse, CustomerARBalanceResponse, CustomerStatementResponse
+ * Related Mapper    : ARMapper
+ * Related DB Table  : a_rs
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Finance Module, Sales Module
+ * Used By           : ARController, ARServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Ar Module. Implements ARService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.ar.service;
 
 import com.plus33.erp.ar.dto.*;
@@ -28,6 +55,30 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Ar Module</b>
+ *
+ * <p><b>Class  :</b> {@code ARServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.ar.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Ar Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ARController
+ *   --> ARServiceImpl (this)
+ *   --> Validate business rules
+ *   --> ARRepository (read/write 'a_rs')
+ *   --> ARMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code a_rs}</p>
+ * <p><b>Module Deps      :</b> Ar, Common, Finance, Sales</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class ARServiceImpl implements ARService {
@@ -58,6 +109,22 @@ public class ARServiceImpl implements ARService {
     // Aging Report
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves aging report data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param customerId the customerId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves aging report data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param customerId the customerId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<ARAgingResponse> getAgingReport(Long companyId, Long customerId) {
         String sql;
@@ -102,6 +169,20 @@ public class ARServiceImpl implements ARService {
     // AR Summary
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves a r summary data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the ARSummaryResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a r summary data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the ARSummaryResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public ARSummaryResponse getARSummary(Long companyId) {
         // KPI totals from mv_sales_kpis
@@ -153,6 +234,22 @@ public class ARServiceImpl implements ARService {
     // Customer AR Balance
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves customer a r balance data from the database.
+     *
+     * @param customerId the customerId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the CustomerARBalanceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves customer a r balance data from the database.
+     *
+     * @param customerId the customerId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return the CustomerARBalanceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public CustomerARBalanceResponse getCustomerARBalance(Long customerId, Long companyId) {
         Customer customer = customerRepository.findById(customerId)
@@ -200,6 +297,18 @@ public class ARServiceImpl implements ARService {
     // Customer Statement
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves customer statement data from the database.
+     *
+     * @return the CustomerStatementResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves customer statement data from the database.
+     *
+     * @return the CustomerStatementResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public CustomerStatementResponse getCustomerStatement(Long customerId, Long companyId,
                                                           LocalDate from, LocalDate to) {
@@ -318,6 +427,22 @@ public class ARServiceImpl implements ARService {
     // Overdue Invoices
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Retrieves overdue invoices data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves overdue invoices data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public PageResponse<AROverdueInvoiceResponse> getOverdueInvoices(Long companyId, Pageable pageable) {
         Specification<CustomerInvoice> spec = overdueSpec(companyId, null);

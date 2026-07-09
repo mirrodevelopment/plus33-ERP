@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 77
+-- File              : V77__create_treasury_module.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create treasury module
+--
+-- Tables Created    : banks, bank_branches, bank_accounts, bank_virtual_accounts, in_house_bank_accounts, intercompany_loans, internal_settlements, cash_position_snapshots, cash_position_snapshot_lines, treasury_limits, cash_pools, cash_pool_members, payment_batches, payment_files, payment_transmission_logs, cash_transfers, treasury_approval_steps, treasury_approvals, bank_statements, bank_statement_lines, reconciliation_rules, bank_fee_rules, treasury_investments, treasury_compliance_logs
+-- Tables Altered    : payments, payments
+-- Seed Data For     : N/A
+-- Indexes           : uk_limits_combination
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V77__create_treasury_module.sql
 -- 1. Corporate Banks & Branches (with Counterparty Risk)
 CREATE TABLE banks (

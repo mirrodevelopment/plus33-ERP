@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 48
+-- File              : V48__create_inventory_traceability.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create inventory traceability
+--
+-- Tables Created    : inventory_lots, inventory_serials, inventory_recalls, inventory_trace_events
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_inv_lots_product, idx_inv_serials_product, idx_inv_serials_lot, idx_inv_trace_product, idx_inv_trace_lot, idx_inv_trace_serial, idx_trace_reference, idx_trace_created_at, idx_lot_expiry, uq_active_recall_lot, uq_active_recall_serial
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V48__create_inventory_traceability.sql
 -- PLUS33 ERP — Inventory Traceability Schema

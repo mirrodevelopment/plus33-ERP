@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 212
+-- File              : V212__create_autoscaling_policies.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create autoscaling policies
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V212: Autoscaling Policies DDL
 CREATE TABLE IF NOT EXISTS platform_scaling_policy (
     id                  BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Project Module
+ * Package           : com.plus33.erp.project.service
+ * File              : ProjectLifecycleService.java
+ * Purpose           : Business logic service layer for Project Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ProjectLifecycleController
+ * Related Service   : ProjectLifecycleService
+ * Related Repository: PpmProjectRepository, ProjectWbsRepository, ProjectWbsVersionRepository, ProjectChangeRequestRepository
+ * Related Entity    : ProjectLifecycle
+ * Related DTO       : approveChangeRequest, ProjectChangeRequest, submitChangeRequest
+ * Related Mapper    : ProjectLifecycleMapper
+ * Related DB Table  : project_lifecycles
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ProjectLifecycleController, ProjectLifecycleServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Project Module. Implements ProjectLifecycleService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.project.service;
 
 import com.plus33.erp.project.entity.*;
@@ -11,6 +38,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Project Module</b>
+ *
+ * <p><b>Class  :</b> {@code ProjectLifecycleService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.project.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Project Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ProjectLifecycleController
+ *   --> ProjectLifecycleService (this)
+ *   --> Validate business rules
+ *   --> ProjectLifecycleRepository (read/write 'project_lifecycles')
+ *   --> ProjectLifecycleMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code project_lifecycles}</p>
+ * <p><b>Module Deps      :</b> Project</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class ProjectLifecycleService {
 
@@ -32,6 +83,18 @@ public class ProjectLifecycleService {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Creates a new project and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param customerId the customerId input value
+     * @param projectNumber the projectNumber input value
+     * @param name the name input value
+     * @return the PpmProject result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public PpmProject createProject(Long companyId, Long customerId, String projectNumber, String name) {
         PpmProject proj = new PpmProject();
@@ -60,6 +123,12 @@ public class ProjectLifecycleService {
         return proj;
     }
 
+    /**
+     * Performs the transitionProjectStatus operation in this module.
+     *
+     * @param projectId the projectId input value
+     * @param targetStatus the targetStatus input value
+     */
     @Transactional
     public void transitionProjectStatus(Long projectId, String targetStatus) {
         PpmProject proj = ppmProjectRepository.findById(projectId)
@@ -76,6 +145,18 @@ public class ProjectLifecycleService {
         }
     }
 
+    /**
+     * Submits the change request for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param projectId the projectId input value
+     * @param requestNumber the requestNumber input value
+     * @param changeType the changeType input value
+     * @param impact the impact input value
+     * @return the ProjectChangeRequest result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public ProjectChangeRequest submitChangeRequest(Long projectId, String requestNumber, String changeType, String impact) {
         ProjectChangeRequest cr = new ProjectChangeRequest();
@@ -88,6 +169,14 @@ public class ProjectLifecycleService {
         return cr;
     }
 
+    /**
+     * Approves the change request, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param changeRequestId the changeRequestId input value
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public void approveChangeRequest(Long changeRequestId) {
         ProjectChangeRequest cr = changeRequestRepository.findById(changeRequestId)

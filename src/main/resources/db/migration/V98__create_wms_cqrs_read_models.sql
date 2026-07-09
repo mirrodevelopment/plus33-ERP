@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 98
+-- File              : V98__create_wms_cqrs_read_models.sql
+-- Operation Type    : DDL
+-- Purpose           : create wms cqrs read models
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V98: CQRS Read Models and Materialized Views for 16 Enterprise KPIs
 CREATE MATERIALIZED VIEW IF NOT EXISTS mv_wms_kpis AS
 SELECT

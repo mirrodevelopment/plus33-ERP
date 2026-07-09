@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.service
+ * File              : BankAccountServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BankAccountController
+ * Related Service   : BankAccountServiceImpl
+ * Related Repository: BankRepository, BankBranchRepository, BankAccountRepository, BankVirtualAccountRepository, CashPoolRepository, CashPoolMemberRepository, CompanyRepository, AccountRepository
+ * Related Entity    : BankAccount
+ * Related DTO       : BankAccountRequest, BankAccountResponse, BankBranchRequest, BankBranchResponse, BankRequest
+ * Related Mapper    : BankAccountMapper
+ * Related DB Table  : bank_accounts
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : BankAccountController, BankAccountServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements BankAccountService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -20,6 +47,30 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code BankAccountServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * BankAccountController
+ *   --> BankAccountServiceImpl (this)
+ *   --> Validate business rules
+ *   --> BankAccountRepository (read/write 'bank_accounts')
+ *   --> BankAccountMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code bank_accounts}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,6 +86,15 @@ public class BankAccountServiceImpl implements BankAccountService {
     private final AccountRepository accountRepository;
 
     // Bank operations
+    /**
+     * Creates a new bank and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the BankResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BankResponse createBank(BankRequest request) {
@@ -56,6 +116,20 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToBankResponse(saved);
     }
 
+    /**
+     * Retrieves a single bank by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BankResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single bank by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BankResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public BankResponse getBankById(Long id) {
         Bank bank = bankRepository.findById(id)
@@ -63,11 +137,31 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToBankResponse(bank);
     }
 
+    /**
+     * Retrieves a paginated list of all banks records.
+     *
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a paginated list of all banks records.
+     *
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<BankResponse> getAllBanks() {
         return bankRepository.findAll().stream().map(this::mapToBankResponse).toList();
     }
 
+    /**
+     * Updates an existing bank exposure record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param bankId the bankId input value
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public void updateBankExposure(Long bankId) {
@@ -85,6 +179,15 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     // Bank Branch operations
+    /**
+     * Creates a new branch and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the BankBranchResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BankBranchResponse createBranch(BankBranchRequest request) {
@@ -106,6 +209,20 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToBranchResponse(saved);
     }
 
+    /**
+     * Retrieves a single branch by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BankBranchResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single branch by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BankBranchResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public BankBranchResponse getBranchById(Long id) {
         BankBranch branch = bankBranchRepository.findById(id)
@@ -113,12 +230,35 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToBranchResponse(branch);
     }
 
+    /**
+     * Retrieves branches by bank data from the database.
+     *
+     * @param bankId the bankId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves branches by bank data from the database.
+     *
+     * @param bankId the bankId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<BankBranchResponse> getBranchesByBank(Long bankId) {
         return bankBranchRepository.findByBankId(bankId).stream().map(this::mapToBranchResponse).toList();
     }
 
     // Bank Account operations
+    /**
+     * Creates a new bank account and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the BankAccountResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BankAccountResponse createBankAccount(BankAccountRequest request) {
@@ -154,6 +294,20 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToAccountResponse(saved);
     }
 
+    /**
+     * Retrieves a single bank account by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BankAccountResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single bank account by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BankAccountResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public BankAccountResponse getBankAccountById(Long id) {
         BankAccount account = bankAccountRepository.findById(id)
@@ -161,11 +315,33 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToAccountResponse(account);
     }
 
+    /**
+     * Retrieves bank accounts by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves bank accounts by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<BankAccountResponse> getBankAccountsByCompany(Long companyId) {
         return bankAccountRepository.findByCompanyId(companyId).stream().map(this::mapToAccountResponse).toList();
     }
 
+    /**
+     * Updates an existing balances record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param accountId the accountId input value
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public void updateBalances(Long accountId) {
@@ -175,6 +351,15 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     // Virtual Account operations
+    /**
+     * Creates a new virtual account and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the BankVirtualAccountResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BankVirtualAccountResponse createVirtualAccount(BankVirtualAccountRequest request) {
@@ -196,12 +381,35 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToVaResponse(saved);
     }
 
+    /**
+     * Retrieves virtual accounts by parent data from the database.
+     *
+     * @param parentAccountId the parentAccountId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves virtual accounts by parent data from the database.
+     *
+     * @param parentAccountId the parentAccountId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<BankVirtualAccountResponse> getVirtualAccountsByParent(Long parentAccountId) {
         return bankVirtualAccountRepository.findByParentAccountId(parentAccountId).stream().map(this::mapToVaResponse).toList();
     }
 
     // Cash Pool operations
+    /**
+     * Creates a new cash pool and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the CashPoolResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CashPoolResponse createCashPool(CashPoolRequest request) {
@@ -243,6 +451,20 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToPoolResponse(savedPool, memberResponses);
     }
 
+    /**
+     * Retrieves a single cash pool by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CashPoolResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single cash pool by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CashPoolResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public CashPoolResponse getCashPoolById(Long id) {
         CashPool pool = cashPoolRepository.findById(id)
@@ -251,6 +473,20 @@ public class BankAccountServiceImpl implements BankAccountService {
         return mapToPoolResponse(pool, memberResponses);
     }
 
+    /**
+     * Retrieves cash pools by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves cash pools by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<CashPoolResponse> getCashPoolsByCompany(Long companyId) {
         return cashPoolRepository.findByCompanyId(companyId).stream().map(p -> {
@@ -259,6 +495,12 @@ public class BankAccountServiceImpl implements BankAccountService {
         }).toList();
     }
 
+    /**
+     * Performs the executeCashPoolSweeps operation in this module.
+     *
+     * @param poolId the poolId input value
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void executeCashPoolSweeps(Long poolId, String username) {

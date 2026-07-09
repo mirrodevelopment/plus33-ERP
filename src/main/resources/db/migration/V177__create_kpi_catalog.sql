@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 177
+-- File              : V177__create_kpi_catalog.sql
+-- Operation Type    : DDL
+-- Purpose           : create kpi catalog
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : bi_kpi_definition, bi_kpi_dependency, bi_kpi_formula_version
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V177: KPI Catalog Seed Data
 -- Purpose: Seed the standard enterprise executive KPI definitions, their
 --          formula expressions, and dependency graph edges.

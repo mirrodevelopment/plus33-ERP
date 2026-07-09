@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.monitoring
+ * File              : BiOperationalMetrics.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BiOperationalMetricsController
+ * Related Service   : BiOperationalMetrics
+ * Related Repository: BiOperationalMetricsRepository
+ * Related Entity    : BiOperationalMetrics
+ * Related DTO       : N/A
+ * Related Mapper    : BiOperationalMetricsMapper
+ * Related DB Table  : bi_operational_metricss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : BiOperationalMetricsController, BiOperationalMetricsImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements BiOperationalMetricsService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.monitoring;
 
 import org.slf4j.Logger;
@@ -18,6 +45,10 @@ public class BiOperationalMetrics {
 
     public BiOperationalMetrics(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
+    /**
+     * Performs the recordSystemHealth operation in this module.
+     *
+     */
     @Transactional
     public void recordSystemHealth() {
         try {
@@ -38,6 +69,12 @@ public class BiOperationalMetrics {
         }
     }
 
+    /**
+     * Retrieves latest health data from the database.
+     *
+     * @return the SystemHealthSummary result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public SystemHealthSummary getLatestHealth() {
         try {
             return jdbc.queryForObject("""

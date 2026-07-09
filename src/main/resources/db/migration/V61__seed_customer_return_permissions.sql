@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 61
+-- File              : V61__seed_customer_return_permissions.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed customer return permissions
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : permissions, role_permissions
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V61__seed_customer_return_permissions.sql
 -- PLUS33 ERP — Customer Returns & Credit Notes Permissions

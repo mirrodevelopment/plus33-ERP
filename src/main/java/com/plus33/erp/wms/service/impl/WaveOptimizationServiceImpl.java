@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.service.impl
+ * File              : WaveOptimizationServiceImpl.java
+ * Purpose           : Business logic service layer for Wms Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: WaveOptimizationController
+ * Related Service   : WaveOptimizationServiceImpl
+ * Related Repository: WaveRepository, PickingWorkRepository
+ * Related Entity    : WaveOptimization
+ * Related DTO       : N/A
+ * Related Mapper    : WaveOptimizationMapper
+ * Related DB Table  : wave_optimizations
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : WaveOptimizationController, WaveOptimizationServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Wms Module. Implements WaveOptimizationService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.wms.service.impl;
 
 import com.plus33.erp.wms.entity.*;
@@ -49,6 +76,15 @@ public class WaveOptimizationServiceImpl {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Creates a new wave and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param wave the wave input value
+     * @return the Wave result
+     * @throws BusinessException if a business rule is violated
+     */
     public Wave createWave(Wave wave) {
         Wave saved = waveRepo.save(wave);
         eventBus.publishWaveCreated(wave.getCompanyId(), saved.getId(), wave.getWarehouseId());
@@ -128,6 +164,13 @@ public class WaveOptimizationServiceImpl {
         return saved;
     }
 
+    /**
+     * Retrieves open picks by wave data from the database.
+     *
+     * @param waveId the waveId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Transactional(readOnly = true)
     public List<PickingWork> getOpenPicksByWave(Long waveId) {
         return pickingWorkRepo.findOpenByWave(waveId);

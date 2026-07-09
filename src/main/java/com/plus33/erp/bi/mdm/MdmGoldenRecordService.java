@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.mdm
+ * File              : MdmGoldenRecordService.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: MdmGoldenRecordController
+ * Related Service   : MdmGoldenRecordService
+ * Related Repository: MdmGoldenRecordRepository
+ * Related Entity    : MdmGoldenRecord
+ * Related DTO       : MdmMergeRequest
+ * Related Mapper    : MdmGoldenRecordMapper
+ * Related DB Table  : mdm_golden_records
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : MdmGoldenRecordController, MdmGoldenRecordServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements MdmGoldenRecordService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.mdm;
 
 import com.plus33.erp.bi.entity.*;
@@ -9,6 +36,30 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Bi Module</b>
+ *
+ * <p><b>Class  :</b> {@code MdmGoldenRecordService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.bi.mdm}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Bi Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * MdmGoldenRecordController
+ *   --> MdmGoldenRecordService (this)
+ *   --> Validate business rules
+ *   --> MdmGoldenRecordRepository (read/write 'mdm_golden_records')
+ *   --> MdmGoldenRecordMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code mdm_golden_records}</p>
+ * <p><b>Module Deps      :</b> Bi</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class MdmGoldenRecordService {
 
@@ -19,7 +70,20 @@ public class MdmGoldenRecordService {
     @Autowired MdmStewardWorkflowService stewardWorkflowService;
     @Autowired SurvivorshipEngine survivorshipEngine;
     @Autowired MdmMatchingService matchingService;
-
+    /**
+     * Creates a new golden record and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param recordType the recordType input value
+     * @param displayName the displayName input value
+     * @param email the email input value
+     * @param phone the phone input value
+     * @param address the address input value
+     * @param taxNumber the taxNumber input value
+     * @return the MdmGoldenRecord result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public MdmGoldenRecord createGoldenRecord(String recordType, String displayName, String email, String phone, String address, String taxNumber) {
         MdmGoldenRecord record = new MdmGoldenRecord();
@@ -35,6 +99,19 @@ public class MdmGoldenRecordService {
         return goldenRecordRepo.save(record);
     }
 
+    /**
+     * Performs the evaluateIncomingRecord operation in this module.
+     *
+     * @param recordType the recordType input value
+     * @param system the system input value
+     * @param table the table input value
+     * @param dimId the dimId input value
+     * @param displayName the displayName input value
+     * @param email the email input value
+     * @param phone the phone input value
+     * @param address the address input value
+     * @param taxNumber the taxNumber input value
+     */
     @Transactional
     public void evaluateIncomingRecord(String recordType, String system, String table, Long dimId, String displayName, String email, String phone, String address, String taxNumber) {
         if (displayName == null || displayName.trim().isEmpty()) {
@@ -105,6 +182,12 @@ public class MdmGoldenRecordService {
         sourceMappingRepo.save(mapping);
     }
 
+    /**
+     * Performs the executeMerge operation in this module.
+     *
+     * @param mergeRequestId the mergeRequestId input value
+     * @param stewardUser the stewardUser input value
+     */
     @Transactional
     public void executeMerge(Long mergeRequestId, String stewardUser) {
         MdmMergeRequest request = mergeRequestRepo.findById(mergeRequestId)

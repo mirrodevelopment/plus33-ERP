@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.mdm
+ * File              : MdmMatchingService.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: MdmMatchingController
+ * Related Service   : MdmMatchingService
+ * Related Repository: MdmMatchingRepository
+ * Related Entity    : MdmMatching
+ * Related DTO       : N/A
+ * Related Mapper    : MdmMatchingMapper
+ * Related DB Table  : mdm_matchings
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : MdmMatchingController, MdmMatchingServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements MdmMatchingService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.mdm;
 
 import org.springframework.stereotype.Service;
@@ -5,6 +32,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class MdmMatchingService {
 
+    /**
+     * Calculates similarity totals including subtotal, tax, discounts, and net amount.
+     *
+     * @param s1 the s1 input value
+     * @param s2 the s2 input value
+     * @return the double result
+     */
     public double calculateSimilarity(String s1, String s2) {
         if (s1 == null || s2 == null) return 0.0;
         s1 = s1.trim().toLowerCase();

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Analytics Module
+ * Package           : com.plus33.erp.analytics.service
+ * File              : InventoryAnalyticsServiceImpl.java
+ * Purpose           : Business logic service layer for Analytics Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryAnalyticsController
+ * Related Service   : InventoryAnalyticsServiceImpl
+ * Related Repository: InventoryAnalyticsRepository
+ * Related Entity    : InventoryAnalytics
+ * Related DTO       : AnalyticsHealthResponse, InventoryAbcXyzResponse, InventoryAgingExpiryResponse, InventoryDashboardResponse, InventoryKpisResponse
+ * Related Mapper    : InventoryAnalyticsMapper
+ * Related DB Table  : inventory_analyticss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : InventoryAnalyticsController, InventoryAnalyticsServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Analytics Module. Implements InventoryAnalyticsService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.analytics.service;
 
 import com.plus33.erp.analytics.dto.*;
@@ -8,6 +35,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Analytics Module</b>
+ *
+ * <p><b>Class  :</b> {@code InventoryAnalyticsServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.analytics.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Analytics Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * InventoryAnalyticsController
+ *   --> InventoryAnalyticsServiceImpl (this)
+ *   --> Validate business rules
+ *   --> InventoryAnalyticsRepository (read/write 'inventory_analyticss')
+ *   --> InventoryAnalyticsMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code inventory_analyticss}</p>
+ * <p><b>Module Deps      :</b> Analytics</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService {
@@ -20,6 +71,24 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         this.analyticsRefreshService = analyticsRefreshService;
     }
 
+    /**
+     * Retrieves dashboard data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryDashboardResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves dashboard data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryDashboardResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public InventoryDashboardResponse getDashboard(Long companyId, Long warehouseId, Long storeId) {
         InventoryKpisResponse kpis = getKpis(companyId, warehouseId, storeId);
@@ -30,6 +99,24 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         return new InventoryDashboardResponse(kpis, aging, repl, trace, turnover);
     }
 
+    /**
+     * Retrieves kpis data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryKpisResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves kpis data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryKpisResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public InventoryKpisResponse getKpis(Long companyId, Long warehouseId, Long storeId) {
         return querySingle(
@@ -50,6 +137,24 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         );
     }
 
+    /**
+     * Retrieves aging expiry data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryAgingExpiryResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves aging expiry data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryAgingExpiryResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public InventoryAgingExpiryResponse getAgingExpiry(Long companyId, Long warehouseId, Long storeId) {
         return querySingle(
@@ -74,6 +179,24 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         );
     }
 
+    /**
+     * Retrieves abc xyz data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves abc xyz data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<InventoryAbcXyzResponse> getAbcXyz(Long companyId, Long warehouseId, Long storeId) {
         String sql;
@@ -98,6 +221,24 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         ), args);
     }
 
+    /**
+     * Retrieves slow dead data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves slow dead data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<InventorySlowDeadResponse> getSlowDead(Long companyId, Long warehouseId, Long storeId) {
         String sql;
@@ -125,6 +266,24 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         ), args);
     }
 
+    /**
+     * Retrieves turnover data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryTurnoverResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves turnover data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryTurnoverResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public InventoryTurnoverResponse getTurnover(Long companyId, Long warehouseId, Long storeId) {
         return querySingle(
@@ -144,6 +303,24 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         );
     }
 
+    /**
+     * Retrieves replenishment metrics data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryReplenishmentResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves replenishment metrics data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryReplenishmentResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public InventoryReplenishmentResponse getReplenishmentMetrics(Long companyId, Long warehouseId, Long storeId) {
         return querySingle(
@@ -163,6 +340,24 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         );
     }
 
+    /**
+     * Retrieves traceability metrics data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryTraceabilityResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves traceability metrics data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param storeId the storeId input value
+     * @return the InventoryTraceabilityResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public InventoryTraceabilityResponse getTraceabilityMetrics(Long companyId, Long warehouseId, Long storeId) {
         return querySingle(
@@ -183,6 +378,18 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         );
     }
 
+    /**
+     * Retrieves health data from the database.
+     *
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves health data from the database.
+     *
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<AnalyticsHealthResponse> getHealth() {
         String sql = "SELECT view_name, last_refreshed_at, refresh_duration_ms, refresh_status FROM analytics_refresh_log ORDER BY view_name";
@@ -194,6 +401,10 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
         ));
     }
 
+    /**
+     * Performs the refreshAllViews operation in this module.
+     *
+     */
     @Override
     @Transactional
     public void refreshAllViews() {

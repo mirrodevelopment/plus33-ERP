@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 372
+-- File              : V372__create_esg_scope2.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create esg scope2
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V372: Scope 2 Indirect Emissions
 CREATE TABLE IF NOT EXISTS platform_esg_scope2_log (
     id                          BIGSERIAL PRIMARY KEY,

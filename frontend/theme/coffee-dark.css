@@ -1,0 +1,45 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Frontend Design System
+ * File              : coffee-dark.css
+ * Path              : frontend/theme/coffee-dark.css
+ * Purpose           : CSS Theme/Stylesheet: coffee-dark design tokens and visual styles
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * CSS Variables     : 17 custom properties defined
+ * Responsive Queries: None
+ * Depends On        : theme/variables.css (root CSS custom properties)
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * CSS Theme/Stylesheet: coffee-dark design tokens and visual styles. Part of the PLUS33 Coffee ERP CSS custom-property design system.
+ * Applied via link tags in index.html across all UI components.
+ ******************************************************************************/
+/* --- Coffee Dark Brand Theme --- */
+html[data-theme="coffee-dark"] {
+  --bg-app: #141414; /* Charcoal Black */
+  --bg-sidebar: #1a1a1a;
+  --bg-header: #1e1e1e;
+  --bg-card: rgba(30, 30, 30, 0.6); /* Frost Glass Backdrop base */
+  --bg-card-hover: rgba(45, 45, 45, 0.85);
+  
+  --border-color: rgba(201, 164, 106, 0.25); /* Translucent Coffee Gold borders */
+  --border-color-hover: rgba(201, 164, 106, 0.55);
+  
+  --text-primary: #f5f5f5; /* Off White */
+  --text-secondary: #d4cfc7;
+  --text-muted: #8c857b;
+  
+  --accent-primary: #c9a46a; /* Coffee Gold */
+  --accent-secondary: #e6c897;
+  --accent-glow: rgba(201, 164, 106, 0.2);
+  
+  --status-success: #82a37d;
+  --status-warning: #d99f59;
+  --status-danger: #c95c5c;
+  --status-info: #799fc4;
+}

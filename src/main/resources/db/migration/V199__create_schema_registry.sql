@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 199
+-- File              : V199__create_schema_registry.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create schema registry
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V199: Schema Registry, Locks & Metrics DDL
 CREATE TABLE IF NOT EXISTS integration_schema_registry (
     id                  BIGSERIAL PRIMARY KEY,

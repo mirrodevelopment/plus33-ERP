@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.service
+ * File              : SupplierServiceImpl.java
+ * Purpose           : Business logic service layer for Procurement Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: SupplierController
+ * Related Service   : SupplierServiceImpl
+ * Related Repository: SupplierRepository, CompanyRepository
+ * Related Entity    : Supplier
+ * Related DTO       : PageResponse, searchRequest, SupplierRequest, SupplierResponse, SupplierSearchRequest
+ * Related Mapper    : SupplierMapper
+ * Related DB Table  : suppliers
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : SupplierController, SupplierServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Procurement Module. Implements SupplierService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.procurement.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -22,6 +49,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code SupplierServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Procurement Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * SupplierController
+ *   --> SupplierServiceImpl (this)
+ *   --> Validate business rules
+ *   --> SupplierRepository (read/write 'suppliers')
+ *   --> SupplierMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code suppliers}</p>
+ * <p><b>Module Deps      :</b> Common, Organization, Procurement</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class SupplierServiceImpl implements SupplierService {
 
@@ -37,6 +88,15 @@ public class SupplierServiceImpl implements SupplierService {
         this.supplierMapper = supplierMapper;
     }
 
+    /**
+     * Creates a new supplier and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the SupplierResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SupplierResponse createSupplier(SupplierRequest request) {
@@ -62,6 +122,16 @@ public class SupplierServiceImpl implements SupplierService {
         return supplierMapper.toResponse(saved);
     }
 
+    /**
+     * Updates an existing supplier record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the SupplierResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SupplierResponse updateSupplier(Long id, SupplierRequest request) {
@@ -96,6 +166,13 @@ public class SupplierServiceImpl implements SupplierService {
         return supplierMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single supplier by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public SupplierResponse getSupplierById(Long id) {
@@ -104,6 +181,13 @@ public class SupplierServiceImpl implements SupplierService {
         return supplierMapper.toResponse(supplier);
     }
 
+    /**
+     * Returns a filtered paginated list of suppliers records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     @Transactional(readOnly = true)
     public PageResponse<SupplierResponse> searchSuppliers(SupplierSearchRequest searchRequest, Pageable pageable) {
@@ -143,6 +227,12 @@ public class SupplierServiceImpl implements SupplierService {
         );
     }
 
+    /**
+     * Performs the activateSupplier operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierResponse result
+     */
     @Override
     @Transactional
     public SupplierResponse activateSupplier(Long id) {
@@ -153,6 +243,12 @@ public class SupplierServiceImpl implements SupplierService {
         return supplierMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the deactivateSupplier operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierResponse result
+     */
     @Override
     @Transactional
     public SupplierResponse deactivateSupplier(Long id) {
@@ -163,6 +259,13 @@ public class SupplierServiceImpl implements SupplierService {
         return supplierMapper.toResponse(saved);
     }
 
+    /**
+     * Permanently deletes the supplier from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     */
     @Override
     @Transactional
     public void deleteSupplier(Long id) {

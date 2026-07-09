@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 80
+-- File              : V80__create_tax_module.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create tax module
+--
+-- Tables Created    : tax_categories, tax_posting_profiles, tax_rates, tax_groups, tax_group_lines, tax_registrations, tax_exemption_certificates, tax_determination_rules, tax_adjustment_entries, tax_override_requests, einvoice_compliance_logs, tax_audit_logs, tax_calendar, tax_filings
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_tr_lookup, idx_mv_input_tax, idx_mv_output_tax, idx_mv_reverse_charge, idx_mv_wht, idx_mv_tax_filings, idx_mv_tax_dashboard
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V80__create_tax_module.sql
 -- 1. Tax Categories
 CREATE TABLE tax_categories (

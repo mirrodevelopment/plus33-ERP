@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 87
+-- File              : V87__create_wms_base_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create wms base tables
+--
+-- Tables Created    : warehouse_zones, warehouse_locations, location_stock, cross_dock_orders, cross_dock_lines, yard_locations, dock_doors, appointment_slots, truck_checkins, dock_schedules
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_warehouse_locations_zone, idx_warehouse_locations_warehouse, idx_warehouse_locations_type, idx_location_stock_product, idx_location_stock_location, idx_location_stock_lot, idx_location_stock_expiry, idx_appointment_slots_date, idx_truck_checkins_warehouse, idx_dock_schedules_door
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V87__create_wms_base_tables.sql
 -- PLUS33 ERP — Enterprise WMS: Layout, Yard & Cross-Dock

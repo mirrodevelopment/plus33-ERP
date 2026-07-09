@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.budget.repository
+ * File              : BudgetLineRepository.java
+ * Purpose           : JPA Repository providing database CRUD for Finance Module entities
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BudgetLineController
+ * Related Service   : BudgetLineService, BudgetLineServiceImpl
+ * Related Repository: BudgetLineRepository
+ * Related Entity    : BudgetLine
+ * Related DTO       : N/A
+ * Related Mapper    : BudgetLineMapper
+ * Related DB Table  : budget_lines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : BudgetLineService, BudgetLineServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Repository for Finance Module against the 'budget_lines' table. Provides CRUD, Specification-based queries, and paginated results.
+ ******************************************************************************/
 package com.plus33.erp.finance.budget.repository;
 
 import com.plus33.erp.finance.budget.entity.BudgetLine;
@@ -11,6 +38,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code BudgetLineRepository}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.budget.repository}</p>
+ * <p><b>Layer  :</b> JPA Repository: database access for table 'budget_lines' via Spring Data JPA.</p>
+ *
+ * <p><b>Database Table   :</b> {@code budget_lines}</p>
+ * <p><b>Module Deps      :</b> Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Repository
 public interface BudgetLineRepository extends JpaRepository<BudgetLine, Long>, JpaSpecificationExecutor<BudgetLine> {
 

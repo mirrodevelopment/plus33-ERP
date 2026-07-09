@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.assets.service
+ * File              : FixedAssetService.java
+ * Purpose           : Service interface contract defining the API for Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: FixedAssetController
+ * Related Service   : FixedAssetService, FixedAssetServiceImpl
+ * Related Repository: FixedAssetRepository
+ * Related Entity    : FixedAsset
+ * Related DTO       : AssetAssignmentRequest, AssetAssignmentResponse, AssetAuditRequest, AssetAuditResponse, AssetCapitalizeCwipRequest
+ * Related Mapper    : FixedAssetMapper
+ * Related DB Table  : fixed_assets
+ * Related REST APIs : N/A
+ * Depends On        : Common Module
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Finance Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.finance.assets.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -6,6 +33,18 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code FixedAssetService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.assets.service}</p>
+ * <p><b>Layer  :</b> Data Transfer Object: serializes API request/response data for Finance Module.</p>
+ *
+ * <p><b>Module Deps      :</b> Common, Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 public interface FixedAssetService {
     AssetCategoryResponse createCategory(Long companyId, AssetCategoryRequest request);
     List<AssetCategoryResponse> getCategories(Long companyId);

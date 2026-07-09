@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.compliance
+ * File              : ComplianceProviderRegistry.java
+ * Purpose           : Component of Finance Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ComplianceProviderRegistryController
+ * Related Service   : ComplianceProviderRegistryService, ComplianceProviderRegistryServiceImpl
+ * Related Repository: ComplianceProviderRegistryRepository
+ * Related Entity    : ComplianceProviderRegistry
+ * Related DTO       : N/A
+ * Related Mapper    : ComplianceProviderRegistryMapper
+ * Related DB Table  : compliance_provider_registrys
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Finance Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.compliance;
 
 import org.springframework.stereotype.Component;
@@ -27,6 +54,13 @@ public class ComplianceProviderRegistry {
                 )));
     }
 
+    /**
+     * Retrieves provider data from the database.
+     *
+     * @param providerType the providerType input value
+     * @return the ComplianceProvider result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public ComplianceProvider getProvider(String providerType) {
         ComplianceProvider provider = providers.get(providerType.toUpperCase());
         if (provider == null) {

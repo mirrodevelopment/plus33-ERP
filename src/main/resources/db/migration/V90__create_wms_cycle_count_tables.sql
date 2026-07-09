@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 90
+-- File              : V90__create_wms_cycle_count_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create wms cycle count tables
+--
+-- Tables Created    : cycle_count_plans, cycle_count_tasks, cycle_count_results
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_cycle_count_tasks_plan, idx_cycle_count_tasks_location, idx_cycle_count_tasks_assignee, idx_cycle_count_results_plan, idx_cycle_count_results_product, idx_cycle_count_results_variance
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V90__create_wms_cycle_count_tables.sql
 -- PLUS33 ERP — Cycle Count Engine (ABC, Blind Count, Variance)

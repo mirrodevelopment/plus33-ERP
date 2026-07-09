@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.service
+ * File              : PaymentServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PaymentController
+ * Related Service   : PaymentServiceImpl
+ * Related Repository: PaymentRepository, SupplierInvoiceRepository, CompanyRepository, SupplierRepository, CustomerRepository, CustomerInvoiceRepository, AccountRepository, JournalEntryRepository, UserRepository
+ * Related Entity    : Payment
+ * Related DTO       : CustomerInvoiceResponse, PageResponse, PaymentAllocationRequest, PaymentCancelRequest, PaymentRequest
+ * Related Mapper    : PaymentMapper
+ * Related DB Table  : payments
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Procurement Module, Sales Module, Security Module
+ * Used By           : PaymentController, PaymentServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements PaymentService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -43,6 +70,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code PaymentServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * PaymentController
+ *   --> PaymentServiceImpl (this)
+ *   --> Validate business rules
+ *   --> PaymentRepository (read/write 'payments')
+ *   --> PaymentMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code payments}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization, Procurement, Sales, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class PaymentServiceImpl implements PaymentService {
@@ -90,6 +141,15 @@ public class PaymentServiceImpl implements PaymentService {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Creates a new payment and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the PaymentResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PaymentResponse createPayment(PaymentRequest request) {
@@ -256,6 +316,20 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single payment by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single payment by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public PaymentResponse getPaymentById(Long id) {
         Payment payment = paymentRepository.findById(id)
@@ -263,6 +337,20 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentMapper.toResponse(payment);
     }
 
+    /**
+     * Returns a filtered paginated list of payments records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of payments records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<PaymentResponse> searchPayments(PaymentSearchRequest searchRequest, Pageable pageable) {
         Specification<Payment> spec = (root, query, cb) -> {
@@ -307,6 +395,16 @@ public class PaymentServiceImpl implements PaymentService {
         );
     }
 
+    /**
+     * Cancels the payment and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the PaymentResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PaymentResponse cancelPayment(Long id, PaymentCancelRequest request) {

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 111
+-- File              : V111__create_esm_work_orders.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create esm work orders
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V111: ESM Core Work Orders and Technician Assignments
 CREATE TABLE IF NOT EXISTS esm_work_orders (
     id BIGSERIAL PRIMARY KEY,

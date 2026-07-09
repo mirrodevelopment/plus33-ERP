@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 119
+-- File              : V119__create_esm_event_store.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create esm event store
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V119: ESM Event Store
 CREATE TABLE IF NOT EXISTS esm_event_store (
     id BIGSERIAL PRIMARY KEY,

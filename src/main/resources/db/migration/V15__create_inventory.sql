@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 15
+-- File              : V15__create_inventory.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create inventory
+--
+-- Tables Created    : product_categories, units_of_measure, products, inventory_stock, stock_movements
+-- Tables Altered    : N/A
+-- Seed Data For     : product_categories, products, units_of_measure
+-- Indexes           : idx_products_category, idx_products_unit, idx_inventory_stock_product, idx_inventory_stock_warehouse, idx_inventory_stock_store, idx_stock_movements_product, idx_stock_movements_warehouse, idx_stock_movements_store
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V15__create_inventory.sql
 -- PLUS33 ERP — Inventory Management Tables & Seed Data

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 182
+-- File              : V182__create_data_catalog.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create data catalog
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V182: Data Catalog Schema
 CREATE TABLE IF NOT EXISTS bi_catalog_dataset (
     id                  BIGSERIAL PRIMARY KEY,

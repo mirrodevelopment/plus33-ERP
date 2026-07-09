@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 223
+-- File              : V223__create_platform_chargeback.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create platform chargeback
+--
+-- Tables Created    : IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V223: Chargeback DDL
 CREATE TABLE IF NOT EXISTS platform_cost_center (
     id                  BIGSERIAL PRIMARY KEY,

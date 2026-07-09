@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 380
+-- File              : V380__seed_plus33_coffee_customers_crm.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed plus33 coffee customers crm
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : crm_cases, crm_leads, crm_opportunities, crm_timeline_events, customers, tmp_customers
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V380__seed_plus33_coffee_customers_crm.sql
 -- PLUS33 ERP — Customers, CRM Leads, Opportunities, Cases, Timeline

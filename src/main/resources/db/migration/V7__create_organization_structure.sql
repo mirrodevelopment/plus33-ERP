@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 7
+-- File              : V7__create_organization_structure.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create organization structure
+--
+-- Tables Created    : companies, regions, warehouses, stores
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_regions_company, idx_warehouses_region, idx_warehouses_active, idx_stores_region, idx_stores_warehouse, idx_stores_active
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V7__create_organization_structure.sql
 -- PLUS33 ERP — Organization module base schema

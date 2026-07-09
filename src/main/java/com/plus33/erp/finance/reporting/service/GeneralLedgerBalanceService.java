@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.reporting.service
+ * File              : GeneralLedgerBalanceService.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: GeneralLedgerBalanceController
+ * Related Service   : GeneralLedgerBalanceService
+ * Related Repository: ExchangeRateRepository
+ * Related Entity    : GeneralLedgerBalance
+ * Related DTO       : N/A
+ * Related Mapper    : GeneralLedgerBalanceMapper
+ * Related DB Table  : general_ledger_balances
+ * Related REST APIs : N/A
+ * Depends On        : Common Module
+ * Used By           : GeneralLedgerBalanceController, GeneralLedgerBalanceServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements GeneralLedgerBalanceService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.reporting.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -21,6 +48,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code GeneralLedgerBalanceService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.reporting.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * GeneralLedgerBalanceController
+ *   --> GeneralLedgerBalanceService (this)
+ *   --> Validate business rules
+ *   --> GeneralLedgerBalanceRepository (read/write 'general_ledger_balances')
+ *   --> GeneralLedgerBalanceMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code general_ledger_balances}</p>
+ * <p><b>Module Deps      :</b> Common, Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 public class GeneralLedgerBalanceService {
@@ -29,6 +80,12 @@ public class GeneralLedgerBalanceService {
     private final EntityManager entityManager;
     private final ExchangeRateRepository exchangeRateRepository;
 
+    /**
+     * Retrieves balance snapshot data from the database.
+     *
+     * @return the LedgerBalanceSnapshot result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Transactional(readOnly = true)
     public LedgerBalanceSnapshot getBalanceSnapshot(
             Long companyId,

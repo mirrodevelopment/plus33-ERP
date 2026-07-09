@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Routing Module
+ * Package           : com.plus33.erp.routing.optimization.cost
+ * File              : RouteCostMinimizer.java
+ * Purpose           : Business logic service layer for Routing Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: RouteCostMinimizerController
+ * Related Service   : RouteCostMinimizer
+ * Related Repository: RouteCostMinimizerRepository
+ * Related Entity    : RouteCostMinimizer
+ * Related DTO       : N/A
+ * Related Mapper    : RouteCostMinimizerMapper
+ * Related DB Table  : route_cost_minimizers
+ * Related REST APIs : N/A
+ * Depends On        : Platform Module
+ * Used By           : RouteCostMinimizerController, RouteCostMinimizerImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Routing Module. Implements RouteCostMinimizerService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.routing.optimization.cost;
 
 import com.plus33.erp.platform.entity.*;
@@ -8,12 +35,44 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Routing Module</b>
+ *
+ * <p><b>Class  :</b> {@code RouteCostMinimizer}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.routing.optimization.cost}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Routing Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * RouteCostMinimizerController
+ *   --> RouteCostMinimizer (this)
+ *   --> Validate business rules
+ *   --> RouteCostMinimizerRepository (read/write 'route_cost_minimizers')
+ *   --> RouteCostMinimizerMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code route_cost_minimizers}</p>
+ * <p><b>Module Deps      :</b> Platform</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class RouteCostMinimizer {
     @Autowired PlatformRouteCostLogRepository costRepo;
     @Autowired PlatformRoutingOptimizationRecommendationRepository recommendationRepo;
     @Autowired PlatformRoutingAuditLogRepository auditRepo;
-
+    /**
+     * Performs the optimizeRouteCost operation in this module.
+     *
+     * @param routeId the routeId input value
+     * @param fuel the fuel input value
+     * @param toll the toll input value
+     * @param driver the driver input value
+     * @return the PlatformRouteCostLog result
+     */
     @Transactional
     public PlatformRouteCostLog optimizeRouteCost(Long routeId, BigDecimal fuel, BigDecimal toll, BigDecimal driver) {
         PlatformRouteCostLog log = new PlatformRouteCostLog();

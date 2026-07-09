@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.entity
+ * File              : CashPool.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CashPoolController
+ * Related Service   : CashPoolService, CashPoolServiceImpl
+ * Related Repository: CashPoolRepository
+ * Related Entity    : CashPool
+ * Related DTO       : N/A
+ * Related Mapper    : CashPoolMapper
+ * Related DB Table  : cash_pools
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : CashPoolRepository, CashPoolMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'cash_pools'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -8,6 +35,19 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code CashPool}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'cash_pools'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code cash_pools}</p>
+ * <p><b>Module Deps      :</b> Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Inventory Module
+ * Package           : com.plus33.erp.inventory.service
+ * File              : StockCountServiceImpl.java
+ * Purpose           : Business logic service layer for Inventory Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: StockCountController
+ * Related Service   : StockCountServiceImpl
+ * Related Repository: StockCountRepository, InventoryAdjustmentRepository, InventoryStockRepository, CompanyRepository, WarehouseRepository, StoreRepository, ProductRepository, UserRepository
+ * Related Entity    : StockCount
+ * Related DTO       : PageResponse, searchRequest, StockCountItemCountRequest, StockCountItemResponse, StockCountRequest
+ * Related Mapper    : StockCountMapper
+ * Related DB Table  : stock_counts
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module, Security Module
+ * Used By           : StockCountController, StockCountServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Inventory Module. Implements StockCountService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.inventory.service;
 
 import com.plus33.erp.common.dto.IdempotentCreateResult;
@@ -32,6 +59,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Inventory Module</b>
+ *
+ * <p><b>Class  :</b> {@code StockCountServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.inventory.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Inventory Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * StockCountController
+ *   --> StockCountServiceImpl (this)
+ *   --> Validate business rules
+ *   --> StockCountRepository (read/write 'stock_counts')
+ *   --> StockCountMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code stock_counts}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class StockCountServiceImpl implements StockCountService {
@@ -76,6 +127,15 @@ public class StockCountServiceImpl implements StockCountService {
         this.inventoryTraceabilityService = inventoryTraceabilityService;
     }
 
+    /**
+     * Creates a new count and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the IdempotentCreateResult result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public IdempotentCreateResult<StockCountResponse> createCount(StockCountRequest request) {
@@ -217,6 +277,16 @@ public class StockCountServiceImpl implements StockCountService {
         return new IdempotentCreateResult<>(toResponse(saved), true);
     }
 
+    /**
+     * Updates an existing count record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the StockCountResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public StockCountResponse updateCount(Long id, StockCountUpdateRequest request) {
@@ -341,6 +411,20 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(saved);
     }
 
+    /**
+     * Retrieves a single count by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StockCountResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single count by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StockCountResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public StockCountResponse getCountById(Long id) {
         StockCount count = stockCountRepository.findById(id)
@@ -348,6 +432,20 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(count);
     }
 
+    /**
+     * Returns a filtered paginated list of counts records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of counts records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<StockCountResponse> searchCounts(StockCountSearchRequest searchRequest, Pageable pageable) {
         Specification<StockCount> spec = (root, query, cb) -> {
@@ -407,6 +505,13 @@ public class StockCountServiceImpl implements StockCountService {
         );
     }
 
+    /**
+     * Performs the assignCount operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param userId authenticated user identifier
+     * @return the StockCountResponse result
+     */
     @Override
     @Transactional
     public StockCountResponse assignCount(Long id, Long userId) {
@@ -432,6 +537,12 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(saved);
     }
 
+    /**
+     * Performs the startCount operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StockCountResponse result
+     */
     @Override
     @Transactional
     public StockCountResponse startCount(Long id) {
@@ -467,6 +578,16 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(saved);
     }
 
+    /**
+     * Submits the count for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the StockCountResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public StockCountResponse submitCount(Long id, StockCountSubmitRequest request) {
@@ -533,6 +654,13 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(saved);
     }
 
+    /**
+     * Performs the rejectCount operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the StockCountResponse result
+     */
     @Override
     @Transactional
     public StockCountResponse rejectCount(Long id, String reason) {
@@ -554,6 +682,12 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(saved);
     }
 
+    /**
+     * Performs the reopenCount operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StockCountResponse result
+     */
     @Override
     @Transactional
     public StockCountResponse reopenCount(Long id) {
@@ -578,6 +712,15 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(saved);
     }
 
+    /**
+     * Approves the count, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the StockCountResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public StockCountResponse approveCount(Long id) {
@@ -599,6 +742,15 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(saved);
     }
 
+    /**
+     * Posts count entries to the General Ledger and updates financial balances.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the StockCountResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public StockCountResponse postCount(Long id) {
@@ -625,6 +777,12 @@ public class StockCountServiceImpl implements StockCountService {
         return toResponse(saved);
     }
 
+    /**
+     * Completes the count workflow and finalizes the record status.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StockCountResponse result
+     */
     @Override
     @Transactional
     public StockCountResponse closeCount(Long id) {

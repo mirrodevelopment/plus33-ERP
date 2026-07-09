@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.service
+ * File              : PurchaseRequestServiceImpl.java
+ * Purpose           : Business logic service layer for Procurement Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PurchaseRequestController
+ * Related Service   : PurchaseRequestServiceImpl
+ * Related Repository: PurchaseRequestRepository, PurchaseOrderRepository, PurchaseOrderItemRepository, CompanyRepository, SupplierRepository, WarehouseRepository, StoreRepository, ProductRepository, UserRepository, BudgetDimensionSetRepository, AccountRepository
+ * Related Entity    : PurchaseRequest
+ * Related DTO       : approvePurchaseRequest, BudgetDimensionSetRequest, BudgetReservationRequest, cancelPurchaseRequest, createPurchaseRequest
+ * Related Mapper    : PurchaseRequestMapper
+ * Related DB Table  : purchase_requests
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module, Organization Module, Security Module, Finance Module
+ * Used By           : PurchaseRequestController, PurchaseRequestServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Procurement Module. Implements PurchaseRequestService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.procurement.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -40,6 +67,30 @@ import com.plus33.erp.finance.repository.AccountRepository;
 import com.plus33.erp.finance.entity.Account;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code PurchaseRequestServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Procurement Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * PurchaseRequestController
+ *   --> PurchaseRequestServiceImpl (this)
+ *   --> Validate business rules
+ *   --> PurchaseRequestRepository (read/write 'purchase_requests')
+ *   --> PurchaseRequestMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code purchase_requests}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Procurement, Security, Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -87,6 +138,15 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         this.accountRepository = accountRepository;
     }
 
+    /**
+     * Creates a new purchase request and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the PurchaseRequestResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseRequestResponse createPurchaseRequest(PurchaseRequestRequest request) {
@@ -131,6 +191,20 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         return purchaseRequestMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single purchase request by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseRequestResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single purchase request by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseRequestResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public PurchaseRequestResponse getPurchaseRequestById(Long id) {
         PurchaseRequest pr = purchaseRequestRepository.findById(id)
@@ -138,6 +212,20 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         return purchaseRequestMapper.toResponse(pr);
     }
 
+    /**
+     * Returns a filtered paginated list of purchase requests records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of purchase requests records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<PurchaseRequestResponse> searchPurchaseRequests(PurchaseRequestSearchRequest searchRequest, Pageable pageable) {
         Specification<PurchaseRequest> spec = (root, query, cb) -> {
@@ -194,6 +282,16 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         );
     }
 
+    /**
+     * Updates an existing purchase request record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the PurchaseRequestResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseRequestResponse updatePurchaseRequest(Long id, PurchaseRequestRequest request) {
@@ -240,6 +338,15 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         return purchaseRequestMapper.toResponse(saved);
     }
 
+    /**
+     * Submits the purchase request for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseRequestResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseRequestResponse submitPurchaseRequest(Long id) {
@@ -295,6 +402,15 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         return purchaseRequestMapper.toResponse(saved);
     }
 
+    /**
+     * Approves the purchase request, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseRequestResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseRequestResponse approvePurchaseRequest(Long id) {
@@ -318,6 +434,13 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         return purchaseRequestMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the rejectPurchaseRequest operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param rejectionReason the rejectionReason input value
+     * @return the PurchaseRequestResponse result
+     */
     @Override
     @Transactional
     public PurchaseRequestResponse rejectPurchaseRequest(Long id, String rejectionReason) {
@@ -347,6 +470,16 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         return purchaseRequestMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the purchase request and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param cancellationReason the cancellationReason input value
+     * @return the PurchaseRequestResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PurchaseRequestResponse cancelPurchaseRequest(Long id, String cancellationReason) {
@@ -383,6 +516,12 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         return !type.equals("SERVICE") && !type.equals("EXPENSE");
     }
 
+    /**
+     * Converts between Entity and DTO representations (MapStruct).
+     *
+     * @param id the unique database ID of the resource
+     * @return the PurchaseRequestResponse result
+     */
     @Override
     @Transactional
     public PurchaseRequestResponse convertPurchaseRequestToPo(Long id) {

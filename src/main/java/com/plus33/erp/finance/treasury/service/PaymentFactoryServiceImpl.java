@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.service
+ * File              : PaymentFactoryServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PaymentFactoryController
+ * Related Service   : PaymentFactoryServiceImpl
+ * Related Repository: PaymentBatchRepository, PaymentFileRepository, PaymentTransmissionLogRepository, CashTransferRepository, TreasuryApprovalStepRepository, TreasuryApprovalRepository, BankAccountRepository, PaymentRepository, CompanyRepository
+ * Related Entity    : PaymentFactory
+ * Related DTO       : CashTransferRequest, CashTransferResponse, mapToBatchResponse, mapToFileResponse, mapToTransferResponse
+ * Related Mapper    : PaymentFactoryMapper
+ * Related DB Table  : payment_factorys
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : PaymentFactoryController, PaymentFactoryServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements PaymentFactoryService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -20,6 +47,30 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code PaymentFactoryServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * PaymentFactoryController
+ *   --> PaymentFactoryServiceImpl (this)
+ *   --> Validate business rules
+ *   --> PaymentFactoryRepository (read/write 'payment_factorys')
+ *   --> PaymentFactoryMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code payment_factorys}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -36,6 +87,16 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
     private final CompanyRepository companyRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * Creates a new payment batch and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the PaymentBatchResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PaymentBatchResponse createPaymentBatch(PaymentBatchRequest request, String username) {
@@ -94,6 +155,20 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         return mapToBatchResponse(savedBatch);
     }
 
+    /**
+     * Retrieves a single payment batch by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentBatchResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single payment batch by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PaymentBatchResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public PaymentBatchResponse getPaymentBatchById(Long id) {
         PaymentBatch batch = paymentBatchRepository.findById(id)
@@ -101,11 +176,35 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         return mapToBatchResponse(batch);
     }
 
+    /**
+     * Retrieves payment batches by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves payment batches by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<PaymentBatchResponse> getPaymentBatchesByCompany(Long companyId) {
         return paymentBatchRepository.findByCompanyId(companyId).stream().map(this::mapToBatchResponse).toList();
     }
 
+    /**
+     * Approves the payment batch, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param batchId the batchId input value
+     * @param remarks the remarks input value
+     * @param username the username input value
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public void approvePaymentBatch(Long batchId, String remarks, String username) {
@@ -157,6 +256,13 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         }
     }
 
+    /**
+     * Performs the rejectPaymentBatch operation in this module.
+     *
+     * @param batchId the batchId input value
+     * @param remarks the remarks input value
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void rejectPaymentBatch(Long batchId, String remarks, String username) {
@@ -179,6 +285,13 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         }
     }
 
+    /**
+     * Generates the payment file based on input parameters and business rules.
+     *
+     * @param batchId the batchId input value
+     * @param format the format input value
+     * @return the PaymentFileResponse result
+     */
     @Override
     @Transactional
     public PaymentFileResponse generatePaymentFile(Long batchId, String format) {
@@ -212,6 +325,12 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         return mapToFileResponse(savedFile);
     }
 
+    /**
+     * Performs the transmitPaymentFile operation in this module.
+     *
+     * @param fileId the fileId input value
+     * @param method the method input value
+     */
     @Override
     @Transactional
     public void transmitPaymentFile(Long fileId, String method) {
@@ -234,6 +353,16 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         paymentBatchRepository.save(batch);
     }
 
+    /**
+     * Creates a new cash transfer and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @param username the username input value
+     * @return the CashTransferResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public CashTransferResponse createCashTransfer(CashTransferRequest request, String username) {
@@ -283,6 +412,20 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         return mapToTransferResponse(savedTransfer);
     }
 
+    /**
+     * Retrieves a single cash transfer by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CashTransferResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single cash transfer by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CashTransferResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public CashTransferResponse getCashTransferById(Long id) {
         CashTransfer transfer = cashTransferRepository.findById(id)
@@ -290,11 +433,35 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         return mapToTransferResponse(transfer);
     }
 
+    /**
+     * Retrieves cash transfers by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves cash transfers by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<CashTransferResponse> getCashTransfersByCompany(Long companyId) {
         return cashTransferRepository.findByCompanyId(companyId).stream().map(this::mapToTransferResponse).toList();
     }
 
+    /**
+     * Approves the cash transfer, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param transferId the transferId input value
+     * @param remarks the remarks input value
+     * @param username the username input value
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public void approveCashTransfer(Long transferId, String remarks, String username) {
@@ -350,6 +517,13 @@ public class PaymentFactoryServiceImpl implements PaymentFactoryService {
         }
     }
 
+    /**
+     * Performs the rejectCashTransfer operation in this module.
+     *
+     * @param transferId the transferId input value
+     * @param remarks the remarks input value
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void rejectCashTransfer(Long transferId, String remarks, String username) {

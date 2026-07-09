@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.inventory
+ * File              : InventoryEngine.java
+ * Purpose           : Business logic service layer for Wms Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryEngineController
+ * Related Service   : InventoryEngine
+ * Related Repository: InventoryEngineRepository
+ * Related Entity    : InventoryEngine
+ * Related DTO       : N/A
+ * Related Mapper    : InventoryEngineMapper
+ * Related DB Table  : inventory_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : InventoryEngineController, InventoryEngineImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Wms Module. Implements InventoryEngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.wms.inventory;
 
 import com.plus33.erp.wms.entity.InventoryMovement;
@@ -28,6 +55,12 @@ public class InventoryEngine {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Processes the command business workflow end-to-end.
+     *
+     * @param cmd the cmd input value
+     * @return the InventoryMovement result
+     */
     public InventoryMovement processCommand(InventoryCommand cmd) {
         // Stage 1: Validation
         if (cmd.quantity() == null || cmd.quantity().compareTo(java.math.BigDecimal.ZERO) <= 0) {

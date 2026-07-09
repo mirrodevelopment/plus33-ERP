@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 271
+-- File              : V271__create_iot_gateway.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create iot gateway
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V271: IoT Gateway Registry & Heartbeats
 CREATE TABLE IF NOT EXISTS platform_iot_gateway (
     id                  BIGSERIAL PRIMARY KEY,

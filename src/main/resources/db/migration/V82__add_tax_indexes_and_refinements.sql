@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 82
+-- File              : V82__add_tax_indexes_and_refinements.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : add tax indexes and refinements
+--
+-- Tables Created    : tax_configuration_versions, tax_calculation_logs, compliance_queue_items
+-- Tables Altered    : tax_groups, tax_rates, tax_determination_rules
+-- Seed Data For     : permissions, role_permissions
+-- Indexes           : idx_tax_rates_lookup, idx_tax_det_rules_lookup, idx_tax_posting_profiles_lookup, idx_tax_registrations_effective, idx_tax_exemption_certs_lookup
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V82__add_tax_indexes_and_refinements.sql
 -- PLUS33 ERP — Tax refinements: indexes, versioning, calculation logs, compliance queue, reporting views, permissions
 

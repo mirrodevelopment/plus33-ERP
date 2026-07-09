@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.service.impl
+ * File              : InventoryMovementLedgerServiceImpl.java
+ * Purpose           : Business logic service layer for Wms Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InventoryMovementLedgerController
+ * Related Service   : InventoryMovementLedgerServiceImpl
+ * Related Repository: InventoryMovementRepository, WarehouseLocationRepository
+ * Related Entity    : InventoryMovementLedger
+ * Related DTO       : N/A
+ * Related Mapper    : InventoryMovementLedgerMapper
+ * Related DB Table  : inventory_movement_ledgers
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : InventoryMovementLedgerController, InventoryMovementLedgerServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Wms Module. Implements InventoryMovementLedgerService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.wms.service.impl;
 
 import com.plus33.erp.wms.entity.InventoryMovement;
@@ -33,6 +60,16 @@ public class InventoryMovementLedgerServiceImpl implements InventoryMovementLedg
         this.eventBus = eventBus;
     }
 
+    /**
+     * Performs the recordMovement operation in this module.
+     *
+     * @return the InventoryMovement result
+     */
+    /**
+     * Performs the recordMovement operation in this module.
+     *
+     * @return the InventoryMovement result
+     */
     @Override
     public InventoryMovement recordMovement(Long companyId, Long warehouseId, String movementType,
                                              Long productId, Long fromLocationId, Long toLocationId,
@@ -81,12 +118,28 @@ public class InventoryMovementLedgerServiceImpl implements InventoryMovementLedg
         return saved;
     }
 
+    /**
+     * Retrieves by product data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param productId the productId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryMovement> findByProduct(Long companyId, Long productId) {
         return movementRepo.findByCompanyIdAndProductIdOrderByMovementAtDesc(companyId, productId);
     }
 
+    /**
+     * Retrieves by source document data from the database.
+     *
+     * @param sourceType the sourceType input value
+     * @param sourceId the sourceId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<InventoryMovement> findBySourceDocument(String sourceType, Long sourceId) {

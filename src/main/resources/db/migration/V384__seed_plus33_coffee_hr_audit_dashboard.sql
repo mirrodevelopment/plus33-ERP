@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 384
+-- File              : V384__seed_plus33_coffee_hr_audit_dashboard.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed plus33 coffee hr audit dashboard
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : attendance, bi_analytics_snapshot, employee_leaves, employee_payrolls, hcm_employee_documents, payroll_periods, platform_audit_log
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V384__seed_plus33_coffee_hr_audit_dashboard.sql
 -- PLUS33 ERP — Payroll, Attendance, Leaves, Docs, Audit, BI Snaps

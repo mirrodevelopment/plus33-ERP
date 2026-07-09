@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 35
+-- File              : V35__alter_supplier_invoices_schema.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : alter supplier invoices schema
+--
+-- Tables Created    : supplier_invoice_items, supplier_invoice_items
+-- Tables Altered    : supplier_invoices, supplier_invoices, supplier_invoices, supplier_invoices, supplier_invoices, supplier_invoices, supplier_invoices, supplier_invoices, supplier_invoices, supplier_invoices, supplier_invoices, purchase_order_items
+-- Seed Data For     : N/A
+-- Indexes           : IF, IF, IF
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V35__alter_supplier_invoices_schema.sql
 -- PLUS33 ERP — Supplier Invoice Schema Enhancements

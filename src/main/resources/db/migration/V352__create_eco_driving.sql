@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 352
+-- File              : V352__create_eco_driving.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create eco driving
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V352: Eco-Driving Diagnostics
 CREATE TABLE IF NOT EXISTS platform_eco_driving_log (
     id                          BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 85
+-- File              : V85__create_manufacturing_enterprise_module.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create manufacturing enterprise module
+--
+-- Tables Created    : bom_headers, bom_lines, bom_substitutes, engineering_change_orders, engineering_change_lines, work_centers, machines, labor_groups, routing_headers, routing_operations, manufacturing_calendars, manufacturing_calendar_shifts, manufacturing_calendar_exceptions, mrp_runs, planned_orders, mrp_pegging_links, capacity_plans, production_orders, production_order_operations, production_material_issues, production_confirmations, production_scrap, production_rework, production_costs, cost_roll_up_snapshots, manufacturing_serial_genealogy, manufacturing_batch_genealogy, quality_inspections, manufacturing_events
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_bom_headers_company_product, idx_bom_headers_status, idx_bom_headers_effective, idx_bom_lines_header, idx_bom_lines_component, idx_eco_company_status, idx_routing_headers_product, idx_mrp_runs_company_status, idx_planned_orders_company_product, idx_planned_orders_required_date, idx_mrp_pegging_links_run, idx_capacity_plans_work_center, idx_production_orders_company_status, idx_production_orders_product, idx_production_orders_planned_start, idx_production_issues_order, idx_production_confirmations_order, idx_production_costs_order, idx_manufacturing_serial_genealogy_serial, idx_manufacturing_batch_genealogy_batch, idx_quality_inspections_order, idx_quality_inspections_status, idx_manufacturing_events_type, idx_manufacturing_events_reference, idx_manufacturing_events_occurred, idx_mv_production_dashboard, idx_mv_wip_valuation, idx_mv_oee_summary, idx_mv_manufacturing_variances
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V85__create_manufacturing_enterprise_module.sql
 -- PLUS33 ERP — Enterprise Manufacturing (MRP II), MES & Cost Accounting

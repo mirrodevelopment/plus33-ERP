@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Analytics Module
+ * Package           : com.plus33.erp.analytics.controller
+ * File              : ProcurementAnalyticsController.java
+ * Purpose           : REST Controller exposing HTTP endpoints for Analytics Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ProcurementAnalyticsController
+ * Related Service   : ProcurementAnalyticsControllerService, ProcurementAnalyticsControllerServiceImpl
+ * Related Repository: ProcurementAnalyticsControllerRepository
+ * Related Entity    : ProcurementAnalyticsController
+ * Related DTO       : ApiResponse, InvoiceMatchingResponse, PayablesAgingResponse, PoFulfilmentResponse, ProcurementSummaryResponse
+ * Related Mapper    : ProcurementAnalyticsControllerMapper
+ * Related DB Table  : procurement_analytics_controllers
+ * Related REST APIs : GET /api/v1/analytics/procurement/summary, GET /api/v1/analytics/procurement/suppliers, GET /api/v1/analytics/procurement/payables-aging, GET /api/v1/analytics/procurement/purchase-orders
+ * Depends On        : Common Module
+ * Used By           : Analytics Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * REST Controller for Analytics Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: GET /api/v1/analytics/procurement/summary, GET /api/v1/analytics/procurement/suppliers, GET /api/v1/analytics/procurement/payables-aging, GET /api/v1/analytics/procurement/purchase-orders
+ ******************************************************************************/
 package com.plus33.erp.analytics.controller;
 
 import com.plus33.erp.analytics.dto.*;
@@ -11,6 +38,31 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Analytics Module</b>
+ *
+ * <p><b>Class  :</b> {@code ProcurementAnalyticsController}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.analytics.controller}</p>
+ * <p><b>Layer  :</b> REST Controller: HTTP endpoints layer. Secured by JWT + @PreAuthorize. Delegates to ProcurementAnalyticsService.</p>
+ *
+ * <p><b>Request Flow:</b></p>
+ * <pre>
+ * HTTP Request
+ *   --> JWT Auth Filter (validate Bearer token)
+ *   --> @PreAuthorize (permission check)
+ *   --> ProcurementAnalyticsController.endpoint()
+ *   --> ProcurementAnalyticsService.method()
+ *   --> ProcurementAnalyticsRepository (PostgreSQL)
+ *   --> ApiResponse wrapped in ResponseEntity
+ *   --> JSON response to Frontend
+ * </pre>
+ *
+ * <p><b>REST Endpoints    :</b> GET /api/v1/analytics/procurement/summary, GET /api/v1/analytics/procurement/suppliers, GET /api/v1/analytics/procurement/payables-aging, GET /api/v1/analytics/procurement/purchase-orders, GET /api/v1/analytics/procurement/invoice-matching</p>
+ * <p><b>Module Deps      :</b> Analytics, Common</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @RestController
 @RequestMapping("/api/v1/analytics/procurement")
 @Tag(name = "Procurement Analytics", description = "REST APIs for procurement KPIs and analytics dashboards")
@@ -22,6 +74,14 @@ public class ProcurementAnalyticsController {
         this.procurementAnalyticsService = procurementAnalyticsService;
     }
 
+    /**
+     * Retrieves summary data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/summary")
     @PreAuthorize("hasAuthority('ANALYTICS_VIEW')")
     @Operation(summary = "Get procurement summary statistics")
@@ -32,6 +92,14 @@ public class ProcurementAnalyticsController {
         return ResponseEntity.ok(ApiResponse.success("Procurement summary retrieved successfully", response));
     }
 
+    /**
+     * Retrieves suppliers data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/suppliers")
     @PreAuthorize("hasAuthority('ANALYTICS_VIEW')")
     @Operation(summary = "Get supplier performance metrics")
@@ -42,6 +110,14 @@ public class ProcurementAnalyticsController {
         return ResponseEntity.ok(ApiResponse.success("Supplier performance metrics retrieved successfully", response));
     }
 
+    /**
+     * Retrieves payables aging data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/payables-aging")
     @PreAuthorize("hasAuthority('ANALYTICS_VIEW')")
     @Operation(summary = "Get payables aging buckets")
@@ -52,6 +128,14 @@ public class ProcurementAnalyticsController {
         return ResponseEntity.ok(ApiResponse.success("Payables aging retrieved successfully", response));
     }
 
+    /**
+     * Retrieves purchase orders data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/purchase-orders")
     @PreAuthorize("hasAuthority('ANALYTICS_VIEW')")
     @Operation(summary = "Get purchase order fulfilment rates")
@@ -62,6 +146,14 @@ public class ProcurementAnalyticsController {
         return ResponseEntity.ok(ApiResponse.success("Purchase order fulfilment rates retrieved successfully", response));
     }
 
+    /**
+     * Retrieves invoice matching data from the database.
+     *
+     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
+     *
+     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @GetMapping("/invoice-matching")
     @PreAuthorize("hasAuthority('ANALYTICS_VIEW')")
     @Operation(summary = "Get invoice matching exception details")

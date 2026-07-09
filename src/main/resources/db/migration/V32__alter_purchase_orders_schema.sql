@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 32
+-- File              : V32__alter_purchase_orders_schema.sql
+-- Operation Type    : Schema Alteration
+-- Purpose           : alter purchase orders schema
+--
+-- Tables Created    : N/A
+-- Tables Altered    : purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_orders, purchase_order_items, purchase_order_items, purchase_order_items, purchase_order_items
+-- Seed Data For     : N/A
+-- Indexes           : IF, IF, IF, IF
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V32__alter_purchase_orders_schema.sql
 -- PLUS33 ERP — Purchase Orders schema changes

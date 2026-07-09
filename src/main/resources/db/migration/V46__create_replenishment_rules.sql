@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 46
+-- File              : V46__create_replenishment_rules.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create replenishment rules
+--
+-- Tables Created    : replenishment_rules, replenishment_suggestions
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_repl_rules_company, idx_repl_rules_product, idx_repl_rules_wh, idx_repl_rules_store, idx_repl_rules_active, idx_repl_rules_client_ref, idx_repl_sugg_rule, idx_repl_sugg_status, idx_repl_sugg_product, idx_repl_sugg_client_ref, idx_repl_sugg_company, uq_replenishment_active_suggestion
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V46__create_replenishment_rules.sql
 -- PLUS33 ERP — Inventory Replenishment Rules & Suggestions

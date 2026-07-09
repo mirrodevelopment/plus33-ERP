@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 62
+-- File              : V62__fix_trace_events_check_constraint.sql
+-- Operation Type    : Schema Alteration
+-- Purpose           : fix trace events check constraint
+--
+-- Tables Created    : N/A
+-- Tables Altered    : inventory_trace_events, inventory_trace_events, inventory_trace_events
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V62__fix_trace_events_check_constraint.sql
 -- PLUS33 ERP — Correct check constraint on inventory_trace_events

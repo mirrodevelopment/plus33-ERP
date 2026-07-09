@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 47
+-- File              : V47__seed_replenishment_permissions.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed replenishment permissions
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : permissions, role_permissions
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V47__seed_replenishment_permissions.sql
 -- PLUS33 ERP — Inventory Replenishment Permissions Seed Data

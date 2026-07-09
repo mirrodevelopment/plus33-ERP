@@ -1,0 +1,27 @@
+{
+  "layout": [
+    { "id": "kpi-revenue", "colSpan": 1 },
+    { "id": "kpi-profit", "colSpan": 1 },
+    { "id": "kpi-stores", "colSpan": 1 },
+    { "id": "kpi-employees", "colSpan": 1 },
+    { "id": "kpi-countries", "colSpan": 1 },
+    { "id": "kpi-regions", "colSpan": 1 },
+    { "id": "kpi-warehouses", "colSpan": 1 },
+    { "id": "kpi-customers", "colSpan": 1 },
+    { "id": "kpi-inventory", "colSpan": 1 },
+    { "id": "kpi-compliance", "colSpan": 1 },
+    { "id": "widget-regional-performance", "colSpan": 6 },
+    { "id": "chart-sales-trend", "colSpan": 6 },
+    { "id": "chart-stock", "colSpan": 6 },
+    { "id": "chart-financial-overview", "colSpan": 6 },
+    { "id": "widget-inventory-overview", "colSpan": 6 },
+    { "id": "widget-franchise-development", "colSpan": 6 },
+    { "id": "widget-workforce-overview", "colSpan": 6 },
+    { "id": "chart-compliance-gauge", "colSpan": 6 },
+    { "id": "widget-complaints-legal", "colSpan": 6 },
+    { "id": "list-pending-approvals", "colSpan": 6 },
+    { "id": "list-alerts-notifications", "colSpan": 6 },
+    { "id": "widget-quick-actions", "colSpan": 6 },
+    { "id": "table-recent-activities", "colSpan": 12 }
+  ]
+}

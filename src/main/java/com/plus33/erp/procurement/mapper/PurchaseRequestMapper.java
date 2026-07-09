@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.mapper
+ * File              : PurchaseRequestMapper.java
+ * Purpose           : MapStruct Mapper converting between entities and DTOs in Procurement Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PurchaseRequestController
+ * Related Service   : PurchaseRequestService, PurchaseRequestServiceImpl
+ * Related Repository: PurchaseRequestRepository
+ * Related Entity    : PurchaseRequest
+ * Related DTO       : PurchaseRequest, PurchaseRequestItemRequest, PurchaseRequestItemResponse, PurchaseRequestRequest, PurchaseRequestResponse
+ * Related Mapper    : PurchaseRequestMapper
+ * Related DB Table  : purchase_requests
+ * Related REST APIs : N/A
+ * Depends On        : Common Module
+ * Used By           : PurchaseRequestService, PurchaseRequestServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * MapStruct Mapper for Procurement Module. Converts JPA entities to DTOs and vice versa. Generated at compile time. Inherits GlobalMapperConfig.
+ ******************************************************************************/
 package com.plus33.erp.procurement.mapper;
 
 import com.plus33.erp.common.mapper.GlobalMapperConfig;
@@ -7,6 +34,18 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code PurchaseRequestMapper}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.mapper}</p>
+ * <p><b>Layer  :</b> MapStruct Mapper: compile-time Entity to DTO conversion. No runtime reflection.</p>
+ *
+ * <p><b>Module Deps      :</b> Common, Procurement</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Mapper(config = GlobalMapperConfig.class)
 public interface PurchaseRequestMapper {
 

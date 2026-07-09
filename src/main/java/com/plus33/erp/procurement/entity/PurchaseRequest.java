@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.entity
+ * File              : PurchaseRequest.java
+ * Purpose           : JPA Entity representing a persistent database record in Procurement Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PurchaseController
+ * Related Service   : PurchaseService, PurchaseServiceImpl
+ * Related Repository: PurchaseRepository
+ * Related Entity    : PurchaseRequest
+ * Related DTO       : purchaseRequest
+ * Related Mapper    : PurchaseMapper
+ * Related DB Table  : purchase_requests
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Security Module
+ * Used By           : PurchaseRepository, PurchaseMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'purchase_requests'. Defines persistent domain object for Procurement Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.procurement.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -12,6 +39,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code PurchaseRequest}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'purchase_requests'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code purchase_requests}</p>
+ * <p><b>Module Deps      :</b> Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity
@@ -105,6 +145,10 @@ public class PurchaseRequest {
     @OneToMany(mappedBy = "purchaseRequest", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PurchaseRequestItem> items = new ArrayList<>();
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -114,6 +158,10 @@ public class PurchaseRequest {
         }
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

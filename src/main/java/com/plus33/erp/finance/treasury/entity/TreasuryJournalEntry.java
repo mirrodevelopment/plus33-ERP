@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.entity
+ * File              : TreasuryJournalEntry.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasuryJournalEntryController
+ * Related Service   : TreasuryJournalEntryService, TreasuryJournalEntryServiceImpl
+ * Related Repository: TreasuryJournalEntryRepository
+ * Related Entity    : TreasuryJournalEntry
+ * Related DTO       : N/A
+ * Related Mapper    : TreasuryJournalEntryMapper
+ * Related DB Table  : treasury_journal_entries
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : TreasuryJournalEntryRepository, TreasuryJournalEntryMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'treasury_journal_entries'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.entity;
 
 import com.plus33.erp.finance.entity.Account;
@@ -22,6 +49,19 @@ import java.time.LocalDateTime;
     @Index(name = "idx_tje_account", columnList = "account_id, posting_date"),
     @Index(name = "idx_tje_company_date", columnList = "company_id, posting_date")
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code TreasuryJournalEntry}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'treasury_journal_entries'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code treasury_journal_entries}</p>
+ * <p><b>Module Deps      :</b> Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -87,6 +127,10 @@ public class TreasuryJournalEntry {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

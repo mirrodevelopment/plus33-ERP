@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 229
+-- File              : V229__create_platform_cost_optimization.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create platform cost optimization
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V229: Cost Optimization Recommendations DDL
 CREATE TABLE IF NOT EXISTS platform_cost_recommendation (
     id                  BIGSERIAL PRIMARY KEY,

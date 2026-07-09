@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Wms Module
+ * Package           : com.plus33.erp.wms.service.impl
+ * File              : InboundOperationsServiceImpl.java
+ * Purpose           : Business logic service layer for Wms Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: InboundOperationsController
+ * Related Service   : InboundOperationsServiceImpl
+ * Related Repository: AdvanceShippingNoticeRepository, PutAwayWorkRepository
+ * Related Entity    : InboundOperations
+ * Related DTO       : N/A
+ * Related Mapper    : InboundOperationsMapper
+ * Related DB Table  : inbound_operationss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : InboundOperationsController, InboundOperationsServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Wms Module. Implements InboundOperationsService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.wms.service.impl;
 
 import com.plus33.erp.wms.entity.*;
@@ -42,10 +69,28 @@ public class InboundOperationsServiceImpl {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Creates a new asn and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param asn the asn input value
+     * @return the AdvanceShippingNotice result
+     * @throws BusinessException if a business rule is violated
+     */
     public AdvanceShippingNotice createAsn(AdvanceShippingNotice asn) {
         return asnRepo.save(asn);
     }
 
+    /**
+     * Validates business rules and constraints for in.
+     *
+     * @param asnId the asnId input value
+     * @param dockDoorId the dockDoorId input value
+     * @param checkinId the checkinId input value
+     * @return the AdvanceShippingNotice result
+     * @throws BusinessException if a business rule is violated
+     */
     public AdvanceShippingNotice checkIn(Long asnId, Long dockDoorId, Long checkinId) {
         AdvanceShippingNotice asn = asnRepo.findById(asnId)
                 .orElseThrow(() -> new EntityNotFoundException("ASN not found: " + asnId));
@@ -112,6 +157,15 @@ public class InboundOperationsServiceImpl {
                 .toList();
     }
 
+    /**
+     * Completes the put away workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param putAwayWorkId the putAwayWorkId input value
+     * @param operatorId the operatorId input value
+     * @return the PutAwayWork result
+     */
     public PutAwayWork completePutAway(Long putAwayWorkId, Long operatorId) {
         PutAwayWork pw = putAwayRepo.findById(putAwayWorkId)
                 .orElseThrow(() -> new EntityNotFoundException("Put-away work not found: " + putAwayWorkId));
@@ -140,6 +194,15 @@ public class InboundOperationsServiceImpl {
         return saved;
     }
 
+    /**
+     * Retrieves by warehouse and status data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param warehouseId the warehouseId input value
+     * @param status status filter for narrowing query results
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Transactional(readOnly = true)
     public List<AdvanceShippingNotice> findByWarehouseAndStatus(Long companyId, Long warehouseId, String status) {
         return asnRepo.findByCompanyIdAndWarehouseIdAndStatus(companyId, warehouseId, status);

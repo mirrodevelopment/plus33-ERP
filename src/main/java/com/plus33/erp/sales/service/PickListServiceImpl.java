@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.service
+ * File              : PickListServiceImpl.java
+ * Purpose           : Business logic service layer for Sales Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PickListController
+ * Related Service   : PickListServiceImpl
+ * Related Repository: PickListRepository, InventoryAllocationRepository, SalesOrderRepository, SalesOrderItemRepository, CompanyRepository, WarehouseRepository, StoreRepository, ProductRepository, UserRepository, InventoryStockRepository, StockMovementRepository
+ * Related Entity    : PickList
+ * Related DTO       : CompletePickingRequest, PickListRequest, PickListResponse, ShipRequest, toResponse
+ * Related Mapper    : PickListMapper
+ * Related DB Table  : pick_lists
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module, Organization Module, Security Module
+ * Used By           : PickListController, PickListServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Sales Module. Implements PickListService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.sales.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -37,6 +64,30 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code PickListServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Sales Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * PickListController
+ *   --> PickListServiceImpl (this)
+ *   --> Validate business rules
+ *   --> PickListRepository (read/write 'pick_lists')
+ *   --> PickListMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code pick_lists}</p>
+ * <p><b>Module Deps      :</b> Common, Inventory, Organization, Sales, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class PickListServiceImpl implements PickListService {
@@ -84,6 +135,15 @@ public class PickListServiceImpl implements PickListService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    /**
+     * Creates a new pick list and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the PickListResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PickListResponse createPickList(PickListRequest request) {
@@ -188,6 +248,20 @@ public class PickListServiceImpl implements PickListService {
         return pickListMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a paginated list of pick list by id records.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PickListResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a paginated list of pick list by id records.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PickListResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public PickListResponse getPickListById(Long id) {
         PickList pickList = pickListRepository.findById(id)
@@ -195,6 +269,12 @@ public class PickListServiceImpl implements PickListService {
         return pickListMapper.toResponse(pickList);
     }
 
+    /**
+     * Releases previously reserved pick list resources back to the available pool.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PickListResponse result
+     */
     @Override
     @Transactional
     public PickListResponse releasePickList(Long id) {
@@ -279,6 +359,12 @@ public class PickListServiceImpl implements PickListService {
         return pickListMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the startPicking operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PickListResponse result
+     */
     @Override
     @Transactional
     public PickListResponse startPicking(Long id) {
@@ -294,6 +380,15 @@ public class PickListServiceImpl implements PickListService {
         return pickListMapper.toResponse(saved);
     }
 
+    /**
+     * Completes the picking workflow and finalizes the record status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the PickListResponse result
+     */
     @Override
     @Transactional
     public PickListResponse completePicking(Long id, CompletePickingRequest request) {
@@ -329,6 +424,12 @@ public class PickListServiceImpl implements PickListService {
         return pickListMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the packPickList operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the PickListResponse result
+     */
     @Override
     @Transactional
     public PickListResponse packPickList(Long id) {
@@ -347,6 +448,13 @@ public class PickListServiceImpl implements PickListService {
         return pickListMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the shipPickList operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the PickListResponse result
+     */
     @Override
     @Transactional
     public PickListResponse shipPickList(Long id, ShipRequest request) {
@@ -468,6 +576,16 @@ public class PickListServiceImpl implements PickListService {
         return pickListMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the pick list and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the PickListResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public PickListResponse cancelPickList(Long id, String reason) {
@@ -540,21 +658,77 @@ public class PickListServiceImpl implements PickListService {
         return pickListMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a paginated list of pick lists by sales order id records.
+     *
+     * @param salesOrderId the salesOrderId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a paginated list of pick lists by sales order id records.
+     *
+     * @param salesOrderId the salesOrderId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<PickListResponse> getPickListsBySalesOrderId(Long salesOrderId) {
         return pickListMapper.toResponseList(pickListRepository.findBySalesOrderId(salesOrderId));
     }
 
+    /**
+     * Retrieves a paginated list of pick lists by warehouse id records.
+     *
+     * @param warehouseId the warehouseId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a paginated list of pick lists by warehouse id records.
+     *
+     * @param warehouseId the warehouseId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<PickListResponse> getPickListsByWarehouseId(Long warehouseId) {
         return pickListMapper.toResponseList(pickListRepository.findByWarehouseId(warehouseId));
     }
 
+    /**
+     * Retrieves a paginated list of pick lists by store id records.
+     *
+     * @param storeId the storeId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a paginated list of pick lists by store id records.
+     *
+     * @param storeId the storeId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<PickListResponse> getPickListsByStoreId(Long storeId) {
         return pickListMapper.toResponseList(pickListRepository.findByStoreId(storeId));
     }
 
+    /**
+     * Retrieves a paginated list of pick lists by status records.
+     *
+     * @param status status filter for narrowing query results
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a paginated list of pick lists by status records.
+     *
+     * @param status status filter for narrowing query results
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<PickListResponse> getPickListsByStatus(PickListStatus status) {
         return pickListMapper.toResponseList(pickListRepository.findByStatus(status));

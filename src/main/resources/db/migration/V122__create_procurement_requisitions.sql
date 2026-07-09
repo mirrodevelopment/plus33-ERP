@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 122
+-- File              : V122__create_procurement_requisitions.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create procurement requisitions
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V122: Advanced Procurement Requisitions and Purchase Orders
 CREATE TABLE IF NOT EXISTS procurement_requisitions (
     id BIGSERIAL PRIMARY KEY,

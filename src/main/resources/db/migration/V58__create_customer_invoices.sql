@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 58
+-- File              : V58__create_customer_invoices.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create customer invoices
+--
+-- Tables Created    : customer_invoices, customer_invoice_items
+-- Tables Altered    : payment_allocations, payment_allocations, payment_allocations, payment_allocations, payments, payments, payments
+-- Seed Data For     : chart_of_accounts
+-- Indexes           : idx_customer_invoice_status, idx_customer_invoice_company, idx_customer_invoice_customer, idx_customer_invoice_items_invoice
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V58__create_customer_invoices.sql
 -- PLUS33 ERP — Customer Invoice Schema

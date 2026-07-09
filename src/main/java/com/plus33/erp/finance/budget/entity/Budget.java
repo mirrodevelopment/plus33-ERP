@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.budget.entity
+ * File              : Budget.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BudgetController
+ * Related Service   : BudgetService, BudgetServiceImpl
+ * Related Repository: BudgetRepository
+ * Related Entity    : Budget
+ * Related DTO       : N/A
+ * Related Mapper    : BudgetMapper
+ * Related DB Table  : budgets
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : BudgetRepository, BudgetMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'budgets'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.budget.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -14,6 +41,19 @@ import java.time.LocalDateTime;
 @Table(name = "budgets", uniqueConstraints = {
     @UniqueConstraint(name = "uk_budgets_company_fy_code", columnNames = {"company_id", "fiscal_year_id", "code", "is_forecast"})
 })
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code Budget}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.budget.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'budgets'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code budgets}</p>
+ * <p><b>Module Deps      :</b> Organization, Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -108,12 +148,20 @@ public class Budget {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /**
+     * Handles the create event or exception in the business workflow.
+     *
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Handles the update event or exception in the business workflow.
+     *
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

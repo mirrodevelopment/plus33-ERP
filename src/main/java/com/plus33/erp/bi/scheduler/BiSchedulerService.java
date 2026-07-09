@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.scheduler
+ * File              : BiSchedulerService.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: BiSchedulerController
+ * Related Service   : BiSchedulerService
+ * Related Repository: BiEtlJobRepository, BiEtlJobRunRepository
+ * Related Entity    : BiScheduler
+ * Related DTO       : N/A
+ * Related Mapper    : BiSchedulerMapper
+ * Related DB Table  : bi_schedulers
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : BiSchedulerController, BiSchedulerServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements BiSchedulerService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.scheduler;
 
 import com.plus33.erp.bi.entity.BiEtlJob;
@@ -34,6 +61,16 @@ public class BiSchedulerService {
         this.jdbc = jdbc;
     }
 
+    /**
+     * Creates a new and queue run and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param jobId the jobId input value
+     * @param triggeredBy the triggeredBy input value
+     * @return the BiEtlJobRun result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public BiEtlJobRun createAndQueueRun(Long jobId, String triggeredBy) {
         BiEtlJob job = jobRepo.findById(jobId).orElseThrow(() -> new IllegalArgumentException("ETL Job not found: " + jobId));
@@ -51,6 +88,12 @@ public class BiSchedulerService {
         return run;
     }
 
+    /**
+     * Performs the transitionRun operation in this module.
+     *
+     * @param runId the runId input value
+     * @param newStatus the newStatus input value
+     */
     @Transactional
     public void transitionRun(Long runId, String newStatus) {
         BiEtlJobRun run = jobRunRepo.findById(runId).orElseThrow();
@@ -70,6 +113,12 @@ public class BiSchedulerService {
         });
     }
 
+    /**
+     * Performs the failRun operation in this module.
+     *
+     * @param runId the runId input value
+     * @param errorMessage the errorMessage input value
+     */
     @Transactional
     public void failRun(Long runId, String errorMessage) {
         BiEtlJobRun run = jobRunRepo.findById(runId).orElseThrow();
@@ -83,10 +132,21 @@ public class BiSchedulerService {
         log.error("[SCHEDULER] RunId={} FAILED: {}", runId, errorMessage);
     }
 
+    /**
+     * Retrieves enabled jobs data from the database.
+     *
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     public List<BiEtlJob> getEnabledJobs() {
         return jobRepo.findByStatusAndEnabledTrue("CREATED");
     }
 
+    /**
+     * Performs the countActiveRuns operation in this module.
+     *
+     * @return the numeric result value
+     */
     public int countActiveRuns() {
         return jdbc.queryForObject(
             "SELECT COUNT(*) FROM bi_etl_job_run WHERE status IN ('QUEUED','EXTRACTING','VALIDATING','TRANSFORMING','LOADING','REFRESHING_CUBES')",

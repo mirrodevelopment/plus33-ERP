@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 173
+-- File              : V173__create_metadata_catalog.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create metadata catalog
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF, IF, IF, IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : bi_scheduled_job
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V173: BI Metadata Catalog
 -- Purpose: Dataset registry, KPI catalog with formula versioning and dependency
 --          tracking, cube refresh history, dashboard cache, and semantic models.

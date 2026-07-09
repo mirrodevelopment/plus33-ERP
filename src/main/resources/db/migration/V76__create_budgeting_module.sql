@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 76
+-- File              : V76__create_budgeting_module.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create budgeting module
+--
+-- Tables Created    : departments, cost_centers, projects, budget_dimension_sets, budget_workflow_templates, budget_workflow_steps, budget_policies, budget_templates, budget_template_lines, budget_drivers, budgets, budget_versions, budget_lines, budget_control_caches, budget_revisions, budget_reservations, budget_consumptions, budget_snapshots, budget_snapshot_lines, budget_approvals, budget_audit_logs
+-- Tables Altered    : purchase_request_items, purchase_request_items, purchase_order_items, purchase_order_items, supplier_invoice_items, supplier_invoice_items, journal_entry_lines, journal_entry_lines
+-- Seed Data For     : permissions, role_permissions
+-- Indexes           : uk_dim_sets_combination, idx_mv_bva
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- 1. Create Organizational Dimensions
 CREATE TABLE departments (
     id BIGSERIAL PRIMARY KEY,

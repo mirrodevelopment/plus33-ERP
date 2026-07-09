@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Manufacturing Module
+ * Package           : com.plus33.erp.manufacturing.service.impl
+ * File              : ManufacturingCalendarServiceImpl.java
+ * Purpose           : Business logic service layer for Manufacturing Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ManufacturingCalendarController
+ * Related Service   : ManufacturingCalendarServiceImpl
+ * Related Repository: ManufacturingCalendarRepository, ManufacturingCalendarShiftRepository, ManufacturingCalendarExceptionRepository
+ * Related Entity    : ManufacturingCalendar
+ * Related DTO       : CalendarDto, CalendarExceptionDto, CreateCalendarRequest, CreateExceptionRequest, CreateShiftRequest
+ * Related Mapper    : ManufacturingCalendarMapper
+ * Related DB Table  : manufacturing_calendars
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ManufacturingCalendarController, ManufacturingCalendarServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Manufacturing Module. Implements ManufacturingCalendarService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.manufacturing.service.impl;
 
 import com.plus33.erp.manufacturing.dto.*;
@@ -12,6 +39,30 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Manufacturing Module</b>
+ *
+ * <p><b>Class  :</b> {@code ManufacturingCalendarServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.manufacturing.service.impl}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Manufacturing Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ManufacturingCalendarController
+ *   --> ManufacturingCalendarServiceImpl (this)
+ *   --> Validate business rules
+ *   --> ManufacturingCalendarRepository (read/write 'manufacturing_calendars')
+ *   --> ManufacturingCalendarMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code manufacturing_calendars}</p>
+ * <p><b>Module Deps      :</b> Manufacturing</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional
 public class ManufacturingCalendarServiceImpl implements ManufacturingCalendarService {
@@ -28,6 +79,24 @@ public class ManufacturingCalendarServiceImpl implements ManufacturingCalendarSe
         this.exceptionRepository = exceptionRepository;
     }
 
+    /**
+     * Creates a new calendar and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the CalendarDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new calendar and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the CalendarDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public CalendarDto createCalendar(CreateCalendarRequest request) {
         ManufacturingCalendar calendar = new ManufacturingCalendar();
@@ -44,6 +113,22 @@ public class ManufacturingCalendarServiceImpl implements ManufacturingCalendarSe
         return mapToDto(calendar);
     }
 
+    /**
+     * Creates a new shift and persists it to the database.
+     *
+     * @param calendarId the calendarId input value
+     * @param request the validated request DTO containing input data
+     * @return the ShiftDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new shift and persists it to the database.
+     *
+     * @param calendarId the calendarId input value
+     * @param request the validated request DTO containing input data
+     * @return the ShiftDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public ShiftDto addShift(Long calendarId, CreateShiftRequest request) {
         ManufacturingCalendar calendar = calendarRepository.findById(calendarId)
@@ -63,6 +148,22 @@ public class ManufacturingCalendarServiceImpl implements ManufacturingCalendarSe
         return mapToShiftDto(shift);
     }
 
+    /**
+     * Creates a new exception and persists it to the database.
+     *
+     * @param calendarId the calendarId input value
+     * @param request the validated request DTO containing input data
+     * @return the CalendarExceptionDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new exception and persists it to the database.
+     *
+     * @param calendarId the calendarId input value
+     * @param request the validated request DTO containing input data
+     * @return the CalendarExceptionDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public CalendarExceptionDto addException(Long calendarId, CreateExceptionRequest request) {
         ManufacturingCalendar calendar = calendarRepository.findById(calendarId)
@@ -79,6 +180,16 @@ public class ManufacturingCalendarServiceImpl implements ManufacturingCalendarSe
         return mapToExceptionDto(exception);
     }
 
+    /**
+     * Retrieves available hours data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param resourceType the resourceType input value
+     * @param resourceId the resourceId input value
+     * @param date the date input value
+     * @return the BigDecimal result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public BigDecimal getAvailableHours(Long companyId, String resourceType, Long resourceId, LocalDate date) {
@@ -130,6 +241,13 @@ public class ManufacturingCalendarServiceImpl implements ManufacturingCalendarSe
         return null;
     }
 
+    /**
+     * Retrieves a single calendar by id by its identifier.
+     *
+     * @param calendarId the calendarId input value
+     * @return the CalendarDto result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public CalendarDto getCalendarById(Long calendarId) {
@@ -138,6 +256,13 @@ public class ManufacturingCalendarServiceImpl implements ManufacturingCalendarSe
         return mapToDto(calendar);
     }
 
+    /**
+     * Retrieves calendars by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<CalendarDto> getCalendarsByCompany(Long companyId) {

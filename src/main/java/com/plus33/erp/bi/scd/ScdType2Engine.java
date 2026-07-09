@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Bi Module
+ * Package           : com.plus33.erp.bi.scd
+ * File              : ScdType2Engine.java
+ * Purpose           : Business logic service layer for Bi Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ScdType2EngineController
+ * Related Service   : ScdType2Engine
+ * Related Repository: ScdType2EngineRepository
+ * Related Entity    : ScdType2Engine
+ * Related DTO       : N/A
+ * Related Mapper    : ScdType2EngineMapper
+ * Related DB Table  : scd_type2_engines
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : ScdType2EngineController, ScdType2EngineImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Bi Module. Implements ScdType2EngineService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.bi.scd;
 
 import org.slf4j.Logger;

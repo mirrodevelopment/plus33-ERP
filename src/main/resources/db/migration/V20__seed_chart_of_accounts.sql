@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 20
+-- File              : V20__seed_chart_of_accounts.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed chart of accounts
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : chart_of_accounts
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V20__seed_chart_of_accounts.sql
 -- PLUS33 ERP — Standard Chart of Accounts Seed Data

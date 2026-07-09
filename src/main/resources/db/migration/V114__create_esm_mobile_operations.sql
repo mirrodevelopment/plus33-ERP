@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 114
+-- File              : V114__create_esm_mobile_operations.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create esm mobile operations
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V114: Mobile Operations, Sessions, GPS tracking, and Survey Feedback
 CREATE TABLE IF NOT EXISTS esm_technician_sessions (
     id BIGSERIAL PRIMARY KEY,

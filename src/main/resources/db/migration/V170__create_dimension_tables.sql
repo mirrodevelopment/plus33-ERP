@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 170
+-- File              : V170__create_dimension_tables.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create dimension tables
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF, IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V170: Enterprise Data Warehouse � Dimension Tables
 -- Purpose: Conformed dimensions for the star schema. All dimensions support
 --          SCD Type 2 (effective_from / effective_to / is_current).

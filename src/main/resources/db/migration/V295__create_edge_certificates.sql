@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 295
+-- File              : V295__create_edge_certificates.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create edge certificates
+--
+-- Tables Created    : IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V295: Edge Certificate Rotation Logs
 CREATE TABLE IF NOT EXISTS platform_edge_certificate_log (
     id                  BIGSERIAL PRIMARY KEY,

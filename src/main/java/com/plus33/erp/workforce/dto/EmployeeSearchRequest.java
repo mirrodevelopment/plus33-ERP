@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Workforce Module
+ * Package           : com.plus33.erp.workforce.dto
+ * File              : EmployeeSearchRequest.java
+ * Purpose           : Data Transfer Object for request/response in Workforce Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: EmployeeSearchController
+ * Related Service   : EmployeeSearchService, EmployeeSearchServiceImpl
+ * Related Repository: EmployeeSearchRepository
+ * Related Entity    : EmployeeSearch
+ * Related DTO       : EmployeeSearchRequest
+ * Related Mapper    : EmployeeSearchMapper
+ * Related DB Table  : employee_searchs
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : EmployeeSearchController, EmployeeSearchService, EmployeeSearchServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * DTO for Workforce Module HTTP serialization. Annotated with Jakarta Bean Validation constraints.
+ ******************************************************************************/
 package com.plus33.erp.workforce.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;

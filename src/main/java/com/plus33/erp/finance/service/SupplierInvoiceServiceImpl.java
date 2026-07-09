@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.service
+ * File              : SupplierInvoiceServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: SupplierInvoiceController
+ * Related Service   : SupplierInvoiceServiceImpl
+ * Related Repository: SupplierInvoiceRepository, CompanyRepository, SupplierRepository, PurchaseOrderRepository, PurchaseOrderItemRepository, GoodsReceiptItemRepository, AccountRepository, JournalEntryRepository, UserRepository, BudgetDimensionSetRepository
+ * Related Entity    : SupplierInvoice
+ * Related DTO       : BudgetDimensionSetRequest, BudgetReservationRequest, PageResponse, searchRequest, SupplierInvoiceItemRequest
+ * Related Mapper    : SupplierInvoiceMapper
+ * Related DB Table  : supplier_invoices
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Inventory Module, Organization Module, Procurement Module, Security Module
+ * Used By           : SupplierInvoiceController, SupplierInvoiceServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements SupplierInvoiceService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -49,6 +76,30 @@ import com.plus33.erp.finance.budget.repository.BudgetDimensionSetRepository;
 import com.plus33.erp.finance.budget.service.BudgetService;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code SupplierInvoiceServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * SupplierInvoiceController
+ *   --> SupplierInvoiceServiceImpl (this)
+ *   --> Validate business rules
+ *   --> SupplierInvoiceRepository (read/write 'supplier_invoices')
+ *   --> SupplierInvoiceMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code supplier_invoices}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Inventory, Organization, Procurement, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -103,6 +154,15 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         this.taxJournalService = taxJournalService;
     }
 
+    /**
+     * Creates a new invoice and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the SupplierInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SupplierInvoiceResponse createInvoice(SupplierInvoiceRequest request) {
@@ -163,6 +223,16 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         return supplierInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Updates an existing invoice record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the SupplierInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SupplierInvoiceResponse updateInvoice(Long id, SupplierInvoiceUpdateRequest request) {
@@ -192,6 +262,20 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         return supplierInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single invoice by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierInvoiceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single invoice by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierInvoiceResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public SupplierInvoiceResponse getInvoiceById(Long id) {
         SupplierInvoice invoice = supplierInvoiceRepository.findById(id)
@@ -199,6 +283,20 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         return supplierInvoiceMapper.toResponse(invoice);
     }
 
+    /**
+     * Returns a filtered paginated list of invoices records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of invoices records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<SupplierInvoiceResponse> searchInvoices(SupplierInvoiceSearchRequest searchRequest, Pageable pageable) {
         Specification<SupplierInvoice> spec = (root, query, cb) -> {
@@ -243,6 +341,15 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         );
     }
 
+    /**
+     * Approves the invoice, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SupplierInvoiceResponse approveInvoice(Long id) {
@@ -297,6 +404,15 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         return supplierInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the invoice and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SupplierInvoiceResponse cancelInvoice(Long id) {
@@ -377,6 +493,13 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         return supplierInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Reserves payment resources (budget or stock) for downstream processing.
+     *
+     * @param id the unique database ID of the resource
+     * @param amount the amount input value
+     * @return the SupplierInvoiceResponse result
+     */
     @Override
     @Transactional
     public SupplierInvoiceResponse allocatePayment(Long id, BigDecimal amount) {
@@ -409,6 +532,13 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         return supplierInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the deallocatePayment operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param amount the amount input value
+     * @return the SupplierInvoiceResponse result
+     */
     @Override
     @Transactional
     public SupplierInvoiceResponse deallocatePayment(Long id, BigDecimal amount) {
@@ -743,6 +873,15 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Current user not found with email: " + email));
     }
 
+    /**
+     * Submits the invoice for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierInvoiceResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public SupplierInvoiceResponse submitInvoice(Long id) {
@@ -759,6 +898,14 @@ public class SupplierInvoiceServiceImpl implements SupplierInvoiceService {
         return supplierInvoiceMapper.toResponse(saved);
     }
 
+    /**
+     * Permanently voids the invoice. This action cannot be undone.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @return the SupplierInvoiceResponse result
+     */
     @Override
     @Transactional
     public SupplierInvoiceResponse voidInvoice(Long id) {

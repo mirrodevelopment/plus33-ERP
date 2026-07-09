@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Organization Module
+ * Package           : com.plus33.erp.organization.service
+ * File              : StoreServiceImpl.java
+ * Purpose           : Business logic service layer for Organization Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: StoreController
+ * Related Service   : StoreServiceImpl
+ * Related Repository: StoreRepository, RegionRepository, WarehouseRepository
+ * Related Entity    : Store
+ * Related DTO       : PageResponse, searchRequest, StoreRequest, StoreResponse, StoreSearchRequest
+ * Related Mapper    : OrganizationMapper
+ * Related DB Table  : stores
+ * Related REST APIs : N/A
+ * Depends On        : Common Module
+ * Used By           : StoreController, StoreServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Organization Module. Implements StoreService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.organization.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -24,6 +51,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Organization Module</b>
+ *
+ * <p><b>Class  :</b> {@code StoreServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.organization.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Organization Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * StoreController
+ *   --> StoreServiceImpl (this)
+ *   --> Validate business rules
+ *   --> StoreRepository (read/write 'stores')
+ *   --> StoreMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code stores}</p>
+ * <p><b>Module Deps      :</b> Common, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional(readOnly = true)
 public class StoreServiceImpl implements StoreService {
@@ -43,6 +94,15 @@ public class StoreServiceImpl implements StoreService {
         this.organizationMapper = organizationMapper;
     }
 
+    /**
+     * Creates a new store and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the StoreResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public StoreResponse createStore(StoreRequest request) {
@@ -72,6 +132,20 @@ public class StoreServiceImpl implements StoreService {
         return organizationMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single store by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StoreResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single store by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StoreResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public StoreResponse getStoreById(Long id) {
         Store store = storeRepository.findById(id)
@@ -79,6 +153,20 @@ public class StoreServiceImpl implements StoreService {
         return organizationMapper.toResponse(store);
     }
 
+    /**
+     * Returns a filtered paginated list of stores records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of stores records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<StoreResponse> searchStores(StoreSearchRequest searchRequest, Pageable pageable) {
         Specification<Store> spec = (root, query, cb) -> {
@@ -124,6 +212,16 @@ public class StoreServiceImpl implements StoreService {
         );
     }
 
+    /**
+     * Updates an existing store record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the StoreResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public StoreResponse updateStore(Long id, StoreRequest request) {
@@ -163,6 +261,13 @@ public class StoreServiceImpl implements StoreService {
         return organizationMapper.toResponse(saved);
     }
 
+    /**
+     * Permanently deletes the store from the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     */
     @Override
     @Transactional
     public void deleteStore(Long id) {
@@ -172,6 +277,12 @@ public class StoreServiceImpl implements StoreService {
         storeRepository.save(store);
     }
 
+    /**
+     * Performs the activateStore operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StoreResponse result
+     */
     @Override
     @Transactional
     public StoreResponse activateStore(Long id) {
@@ -182,6 +293,12 @@ public class StoreServiceImpl implements StoreService {
         return organizationMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the deactivateStore operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the StoreResponse result
+     */
     @Override
     @Transactional
     public StoreResponse deactivateStore(Long id) {

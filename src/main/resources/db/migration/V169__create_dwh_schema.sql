@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 169
+-- File              : V169__create_dwh_schema.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create dwh schema
+--
+-- Tables Created    : IF, IF, IF, IF, IF, IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : bi_configuration, bi_warehouse_version
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V169: Enterprise Data Warehouse Core Schema
 -- Purpose: Core DWH infrastructure: warehouse versioning, build manifests,
 --          ETL job state machine, job dependency graph, data source registry,

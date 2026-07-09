@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.vat
+ * File              : VatTaxEngineProvider.java
+ * Purpose           : Component of Finance Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: VatTaxEngineProviderController
+ * Related Service   : VatTaxEngineProviderService, VatTaxEngineProviderServiceImpl
+ * Related Repository: TaxRateRepository
+ * Related Entity    : VatTaxEngineProvider
+ * Related DTO       : TaxCalculationLineRequest, TaxCalculationRequest
+ * Related Mapper    : VatTaxEngineProviderMapper
+ * Related DB Table  : vat_tax_engine_providers
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Finance Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Finance Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.vat;
 
 import com.plus33.erp.finance.tax.dto.*;
@@ -27,11 +54,39 @@ public class VatTaxEngineProvider implements TaxEngineProvider {
     private final TaxPostingProfileService postingProfileService;
     private final TaxConfigurationCache taxConfigurationCache;
 
+    /**
+     * Retrieves tax type data from the database.
+     *
+     * @return the result string value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves tax type data from the database.
+     *
+     * @return the result string value
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public String getTaxType() {
         return "VAT";
     }
 
+    /**
+     * Calculates tax totals including subtotal, tax, discounts, and net amount.
+     *
+     * @param request the validated request DTO containing input data
+     * @param taxGroup the taxGroup input value
+     * @param isExempt the isExempt input value
+     * @return the TaxCalculationResult result
+     */
+    /**
+     * Calculates tax totals including subtotal, tax, discounts, and net amount.
+     *
+     * @param request the validated request DTO containing input data
+     * @param taxGroup the taxGroup input value
+     * @param isExempt the isExempt input value
+     * @return the TaxCalculationResult result
+     */
     @Override
     public TaxCalculationResult calculateTax(TaxCalculationRequest request, TaxGroup taxGroup, boolean isExempt) {
         Long companyId = request.getCompanyId();

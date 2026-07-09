@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 73
+-- File              : V73__create_fixed_assets_module.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create fixed assets module
+--
+-- Tables Created    : asset_categories, fixed_assets, fixed_asset_depreciation_logs, fixed_asset_transfers, fixed_asset_maintenances, fixed_asset_assignments, fixed_asset_audits, fixed_asset_audit_items
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_asset_company_status, idx_asset_category, idx_asset_parent, idx_asset_assigned, idx_depr_log_asset, idx_transfer_asset, idx_maintenance_asset, idx_assignment_asset, idx_audit_item_audit
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V73__create_fixed_assets_module.sql
 -- PLUS33 ERP — Fixed Asset Management Tables

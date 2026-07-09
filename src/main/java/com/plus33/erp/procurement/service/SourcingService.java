@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.service
+ * File              : SourcingService.java
+ * Purpose           : Business logic service layer for Procurement Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: SourcingController
+ * Related Service   : SourcingService
+ * Related Repository: ProcurementRequisitionRepository, ProcurementRfqRepository, ProcurementRfqVersionRepository, SupplierResponseRepository, PurchaseOrderRepository, CompanyRepository, SupplierRepository, UserRepository
+ * Related Entity    : Sourcing
+ * Related DTO       : SupplierResponse
+ * Related Mapper    : SourcingMapper
+ * Related DB Table  : sourcings
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module, Security Module
+ * Used By           : SourcingController, SourcingServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Procurement Module. Implements SourcingService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.procurement.service;
 
 import com.plus33.erp.procurement.entity.*;
@@ -15,6 +42,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code SourcingService}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Procurement Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * SourcingController
+ *   --> SourcingService (this)
+ *   --> Validate business rules
+ *   --> SourcingRepository (read/write 'sourcings')
+ *   --> SourcingMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code sourcings}</p>
+ * <p><b>Module Deps      :</b> Procurement, Organization, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 public class SourcingService {
 
@@ -48,6 +99,17 @@ public class SourcingService {
         this.eventBus = eventBus;
     }
 
+    /**
+     * Creates a new requisition and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param requisitionNumber the requisitionNumber input value
+     * @param createdBy the createdBy input value
+     * @return the ProcurementRequisition result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public ProcurementRequisition createRequisition(Long companyId, String requisitionNumber, Long createdBy) {
         ProcurementRequisition req = new ProcurementRequisition();
@@ -61,6 +123,12 @@ public class SourcingService {
         return req;
     }
 
+    /**
+     * Performs the transitionRequisitionStatus operation in this module.
+     *
+     * @param requisitionId the requisitionId input value
+     * @param targetStatus the targetStatus input value
+     */
     @Transactional
     public void transitionRequisitionStatus(Long requisitionId, String targetStatus) {
         ProcurementRequisition req = requisitionRepository.findById(requisitionId)
@@ -75,6 +143,16 @@ public class SourcingService {
         }
     }
 
+    /**
+     * Creates a new rfq and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param rfqNumber the rfqNumber input value
+     * @return the ProcurementRfq result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public ProcurementRfq createRfq(Long companyId, String rfqNumber) {
         ProcurementRfq rfq = new ProcurementRfq();
@@ -95,6 +173,15 @@ public class SourcingService {
         return rfq;
     }
 
+    /**
+     * Creates a new new rfq version and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param rfqId the rfqId input value
+     * @param notes the notes input value
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public void createNewRfqVersion(Long rfqId, String notes) {
         ProcurementRfq rfq = rfqRepository.findById(rfqId)
@@ -118,6 +205,17 @@ public class SourcingService {
         rfqVersionRepository.save(newVer);
     }
 
+    /**
+     * Submits the bid for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param rfqVersionId the rfqVersionId input value
+     * @param supplierId the supplierId input value
+     * @param amount the amount input value
+     * @return the SupplierResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Transactional
     public SupplierResponse submitBid(Long rfqVersionId, Long supplierId, BigDecimal amount) {
         SupplierResponse response = new SupplierResponse();
@@ -134,6 +232,13 @@ public class SourcingService {
         return response;
     }
 
+    /**
+     * Performs the awardAndGeneratePo operation in this module.
+     *
+     * @param rfqVersionId the rfqVersionId input value
+     * @param supplierId the supplierId input value
+     * @return the PurchaseOrder result
+     */
     @Transactional
     public PurchaseOrder awardAndGeneratePo(Long rfqVersionId, Long supplierId) {
         ProcurementRfqVersion rfqVer = rfqVersionRepository.findById(rfqVersionId)

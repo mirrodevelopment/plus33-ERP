@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 382
+-- File              : V382__seed_plus33_coffee_purchasing.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed plus33 coffee purchasing
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : purchase_order_items, purchase_orders, purchase_request_items, purchase_requests, supplier_invoice_items, supplier_invoices
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V382__seed_plus33_coffee_purchasing.sql
 -- PLUS33 ERP — Purchase Requests, Purchase Orders, Supplier Invoices

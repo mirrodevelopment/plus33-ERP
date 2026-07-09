@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.tax.service
+ * File              : TaxFilingServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TaxFilingController
+ * Related Service   : TaxFilingServiceImpl
+ * Related Repository: TaxCalendarRepository, TaxFilingRepository, TaxRegistrationRepository, CustomerInvoiceRepository, SupplierInvoiceRepository
+ * Related Entity    : TaxFiling
+ * Related DTO       : N/A
+ * Related Mapper    : TaxFilingMapper
+ * Related DB Table  : tax_filings
+ * Related REST APIs : N/A
+ * Depends On        : Sales Module
+ * Used By           : TaxFilingController, TaxFilingServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TaxFilingService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.tax.service;
 
 import com.plus33.erp.finance.repository.SupplierInvoiceRepository;
@@ -18,6 +45,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code TaxFilingServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.tax.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * TaxFilingController
+ *   --> TaxFilingServiceImpl (this)
+ *   --> Validate business rules
+ *   --> TaxFilingRepository (read/write 'tax_filings')
+ *   --> TaxFilingMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code tax_filings}</p>
+ * <p><b>Module Deps      :</b> Finance, Sales</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,6 +80,13 @@ public class TaxFilingServiceImpl implements TaxFilingService {
     private final CustomerInvoiceRepository customerInvoiceRepository;
     private final SupplierInvoiceRepository supplierInvoiceRepository;
 
+    /**
+     * Validates business rules and constraints for filing.
+     *
+     * @param calendarId the calendarId input value
+     * @return the PreFilingValidationResult result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional(readOnly = true)
     public PreFilingValidationResult validateFiling(Long calendarId) {
@@ -60,6 +118,20 @@ public class TaxFilingServiceImpl implements TaxFilingService {
         return new PreFilingValidationResult(errors, warnings);
     }
 
+    /**
+     * Calculates filing totals including subtotal, tax, discounts, and net amount.
+     *
+     * @param calendarId the calendarId input value
+     * @param filedBy the filedBy input value
+     * @return the TaxFiling result
+     */
+    /**
+     * Calculates filing totals including subtotal, tax, discounts, and net amount.
+     *
+     * @param calendarId the calendarId input value
+     * @param filedBy the filedBy input value
+     * @return the TaxFiling result
+     */
     @Override
     public TaxFiling calculateFiling(Long calendarId, String filedBy) {
         TaxCalendar calendar = taxCalendarRepository.findById(calendarId)
@@ -118,6 +190,26 @@ public class TaxFilingServiceImpl implements TaxFilingService {
         return taxFilingRepository.save(filing);
     }
 
+    /**
+     * Submits the filing for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param filingId the filingId input value
+     * @param filedBy the filedBy input value
+     * @return the TaxFiling result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Submits the filing for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param filingId the filingId input value
+     * @param filedBy the filedBy input value
+     * @return the TaxFiling result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public TaxFiling submitFiling(Long filingId, String filedBy) {
         TaxFiling filing = taxFilingRepository.findById(filingId)

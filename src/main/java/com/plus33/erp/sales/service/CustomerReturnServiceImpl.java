@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.service
+ * File              : CustomerReturnServiceImpl.java
+ * Purpose           : Business logic service layer for Sales Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: CustomerReturnController
+ * Related Service   : CustomerReturnServiceImpl
+ * Related Repository: CustomerReturnRepository, CustomerReturnItemRepository, CreditNoteRepository, CreditNoteItemRepository, CustomerInvoiceRepository, CustomerInvoiceItemRepository, SalesOrderRepository, SalesOrderItemRepository, ProductRepository, CompanyRepository, CustomerRepository, WarehouseRepository, StoreRepository, UserRepository, InventoryStockRepository, StockMovementRepository, InventoryLotRepository, InventorySerialRepository, AccountRepository, JournalEntryRepository
+ * Related Entity    : CustomerReturn
+ * Related DTO       : CustomerReturnItemRequest, CustomerReturnRequest, CustomerReturnResponse, CustomerReturnSearchRequest, InspectionRequest
+ * Related Mapper    : CustomerReturnMapper
+ * Related DB Table  : customer_returns
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Finance Module, Inventory Module, Organization Module, Security Module
+ * Used By           : CustomerReturnController, CustomerReturnServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Sales Module. Implements CustomerReturnService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.sales.service;
 
 import com.plus33.erp.common.dto.PageResponse;
@@ -44,6 +71,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code CustomerReturnServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Sales Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * CustomerReturnController
+ *   --> CustomerReturnServiceImpl (this)
+ *   --> Validate business rules
+ *   --> CustomerReturnRepository (read/write 'customer_returns')
+ *   --> CustomerReturnMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code customer_returns}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Inventory, Organization, Sales, Security</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional
 public class CustomerReturnServiceImpl implements CustomerReturnService {
@@ -121,6 +172,24 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Creates a new return and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new return and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public CustomerReturnResponse createReturn(CustomerReturnRequest request) {
         // Tenant validation
@@ -278,6 +347,26 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         return customerReturnMapper.toResponse(saved);
     }
 
+    /**
+     * Updates an existing return record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Updates an existing return record in the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public CustomerReturnResponse updateReturn(Long id, CustomerReturnRequest request) {
         CustomerReturn customerReturn = customerReturnRepository.findById(id)
@@ -353,6 +442,20 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         return customerReturnMapper.toResponse(saved);
     }
 
+    /**
+     * Retrieves a single return by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerReturnResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single return by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerReturnResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public CustomerReturnResponse getReturnById(Long id) {
         CustomerReturn customerReturn = customerReturnRepository.findById(id)
@@ -360,6 +463,20 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         return customerReturnMapper.toResponse(customerReturn);
     }
 
+    /**
+     * Returns a filtered paginated list of returns records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
+    /**
+     * Returns a filtered paginated list of returns records.
+     *
+     * @param searchRequest the searchRequest input value
+     * @param pageable Spring Pageable (page, size, sort) from query parameters
+     * @return the PageResponse result
+     */
     @Override
     public PageResponse<CustomerReturnResponse> searchReturns(CustomerReturnSearchRequest searchRequest, Pageable pageable) {
         Specification<CustomerReturn> spec = (root, query, cb) -> {
@@ -407,6 +524,26 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         );
     }
 
+    /**
+     * Approves the return, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Approves the return, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public CustomerReturnResponse approveReturn(Long id, ReturnApprovalRequest request) {
         CustomerReturn customerReturn = customerReturnRepository.findById(id)
@@ -425,6 +562,18 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         return customerReturnMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the receiveReturn operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerReturnResponse result
+     */
+    /**
+     * Performs the receiveReturn operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @return the CustomerReturnResponse result
+     */
     @Override
     public CustomerReturnResponse receiveReturn(Long id) {
         CustomerReturn customerReturn = customerReturnRepository.findById(id)
@@ -443,6 +592,20 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         return customerReturnMapper.toResponse(saved);
     }
 
+    /**
+     * Performs the inspectReturn operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     */
+    /**
+     * Performs the inspectReturn operation in this module.
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     */
     @Override
     public CustomerReturnResponse inspectReturn(Long id, InspectionRequest request) {
         CustomerReturn customerReturn = customerReturnRepository.findById(id)
@@ -472,6 +635,13 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         return customerReturnMapper.toResponse(saved);
     }
 
+    /**
+     * Completes the return workflow and finalizes the record status.
+     *
+     * @param id the unique database ID of the resource
+     * @param request the validated request DTO containing input data
+     * @return the CustomerReturnResponse result
+     */
     @Override
     @Transactional
     public CustomerReturnResponse closeReturn(Long id, ReturnCloseRequest request) {
@@ -615,6 +785,26 @@ public class CustomerReturnServiceImpl implements CustomerReturnService {
         return customerReturnMapper.toResponse(saved);
     }
 
+    /**
+     * Cancels the return and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the CustomerReturnResponse result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Cancels the return and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param id the unique database ID of the resource
+     * @param reason the reason input value
+     * @return the CustomerReturnResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public CustomerReturnResponse cancelReturn(Long id, String reason) {
         CustomerReturn customerReturn = customerReturnRepository.findById(id)

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 215
+-- File              : V215__create_kubernetes_service_mesh.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create kubernetes service mesh
+--
+-- Tables Created    : IF, IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V215: Kubernetes & Service Mesh DDL
 CREATE TABLE IF NOT EXISTS platform_k8s_resource (
     id                  BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.reporting.entity
+ * File              : PeriodLock.java
+ * Purpose           : JPA Entity representing a persistent database record in Finance Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PeriodLockController
+ * Related Service   : PeriodLockService, PeriodLockServiceImpl
+ * Related Repository: PeriodLockRepository
+ * Related Entity    : PeriodLock
+ * Related DTO       : N/A
+ * Related Mapper    : PeriodLockMapper
+ * Related DB Table  : period_locks
+ * Related REST APIs : N/A
+ * Depends On        : Organization Module
+ * Used By           : PeriodLockRepository, PeriodLockMapper
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Entity mapped to 'period_locks'. Defines persistent domain object for Finance Module with validation, relationship mappings, and lifecycle callbacks.
+ ******************************************************************************/
 package com.plus33.erp.finance.reporting.entity;
 
 import com.plus33.erp.organization.entity.Company;
@@ -7,6 +34,19 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code PeriodLock}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.reporting.entity}</p>
+ * <p><b>Layer  :</b> JPA Entity: persistent domain object mapped to PostgreSQL table 'period_locks'.</p>
+ *
+ * <p><b>Database Table   :</b> {@code period_locks}</p>
+ * <p><b>Module Deps      :</b> Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @Entity

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 163
+-- File              : V163__create_policy_management.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create policy management
+--
+-- Tables Created    : IF, IF, IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V163: Enterprise Policy Management
 CREATE TABLE IF NOT EXISTS grc_policies (
     id BIGSERIAL PRIMARY KEY,

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 99
+-- File              : V99__create_wms_tier1_permissions.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : create wms tier1 permissions
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : permissions
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V99: Seed Tier-1 WMS/TMS Enterprise Permissions
 INSERT INTO permissions (code, name, description)
 VALUES

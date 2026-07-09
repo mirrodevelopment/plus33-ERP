@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 136
+-- File              : V136__create_billing_and_revenue.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create billing and revenue
+--
+-- Tables Created    : IF, IF
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- V136: Project Contracts and Billing milestones
 CREATE TABLE IF NOT EXISTS project_billing_contracts (
     id BIGSERIAL PRIMARY KEY,

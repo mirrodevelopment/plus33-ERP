@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 381
+-- File              : V381__seed_plus33_coffee_inventory.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed plus33 coffee inventory
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : inventory_stock, stock_adjustments, stock_count_items, stock_counts, stock_movements, stock_transfer_items, stock_transfers, tmp_locations
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V381__seed_plus33_coffee_inventory.sql
 -- PLUS33 ERP — Inventory Stock, Movements, Transfers, Adjustments, Counts

@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 70
+-- File              : V70__payment_run_file_and_supplier_results.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : payment run file and supplier results
+--
+-- Tables Created    : payment_run_supplier_results
+-- Tables Altered    : payment_runs, payment_runs, payment_runs, payment_runs, payment_runs
+-- Seed Data For     : N/A
+-- Indexes           : idx_payment_run_supplier_results
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V70__payment_run_file_and_supplier_results.sql
 -- PLUS33 ERP — Supplier Results & Bank File Storage Metadata

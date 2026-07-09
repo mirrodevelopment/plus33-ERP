@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 37
+-- File              : V37__alter_payments_schema.sql
+-- Operation Type    : Schema Alteration
+-- Purpose           : alter payments schema
+--
+-- Tables Created    : N/A
+-- Tables Altered    : payments, payments, payments, payments, payments, payments, payments, payments
+-- Seed Data For     : permissions, role_permissions
+-- Indexes           : IF, IF
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V37__alter_payments_schema.sql
 -- PLUS33 ERP — Supplier Payments Schema Enhancements & Permissions

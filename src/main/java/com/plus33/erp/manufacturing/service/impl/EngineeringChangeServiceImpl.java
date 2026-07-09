@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Manufacturing Module
+ * Package           : com.plus33.erp.manufacturing.service.impl
+ * File              : EngineeringChangeServiceImpl.java
+ * Purpose           : Business logic service layer for Manufacturing Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: EngineeringChangeController
+ * Related Service   : EngineeringChangeServiceImpl
+ * Related Repository: EngineeringChangeOrderRepository, EngineeringChangeLineRepository, BomHeaderRepository, RoutingHeaderRepository
+ * Related Entity    : EngineeringChange
+ * Related DTO       : CreateEcoLineRequest, CreateEcoRequest, EngineeringChangeLineDto, EngineeringChangeOrderDto, lineDto
+ * Related Mapper    : EngineeringChangeMapper
+ * Related DB Table  : engineering_changes
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : EngineeringChangeController, EngineeringChangeServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Manufacturing Module. Implements EngineeringChangeService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.manufacturing.service.impl;
 
 import com.plus33.erp.manufacturing.dto.*;
@@ -11,6 +38,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Manufacturing Module</b>
+ *
+ * <p><b>Class  :</b> {@code EngineeringChangeServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.manufacturing.service.impl}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Manufacturing Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * EngineeringChangeController
+ *   --> EngineeringChangeServiceImpl (this)
+ *   --> Validate business rules
+ *   --> EngineeringChangeRepository (read/write 'engineering_changes')
+ *   --> EngineeringChangeMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code engineering_changes}</p>
+ * <p><b>Module Deps      :</b> Manufacturing</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Transactional
 public class EngineeringChangeServiceImpl implements EngineeringChangeService {
@@ -30,6 +81,24 @@ public class EngineeringChangeServiceImpl implements EngineeringChangeService {
         this.routingHeaderRepository = routingHeaderRepository;
     }
 
+    /**
+     * Creates a new eco and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the EngineeringChangeOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Creates a new eco and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the EngineeringChangeOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public EngineeringChangeOrderDto createEco(CreateEcoRequest request) {
         if (ecoRepository.existsByCompanyIdAndEcoNumber(request.getCompanyId(), request.getEcoNumber())) {
@@ -69,6 +138,13 @@ public class EngineeringChangeServiceImpl implements EngineeringChangeService {
         return mapToDto(eco);
     }
 
+    /**
+     * Retrieves a single eco by id by its identifier.
+     *
+     * @param ecoId the ecoId input value
+     * @return the EngineeringChangeOrderDto result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public EngineeringChangeOrderDto getEcoById(Long ecoId) {
@@ -77,6 +153,13 @@ public class EngineeringChangeServiceImpl implements EngineeringChangeService {
         return mapToDto(eco);
     }
 
+    /**
+     * Retrieves eco by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     @Transactional(readOnly = true)
     public List<EngineeringChangeOrderDto> getEcoByCompany(Long companyId) {
@@ -84,6 +167,26 @@ public class EngineeringChangeServiceImpl implements EngineeringChangeService {
                 .stream().map(this::mapToDto).toList();
     }
 
+    /**
+     * Submits the eco for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param ecoId the ecoId input value
+     * @param userId authenticated user identifier
+     * @return the EngineeringChangeOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Submits the eco for approval. Transitions DRAFT to SUBMITTED status.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param ecoId the ecoId input value
+     * @param userId authenticated user identifier
+     * @return the EngineeringChangeOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public EngineeringChangeOrderDto submitEco(Long ecoId, Long userId) {
         EngineeringChangeOrder eco = ecoRepository.findById(ecoId)
@@ -97,6 +200,26 @@ public class EngineeringChangeServiceImpl implements EngineeringChangeService {
         return mapToDto(ecoRepository.save(eco));
     }
 
+    /**
+     * Approves the eco, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param ecoId the ecoId input value
+     * @param userId authenticated user identifier
+     * @return the EngineeringChangeOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Approves the eco, transitions to APPROVED status, and posts GL journal entries.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param ecoId the ecoId input value
+     * @param userId authenticated user identifier
+     * @return the EngineeringChangeOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public EngineeringChangeOrderDto approveEco(Long ecoId, Long userId) {
         EngineeringChangeOrder eco = ecoRepository.findById(ecoId)
@@ -110,6 +233,20 @@ public class EngineeringChangeServiceImpl implements EngineeringChangeService {
         return mapToDto(ecoRepository.save(eco));
     }
 
+    /**
+     * Performs the implementEco operation in this module.
+     *
+     * @param ecoId the ecoId input value
+     * @param userId authenticated user identifier
+     * @return the EngineeringChangeOrderDto result
+     */
+    /**
+     * Performs the implementEco operation in this module.
+     *
+     * @param ecoId the ecoId input value
+     * @param userId authenticated user identifier
+     * @return the EngineeringChangeOrderDto result
+     */
     @Override
     public EngineeringChangeOrderDto implementEco(Long ecoId, Long userId) {
         EngineeringChangeOrder eco = ecoRepository.findById(ecoId)
@@ -152,6 +289,28 @@ public class EngineeringChangeServiceImpl implements EngineeringChangeService {
         return mapToDto(ecoRepository.save(eco));
     }
 
+    /**
+     * Cancels the eco and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param ecoId the ecoId input value
+     * @param reason the reason input value
+     * @param userId authenticated user identifier
+     * @return the EngineeringChangeOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
+    /**
+     * Cancels the eco and posts reversing GL entries. Restores reserved resources.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param ecoId the ecoId input value
+     * @param reason the reason input value
+     * @param userId authenticated user identifier
+     * @return the EngineeringChangeOrderDto result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     public EngineeringChangeOrderDto cancelEco(Long ecoId, String reason, Long userId) {
         EngineeringChangeOrder eco = ecoRepository.findById(ecoId)

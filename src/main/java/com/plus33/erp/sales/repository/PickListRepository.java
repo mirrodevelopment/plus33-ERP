@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Sales Module
+ * Package           : com.plus33.erp.sales.repository
+ * File              : PickListRepository.java
+ * Purpose           : JPA Repository providing database CRUD for Sales Module entities
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: PickListController
+ * Related Service   : PickListService, PickListServiceImpl
+ * Related Repository: PickListRepository
+ * Related Entity    : PickList
+ * Related DTO       : N/A
+ * Related Mapper    : PickListMapper
+ * Related DB Table  : pick_lists
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : PickListService, PickListServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * JPA Repository for Sales Module against the 'pick_lists' table. Provides CRUD, Specification-based queries, and paginated results.
+ ******************************************************************************/
 package com.plus33.erp.sales.repository;
 
 import com.plus33.erp.sales.entity.PickList;
@@ -12,6 +39,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Sales Module</b>
+ *
+ * <p><b>Class  :</b> {@code PickListRepository}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.sales.repository}</p>
+ * <p><b>Layer  :</b> JPA Repository: database access for table 'pick_lists' via Spring Data JPA.</p>
+ *
+ * <p><b>Database Table   :</b> {@code pick_lists}</p>
+ * <p><b>Module Deps      :</b> Sales</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Repository
 public interface PickListRepository extends JpaRepository<PickList, Long>, JpaSpecificationExecutor<PickList> {
 

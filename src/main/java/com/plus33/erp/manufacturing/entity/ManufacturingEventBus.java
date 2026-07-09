@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Manufacturing Module
+ * Package           : com.plus33.erp.manufacturing.entity
+ * File              : ManufacturingEventBus.java
+ * Purpose           : Component of Manufacturing Module within the PLUS33 Coffee ERP platform
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ManufacturingEventBusController
+ * Related Service   : ManufacturingEventBusService, ManufacturingEventBusServiceImpl
+ * Related Repository: ManufacturingEventRepository
+ * Related Entity    : ManufacturingEventBus
+ * Related DTO       : N/A
+ * Related Mapper    : ManufacturingEventBusMapper
+ * Related DB Table  : manufacturing_event_buss
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : Manufacturing Module components
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Component of Manufacturing Module within the PLUS33 Coffee ERP platform.
+ ******************************************************************************/
 package com.plus33.erp.manufacturing.entity;
 
 import com.plus33.erp.manufacturing.repository.ManufacturingEventRepository;
@@ -8,6 +35,18 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Manufacturing Module</b>
+ *
+ * <p><b>Class  :</b> {@code ManufacturingEventBus}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.manufacturing.entity}</p>
+ * <p><b>Layer  :</b> Spring Component: shared utility or infrastructure helper for Manufacturing Module.</p>
+ *
+ * <p><b>Module Deps      :</b> Manufacturing</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Component
 public class ManufacturingEventBus {
 
@@ -195,6 +234,11 @@ public class ManufacturingEventBus {
         public Long getCompanyId() { return companyId; }
     }
 
+    /**
+     * Handles the mrp run completed event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleMrpRunCompleted(MrpRunCompletedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -209,6 +253,11 @@ public class ManufacturingEventBus {
         analyticsService.refreshMaterializedViews();
     }
 
+    /**
+     * Handles the planned order released event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handlePlannedOrderReleased(PlannedOrderReleasedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -220,6 +269,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the production order released event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleProductionOrderReleased(ProductionOrderReleasedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -234,6 +288,11 @@ public class ManufacturingEventBus {
         analyticsService.refreshMaterializedViews();
     }
 
+    /**
+     * Handles the production order completed event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleProductionOrderCompleted(ProductionOrderCompletedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -248,6 +307,11 @@ public class ManufacturingEventBus {
         analyticsService.refreshMaterializedViews();
     }
 
+    /**
+     * Handles the production order created event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleProductionOrderCreated(ProductionOrderCreatedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -259,6 +323,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the material allocated event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleMaterialAllocated(MaterialAllocatedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -270,6 +339,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the material issued event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleMaterialIssued(MaterialIssuedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -281,6 +355,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the operation started event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleOperationStarted(OperationStartedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -292,6 +371,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the operation completed event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleOperationCompleted(OperationCompletedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -303,6 +387,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the quality approved event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleQualityApproved(QualityApprovedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -314,6 +403,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the cost calculated event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleCostCalculated(CostCalculatedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -325,6 +419,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the inventory received event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleInventoryReceived(InventoryReceivedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();
@@ -336,6 +435,11 @@ public class ManufacturingEventBus {
         eventRepository.save(me);
     }
 
+    /**
+     * Handles the wip closed event or exception in the business workflow.
+     *
+     * @param event the event input value
+     */
     @EventListener
     public void handleWipClosed(WipClosedEvent event) {
         ManufacturingEvent me = new ManufacturingEvent();

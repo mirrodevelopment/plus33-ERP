@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 50
+-- File              : V50__create_inventory_analytics.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create inventory analytics
+--
+-- Tables Created    : weekly_product_demand_summary, analytics_refresh_log
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : uidx_weekly_product_demand_summary, uidx_mv_inventory_kpis, uidx_mv_inventory_aging_expiry, uidx_mv_inventory_abc_xyz, uidx_mv_inventory_slow_dead, uidx_mv_inventory_repl_metrics, uidx_mv_inventory_trace_metrics, uidx_mv_inventory_turnover
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V50__create_inventory_analytics.sql
 -- PLUS33 ERP — Inventory Analytics & Dashboards Materialized Views

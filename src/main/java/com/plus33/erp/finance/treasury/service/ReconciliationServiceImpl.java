@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.service
+ * File              : ReconciliationServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: ReconciliationController
+ * Related Service   : ReconciliationServiceImpl
+ * Related Repository: BankStatementRepository, BankStatementLineRepository, ReconciliationRuleRepository, BankFeeRuleRepository, BankAccountRepository, PaymentRepository, CompanyRepository, AccountRepository
+ * Related Entity    : Reconciliation
+ * Related DTO       : BankFeeRuleRequest, BankFeeRuleResponse, BankStatementLineRequest, BankStatementLineResponse, BankStatementRequest
+ * Related Mapper    : ReconciliationMapper
+ * Related DB Table  : reconciliations
+ * Related REST APIs : N/A
+ * Depends On        : Common Module, Organization Module
+ * Used By           : ReconciliationController, ReconciliationServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements ReconciliationService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -26,6 +53,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code ReconciliationServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * ReconciliationController
+ *   --> ReconciliationServiceImpl (this)
+ *   --> Validate business rules
+ *   --> ReconciliationRepository (read/write 'reconciliations')
+ *   --> ReconciliationMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code reconciliations}</p>
+ * <p><b>Module Deps      :</b> Common, Finance, Organization</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,6 +92,12 @@ public class ReconciliationServiceImpl implements ReconciliationService {
     private final AccountRepository accountRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * Imports statement data from an external source or file.
+     *
+     * @param request the validated request DTO containing input data
+     * @return the BankStatementResponse result
+     */
     @Override
     @Transactional
     public BankStatementResponse importStatement(BankStatementRequest request) {
@@ -101,6 +158,20 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         return mapToStatementResponse(savedStatement, lineResponses);
     }
 
+    /**
+     * Retrieves a single statement by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BankStatementResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single statement by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the BankStatementResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public BankStatementResponse getStatementById(Long id) {
         BankStatement statement = bankStatementRepository.findById(id)
@@ -109,6 +180,20 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         return mapToStatementResponse(statement, lines);
     }
 
+    /**
+     * Retrieves statements by account data from the database.
+     *
+     * @param bankAccountId the bankAccountId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves statements by account data from the database.
+     *
+     * @param bankAccountId the bankAccountId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<BankStatementResponse> getStatementsByAccount(Long bankAccountId) {
         return bankStatementRepository.findByBankAccountId(bankAccountId).stream().map(s -> {
@@ -117,6 +202,15 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         }).toList();
     }
 
+    /**
+     * Creates a new rule and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the ReconciliationRuleResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public ReconciliationRuleResponse createRule(ReconciliationRuleRequest request) {
@@ -137,11 +231,31 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         return mapToRuleResponse(saved);
     }
 
+    /**
+     * Retrieves rules by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves rules by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<ReconciliationRuleResponse> getRulesByCompany(Long companyId) {
         return reconciliationRuleRepository.findByCompanyId(companyId).stream().map(this::mapToRuleResponse).toList();
     }
 
+    /**
+     * Performs the runAutoReconciliation operation in this module.
+     *
+     * @param statementId the statementId input value
+     * @param companyId owning company ID for multi-tenant data isolation
+     */
     @Override
     @Transactional
     public void runAutoReconciliation(Long statementId, Long companyId) {
@@ -216,6 +330,13 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         eventPublisher.publishEvent(new com.plus33.erp.finance.treasury.entity.ReconciliationCompletedEvent(this, statementId));
     }
 
+    /**
+     * Performs the manualMatch operation in this module.
+     *
+     * @param statementLineId the statementLineId input value
+     * @param paymentId the paymentId input value
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void manualMatch(Long statementLineId, Long paymentId, String username) {
@@ -244,6 +365,13 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         log.info("MANUAL-MATCH: Statement line ID {} matched to payment ID {} by {}", statementLineId, paymentId, username);
     }
 
+    /**
+     * Performs the splitAndMatch operation in this module.
+     *
+     * @param statementLineId the statementLineId input value
+     * @param paymentIds the paymentIds input value
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void splitAndMatch(Long statementLineId, List<Long> paymentIds, String username) {
@@ -280,6 +408,15 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         log.info("SPLIT-MATCH: Statement line ID {} split-matched to {} payments by {}", statementLineId, paymentIds.size(), username);
     }
 
+    /**
+     * Creates a new fee rule and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the BankFeeRuleResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public BankFeeRuleResponse createFeeRule(BankFeeRuleRequest request) {
@@ -300,11 +437,31 @@ public class ReconciliationServiceImpl implements ReconciliationService {
         return mapToFeeRuleResponse(saved);
     }
 
+    /**
+     * Retrieves fee rules by account data from the database.
+     *
+     * @param bankAccountId the bankAccountId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves fee rules by account data from the database.
+     *
+     * @param bankAccountId the bankAccountId input value
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<BankFeeRuleResponse> getFeeRulesByAccount(Long bankAccountId) {
         return bankFeeRuleRepository.findByBankAccountId(bankAccountId).stream().map(this::mapToFeeRuleResponse).toList();
     }
 
+    /**
+     * Processes the bank fees business workflow end-to-end.
+     *
+     * @param bankAccountId the bankAccountId input value
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void processBankFees(Long bankAccountId, String username) {

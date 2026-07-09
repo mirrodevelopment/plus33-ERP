@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 12
+-- File              : V12__create_attendance.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create attendance
+--
+-- Tables Created    : attendance
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_attendance_employee, idx_attendance_date, idx_attendance_status
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V12__create_attendance.sql
 -- PLUS33 ERP — Attendance Master Table

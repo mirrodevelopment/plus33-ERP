@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 9
+-- File              : V9__create_user_assignments.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create user assignments
+--
+-- Tables Created    : user_regions, user_warehouses, user_stores
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : idx_user_regions_user, idx_user_warehouses_user, idx_user_stores_user
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V9__create_user_assignments.sql
 -- PLUS33 ERP — User organizational unit assignments

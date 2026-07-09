@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Procurement Module
+ * Package           : com.plus33.erp.procurement.dto
+ * File              : GoodsReceiptResponse.java
+ * Purpose           : Data Transfer Object for request/response in Procurement Module
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: GoodsReceiptController
+ * Related Service   : GoodsReceiptService, GoodsReceiptServiceImpl
+ * Related Repository: GoodsReceiptRepository
+ * Related Entity    : GoodsReceipt
+ * Related DTO       : GoodsReceiptItemResponse, GoodsReceiptResponse
+ * Related Mapper    : GoodsReceiptMapper
+ * Related DB Table  : goods_receipts
+ * Related REST APIs : N/A
+ * Depends On        : None
+ * Used By           : GoodsReceiptController, GoodsReceiptService, GoodsReceiptServiceImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * DTO for Procurement Module HTTP serialization. Annotated with Jakarta Bean Validation constraints.
+ ******************************************************************************/
 package com.plus33.erp.procurement.dto;
 
 import com.plus33.erp.procurement.entity.GoodsReceiptStatus;
@@ -7,6 +34,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Procurement Module</b>
+ *
+ * <p><b>Class  :</b> {@code GoodsReceiptResponse}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.procurement.dto}</p>
+ * <p><b>Layer  :</b> Java Record: immutable value object / data carrier for Procurement Module.</p>
+ *
+ * <p><b>Module Deps      :</b> Procurement</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Schema(description = "Goods Receipt response details")
 public record GoodsReceiptResponse(
         @Schema(description = "Database ID of the goods receipt", example = "1")

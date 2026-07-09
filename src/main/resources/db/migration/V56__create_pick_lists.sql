@@ -1,3 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 56
+-- File              : V56__create_pick_lists.sql
+-- Operation Type    : Schema Creation
+-- Purpose           : create pick lists
+--
+-- Tables Created    : pick_lists, pick_list_items, inventory_allocations
+-- Tables Altered    : sales_order_items
+-- Seed Data For     : N/A
+-- Indexes           : idx_pick_lists_company, idx_pick_lists_order, idx_pick_items_list, idx_allocations_order, idx_allocations_status
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
 -- ============================================================
 -- V56__create_pick_lists.sql
 -- PLUS33 ERP — Order Fulfillment & Picking Schema

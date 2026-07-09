@@ -1,3 +1,30 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Finance Module
+ * Package           : com.plus33.erp.finance.treasury.service
+ * File              : TreasuryInvestmentServiceImpl.java
+ * Purpose           : Business logic service layer for Finance Module operations
+ * Version           : 0.0.1-SNAPSHOT
+ *
+ * Related Controller: TreasuryInvestmentController
+ * Related Service   : TreasuryInvestmentServiceImpl
+ * Related Repository: TreasuryInvestmentRepository, BankAccountRepository
+ * Related Entity    : TreasuryInvestment
+ * Related DTO       : mapToInvestmentResponse, TreasuryInvestmentRequest, TreasuryInvestmentResponse
+ * Related Mapper    : TreasuryInvestmentMapper
+ * Related DB Table  : treasury_investments
+ * Related REST APIs : N/A
+ * Depends On        : Common Module
+ * Used By           : TreasuryInvestmentController, TreasuryInvestmentServiceImplImpl
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Business service for Finance Module. Implements TreasuryInvestmentService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ ******************************************************************************/
 package com.plus33.erp.finance.treasury.service;
 
 import com.plus33.erp.common.exception.BusinessException;
@@ -17,6 +44,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * <b>PLUS33 Coffee ERP -- Finance Module</b>
+ *
+ * <p><b>Class  :</b> {@code TreasuryInvestmentServiceImpl}</p>
+ * <p><b>Package:</b> {@code com.plus33.erp.finance.treasury.service}</p>
+ * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Finance Module.</p>
+ *
+ * <p><b>Service Flow:</b></p>
+ * <pre>
+ * TreasuryInvestmentController
+ *   --> TreasuryInvestmentServiceImpl (this)
+ *   --> Validate business rules
+ *   --> TreasuryInvestmentRepository (read/write 'treasury_investments')
+ *   --> TreasuryInvestmentMapper (Entity to DTO conversion)
+ *   --> Publish domain event (analytics refresh)
+ *   --> Return DTO response to Controller
+ * </pre>
+ *
+ * <p><b>Database Table   :</b> {@code treasury_investments}</p>
+ * <p><b>Module Deps      :</b> Common, Finance</p>
+ *
+ * @author Sivasurya (Developed for PLUS33 Coffee by Haulo)
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,6 +77,15 @@ public class TreasuryInvestmentServiceImpl implements TreasuryInvestmentService 
     private final BankAccountRepository bankAccountRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * Creates a new investment and persists it to the database.
+     *
+     * <p><em>@Transactional: rolled back on exception. Publishes domain event on success.</em></p>
+     *
+     * @param request the validated request DTO containing input data
+     * @return the TreasuryInvestmentResponse result
+     * @throws BusinessException if a business rule is violated
+     */
     @Override
     @Transactional
     public TreasuryInvestmentResponse createInvestment(TreasuryInvestmentRequest request) {
@@ -64,6 +124,20 @@ public class TreasuryInvestmentServiceImpl implements TreasuryInvestmentService 
         return mapToInvestmentResponse(saved);
     }
 
+    /**
+     * Retrieves a single investment by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the TreasuryInvestmentResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves a single investment by id by its identifier.
+     *
+     * @param id the unique database ID of the resource
+     * @return the TreasuryInvestmentResponse result
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public TreasuryInvestmentResponse getInvestmentById(Long id) {
         TreasuryInvestment investment = treasuryInvestmentRepository.findById(id)
@@ -71,11 +145,30 @@ public class TreasuryInvestmentServiceImpl implements TreasuryInvestmentService 
         return mapToInvestmentResponse(investment);
     }
 
+    /**
+     * Retrieves investments by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
+    /**
+     * Retrieves investments by company data from the database.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @return List of matching records
+     * @throws ResourceNotFoundException if the entity is not found
+     */
     @Override
     public List<TreasuryInvestmentResponse> getInvestmentsByCompany(Long companyId) {
         return treasuryInvestmentRepository.findByBankAccountCompanyId(companyId).stream().map(this::mapToInvestmentResponse).toList();
     }
 
+    /**
+     * Performs the accrueInterest operation in this module.
+     *
+     * @param investmentId the investmentId input value
+     */
     @Override
     @Transactional
     public void accrueInterest(Long investmentId) {
@@ -93,6 +186,11 @@ public class TreasuryInvestmentServiceImpl implements TreasuryInvestmentService 
         treasuryInvestmentRepository.save(investment);
     }
 
+    /**
+     * Performs the liquidateInvestment operation in this module.
+     *
+     * @param investmentId the investmentId input value
+     */
     @Override
     @Transactional
     public void liquidateInvestment(Long investmentId) {
@@ -126,6 +224,11 @@ public class TreasuryInvestmentServiceImpl implements TreasuryInvestmentService 
             investmentId, refundAmount, interestToPay);
     }
 
+    /**
+     * Performs the executeDailyMaturities operation in this module.
+     *
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void executeDailyMaturities(String username) {
@@ -158,6 +261,11 @@ public class TreasuryInvestmentServiceImpl implements TreasuryInvestmentService 
         }
     }
 
+    /**
+     * Performs the executeDailyAccruals operation in this module.
+     *
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void executeDailyAccruals(String username) {
@@ -167,6 +275,12 @@ public class TreasuryInvestmentServiceImpl implements TreasuryInvestmentService 
         }
     }
 
+    /**
+     * Performs the executeFXRevaluations operation in this module.
+     *
+     * @param companyId owning company ID for multi-tenant data isolation
+     * @param username the username input value
+     */
     @Override
     @Transactional
     public void executeFXRevaluations(Long companyId, String username) {
