@@ -1,1 +1,214 @@
-/* CSS for login */
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Shared — Authentication
+ * File              : login.css
+ * Path              : frontend/shared/login/login.css
+ * Purpose           : Styles for the Login page
+ * Version           : 2.0.0
+ *
+ * Design System     : PLUS33 Coffee — Charcoal Dark + Gold Accent
+ *   --bg-primary     : #141414  (Charcoal Black)
+ *   --text-primary   : #F5F5F5  (Off White)
+ *   --accent-primary : #C9A46A  (Coffee Gold)
+ *   Glassmorphism, Montserrat Font
+ ******************************************************************************/
+
+/* ============================================================
+   LOGIN BRAND HEADER
+   ============================================================ */
+
+.login-brand {
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.login-logo {
+  height: 64px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: var(--spacing-md);
+  display: block;
+  margin-inline: auto;
+}
+
+.login-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.login-title-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.login-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.8rem;
+  margin: 0;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.login-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ============================================================
+   LOGIN FORM
+   ============================================================ */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+/* ============================================================
+   FORM GROUPS
+   ============================================================ */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input-icon {
+  position: absolute;
+  left: 12px;
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.form-input,
+.form-select {
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 36px;
+  width: 100%;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-sizing: border-box;
+  font-family: var(--font-body);
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(201, 164, 106, 0.15);
+}
+
+.form-select {
+  background-color: var(--bg-card);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Password toggle button */
+.btn-toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color var(--transition-fast);
+}
+
+.btn-toggle-password:hover {
+  color: var(--accent-primary);
+}
+
+.btn-toggle-password i {
+  width: 15px;
+  height: 15px;
+}
+
+/* ============================================================
+   ERROR MESSAGE
+   ============================================================ */
+
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid var(--status-danger);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: var(--status-danger);
+}
+
+.login-error[hidden] {
+  display: none;
+}
+
+.login-error-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   SUBMIT BUTTON
+   ============================================================ */
+
+.btn-login {
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  width: 100%;
+}
+
+.btn-login i {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

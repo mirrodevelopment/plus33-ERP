@@ -1,1 +1,132 @@
-<!-- HTML for login -->
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Shared — Authentication
+ * File              : login.html
+ * Path              : frontend/shared/login/login.html
+ * Purpose           : HTML structure for the Login page
+ * Version           : 2.0.0
+ *
+ * Related JS        : login.js
+ * Related CSS       : login.css
+ * Related API       : POST /api/v1/auth/login
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines all structural HTML for the login page.
+ * JavaScript (login.js) populates dynamic data and binds all events.
+ * No inline styles. No onclick attributes.
+ ******************************************************************************
+-->
+
+<!-- Login Brand Header -->
+<div class="login-brand">
+  <img
+    src="imgs/logo-gold.png"
+    alt="PLUS33 Coffee Logo"
+    class="login-logo"
+    id="login-logo"
+    onerror="this.style.display='none'"
+  >
+  <div class="login-title-row">
+    <i data-lucide="coffee" class="login-title-icon" aria-hidden="true"></i>
+    <h1 class="login-title">PLUS33 ERP</h1>
+  </div>
+  <p class="login-subtitle">Enterprise Operations Control Center</p>
+</div>
+
+<!-- Login Form -->
+<form id="login-credentials-form" class="login-form" novalidate>
+
+  <!-- Email Field -->
+  <div class="form-group">
+    <label for="input-username" class="form-label">Operator Email</label>
+    <div class="form-input-wrapper">
+      <i data-lucide="mail" class="form-input-icon" aria-hidden="true"></i>
+      <input
+        type="email"
+        id="input-username"
+        name="username"
+        class="form-input"
+        placeholder="Enter your email address"
+        autocomplete="email"
+        required
+        aria-required="true"
+        aria-describedby="login-error-text"
+      >
+    </div>
+  </div>
+
+  <!-- Password Field -->
+  <div class="form-group">
+    <label for="input-password" class="form-label">Password</label>
+    <div class="form-input-wrapper">
+      <i data-lucide="lock" class="form-input-icon" aria-hidden="true"></i>
+      <input
+        type="password"
+        id="input-password"
+        name="password"
+        class="form-input"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+        aria-required="true"
+      >
+      <button
+        type="button"
+        class="btn-toggle-password"
+        id="btn-toggle-password"
+        aria-label="Toggle password visibility"
+        title="Show/hide password"
+      >
+        <i data-lucide="eye" id="password-eye-icon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Role Profile Selector -->
+  <div class="form-group">
+    <label for="select-role-profile" class="form-label">Role Profile</label>
+    <div class="form-input-wrapper">
+      <i data-lucide="shield" class="form-input-icon" aria-hidden="true"></i>
+      <select
+        id="select-role-profile"
+        name="role"
+        class="form-select"
+        aria-label="Select your role profile"
+      >
+        <option value="ultimateAdmin">Ultimate Admin</option>
+        <option value="nationalAdmin">National Admin</option>
+        <option value="regionalAdmin">Regional Admin</option>
+        <option value="warehouse">Warehouse Admin</option>
+        <option value="store">Store Admin</option>
+        <option value="storeEmployee">Store Employee</option>
+        <option value="shiftSupervisor">Shift Supervisor</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Error Message Area — hidden by default -->
+  <div
+    id="login-error-msg"
+    class="login-error"
+    role="alert"
+    aria-live="polite"
+    hidden
+  >
+    <i data-lucide="alert-circle" class="login-error-icon" aria-hidden="true"></i>
+    <span id="login-error-text">Authentication failed.</span>
+  </div>
+
+  <!-- Submit Button -->
+  <button
+    type="submit"
+    id="btn-login-submit"
+    class="btn btn-primary btn-login"
+    aria-label="Authenticate"
+  >
+    <i data-lucide="log-in" id="btn-login-icon" aria-hidden="true"></i>
+    <span id="btn-login-label">Authenticate</span>
+  </button>
+
+</form>
