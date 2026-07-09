@@ -1,0 +1,130 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Layouts Module
+ * File              : dashboard-layout.html
+ * Path              : frontend/layouts/html/dashboard-layout.html
+ * Purpose           : HTML skeleton for the main dashboard shell layout
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the static structural shell of the dashboard layout:
+ * sidebar, header, main-content mount point, and footer.
+ * All dynamic data (user name, menu items, breadcrumbs) is
+ * injected by dashboard.js after this template is loaded.
+ ******************************************************************************
+-->
+
+<div class="dashboard-shell">
+
+  <!-- ===== SIDEBAR NAVIGATION ===== -->
+  <aside class="sidebar animate-slide-left" id="app-sidebar">
+
+    <!-- Brand Logo -->
+    <div class="sidebar-brand" id="sidebar-brand">
+      <img src="imgs/logo-gold.png" alt="PLUS33 Coffee Logo" class="sidebar-logo" id="sidebar-logo">
+      <span class="brand-text">PLUS33 Coffee</span>
+    </div>
+
+    <!-- Navigation Menu — populated by JS -->
+    <nav class="sidebar-nav" id="sidebar-nav-container" aria-label="Main Navigation">
+      <!-- Menu items injected by dashboard.js renderSidebarMenu() -->
+    </nav>
+
+    <!-- Shift Card — visible only for store role, shown by JS -->
+    <div class="sidebar-shift-card" id="sidebar-shift-card" hidden>
+      <div class="shift-header">
+        <span class="shift-label">Current Shift</span>
+        <span class="shift-status-badge" id="shift-status-badge">Open</span>
+      </div>
+      <strong class="shift-name" id="shift-name">Morning Shift</strong>
+      <span class="shift-hours" id="shift-hours">06:00 AM – 02:00 PM</span>
+      <div class="shift-footer">
+        <span class="shift-elapsed-label">
+          Time Elapsed:<br>
+          <strong class="shift-elapsed-time" id="shift-elapsed-time">00:00:00</strong>
+        </span>
+        <button class="btn-end-shift" id="btn-end-shift" type="button">End Shift</button>
+      </div>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="sidebar-footer">
+      <a href="#profile" class="sidebar-profile-link" id="sidebar-profile-link" aria-label="View Profile">
+        <img class="user-avatar" src="imgs/male-avatar.png" alt="User Avatar" id="user-avatar-sidebar">
+        <div class="user-info">
+          <div class="user-name" id="user-name-sidebar">Loading...</div>
+          <div class="user-role" id="user-role-sidebar">—</div>
+        </div>
+      </a>
+      <button class="btn-logout btn-icon" id="btn-logout" type="button" title="Log Out" aria-label="Log Out">
+        <i data-lucide="log-out"></i>
+      </button>
+    </div>
+
+  </aside><!-- /sidebar -->
+
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="main-wrapper">
+
+    <!-- Header / Topbar -->
+    <header class="header" id="app-header" role="banner">
+
+      <div class="header-left">
+        <!-- Sidebar Toggle -->
+        <button class="btn-icon" id="sidebar-toggle" type="button" title="Toggle Navigation" aria-label="Toggle sidebar">
+          <i data-lucide="menu"></i>
+        </button>
+
+        <!-- Global Search -->
+        <div class="header-search" role="search">
+          <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
+          <input
+            type="search"
+            id="global-search-input"
+            placeholder="Search enterprise resources..."
+            autocomplete="off"
+            aria-label="Search"
+          >
+        </div>
+
+        <!-- Breadcrumbs — populated by JS -->
+        <nav class="breadcrumbs" id="breadcrumbs-container" aria-label="Breadcrumb">
+          <!-- Injected by dashboard.js renderBreadcrumbs() -->
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <!-- Notification Bell -->
+        <button class="btn-icon notification-btn" id="btn-notifications" type="button" title="Notifications" aria-label="Notifications">
+          <i data-lucide="bell"></i>
+          <span class="notification-badge" id="notification-badge" hidden>0</span>
+        </button>
+      </div>
+
+    </header><!-- /header -->
+
+
+    <!-- Page Content Mount Point -->
+    <main class="content-area animate-fade-in" id="main-content" role="main">
+      <!-- Dynamic page content injected by the router -->
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+      <div>&copy; 2026 PLUS33 Coffee Co. Enterprise</div>
+    </footer>
+
+  </div><!-- /main-wrapper -->
+
+</div><!-- /dashboard-shell -->
+
+<!-- Global Toast Notification Container -->
+<div id="toast-container" aria-live="polite" aria-atomic="false"></div>

@@ -1,40 +1,28 @@
 /******************************************************************************
  * Project           : PLUS33 Coffee ERP
- * Developed By      : Haulo
- * Developed For     : PLUS33 Coffee
- * Developer         : Sivasurya
- *
  * Module            : Layouts Module
  * File              : auth.js
  * Path              : frontend/layouts/auth.js
- * Purpose           : Frontend utility: auth for PLUS33 Coffee ERP
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related API       : N/A
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : 
- * Depends On        : 
+ * Purpose           : Auth layout controller — loads HTML template
+ * Version           : 2.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Frontend utility: auth for PLUS33 Coffee ERP. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Refactored to HTML + CSS + JS mixed architecture.
+ * HTML structure lives in layouts/html/auth-layout.html
  ******************************************************************************/
 
-/**
- * Layout configuration for public/authentication pages.
- */
+import { htmlLoader } from '../core/htmlLoader.js';
+
+const LAYOUT_TEMPLATE_URL = 'layouts/html/auth-layout.html';
+
 export const authLayout = {
-  render(container) {
-    container.innerHTML = `
-      <div class="auth-layout">
-        <div class="auth-bg-decor"></div>
-        <div class="auth-container">
-          <div id="main-content" class="auth-box animate-pop-in"></div>
-        </div>
-      </div>
-    `;
+  /**
+   * Render the auth layout shell.
+   * @param {HTMLElement} container - The #app root element
+   */
+  async render(container) {
+    await htmlLoader.inject(LAYOUT_TEMPLATE_URL, container);
   }
 };
 
