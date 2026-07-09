@@ -1,1 +1,133 @@
-<!-- HTML for dashboard -->
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Dashboard
+ * File              : dashboard.html
+ * Path              : frontend/modules/ultimate-admin/dashboard/dashboard.html
+ * Purpose           : HTML structure for the Ultimate Admin Dashboard page
+ * Version           : 2.0.0
+ *
+ * Related JS        : dashboard.js
+ * Related CSS       : dashboard.css
+ * Related APIs      : GET /api/v1/dashboard/overview
+ *                     GET /api/v1/regions?size=100
+ *                     GET /api/v1/stores?size=100
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the complete HTML skeleton for the Ultimate Admin Dashboard.
+ * JavaScript (dashboard.js) populates all dynamic data.
+ * No inline styles. No onclick attributes.
+ ******************************************************************************
+-->
+
+<!-- ===== PAGE HEADER ===== -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h2 class="page-title">Ultimate Admin Dashboard</h2>
+    <p class="page-subtitle">
+      Enterprise Analytics &amp; Operational Intelligence &nbsp;·&nbsp;
+      <span id="live-clock" class="live-clock" aria-live="off" aria-label="Current time"></span>
+    </p>
+  </div>
+  <div class="page-header-right">
+    <!-- Sync Status Pill -->
+    <div id="sync-status-badge" class="sync-badge" role="status" aria-label="Data sync status">
+      <span class="sync-dot" aria-hidden="true"></span>
+      <span class="sync-label">Live</span>
+    </div>
+    <!-- Refresh Button -->
+    <button id="btn-refresh-dashboard" class="btn btn-ghost btn-sm" type="button" aria-label="Refresh dashboard data">
+      <i data-lucide="refresh-cw" aria-hidden="true"></i>
+      <span>Refresh</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== FILTERS RIBBON ===== -->
+<div class="filters-ribbon card glass" id="dashboard-filters" role="search" aria-label="Dashboard filters">
+
+  <!-- Date Range Selector -->
+  <div class="filter-group">
+    <label for="filter-range-type" class="filter-label">Date Range</label>
+    <select id="filter-range-type" class="filter-select" aria-label="Select date range">
+      <option value="today">Today</option>
+      <option value="yesterday">Yesterday</option>
+      <option value="thisWeek">This Week</option>
+      <option value="lastWeek">Last Week</option>
+      <option value="thisMonth" selected>This Month</option>
+      <option value="lastMonth">Last Month</option>
+      <option value="quarter">This Quarter</option>
+      <option value="year">This Year</option>
+      <option value="custom">Custom Range...</option>
+    </select>
+  </div>
+
+  <!-- Custom Date Range Inputs (shown only when "custom" is selected) -->
+  <div id="custom-date-inputs" class="filter-group filter-group--date-range" hidden>
+    <div class="filter-group">
+      <label for="filter-date-from" class="filter-label">From</label>
+      <input type="date" id="filter-date-from" class="filter-input" aria-label="From date">
+    </div>
+    <div class="filter-group">
+      <label for="filter-date-to" class="filter-label">To</label>
+      <input type="date" id="filter-date-to" class="filter-input" aria-label="To date">
+    </div>
+  </div>
+
+  <!-- Region Selector — populated by JS -->
+  <div class="filter-group">
+    <label for="filter-region" class="filter-label">Region</label>
+    <select id="filter-region" class="filter-select filter-select--wide" aria-label="Filter by region">
+      <option value="">All Regions</option>
+      <optgroup id="filter-region-countries" label="Countries"></optgroup>
+      <optgroup id="filter-region-subregions" label="Sub-Regions"></optgroup>
+    </select>
+  </div>
+
+  <!-- Store Selector — populated by JS -->
+  <div class="filter-group">
+    <label for="filter-store" class="filter-label">Store</label>
+    <select id="filter-store" class="filter-select filter-select--wider" aria-label="Filter by store">
+      <option value="">All Stores</option>
+    </select>
+  </div>
+
+  <!-- Filter Action Buttons -->
+  <div class="filter-actions">
+    <button id="btn-apply-filters" class="btn btn-primary btn-sm" type="button" aria-label="Apply filters">
+      <i data-lucide="filter" aria-hidden="true"></i>
+      <span>Apply</span>
+    </button>
+    <button id="btn-reset-filters" class="btn btn-ghost btn-sm" type="button" aria-label="Reset all filters">
+      <i data-lucide="x-circle" aria-hidden="true"></i>
+      <span>Reset</span>
+    </button>
+  </div>
+
+</div><!-- /filters-ribbon -->
+
+<!-- ===== KPI CARDS GRID — populated by WidgetEngine ===== -->
+<div id="dashboard-kpis-mount" class="kpi-grid" role="region" aria-label="Key Performance Indicators">
+  <!-- KPI Cards dynamically appended here by dashboard.js -->
+</div>
+
+<!-- ===== DASHBOARD WIDGETS GRID — populated by WidgetEngine ===== -->
+<div class="grid grid-cols-12 gap-lg" id="dashboard-grid-mount" role="region" aria-label="Dashboard widgets">
+  <!-- Charts, tables, and widgets dynamically appended here by dashboard.js -->
+</div>
+
+<!-- ===== ERROR STATE TEMPLATE ===== -->
+<template id="dashboard-error-tpl">
+  <div class="card card--error col-12" role="alert">
+    <div class="error-header">
+      <i data-lucide="wifi-off" aria-hidden="true"></i>
+      <h4 class="m-0">Enterprise Analytics Unavailable</h4>
+    </div>
+    <p class="error-message m-0"></p>
+    <button type="button" class="btn btn-ghost btn-sm error-retry-btn">
+      <i data-lucide="refresh-cw" aria-hidden="true"></i>
+      <span>Retry Connection</span>
+    </button>
+  </div>
+</template>

@@ -4,34 +4,50 @@
  * Developed For     : PLUS33 Coffee
  * Developer         : Sivasurya
  *
- * Module            : Pages Module
+ * Module            : Ultimate Admin — Dashboard
  * File              : dashboard.js
- * Path              : frontend/pages/dashboard/ultimate-admin/dashboard.js
- * Purpose           : Frontend page component for the Pages Module UI
- * Version           : 0.0.1-SNAPSHOT
+ * Path              : frontend/modules/ultimate-admin/dashboard/dashboard.js
+ * Purpose           : Dashboard page controller
+ * Version           : 2.0.0
  *
- * Related API       : GET /api/v1/regions?size=100, GET /api/v1/stores?size=100
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : services/dashboard/DashboardService, widgets/widget-engine.js?v=10, api/client, core/logger
- * Depends On        : services/dashboard/DashboardService, widgets/widget-engine.js?v=10, api/client, core/logger
+ * Related HTML      : frontend/modules/ultimate-admin/dashboard/dashboard.html
+ * Related CSS       : frontend/modules/ultimate-admin/dashboard/dashboard.css
+ * Related APIs      : GET /api/v1/dashboard/overview
+ *                     GET /api/v1/regions?size=100
+ *                     GET /api/v1/stores?size=100
  *
  * Description
  * ---------------------------------------------------------------------------
- * Frontend page component for the Pages Module UI. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Refactored to HTML + CSS + JS mixed architecture.
+ * HTML structure lives in dashboard.html — this file is a controller only.
+ *
+ * Controller Lifecycle:
+ *   constructor → mount → loadTemplate → loadData → render → bindEvents → destroy
  ******************************************************************************/
 
+import { htmlLoader } from '../../../core/htmlLoader.js';
 import { dashboardService } from '../../../services/dashboard/DashboardService.js';
 import { WidgetEngine } from '../../../widgets/widget-engine.js?v=10';
 import { apiClient } from '../../../api/client.js';
 import { logger } from '../../../core/logger.js';
 
+/** Path to the dashboard HTML template */
+const TEMPLATE_URL = 'modules/ultimate-admin/dashboard/dashboard.html';
+
+/** Friendly timezone label map */
+const TIMEZONE_LABELS = {
+  'Europe/Paris':  'Europe/Paris (CET)',
+  'Asia/Dubai':    'Asia/Dubai (GST)',
+  'Asia/Kolkata':  'Asia/Kolkata (IST)',
+  'UTC':           'UTC (GMT)'
+};
+
 export default class UltimateAdminDashboard {
-  /**
-   * Performs the fn operation in this module.
-   * @memberof Pages Module
-   */
+
+  // ---------------------------------------------------------------------------
+  // LIFECYCLE: constructor
+  // ---------------------------------------------------------------------------
+
   constructor() {
     this.filters = {
       from: '',
@@ -41,451 +57,462 @@ export default class UltimateAdminDashboard {
       rangeType: 'thisMonth'
     };
     this.regions = [];
-    this.stores = [];
+    this.stores  = [];
+    /** @type {number|null} setInterval ID for live clock */
     this._clockInterval = null;
   }
 
+  // ---------------------------------------------------------------------------
+  // LIFECYCLE: mount
+  // ---------------------------------------------------------------------------
+
   /**
-   * Performs the fn operation in this module.
-   * @memberof Pages Module
+   * Mount the dashboard into the container.
+   * @param {HTMLElement} container
+   * @param {{ onCleanup?: Function, onDestroy?: Function }} lifecycle
    */
   async mount(container, lifecycle) {
-    logger.info('UltimateAdminDashboard', 'Mounting Ultimate Admin dashboard...');
+    logger.info('UltimateAdminDashboard', 'Mounting...');
 
-    // Load persisted filters
-    const savedFilters = localStorage.getItem('dashboard_filters');
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Pages Module
-     */
-    if (savedFilters) {
-      try {
-        this.filters = { ...this.filters, ...JSON.parse(savedFilters) };
-      } catch (e) {
-        logger.warn('UltimateAdminDashboard', 'Failed to parse stored filters', e);
-      }
-    }
+    // Restore persisted filters
+    this._restoreFilters();
 
-    // Resolve date bounds
+    // Resolve date bounds for the selected range type
     this.resolveDates();
 
-    // Fetch Regions & Stores options in parallel
+    // 1. Load HTML template
+    await this._loadTemplate(container);
+
+    // 2. Load data (regions, stores)
+    await this._loadData();
+
+    // 3. Render dynamic content into DOM
+    this._render(container);
+
+    // 4. Bind event listeners
+    this._bindEvents(container, lifecycle);
+
+    // 5. Initial dashboard data load
+    await this._refreshDashboard(container);
+  }
+
+  // ---------------------------------------------------------------------------
+  // LIFECYCLE: loadTemplate
+  // ---------------------------------------------------------------------------
+
+  async _loadTemplate(container) {
+    await htmlLoader.inject(TEMPLATE_URL, container);
+  }
+
+  // ---------------------------------------------------------------------------
+  // LIFECYCLE: loadData
+  // ---------------------------------------------------------------------------
+
+  async _loadData() {
     try {
       const [regRes, storeRes] = await Promise.all([
         apiClient.get('/api/v1/regions?size=100'),
         apiClient.get('/api/v1/stores?size=100')
       ]);
-      /**
-       * Performs the fn operation in this module.
-       * @memberof Pages Module
-       */
-      if (regRes?.success && regRes?.data?.content) {
-        this.regions = regRes.data.content;
-      }
-      /**
-       * Performs the fn operation in this module.
-       * @memberof Pages Module
-       */
-      if (storeRes?.success && storeRes?.data?.content) {
-        this.stores = storeRes.data.content;
-      }
+      if (regRes?.success && regRes?.data?.content)     this.regions = regRes.data.content;
+      if (storeRes?.success && storeRes?.data?.content) this.stores  = storeRes.data.content;
     } catch (err) {
-      logger.error('UltimateAdminDashboard', 'Failed to fetch dropdown filter options', err);
+      logger.error('UltimateAdminDashboard', 'Failed to fetch filter dropdown data', err);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // LIFECYCLE: render
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Populate all dynamic content into the already-injected DOM.
+   * @param {HTMLElement} container
+   */
+  _render(container) {
+    this._populateRegionDropdown(container);
+    this._updateStoreDropdown(container);
+    this._restoreFilterValues(container);
+    this._toggleCustomDates(container);
+    this._startClock(container);
+  }
+
+  // ---------------------------------------------------------------------------
+  // LIFECYCLE: bindEvents
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Attach all event listeners.
+   * @param {HTMLElement} container
+   * @param {{ onCleanup?: Function, onDestroy?: Function }} lifecycle
+   */
+  _bindEvents(container, lifecycle) {
+    const rangeSelect  = container.querySelector('#filter-range-type');
+    const regionSelect = container.querySelector('#filter-region');
+    const storeSelect  = container.querySelector('#filter-store');
+    const dateFrom     = container.querySelector('#filter-date-from');
+    const dateTo       = container.querySelector('#filter-date-to');
+    const applyBtn     = container.querySelector('#btn-apply-filters');
+    const resetBtn     = container.querySelector('#btn-reset-filters');
+    const refreshBtn   = container.querySelector('#btn-refresh-dashboard');
+
+    // Date range type change
+    if (rangeSelect) {
+      rangeSelect.addEventListener('change', () => {
+        this.filters.rangeType = rangeSelect.value;
+        this.resolveDates();
+        this._toggleCustomDates(container);
+        const fromEl = container.querySelector('#filter-date-from');
+        const toEl   = container.querySelector('#filter-date-to');
+        if (fromEl) fromEl.value = this.filters.from;
+        if (toEl)   toEl.value   = this.filters.to;
+      });
     }
 
-    // Render page structural layout
-    container.innerHTML = `
-      <!-- Page Header -->
-      <div class="dashboard-header flex justify-between align-center mb-lg" style="flex-wrap: wrap; gap: var(--spacing-md);">
-        <div>
-          <h2 class="m-0" style="font-family: var(--font-display); font-weight: 800; font-size: 1.65rem; letter-spacing: -0.02em;">
-            Ultimate Admin Dashboard
-          </h2>
-          <p class="m-0" style="color: var(--text-muted); font-size: 0.82rem; margin-top: 2px;">
-            Enterprise Analytics &amp; Operational Intelligence &nbsp;·&nbsp;
-            <span id="live-clock" style="color: var(--accent-primary); font-weight: 600; font-variant-numeric: tabular-nums;"></span>
-          </p>
-        </div>
-        <div style="display:flex; align-items:center; gap: var(--spacing-md);">
-          <!-- Data Sync Status Pill -->
-          <div id="sync-status-badge" style="display:flex; align-items:center; gap:6px; background: rgba(130,163,125,0.12); border: 1px solid rgba(130,163,125,0.3); border-radius: var(--radius-full); padding: 4px 12px; font-size: 0.75rem; font-weight: 600; color: var(--status-success);">
-            <span style="width:7px; height:7px; border-radius:50%; background: var(--status-success); display:inline-block; animation: pulse-dot 2s infinite;"></span>
-            Live
-          </div>
-          <!-- Refresh Button -->
-          <button id="btn-refresh-dashboard" style="display:flex; align-items:center; gap:6px; background: rgba(201,164,106,0.08); border: 1px solid rgba(201,164,106,0.3); border-radius: var(--radius-md); padding: 6px 14px; color: var(--accent-primary); font-size: 0.78rem; font-weight: 700; cursor:pointer; transition: var(--transition-fast);" onmouseover="this.style.background='rgba(201,164,106,0.16)'" onmouseout="this.style.background='rgba(201,164,106,0.08)'">
-            <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i>
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      <!-- Filters Ribbon Control -->
-      <div class="card mb-lg glass flex gap-md align-center flex-wrap" style="padding: var(--spacing-sm) var(--spacing-md); border-color: rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
-        <div class="flex flex-col">
-          <label style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing:0.07em; margin-bottom: 4px;">Date Range</label>
-          <select id="filter-range-type" style="background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 0.75rem; font-weight: 600; outline:none; cursor:pointer;">
-            <option value="today">Today</option>
-            <option value="yesterday">Yesterday</option>
-            <option value="thisWeek">This Week</option>
-            <option value="lastWeek">Last Week</option>
-            <option value="thisMonth">This Month</option>
-            <option value="lastMonth">Last Month</option>
-            <option value="quarter">This Quarter</option>
-            <option value="year">This Year</option>
-            <option value="custom">Custom Range...</option>
-          </select>
-        </div>
-
-        <div id="custom-date-inputs" class="flex gap-xs" style="display: none;">
-          <div class="flex flex-col">
-            <label style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing:0.07em; margin-bottom: 4px;">From</label>
-            <input type="date" id="filter-date-from" style="background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 4px 8px; font-size: 0.75rem; outline:none;">
-          </div>
-          <div class="flex flex-col">
-            <label style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing:0.07em; margin-bottom: 4px;">To</label>
-            <input type="date" id="filter-date-to" style="background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 4px 8px; font-size: 0.75rem; outline:none;">
-          </div>
-        </div>
-
-        <div class="flex flex-col">
-          <label style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing:0.07em; margin-bottom: 4px;">Region</label>
-          <select id="filter-region" style="background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 0.75rem; font-weight: 600; min-width: 140px; outline:none; cursor:pointer;">
-            <option value="">All Regions</option>
-            <optgroup label="Countries" style="background: #1e1e1e; color: var(--accent-primary);">
-              ${this.regions.filter(r => r.parentId === null || r.parentId === undefined).map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
-            </optgroup>
-            <optgroup label="Sub-Regions" style="background: #1e1e1e; color: var(--text-primary);">
-              ${this.regions.filter(r => r.parentId !== null && r.parentId !== undefined).map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
-            </optgroup>
-          </select>
-        </div>
-
-        <div class="flex flex-col">
-          <label style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing:0.07em; margin-bottom: 4px;">Store</label>
-          <select id="filter-store" style="background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 0.75rem; font-weight: 600; min-width: 160px; outline:none; cursor:pointer;">
-            <option value="">All Stores</option>
-            ${this.stores.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
-          </select>
-        </div>
-
-        <div style="display:flex; gap: var(--spacing-sm); margin-top: 14px;">
-          <button id="btn-apply-filters" class="btn btn-primary" style="font-size: 0.75rem; padding: 5px var(--spacing-md); font-weight: 700; display:flex; align-items:center; gap:5px;">
-            <i data-lucide="filter" style="width:13px;height:13px;"></i>
-            Apply
-          </button>
-          <button id="btn-reset-filters" style="font-size: 0.75rem; padding: 5px var(--spacing-md); font-weight: 600; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-sm); color: var(--text-muted); cursor:pointer; display:flex; align-items:center; gap:5px; transition: var(--transition-fast);" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">
-            <i data-lucide="x-circle" style="width:13px;height:13px;"></i>
-            Reset
-          </button>
-        </div>
-      </div>
-
-      <!-- Responsive Grid for KPIs -->
-      <div id="dashboard-kpis-mount" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--spacing-md); width: 100%; margin-bottom: var(--spacing-lg);">
-        <!-- KPI Cards dynamically appended here -->
-      </div>
-
-      <!-- 12-Column Responsive Grid -->
-      <div class="grid grid-cols-12 gap-lg" id="dashboard-grid-mount">
-        <!-- Dynamic content or loader goes here -->
-      </div>
-    `;
-
-    // Bind element refs
-    const rangeSelect = container.querySelector('#filter-range-type');
-    const customDateContainer = container.querySelector('#custom-date-inputs');
-    const dateFromInput = container.querySelector('#filter-date-from');
-    const dateToInput = container.querySelector('#filter-date-to');
-    const regionSelect = container.querySelector('#filter-region');
-    const storeSelect = container.querySelector('#filter-store');
-    const applyBtn = container.querySelector('#btn-apply-filters');
-    const resetBtn = container.querySelector('#btn-reset-filters');
-    const refreshBtn = container.querySelector('#btn-refresh-dashboard');
-    const kpisContainer = container.querySelector('#dashboard-kpis-mount');
-    const gridContainer = container.querySelector('#dashboard-grid-mount');
-
-    // Restore filter values
-    rangeSelect.value = this.filters.rangeType;
-    regionSelect.value = this.filters.regionId;
-    
-    // Synchronize store dropdown to initial region filter value
-    const updateStoreDropdown = () => {
-      const selectedRegionId = regionSelect.value;
-      if (!selectedRegionId) {
-        storeSelect.innerHTML = `<option value="">All Stores</option>` + 
-          this.stores.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-      } else {
-        const childRegionIds = this.regions
-          .filter(r => String(r.parentId) === String(selectedRegionId) || String(r.id) === String(selectedRegionId))
-          .map(r => String(r.id));
-        const filteredStores = this.stores.filter(s => childRegionIds.includes(String(s.regionId)));
-        storeSelect.innerHTML = `<option value="">All Stores (${filteredStores.length})</option>` +
-          filteredStores.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-      }
-    };
-    updateStoreDropdown();
-    storeSelect.value = this.filters.storeId;
-    regionSelect.addEventListener('change', () => {
-      updateStoreDropdown();
-      storeSelect.value = ''; // Reset selected store when region changes
-    });
-
-    dateFromInput.value = this.filters.from;
-    dateToInput.value = this.filters.to;
-
-    /**
-     * Performs the toggleCustomDates operation in this module.
-     * @memberof Pages Module
-     */
-    const toggleCustomDates = () => {
-      customDateContainer.style.display = rangeSelect.value === 'custom' ? 'flex' : 'none';
-    };
-    toggleCustomDates();
-    rangeSelect.addEventListener('change', () => {
-      toggleCustomDates();
-      this.filters.rangeType = rangeSelect.value;
-      this.resolveDates();
-      dateFromInput.value = this.filters.from;
-      dateToInput.value = this.filters.to;
-    });
-
-    // Skeleton loader helper
-    /**
-     * Performs the showSkeleton operation in this module.
-     * @memberof Pages Module
-     */
-    const showSkeleton = () => {
-      kpisContainer.innerHTML = Array(8).fill(0).map(() => `
-        <div style="height:90px; border-radius:var(--radius-lg); background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite; border: 1px solid rgba(255,255,255,0.05);"></div>
-      `).join('');
-      gridContainer.innerHTML = `
-        <div class="col-12" style="display:grid; grid-template-columns: 8fr 4fr; gap: var(--spacing-lg);">
-          ${[220, 280].map(h => `
-            <div style="height:${h}px; border-radius:var(--radius-lg); background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite; border: 1px solid rgba(255,255,255,0.05);"></div>
-          `).join('')}
-        </div>
-        <div class="col-12" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--spacing-lg);">
-          ${[200, 200, 200].map(h => `
-            <div style="height:${h}px; border-radius:var(--radius-lg); background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite; border: 1px solid rgba(255,255,255,0.05);"></div>
-          `).join('')}
-        </div>
-      `;
-    };
-
-    /**
-     * Performs the refreshDashboard operation in this module.
-     * @memberof Pages Module
-     */
-    const refreshDashboard = async () => {
-      showSkeleton();
-      // Spin the refresh icon
-      const refreshIcon = refreshBtn?.querySelector('i[data-lucide="refresh-cw"]');
-      if (refreshIcon) refreshIcon.style.animation = 'spin 1s linear infinite';
-
-      try {
-        const queryParams = {
-          from: this.filters.from,
-          to: this.filters.to
-        };
-        if (this.filters.regionId) queryParams.regionId = this.filters.regionId;
-        if (this.filters.storeId) queryParams.storeId = this.filters.storeId;
-
-        const overview = await dashboardService.getDashboardOverview(queryParams);
-        /**
-         * Performs the fn operation in this module.
-         * @memberof Pages Module
-         */
-        if (!overview) {
-          throw new Error('Failed to retrieve server analytics overview.');
-        }
-
-        const dashboardRes = await fetch('roles/ultimate-admin/dashboard.json');
-        const layoutRes = await fetch('roles/ultimate-admin/layout.json');
-
-        /**
-         * Performs the fn operation in this module.
-         * @memberof Pages Module
-         */
-        if (!dashboardRes.ok || !layoutRes.ok) {
-          throw new Error('Failed to load JSON configurations.');
-        }
-
-        const { widgets } = await dashboardRes.json();
-        const { layout } = await layoutRes.json();
-
-        gridContainer.innerHTML = '';
-        kpisContainer.innerHTML = '';
-
-        /**
-         * Performs the widget operation in this module.
-         * @memberof Pages Module
-         */
-        for (const widget of widgets) {
-          const positioning = layout.find(l => l.id === widget.id);
-          const targetContainer = widget.type === 'kpi' ? kpisContainer : gridContainer;
-          await WidgetEngine.loadWidget(widget, positioning, targetContainer, overview, lifecycle);
-        }
-      } catch (err) {
-        logger.error('UltimateAdminDashboard', 'Failed to render dashboard overview:', err);
-        kpisContainer.innerHTML = '';
-        gridContainer.innerHTML = `
-          <div class="card col-12" style="display:flex; flex-direction:column; gap:var(--spacing-sm); background: rgba(201, 92, 92, 0.06); border: 1px solid var(--status-danger); padding: var(--spacing-xl);">
-            <div style="display:flex; align-items:center; gap:10px; color: var(--status-danger);">
-              <i data-lucide="wifi-off" style="width:22px;height:22px;"></i>
-              <h4 class="m-0">Enterprise Analytics Unavailable</h4>
-            </div>
-            <p class="m-0" style="color: var(--text-muted); font-size:0.85rem;">${err.message}</p>
-            <button onclick="window.location.reload()" style="margin-top:8px; width:fit-content; padding: 6px 16px; font-size:0.8rem; background: rgba(201,164,106,0.1); border:1px solid var(--accent-primary); border-radius:var(--radius-sm); color:var(--accent-primary); cursor:pointer; display:flex; align-items:center; gap:6px;">
-              <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Retry Connection
-            </button>
-          </div>
-        `;
-        if (window.lucide) window.lucide.createIcons();
-      } finally {
-        // Stop spinning refresh icon
-        if (refreshIcon) refreshIcon.style.animation = '';
-        if (window.lucide) window.lucide.createIcons();
-      }
-    };
+    // Region change → update store dropdown
+    if (regionSelect) {
+      regionSelect.addEventListener('change', () => {
+        this._updateStoreDropdown(container);
+        if (storeSelect) storeSelect.value = '';
+      });
+    }
 
     // Apply filters
-    applyBtn.addEventListener('click', () => {
-      this.filters.rangeType = rangeSelect.value;
-      /**
-       * Performs the fn operation in this module.
-       * @memberof Pages Module
-       */
-      if (this.filters.rangeType === 'custom') {
-        this.filters.from = dateFromInput.value;
-        this.filters.to = dateToInput.value;
-      } else {
-        this.resolveDates();
-      }
-      this.filters.regionId = regionSelect.value;
-      this.filters.storeId = storeSelect.value;
-      localStorage.setItem('dashboard_filters', JSON.stringify(this.filters));
-      refreshDashboard();
-    });
+    if (applyBtn) {
+      applyBtn.addEventListener('click', () => {
+        this.filters.rangeType = rangeSelect?.value || 'thisMonth';
+        if (this.filters.rangeType === 'custom') {
+          this.filters.from = dateFrom?.value || '';
+          this.filters.to   = dateTo?.value   || '';
+        } else {
+          this.resolveDates();
+        }
+        this.filters.regionId = regionSelect?.value || '';
+        this.filters.storeId  = storeSelect?.value  || '';
+        localStorage.setItem('dashboard_filters', JSON.stringify(this.filters));
+        this._refreshDashboard(container);
+      });
+    }
 
     // Reset filters
-    resetBtn.addEventListener('click', () => {
-      this.filters = { from: '', to: '', regionId: '', storeId: '', rangeType: 'thisMonth' };
-      this.resolveDates();
-      rangeSelect.value = this.filters.rangeType;
-      regionSelect.value = '';
-      storeSelect.value = '';
-      dateFromInput.value = '';
-      dateToInput.value = '';
-      toggleCustomDates();
-      localStorage.removeItem('dashboard_filters');
-      refreshDashboard();
-    });
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        this.filters = { from: '', to: '', regionId: '', storeId: '', rangeType: 'thisMonth' };
+        this.resolveDates();
+        if (rangeSelect)  rangeSelect.value  = this.filters.rangeType;
+        if (regionSelect) regionSelect.value = '';
+        if (storeSelect)  storeSelect.value  = '';
+        if (dateFrom)     dateFrom.value     = '';
+        if (dateTo)       dateTo.value       = '';
+        this._updateStoreDropdown(container);
+        this._toggleCustomDates(container);
+        localStorage.removeItem('dashboard_filters');
+        this._refreshDashboard(container);
+      });
+    }
 
     // Refresh button
-    refreshBtn.addEventListener('click', refreshDashboard);
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => this._refreshDashboard(container));
+    }
 
-    // Live clock
-    const clockEl = container.querySelector('#live-clock');
-    /**
-     * Performs the tickClock operation in this module.
-     * @memberof Pages Module
-     */
-    const tickClock = () => {
-      /**
-       * Performs the fn operation in this module.
-       * @memberof Pages Module
-       */
-      if (clockEl) {
-        try {
-          const now = new Date();
-          let timeFormat = '24h';
-          let timezone = 'Europe/Paris';
-          
-          const storedGeneral = localStorage.getItem('plus33-settings-general');
-          if (storedGeneral) {
-            try {
-              const parsed = JSON.parse(storedGeneral);
-              if (parsed.timeFormat) timeFormat = parsed.timeFormat;
-              if (parsed.defaultTimezone) timezone = parsed.defaultTimezone;
-            } catch (e) {
-              // ignore
-            }
-          }
-          
-          const options = {
-            timeZone: timezone,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: timeFormat === '12h'
-          };
-          
-          const timeStr = now.toLocaleTimeString(timeFormat === '12h' ? 'en-US' : 'fr-FR', options);
-          
-          let friendlyTimezone = timezone;
-          if (timezone === 'Europe/Paris') friendlyTimezone = 'Europe/Paris (CET)';
-          else if (timezone === 'Asia/Dubai') friendlyTimezone = 'Asia/Dubai (GST)';
-          else if (timezone === 'Asia/Kolkata') friendlyTimezone = 'Asia/Kolkata (IST)';
-          else if (timezone === 'UTC') friendlyTimezone = 'UTC (GMT)';
-          
-          clockEl.textContent = `${friendlyTimezone} · ${timeStr}`;
-        } catch (err) {
-          const now = new Date();
-          clockEl.textContent = now.toLocaleTimeString();
-        }
-      }
-    };
-    tickClock();
-    this._clockInterval = setInterval(tickClock, 1000);
-
-    // Cleanup on navigation away
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Pages Module
-     */
+    // Destroy: stop clock interval
     if (lifecycle?.onDestroy) {
-      lifecycle.onDestroy(() => clearInterval(this._clockInterval));
+      lifecycle.onDestroy(() => this.destroy());
     }
+  }
 
-    // Inject skeleton shimmer keyframe if not already present
-    if (!document.getElementById('skeleton-shimmer-style')) {
-      const style = document.createElement('style');
-      style.id = 'skeleton-shimmer-style';
-      style.textContent = `
-        @keyframes skeleton-shimmer {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-      `;
-      document.head.appendChild(style);
+  // ---------------------------------------------------------------------------
+  // LIFECYCLE: destroy
+  // ---------------------------------------------------------------------------
+
+  destroy() {
+    if (this._clockInterval) {
+      clearInterval(this._clockInterval);
+      this._clockInterval = null;
     }
+    logger.debug('UltimateAdminDashboard', 'Destroyed.');
+  }
 
-    // Initial load
-    if (window.lucide) window.lucide.createIcons();
-    await refreshDashboard();
+  // ---------------------------------------------------------------------------
+  // PRIVATE: Dashboard Data Refresh
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Fetch dashboard overview and render widgets.
+   * @param {HTMLElement} container
+   */
+  async _refreshDashboard(container) {
+    const kpisContainer = container.querySelector('#dashboard-kpis-mount');
+    const gridContainer = container.querySelector('#dashboard-grid-mount');
+    const refreshBtn    = container.querySelector('#btn-refresh-dashboard');
+    const refreshIcon   = refreshBtn?.querySelector('[data-lucide="refresh-cw"]');
+
+    // Show skeleton loaders
+    this._showSkeleton(kpisContainer, gridContainer);
+
+    // Spin refresh icon
+    if (refreshIcon) refreshIcon.classList.add('icon-spinning');
+
+    try {
+      const queryParams = { from: this.filters.from, to: this.filters.to };
+      if (this.filters.regionId) queryParams.regionId = this.filters.regionId;
+      if (this.filters.storeId)  queryParams.storeId  = this.filters.storeId;
+
+      const overview = await dashboardService.getDashboardOverview(queryParams);
+      if (!overview) throw new Error('Failed to retrieve server analytics overview.');
+
+      const [dashboardRes, layoutRes] = await Promise.all([
+        fetch('roles/ultimate-admin/dashboard.json'),
+        fetch('roles/ultimate-admin/layout.json')
+      ]);
+
+      if (!dashboardRes.ok || !layoutRes.ok) {
+        throw new Error('Failed to load widget configuration files.');
+      }
+
+      const { widgets } = await dashboardRes.json();
+      const { layout }  = await layoutRes.json();
+
+      kpisContainer.replaceChildren();
+      gridContainer.replaceChildren();
+
+      for (const widget of widgets) {
+        const positioning = layout.find(l => l.id === widget.id);
+        const targetEl    = widget.type === 'kpi' ? kpisContainer : gridContainer;
+        await WidgetEngine.loadWidget(widget, positioning, targetEl, overview, {});
+      }
+
+      if (window.lucide) window.lucide.createIcons();
+
+    } catch (err) {
+      logger.error('UltimateAdminDashboard', 'Failed to render dashboard overview', err);
+      this._showError(container, kpisContainer, gridContainer, err.message);
+    } finally {
+      if (refreshIcon) refreshIcon.classList.remove('icon-spinning');
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // PRIVATE: DOM Helpers
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Populate region dropdown from this.regions data.
+   * @param {HTMLElement} container
+   */
+  _populateRegionDropdown(container) {
+    const countriesGroup  = container.querySelector('#filter-region-countries');
+    const subRegionGroup  = container.querySelector('#filter-region-subregions');
+    if (!countriesGroup || !subRegionGroup) return;
+
+    countriesGroup.replaceChildren();
+    subRegionGroup.replaceChildren();
+
+    this.regions
+      .filter(r => r.parentId === null || r.parentId === undefined)
+      .forEach(r => {
+        const opt = document.createElement('option');
+        opt.value       = r.id;
+        opt.textContent = r.name;
+        countriesGroup.appendChild(opt);
+      });
+
+    this.regions
+      .filter(r => r.parentId !== null && r.parentId !== undefined)
+      .forEach(r => {
+        const opt = document.createElement('option');
+        opt.value       = r.id;
+        opt.textContent = r.name;
+        subRegionGroup.appendChild(opt);
+      });
   }
 
   /**
-   * Performs the fn operation in this module.
-   * @memberof Pages Module
+   * Update store dropdown based on currently selected region.
+   * @param {HTMLElement} container
+   */
+  _updateStoreDropdown(container) {
+    const regionSelect = container.querySelector('#filter-region');
+    const storeSelect  = container.querySelector('#filter-store');
+    if (!storeSelect) return;
+
+    const selectedRegionId = regionSelect?.value || '';
+    storeSelect.replaceChildren();
+
+    let filteredStores = this.stores;
+    let label = 'All Stores';
+
+    if (selectedRegionId) {
+      const childRegionIds = this.regions
+        .filter(r => String(r.parentId) === String(selectedRegionId) || String(r.id) === String(selectedRegionId))
+        .map(r => String(r.id));
+      filteredStores = this.stores.filter(s => childRegionIds.includes(String(s.regionId)));
+      label = `All Stores (${filteredStores.length})`;
+    }
+
+    const allOpt = document.createElement('option');
+    allOpt.value       = '';
+    allOpt.textContent = label;
+    storeSelect.appendChild(allOpt);
+
+    filteredStores.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value       = s.id;
+      opt.textContent = s.name;
+      storeSelect.appendChild(opt);
+    });
+  }
+
+  /**
+   * Restore filter form values from this.filters.
+   * @param {HTMLElement} container
+   */
+  _restoreFilterValues(container) {
+    const rangeSelect  = container.querySelector('#filter-range-type');
+    const regionSelect = container.querySelector('#filter-region');
+    const storeSelect  = container.querySelector('#filter-store');
+    const dateFrom     = container.querySelector('#filter-date-from');
+    const dateTo       = container.querySelector('#filter-date-to');
+
+    if (rangeSelect)  rangeSelect.value  = this.filters.rangeType;
+    if (regionSelect) regionSelect.value = this.filters.regionId;
+    if (storeSelect)  storeSelect.value  = this.filters.storeId;
+    if (dateFrom)     dateFrom.value     = this.filters.from;
+    if (dateTo)       dateTo.value       = this.filters.to;
+  }
+
+  /**
+   * Show/hide the custom date inputs based on rangeType.
+   * @param {HTMLElement} container
+   */
+  _toggleCustomDates(container) {
+    const rangeSelect   = container.querySelector('#filter-range-type');
+    const customInputs  = container.querySelector('#custom-date-inputs');
+    if (customInputs) {
+      customInputs.hidden = rangeSelect?.value !== 'custom';
+    }
+  }
+
+  /**
+   * Start the live clock interval.
+   * @param {HTMLElement} container
+   */
+  _startClock(container) {
+    const clockEl = container.querySelector('#live-clock');
+    if (!clockEl) return;
+
+    const tick = () => {
+      try {
+        const stored   = localStorage.getItem('plus33-settings-general');
+        let timeFormat = '24h', timezone = 'Europe/Paris';
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.timeFormat)      timeFormat = parsed.timeFormat;
+          if (parsed.defaultTimezone) timezone   = parsed.defaultTimezone;
+        }
+        const timeStr       = new Date().toLocaleTimeString(
+          timeFormat === '12h' ? 'en-US' : 'fr-FR',
+          { timeZone: timezone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: timeFormat === '12h' }
+        );
+        const friendlyTz    = TIMEZONE_LABELS[timezone] || timezone;
+        clockEl.textContent = `${friendlyTz} · ${timeStr}`;
+      } catch {
+        clockEl.textContent = new Date().toLocaleTimeString();
+      }
+    };
+
+    tick();
+    this._clockInterval = setInterval(tick, 1000);
+  }
+
+  /**
+   * Show skeleton placeholder cards while data loads.
+   */
+  _showSkeleton(kpisContainer, gridContainer) {
+    if (!kpisContainer || !gridContainer) return;
+
+    kpisContainer.replaceChildren();
+    for (let i = 0; i < 8; i++) {
+      const div = document.createElement('div');
+      div.className = 'skeleton-card';
+      kpisContainer.appendChild(div);
+    }
+
+    gridContainer.replaceChildren();
+    const row1 = document.createElement('div');
+    row1.className = 'col-12 skeleton-row skeleton-row--2col';
+    const row2 = document.createElement('div');
+    row2.className = 'col-12 skeleton-row skeleton-row--3col';
+    [row1, row2].forEach(row => {
+      gridContainer.appendChild(row);
+    });
+  }
+
+  /**
+   * Show an error card when data fetch fails.
+   * @param {HTMLElement} container
+   * @param {HTMLElement} kpisContainer
+   * @param {HTMLElement} gridContainer
+   * @param {string} message
+   */
+  _showError(container, kpisContainer, gridContainer, message) {
+    if (kpisContainer) kpisContainer.replaceChildren();
+    if (!gridContainer) return;
+
+    const tpl = container.querySelector('#dashboard-error-tpl');
+    if (tpl) {
+      const clone = tpl.content.cloneNode(true);
+      const msgEl = clone.querySelector('.error-message');
+      if (msgEl) msgEl.textContent = message;
+
+      const retryBtn = clone.querySelector('.error-retry-btn');
+      if (retryBtn) {
+        retryBtn.addEventListener('click', () => window.location.reload());
+      }
+      gridContainer.replaceChildren(clone);
+    } else {
+      // Fallback if template not found
+      const div = document.createElement('div');
+      div.className = 'card col-12';
+      div.textContent = `Analytics Unavailable: ${message}`;
+      gridContainer.replaceChildren(div);
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  // ---------------------------------------------------------------------------
+  // PRIVATE: Filter Persistence
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Load persisted filters from localStorage.
+   */
+  _restoreFilters() {
+    try {
+      const saved = localStorage.getItem('dashboard_filters');
+      if (saved) this.filters = { ...this.filters, ...JSON.parse(saved) };
+    } catch (e) {
+      logger.warn('UltimateAdminDashboard', 'Failed to parse stored filters', e);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // PUBLIC: Date Resolver (preserved from original)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Resolve from/to date strings based on current rangeType.
+   * Called both on mount and on dropdown changes.
    */
   resolveDates() {
     const today = new Date();
     let fromDate = new Date();
-    let toDate = new Date();
+    let toDate   = new Date();
 
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Pages Module
-     */
     switch (this.filters.rangeType) {
-      case 'today':
-        break;
+      case 'today':      break;
       case 'yesterday':
         fromDate.setDate(today.getDate() - 1);
         toDate.setDate(today.getDate() - 1);
@@ -504,7 +531,7 @@ export default class UltimateAdminDashboard {
         break;
       case 'lastMonth':
         fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        toDate = new Date(today.getFullYear(), today.getMonth(), 0);
+        toDate   = new Date(today.getFullYear(), today.getMonth(), 0);
         break;
       case 'quarter': {
         const q = Math.floor(today.getMonth() / 3);
@@ -518,22 +545,16 @@ export default class UltimateAdminDashboard {
         return;
     }
 
-    /**
-     * Performs the fmt operation in this module.
-     * @memberof Pages Module
-     */
     const fmt = (d) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const y   = d.getFullYear();
+      const m   = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
       return `${y}-${m}-${day}`;
     };
 
     this.filters.from = fmt(fromDate);
-    this.filters.to = fmt(toDate);
+    this.filters.to   = fmt(toDate);
   }
 }
+
 export { UltimateAdminDashboard };
-
-
-
