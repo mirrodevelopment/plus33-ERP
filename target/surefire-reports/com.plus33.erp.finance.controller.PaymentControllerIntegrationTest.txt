@@ -1,0 +1,10 @@
+-------------------------------------------------------------------------------
+Test set: com.plus33.erp.finance.controller.PaymentControllerIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 70.86 s <<< FAILURE! -- in com.plus33.erp.finance.controller.PaymentControllerIntegrationTest
+com.plus33.erp.finance.controller.PaymentControllerIntegrationTest.testPaymentWorkflowAndValidations -- Time elapsed: 5.698 s <<< FAILURE!
+java.lang.AssertionError: PLUS33_GLOBAL not found
+	at com.plus33.erp.finance.controller.PaymentControllerIntegrationTest.lambda$testPaymentWorkflowAndValidations$0(PaymentControllerIntegrationTest.java:138)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at com.plus33.erp.finance.controller.PaymentControllerIntegrationTest.testPaymentWorkflowAndValidations(PaymentControllerIntegrationTest.java:138)
+

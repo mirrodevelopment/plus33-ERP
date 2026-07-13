@@ -1,0 +1,23 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 167
+-- File              : V167__seed_grc_permissions.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed grc permissions
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
+-- V167: GRC Permissions seed
+SELECT 1;

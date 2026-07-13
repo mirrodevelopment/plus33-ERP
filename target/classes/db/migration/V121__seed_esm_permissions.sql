@@ -1,0 +1,24 @@
+﻿-- ============================================================================
+-- Project           : PLUS33 Coffee ERP
+-- Developed By      : Haulo
+-- Developed For     : PLUS33 Coffee
+-- Developer         : Sivasurya
+--
+-- Migration Version : 121
+-- File              : V121__seed_esm_permissions.sql
+-- Operation Type    : Seed Data / Permission Grant
+-- Purpose           : seed esm permissions
+--
+-- Tables Created    : N/A
+-- Tables Altered    : N/A
+-- Seed Data For     : N/A
+-- Indexes           : N/A
+--
+-- Notes
+-- ----------------------------------------------------------------------------
+-- Flyway migration applied automatically on application startup.
+-- Do NOT modify after applying to any environment.
+-- ============================================================================
+-- V121: Seed ESM Permissions
+-- (Maps ESM security roles dynamically to system roles)
+SELECT 1;
