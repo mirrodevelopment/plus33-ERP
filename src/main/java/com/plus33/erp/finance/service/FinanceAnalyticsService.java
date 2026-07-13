@@ -175,7 +175,7 @@ public class FinanceAnalyticsService {
      */
     @SuppressWarnings("unchecked")
     public List<Object[]> getDailyFinanceTrend(LocalDate endDate) {
-        LocalDate startDate = endDate.minusDays(4);
+        LocalDate startDate = endDate.minusDays(6);
         
         String jpql = "SELECT CAST(ci.invoiceDate AS string), COALESCE(SUM(ci.totalAmount), 0) " +
                 "FROM CustomerInvoice ci " +
@@ -200,7 +200,7 @@ public class FinanceAnalyticsService {
                 .getResultList();
 
         Map<String, BigDecimal[]> dayMap = new TreeMap<>();
-        for (int i = 4; i >= 0; i--) {
+        for (int i = 6; i >= 0; i--) {
             LocalDate d = endDate.minusDays(i);
             dayMap.put(d.toString(), new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO});
         }

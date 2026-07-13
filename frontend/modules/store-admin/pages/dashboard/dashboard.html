@@ -1,0 +1,464 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Admin — Dashboard
+ * File              : dashboard.html
+ * Path              : frontend/modules/store-admin/dashboard/dashboard.html
+ * Purpose           : HTML template for the Store Admin Dashboard
+ * Version           : 2.0.0
+ *
+ * Related JS        : dashboard.js
+ * Related CSS       : dashboard.css
+ * Related APIs      : GET /api/v1/dashboard/overview
+ *                     GET /api/v1/auth/me
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural layout of the Store Admin Panel Dashboard.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="store-admin-dashboard-workspace">
+
+  <!-- ===== PAGE HEADER CARD ===== -->
+  <div class="card glass dashboard-header-card">
+    <div class="header-details">
+      <h2 class="header-title">
+        <i data-lucide="store" class="header-icon" aria-hidden="true"></i>
+        <span>Dashboard</span>
+      </h2>
+      <span class="header-metadata">
+        Active: <span id="header-store-name" class="highlight-val">—</span> &nbsp;·&nbsp;
+        Role: <span class="highlight-val">Store Admin</span> &nbsp;·&nbsp;
+        Welcome, <span id="header-user-name" class="highlight-val">—</span>
+      </span>
+    </div>
+    
+    <div class="header-actions">
+      <select id="select-store-view" class="filter-select">
+        <!-- store option(s) loaded dynamically -->
+      </select>
+      <div id="store-admin-clock" class="dashboard-clock-panel" role="status" aria-live="off">
+        --:--:--
+      </div>
+      <div class="notifications-indicator" title="Unread alerts">
+        <i data-lucide="bell" aria-hidden="true"></i>
+        <span class="badge-count" id="header-alert-count">3</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPI METRIC SUMMARY GRID (8 Cards) ===== -->
+  <div class="kpi-grid-container" role="region" aria-label="Store key performance indicators">
+    
+    <!-- KPI 1: Today's Sales -->
+    <div class="kpi-block-card">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Today's Sales</span>
+        <i data-lucide="banknote" class="kpi-block-icon icon-success" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-today-sales">—</h4>
+        <div class="kpi-block-subtext" id="kpi-target-sales-value">Target: —</div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="sales-progress-fill"></div>
+          </div>
+        </div>
+        <span class="kpi-block-trend" id="sales-achieved-percentage">—% Achieved</span>
+      </div>
+    </div>
+
+    <!-- KPI 2: Transactions -->
+    <div class="kpi-block-card">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Transactions</span>
+        <i data-lucide="shopping-cart" class="kpi-block-icon icon-primary" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-transactions-count">—</h4>
+        <span class="kpi-block-trend">▲ Live data synced</span>
+      </div>
+    </div>
+
+    <!-- KPI 3: Average Order Value -->
+    <div class="kpi-block-card">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Avg Order Value</span>
+        <i data-lucide="calculator" class="kpi-block-icon icon-info" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-avg-order-val">—</h4>
+        <span class="kpi-block-trend">▲ Live average</span>
+      </div>
+    </div>
+
+    <!-- KPI 4: Customers Served -->
+    <div class="kpi-block-card">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Served Today</span>
+        <i data-lucide="users" class="kpi-block-icon icon-primary" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-customers-served">—</h4>
+        <span class="kpi-block-trend">▲ Live count</span>
+      </div>
+    </div>
+
+    <!-- KPI 5: Inventory Alerts -->
+    <div class="kpi-block-card">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Inventory Alerts</span>
+        <i data-lucide="alert-triangle" class="kpi-block-icon icon-danger" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-inventory-alerts">— Items</h4>
+        <span class="kpi-block-trend kpi-block-trend--danger">Low / Out of Stock</span>
+      </div>
+    </div>
+
+    <!-- KPI 6: Employees on Shift -->
+    <div class="kpi-block-card">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Active Staff</span>
+        <i data-lucide="user-check" class="kpi-block-icon icon-success" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-active-staff">— Staff</h4>
+        <span class="kpi-block-subtext" id="kpi-total-staff">From — total staff</span>
+      </div>
+    </div>
+
+    <!-- KPI 7: Open Tasks -->
+    <div class="kpi-block-card">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Open Tasks</span>
+        <i data-lucide="clipboard-list" class="kpi-block-icon icon-warning" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-open-tasks">—</h4>
+        <span class="kpi-block-action-link" id="btn-view-tasks-kpi">View Tasks</span>
+      </div>
+    </div>
+
+    <!-- KPI 8: Open Approvals -->
+    <div class="kpi-block-card">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Open Approvals</span>
+        <i data-lucide="check-square" class="kpi-block-icon icon-info" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-open-approvals">—</h4>
+        <span class="kpi-block-action-link" id="btn-view-approvals-kpi">View Approvals</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 1: SALES OVERVIEW + WORKFORCE + INVENTORY SPREADS ===== -->
+  <div class="layout-grid-three">
+    
+    <!-- Sales Overview Widget -->
+    <div class="card glass sales-overview-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">
+          <i data-lucide="trending-up" class="card-split-icon" aria-hidden="true"></i>
+          <span>Sales Overview</span>
+        </h3>
+        <select class="filter-select mini-select">
+          <option value="today">Today</option>
+        </select>
+      </div>
+      <div class="sales-card-body">
+        <div class="sales-card-split">
+          <div class="sales-stat-group">
+            <span class="sales-stat-label">Total Sales</span>
+            <strong class="sales-stat-value" id="val-total-sales">—</strong>
+          </div>
+          <div class="sales-stat-group">
+            <span class="sales-stat-label">Target</span>
+            <strong class="sales-stat-target" id="val-target-sales">—</strong>
+          </div>
+          <div class="progress-radial-group">
+            <div class="progress-radial" id="sales-progress-gauge">
+              <div class="radial-center-badge" id="sales-progress-percentage">—%</div>
+            </div>
+            <span class="progress-label">Target Achieved</span>
+          </div>
+        </div>
+
+        <div class="sales-trend-group">
+          <span class="trend-label">Sales Trend (Today)</span>
+          <div class="trend-sparkline-container">
+            <svg viewBox="0 0 100 40" class="sparkline-svg">
+              <path d="M 0 35 L 20 28 L 40 20 L 60 10 L 80 25 L 100 5" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round"></path>
+              <path d="M 0 35 L 20 28 L 40 20 L 60 10 L 80 25 L 100 5 L 100 40 L 0 40 Z" fill="rgba(201,164,106,0.06)"></path>
+            </svg>
+            <div class="sparkline-labels-row">
+              <span>06 AM</span><span>12 PM</span><span>06 PM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 5 Products List -->
+      <div class="top-products-section border-top-divider pt-xs">
+        <span class="section-title">Top 5 Selling Products</span>
+        <div class="products-grid">
+          <div class="product-item"><span>Cappuccino:</span><strong>125 units</strong></div>
+          <div class="product-item"><span>Latte:</span><strong>98 units</strong></div>
+          <div class="product-item"><span>Americano:</span><strong>76 units</strong></div>
+          <div class="product-item"><span>Mocha:</span><strong>65 units</strong></div>
+          <div class="product-item product-item--colspan"><span>Cold Coffee:</span><strong>54 units</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workforce Overview Widget -->
+    <div class="card glass workforce-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">
+          <i data-lucide="users" class="card-split-icon" aria-hidden="true"></i>
+          <span>Workforce Overview</span>
+        </h3>
+        <span class="badge-pill">Attendance Today</span>
+      </div>
+
+      <div class="attendance-status-blocks">
+        <div class="status-block">
+          <span class="status-block-label">On Shift</span>
+          <strong class="status-block-value color-success" id="val-on-shift">—</strong>
+        </div>
+        <div class="status-block">
+          <span class="status-block-label">Absent</span>
+          <strong class="status-block-value color-danger" id="val-absent">—</strong>
+        </div>
+        <div class="status-block">
+          <span class="status-block-label">On Leave</span>
+          <strong class="status-block-value color-info" id="val-on-leave">—</strong>
+        </div>
+        <div class="status-block">
+          <span class="status-block-label">Swap due</span>
+          <strong class="status-block-value color-warning">4</strong>
+        </div>
+      </div>
+
+      <div class="attendance-radial-row">
+        <div class="attendance-progress-circle" id="attendance-gauge">
+          <div class="circle-center-overlay">
+            <span id="attendance-gauge-percent">—%</span>
+            <span class="circle-subtext">Present</span>
+          </div>
+        </div>
+        <div class="attendance-details-text">
+          <div class="stat-text-row"><span>Present Staff:</span><strong id="txt-present-staff">—</strong></div>
+          <div class="stat-text-row"><span>Absent Staff:</span><strong id="txt-absent-staff">—</strong></div>
+          <div class="stat-text-row"><span>On Leave:</span><strong id="txt-leave-staff">—</strong></div>
+        </div>
+      </div>
+
+      <div class="attendance-footer-actions border-top-divider pt-xs">
+        <button class="btn btn-secondary btn-action" id="wa-btn-shifts" type="button">Assign Shifts</button>
+        <button class="btn btn-secondary btn-action" id="wa-btn-leaves" type="button">Approve Leave</button>
+      </div>
+    </div>
+
+    <!-- Inventory Overview Widget -->
+    <div class="card glass inventory-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">
+          <i data-lucide="package" class="card-split-icon" aria-hidden="true"></i>
+          <span>Inventory Overview</span>
+        </h3>
+        <span class="badge-pill badge-pill--danger">Critical Stock</span>
+      </div>
+
+      <div class="inventory-status-rows">
+        <div class="inventory-status-row">
+          <span>Low-Stock Items:</span>
+          <strong class="color-danger" id="val-low-stock">— Items</strong>
+        </div>
+        <div class="inventory-status-row">
+          <span>Out-of-Stock Items:</span>
+          <strong class="color-red" id="val-out-stock">— Items</strong>
+        </div>
+        <div class="inventory-status-row">
+          <span>Expiring Items (7 Days):</span>
+          <strong class="color-warning" id="val-expiring-stock">— Items</strong>
+        </div>
+        <div class="inventory-status-row">
+          <span>Pending Supply Requests:</span>
+          <strong id="val-pending-requests">— Requests</strong>
+        </div>
+      </div>
+
+      <div class="inventory-footer-actions border-top-divider pt-xs">
+        <button class="btn btn-secondary btn-action" id="wa-btn-supply" type="button">Create Supply Req</button>
+        <button class="btn btn-secondary btn-action" id="wa-btn-waste" type="button">Record Waste</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 2: FINANCIALS + COMPLIANCE + APPROVALS + ALERTS ===== -->
+  <div class="layout-grid-four">
+    
+    <!-- Financial Overview -->
+    <div class="card glass financials-panel-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">
+          <i data-lucide="dollar-sign" class="card-split-icon" aria-hidden="true"></i>
+          <span>Financial Overview</span>
+        </h3>
+      </div>
+      
+      <div class="financials-rows">
+        <div class="financials-row">
+          <span>Cash Sales:</span>
+          <strong class="color-success" id="fin-cash-sales">—</strong>
+        </div>
+        <div class="financials-row">
+          <span>Card Sales:</span>
+          <strong class="color-success" id="fin-card-sales">—</strong>
+        </div>
+        <div class="financials-row">
+          <span>Refund Amount:</span>
+          <strong class="color-danger" id="fin-refunds">—</strong>
+        </div>
+        <div class="financials-row border-top-divider">
+          <span>Petty Cash Balance:</span>
+          <strong id="fin-petty-cash">—</strong>
+        </div>
+      </div>
+
+      <div class="financials-footer-actions border-top-divider">
+        <button class="btn btn-secondary btn-action w-100" id="sa-btn-reconcile" type="button">Reconcile Cash</button>
+      </div>
+    </div>
+
+    <!-- Compliance Checklist -->
+    <div class="card glass compliance-panel-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">
+          <i data-lucide="shield-check" class="card-split-icon" aria-hidden="true"></i>
+          <span>Compliance Overview</span>
+        </h3>
+      </div>
+      
+      <div class="compliance-rows">
+        <div class="compliance-row">
+          <span>Opening Checklist:</span>
+          <span class="color-success weight-bold" id="checklist-opening">Completed</span>
+        </div>
+        <div class="compliance-row">
+          <span>Closing Checklist:</span>
+          <span class="color-warning weight-bold" id="checklist-closing">Pending</span>
+        </div>
+        <div class="compliance-row">
+          <span>Cleaning Checklist:</span>
+          <span class="color-success weight-bold" id="checklist-cleaning">Completed</span>
+        </div>
+        <div class="compliance-row">
+          <span>Temperature Log:</span>
+          <span class="color-success weight-bold" id="checklist-temp">Completed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Approvals -->
+    <div class="card glass approvals-panel-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">
+          <i data-lucide="check-square" class="card-split-icon" aria-hidden="true"></i>
+          <span>Pending Approvals</span>
+        </h3>
+      </div>
+      
+      <div class="approvals-rows">
+        <div class="approvals-row">
+          <span>Leave Requests:</span>
+          <strong id="val-pending-leaves">— Requests</strong>
+        </div>
+        <div class="approvals-row">
+          <span>Shift Change Requests:</span>
+          <strong id="val-pending-shift-changes">— Requests</strong>
+        </div>
+        <div class="approvals-row border-top-divider">
+          <span>Expenses Claims:</span>
+          <strong class="color-gold">2 Claims</strong>
+        </div>
+      </div>
+
+      <div class="approvals-footer-actions border-top-divider">
+        <button class="btn btn-secondary btn-action w-100" id="sa-btn-approvals" type="button">Review Approvals</button>
+      </div>
+    </div>
+
+    <!-- Live Alerts -->
+    <div class="card glass alerts-panel-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">
+          <i data-lucide="bell" class="card-split-icon" aria-hidden="true"></i>
+          <span>Critical Alerts</span>
+        </h3>
+        <span class="badge-pill badge-pill--danger">Live Feed</span>
+      </div>
+
+      <div class="alerts-rows" id="alerts-rows-list">
+        <!-- Dynamically rendered alert feeds -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 3: STAFF ROSTER SCHEDULE LIST ===== -->
+  <div class="card glass staff-roster-card">
+    <div class="card-header-split">
+      <h3 class="card-split-title">
+        <i data-lucide="calendar" class="card-split-icon" aria-hidden="true"></i>
+        <span>Today's Shift Roster Schedule</span>
+      </h3>
+      <span class="badge-pill">Downtown Shift Plan</span>
+    </div>
+
+    <div class="table-scroll-wrapper">
+      <table class="roster-schedule-table">
+        <thead>
+          <tr>
+            <th scope="col">Staff Code</th>
+            <th scope="col">Employee Name</th>
+            <th scope="col">Planned Shift</th>
+            <th scope="col">Designation</th>
+            <th scope="col">Duty Status</th>
+            <th scope="col" class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="roster-schedule-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== ROSTER ROW TEMPLATE ===== -->
+<template id="roster-schedule-row-tpl">
+  <tr class="roster-schedule-row">
+    <td class="col-code"></td>
+    <td class="col-name"></td>
+    <td class="col-shift"></td>
+    <td class="col-designation"></td>
+    <td class="col-status">
+      <span class="status-indicator-wrapper">
+        <span class="status-dot"></span>
+        <span class="status-label"></span>
+      </span>
+    </td>
+    <td class="col-actions">
+      <!-- Actions buttons populated by JS -->
+    </td>
+  </tr>
+</template>

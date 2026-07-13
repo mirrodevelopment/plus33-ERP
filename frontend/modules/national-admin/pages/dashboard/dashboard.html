@@ -1,0 +1,519 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : National Admin — Dashboard
+ * File              : dashboard.html
+ * Path              : frontend/modules/national-admin/dashboard/dashboard.html
+ * Purpose           : HTML template for the National Admin Dashboard
+ * Version           : 2.0.0
+ *
+ * Related JS        : dashboard.js
+ * Related CSS       : dashboard.css
+ * Related APIs      : GET /api/v1/dashboard/overview
+ *                     GET /api/v1/regions
+ *                     GET /api/v1/stores
+ *                     GET /api/v1/warehouses
+ *                     GET /api/v1/suppliers
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural layout of the National Admin Dashboard.
+ * No inline styles, no inline javascript handlers.
+ ******************************************************************************
+-->
+
+<div class="national-admin-dashboard-workspace">
+
+  <!-- ===== PAGE HEADER CARD ===== -->
+  <div class="card glass dashboard-header-card">
+    <div class="header-details">
+      <h2 class="header-title">
+        <i data-lucide="layout-dashboard" class="header-icon" aria-hidden="true"></i>
+        <span>National Admin Dashboard</span>
+      </h2>
+      <span class="header-metadata">
+        Active: <span id="header-region-name" class="highlight-val">—</span> &nbsp;·&nbsp;
+        Region ID: <span id="header-region-id" class="highlight-val">—</span> &nbsp;·&nbsp;
+        User: <span id="header-user-profile" class="highlight-val">—</span>
+      </span>
+    </div>
+    <div class="header-actions">
+      <div id="dashboard-clock" class="dashboard-clock-panel" role="status" aria-live="off">
+        --:--:--
+      </div>
+      <div class="notifications-indicator" title="Unread notifications">
+        <i data-lucide="bell" aria-hidden="true"></i>
+        <span id="dashboard-notif-count" class="badge-count">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FILTER PANEL RIBBON ===== -->
+  <div class="card glass filters-card" role="search" aria-label="Dashboard filters">
+    <div class="filter-group">
+      <label for="filter-timeframe" class="filter-label">Timeframe</label>
+      <select id="filter-timeframe" class="filter-select">
+        <option value="Today">Today</option>
+        <option value="Week">This Week</option>
+        <option value="Month">This Month</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-store" class="filter-label">Store Location</label>
+      <select id="filter-store" class="filter-select">
+        <!-- populated dynamically -->
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-warehouse" class="filter-label">Warehouse</label>
+      <select id="filter-warehouse" class="filter-select">
+        <!-- populated dynamically -->
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-vendor" class="filter-label">Vendor</label>
+      <select id="filter-vendor" class="filter-select">
+        <!-- populated dynamically -->
+      </select>
+    </div>
+
+    <button id="btn-apply-filters" class="btn btn-primary btn-refresh-dashboard" type="button" aria-label="Refresh dashboard data">
+      <i data-lucide="filter" aria-hidden="true"></i>
+      <span>Refresh Dashboard</span>
+    </button>
+  </div>
+
+  <!-- ===== KPI METRIC SUMMARY GRID (8 Cards) ===== -->
+  <div class="kpi-grid-container" role="region" aria-label="National key performance indicators">
+    
+    <!-- KPI 1: Total Sales -->
+    <div class="kpi-block-card kpi-block-card--sales">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Total Sales</span>
+        <i data-lucide="trending-up" class="kpi-block-icon" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-total-sales">—</h4>
+        <span class="kpi-block-trend">▲ 4.8% vs target</span>
+      </div>
+    </div>
+
+    <!-- KPI 2: Target Achievement -->
+    <div class="kpi-block-card kpi-block-card--achievement">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Target Achievement</span>
+        <i data-lucide="target" class="kpi-block-icon" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-target-achievement">—</h4>
+        <span class="kpi-block-subtext" id="kpi-target-value">Target: —</span>
+      </div>
+    </div>
+
+    <!-- KPI 3: Active Stores -->
+    <div class="kpi-block-card kpi-block-card--stores">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Active Stores</span>
+        <i data-lucide="store" class="kpi-block-icon" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-total-stores">—</h4>
+        <span class="kpi-block-trend">100% Operational</span>
+      </div>
+    </div>
+
+    <!-- KPI 4: Regional Profit -->
+    <div class="kpi-block-card kpi-block-card--profit">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Regional Profit</span>
+        <i data-lucide="dollar-sign" class="kpi-block-icon" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-total-profit">—</h4>
+        <span class="kpi-block-subtext" id="kpi-profit-margin">Margin: —</span>
+      </div>
+    </div>
+
+    <!-- KPI 5: Compliance Score -->
+    <div class="kpi-block-card kpi-block-card--compliance">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Compliance Score</span>
+        <i data-lucide="shield" class="kpi-block-icon" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-compliance-score">—</h4>
+        <span class="kpi-block-trend kpi-block-trend--warning">2 Overdue Actions</span>
+      </div>
+    </div>
+
+    <!-- KPI 6: Total Regions -->
+    <div class="kpi-block-card kpi-block-card--regions">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Total Regions</span>
+        <i data-lucide="map-pin" class="kpi-block-icon" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-total-regions">—</h4>
+        <span class="kpi-block-subtext">Active Territories</span>
+      </div>
+    </div>
+
+    <!-- KPI 7: Total Warehouses -->
+    <div class="kpi-block-card kpi-block-card--warehouses">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Total Warehouses</span>
+        <i data-lucide="archive" class="kpi-block-icon" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-total-warehouses">—</h4>
+        <span class="kpi-block-trend">Fulfilled Directly</span>
+      </div>
+    </div>
+
+    <!-- KPI 8: Total Employees -->
+    <div class="kpi-block-card kpi-block-card--employees">
+      <div class="kpi-block-header">
+        <span class="kpi-block-title">Total Employees</span>
+        <i data-lucide="users" class="kpi-block-icon" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-block-body">
+        <h4 class="kpi-block-value" id="kpi-total-employees">—</h4>
+        <span class="kpi-block-subtext">Active Staff</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 1: SALES OVERVIEW + STORE PERFORMANCE SPLIT ===== -->
+  <div class="layout-grid-split">
+    
+    <!-- Widget: Dynamic Sales Overview Chart Widget (Left) -->
+    <div id="national-admin-sales-widget-container" style="min-width: 0;"></div>
+
+    <!-- Widget: Store Performance Tabs List (Right) -->
+    <div class="card glass store-performance-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Store Performance</h3>
+      </div>
+      <div class="tab-selectors-row">
+        <button class="dashboard-tab active" data-tab="top" type="button">Top</button>
+        <button class="dashboard-tab" data-tab="under" type="button">Underperformers</button>
+        <button class="dashboard-tab" data-tab="below" type="button">Below Target</button>
+      </div>
+      <div class="tab-table-scroll-wrapper">
+        <table class="performance-table">
+          <thead>
+            <tr>
+              <th scope="col">Code</th>
+              <th scope="col">Name</th>
+              <th scope="col">Sales</th>
+              <th scope="col">Target %</th>
+            </tr>
+          </thead>
+          <tbody id="store-performance-tbody">
+            <!-- Rows dynamically written by dashboard.js -->
+          </tbody>
+        </table>
+      </div>
+      <div class="performance-footer-actions">
+        <button class="quick-action-btn" id="btn-schedule-visit" type="button">
+          <i data-lucide="calendar" aria-hidden="true"></i>
+          <span>Schedule Visit</span>
+        </button>
+        <button class="quick-action-btn" id="btn-improvement-plan" type="button">
+          <i data-lucide="file-text" aria-hidden="true"></i>
+          <span>Action Plan</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 2: NATIONAL PERFORMANCE BY REGION DONUT GRAPH ===== -->
+  <div class="card glass regional-performance-container">
+    <div class="card-header-split">
+      <h3 class="card-split-title">National Performance by Region</h3>
+      <a href="#regions" class="detail-link">View All</a>
+    </div>
+
+    <div class="regional-performance-body">
+      <!-- Donut Circle Chart -->
+      <div class="donut-chart-container">
+        <svg width="140" height="140" viewBox="0 0 42 42" id="donut-svg-element">
+          <circle cx="21" cy="21" r="15.915" fill="transparent" class="donut-bg-circle"></circle>
+          <g id="donut-segments-group"></g>
+        </svg>
+        <div class="donut-center-overlay">
+          <span class="donut-overlay-value" id="donut-val-total-sales">—</span>
+          <span class="donut-overlay-label">Total Income</span>
+        </div>
+      </div>
+
+      <!-- Regional Share Table -->
+      <div class="regional-table-wrapper">
+        <table class="regional-table">
+          <thead>
+            <tr>
+              <th scope="col">Region</th>
+              <th scope="col" class="text-right">Income</th>
+              <th scope="col" class="text-right">Share</th>
+              <th scope="col" class="text-right">Ach.</th>
+            </tr>
+          </thead>
+          <tbody id="regional-performance-tbody">
+            <!-- populated by script -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="performance-footer-actions border-top-divider">
+      <button class="quick-action-btn" id="btn-view-performance-dashboard" type="button">
+        <i data-lucide="eye" aria-hidden="true"></i>
+        <span>View Dashboard</span>
+      </button>
+      <button class="quick-action-btn" id="btn-performance-improvement" type="button">
+        <i data-lucide="file-text" aria-hidden="true"></i>
+        <span>Improvement Plan</span>
+      </button>
+      <button class="quick-action-btn" id="btn-performance-assign" type="button">
+        <i data-lucide="user-check" aria-hidden="true"></i>
+        <span>Assign Review</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== ROW 3: WORKFORCE SUMMARY + REGIONAL WAREHOUSE STOCKS ===== -->
+  <div class="layout-grid-split">
+    
+    <!-- Workforce Overview -->
+    <div class="card glass workforce-summary-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Workforce Overview</h3>
+        <span class="badge-pill">Staff Active</span>
+      </div>
+      <div class="workforce-card-body">
+        <div class="progress-radial-container">
+          <svg width="100" height="100" viewBox="0 0 36 36" class="radial-svg">
+            <circle cx="18" cy="18" r="15.9155" fill="none" class="radial-track" />
+            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--status-success)" class="radial-segment" stroke-dasharray="75 100" />
+            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--status-warning)" class="radial-segment" stroke-dasharray="15 100" stroke-dashoffset="-75" />
+            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--status-danger)" class="radial-segment" stroke-dasharray="10 100" stroke-dashoffset="-90" />
+          </svg>
+          <div class="radial-label-overlay">
+            <h4 class="radial-percentage">90%</h4>
+            <span class="radial-status">On Duty</span>
+          </div>
+        </div>
+        <div class="workforce-list-indicators">
+          <div class="indicator-row">
+            <span><i data-lucide="check-circle-2" class="color-success" aria-hidden="true"></i> On Duty</span>
+            <span class="weight-bold">75 Baristas</span>
+          </div>
+          <div class="indicator-row">
+            <span><i data-lucide="plane-takeoff" class="color-warning" aria-hidden="true"></i> On Leave</span>
+            <span class="weight-bold">15 Approved</span>
+          </div>
+          <div class="indicator-row">
+            <span><i data-lucide="alert-octagon" class="color-danger" aria-hidden="true"></i> Unplanned Absent</span>
+            <span class="weight-bold">2 Incidents</span>
+          </div>
+          <div class="indicator-row border-top-divider pt-xs">
+            <span>Open Recruitment Requests</span>
+            <span class="weight-bold color-gold">3 Pending</span>
+          </div>
+        </div>
+      </div>
+      <div class="performance-footer-actions">
+        <button class="quick-action-btn" id="btn-approve-recruitment" type="button">
+          <i data-lucide="user-plus" aria-hidden="true"></i>
+          <span>Approve Recruitment</span>
+        </button>
+        <button class="quick-action-btn" id="btn-view-workforce" type="button">
+          <i data-lucide="users" aria-hidden="true"></i>
+          <span>View Roster</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Warehouse Overview -->
+    <div class="card glass warehouse-summary-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Regional Warehouse Overview</h3>
+        <span class="badge-pill">Dynamic stock tracking</span>
+      </div>
+      <div class="warehouse-card-body">
+        <div class="grid-sub-cards">
+          <div class="sub-stat-card">
+            <span class="sub-stat-label">Stock Value</span>
+            <span class="sub-stat-value" id="val-warehouse-stock-value">—</span>
+            <span class="sub-stat-desc" id="val-warehouse-units-count">— Stocked Units</span>
+          </div>
+          <div class="sub-stat-card">
+            <span class="sub-stat-label">WMS Alerts</span>
+            <span class="sub-stat-value" id="val-wms-alerts-count">— Low / — Out</span>
+            <span class="sub-stat-desc">WMS Health OK</span>
+          </div>
+        </div>
+        <div class="warehouse-bottom-data border-top-divider">
+          <span>Pending Store Requests: <strong id="val-pending-requests-count">—</strong></span>
+          <span>Today's Dispatches: <strong id="val-dispatches-count">—</strong></span>
+        </div>
+      </div>
+      <div class="performance-footer-actions">
+        <button class="quick-action-btn" id="btn-warehouse-dashboard" type="button">
+          <i data-lucide="warehouse" aria-hidden="true"></i>
+          <span>Warehouse Hub</span>
+        </button>
+        <button class="quick-action-btn" id="btn-emergency-procurement" type="button">
+          <i data-lucide="shopping-cart" aria-hidden="true"></i>
+          <span>Emergency Buy</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 4: DYNAMIC FINANCIAL OVERVIEW ===== -->
+  <div id="national-admin-financial-widget-container" style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-lg);"></div>
+
+  <!-- ===== ROW 5: CRITICAL LEGAL ISSUES + AUDIT COMPLIANCE ===== -->
+  <div class="layout-grid-split">
+
+    <!-- GRC: Complaints & Legal Cases -->
+    <div class="card glass legal-cases-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Complaints &amp; Legal Cases</h3>
+        <span class="badge-pill badge-pill--danger">GRC Alerts</span>
+      </div>
+      <div class="panel-body-data flex-grow">
+        <div class="row-value-item">
+          <span>Customer Complaints</span>
+          <span class="item-value" id="grc-complaints">— Open (High: —)</span>
+        </div>
+        <div class="row-value-item">
+          <span>Active Legal Investigations</span>
+          <span class="item-value color-warning" id="grc-legal-cases">— Cases (High: —)</span>
+        </div>
+        <div class="row-value-item border-top-divider">
+          <span>Vendor Disputes</span>
+          <span class="item-value color-muted">0 Disputes Pending</span>
+        </div>
+      </div>
+      <div class="performance-footer-actions">
+        <button class="quick-action-btn w-100 justify-center" id="btn-escalate-case" type="button">
+          <i data-lucide="alert-triangle" aria-hidden="true"></i>
+          <span>Escalate Case</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Compliance & Audit Score -->
+    <div class="card glass compliance-audit-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Compliance &amp; Audit</h3>
+        <span class="badge-pill" id="compliance-score-badge">Score: —</span>
+      </div>
+      <div class="panel-body-data flex-grow">
+        <div class="row-value-item">
+          <span>Surprise Audits Completed</span>
+          <span class="item-value color-success" id="audit-completed">— Audits</span>
+        </div>
+        <div class="row-value-item">
+          <span>Planned Audits Pending</span>
+          <span class="item-value" id="audit-pending">— Scheduled</span>
+        </div>
+        <div class="row-value-item border-top-divider">
+          <span>Overdue Corrective Actions</span>
+          <span class="item-value color-danger" id="audit-overdue-actions">— Actions</span>
+        </div>
+      </div>
+      <div class="performance-footer-actions">
+        <button class="quick-action-btn w-100 justify-center" id="btn-schedule-audit" type="button">
+          <i data-lucide="check-square" aria-hidden="true"></i>
+          <span>Schedule Audit</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 5: PENDING APPROVALS + CRITICAL ALERTS FEED ===== -->
+  <div class="layout-grid-split">
+    
+    <!-- Approvals list panel -->
+    <div class="card glass pending-approvals-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Pending Approvals</h3>
+        <span class="badge-pill">Dynamic</span>
+      </div>
+      <div class="approvals-feed-rows" id="pending-approvals-list">
+        <!-- Approvals list loaded by JS -->
+      </div>
+    </div>
+
+    <!-- Database alerts notifications feed -->
+    <div class="card glass critical-alerts-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Critical Alerts</h3>
+        <span class="badge-pill badge-pill--danger">Database Sync</span>
+      </div>
+      <div class="alerts-feed-rows" id="critical-alerts-list">
+        <!-- Alerts logs rendered by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 6: RECENT ACTIVITIES + QUICK SHORTCUTS ===== -->
+  <div class="layout-grid-split">
+    
+    <!-- Recent Activity log feed -->
+    <div class="card glass activity-feed-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Recent Activity Feed</h3>
+      </div>
+      <div class="activity-feed-rows" id="recent-activity-list">
+        <!-- Dynamic activities rows list -->
+      </div>
+    </div>
+
+    <!-- Quick Actions matrix shortcuts panel -->
+    <div class="card glass quick-shortcuts-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Quick Actions Panel</h3>
+      </div>
+      <div class="shortcuts-matrix-grid">
+        <button class="quick-shortcut-btn" id="qa-schedule-visit" type="button">
+          <i data-lucide="calendar" class="icon-gold" aria-hidden="true"></i>
+          <span>Schedule Visit</span>
+        </button>
+        <button class="quick-shortcut-btn" id="qa-approve-vendor" type="button">
+          <i data-lucide="check-square" class="icon-success" aria-hidden="true"></i>
+          <span>Approve Vendor</span>
+        </button>
+        <button class="quick-shortcut-btn" id="qa-approve-recruitment" type="button">
+          <i data-lucide="user-plus" class="icon-info" aria-hidden="true"></i>
+          <span>Approve Hires</span>
+        </button>
+        <button class="quick-shortcut-btn" id="qa-review-complaints" type="button">
+          <i data-lucide="alert-triangle" class="icon-danger" aria-hidden="true"></i>
+          <span>Review GRC</span>
+        </button>
+        <button class="quick-shortcut-btn" id="qa-approve-procurement" type="button">
+          <i data-lucide="shopping-cart" class="icon-gold" aria-hidden="true"></i>
+          <span>Approve PO</span>
+        </button>
+        <button class="quick-shortcut-btn" id="qa-view-reports" type="button">
+          <i data-lucide="file-text" aria-hidden="true"></i>
+          <span>View Reports</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

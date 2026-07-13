@@ -98,10 +98,26 @@
         <option value="ultimateAdmin">Ultimate Admin</option>
         <option value="nationalAdmin">National Admin</option>
         <option value="regionalAdmin">Regional Admin</option>
-        <option value="warehouse">Warehouse Admin</option>
+        <option value="nationalWarehouseAdmin">National Warehouse Admin</option>
+        <option value="regionalWarehouseAdmin">Regional Warehouse Admin</option>
         <option value="store">Store Admin</option>
         <option value="storeEmployee">Store Employee</option>
         <option value="shiftSupervisor">Shift Supervisor</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Sub-Role Profile Selector -->
+  <div class="form-group" id="group-subprofile" style="display: none;">
+    <label for="select-subprofile" class="form-label">Assigned Nation / Region</label>
+    <div class="form-input-wrapper">
+      <i data-lucide="map-pin" class="form-input-icon" aria-hidden="true"></i>
+      <select
+        id="select-subprofile"
+        class="form-select"
+        aria-label="Select your assigned territory"
+      >
+        <!-- populated dynamically -->
       </select>
     </div>
   </div>

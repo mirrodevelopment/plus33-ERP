@@ -1,0 +1,211 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Admin — Leave Management
+ * File              : leave.html
+ * Path              : frontend/modules/store-admin/leave/leave.html
+ * Purpose           : HTML template for Store Admin Leave page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : leave.js
+ * Related CSS       : leave.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines structural elements for the approvals queue, cancellation requests,
+ * and yearly summaries lists.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="store-leave-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">Leave Management</h2>
+      <p class="welcome-subtitle">
+        Store Admin &nbsp;·&nbsp; <span class="highlight-val">Approval Hub &amp; Analytics</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>Live</span>
+    </div>
+  </div>
+
+  <!-- ===== KPI CARDS GRID ===== -->
+  <div class="kpi-grid-row" id="leave-kpi-grid" role="region" aria-label="Leave approvals summary metrics">
+    <!-- Populated dynamically by JS -->
+  </div>
+
+  <!-- ===== MAIN SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: Approvals & Cancellations -->
+    <div class="layout-column-left">
+      
+      <!-- Pending Approvals card -->
+      <div class="card glass queue-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">
+            <span>Approval Queue</span>
+            <span id="badge-pending-count" class="badge-warning">0</span>
+          </h3>
+          <i data-lucide="inbox" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <div class="queue-scroll-list" id="approval-queue-list">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Cancellations card -->
+      <div class="card glass cancellation-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">
+            <span>Cancellation Requests</span>
+            <span id="badge-cancellations-count" class="badge-warning">0</span>
+          </h3>
+          <i data-lucide="x-circle" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <div class="cancellations-scroll-list" id="cancellation-queue-list">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Summaries, Rules and Holidays -->
+    <div class="layout-column-right">
+      
+      <!-- Summaries card -->
+      <div class="card glass summary-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title" id="summary-year-title">Leave Summary</h3>
+          <i data-lucide="bar-chart-2" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <div class="summary-details-list" id="summary-details-container">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Policy rules card -->
+      <div class="card glass policy-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Leave Types Policy</h3>
+          <i data-lucide="file-text" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <div class="policy-details-list" id="policy-details-container">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- French Public Holidays card -->
+      <div class="card glass holidays-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title" id="holidays-title">Public Holidays 2026</h3>
+          <i data-lucide="calendar" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <div class="holidays-details-list" id="holidays-details-container">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===== REJECT MODAL PROMPT ===== -->
+  <div id="reject-modal" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up">
+      <h3 class="modal-title color-danger">Reject Leave Request</h3>
+      <p class="modal-description">You are rejecting a leave request. This action is irreversible.</p>
+      
+      <div class="form-group">
+        <label for="reject-reason-input" class="form-label">
+          <span>Rejection Reason</span>
+          <span class="required-indicator">*</span>
+          <span class="hint">(10–500 chars)</span>
+        </label>
+        <textarea id="reject-reason-input" rows="3" class="form-textarea" placeholder="State the reason for rejection..."></textarea>
+      </div>
+      
+      <div id="reject-char-count" class="char-counter-text">0 / 500</div>
+
+      <div class="modal-actions-row">
+        <button id="reject-modal-submit" class="btn btn-danger" type="button">Confirm Rejection</button>
+        <button id="reject-modal-close" class="btn btn-secondary" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== EMPTY LIST TEMPLATES ===== -->
+<template id="leave-empty-queue-tpl">
+  <div class="empty-list-banner">
+    <i data-lucide="check-circle" class="success-icon" aria-hidden="true"></i>
+    <span class="empty-list-title">All requests signed off</span>
+    <span class="empty-list-subtitle">No pending leave requests requiring your approval.</span>
+  </div>
+</template>
+
+<template id="leave-empty-cancellations-tpl">
+  <div class="empty-list-banner">
+    <i data-lucide="check-circle" class="success-icon" aria-hidden="true"></i>
+    <span class="empty-list-title">No cancellation requests</span>
+    <span class="empty-list-subtitle">All cancellation requests cleared.</span>
+  </div>
+</template>
+
+
+<!-- ===== PENDING APPROVAL CARD ITEM TEMPLATE ===== -->
+<template id="leave-pending-card-tpl">
+  <div class="pending-approval-item-card">
+    <div class="item-top-row">
+      <div class="employee-meta">
+        <strong class="employee-name"></strong>
+        <span class="leave-details-subline"></span>
+      </div>
+      <div class="badges-group">
+        <span class="sla-warning-span"></span>
+        <span class="protected-badge">🛡️ Protected</span>
+        <span class="document-badge">📄 Doc Missing</span>
+      </div>
+    </div>
+    
+    <div class="dates-subline"></div>
+    <div class="reason-quote-box"></div>
+    
+    <div class="comment-group form-group">
+      <input type="text" class="admin-comment-input form-input" placeholder="Store Admin comment (optional)...">
+    </div>
+
+    <div class="action-buttons-row">
+      <button class="btn btn-success btn-approve-leave" type="button">✓ Approve</button>
+      <button class="btn btn-danger btn-reject-leave" type="button">✕ Reject</button>
+    </div>
+    
+    <div class="document-warning-note color-danger">Approve disabled — medical certificate required first.</div>
+  </div>
+</template>
+
+
+<!-- ===== CANCELLATION REQUEST CARD ITEM TEMPLATE ===== -->
+<template id="leave-cancellation-card-tpl">
+  <div class="cancellation-request-item-card">
+    <strong class="employee-name"></strong>
+    <span class="leave-details-subline"></span>
+    <div class="reason-quote-box"></div>
+    <div class="action-buttons-row">
+      <button class="btn btn-success btn-approve-cancellation" type="button">Approve Cancellation</button>
+    </div>
+  </div>
+</template>

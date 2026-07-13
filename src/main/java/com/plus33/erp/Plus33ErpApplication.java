@@ -28,6 +28,7 @@ public class Plus33ErpApplication {
      * @param args the args input value
      */
 	public static void main(String[] args) {
+		System.setProperty("spring.devtools.restart.enabled", "false");
 		SpringApplication.run(Plus33ErpApplication.class, args);
 	}
 

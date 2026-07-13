@@ -1,0 +1,114 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Announcements Board
+ * File              : announcements.html
+ * Path              : frontend/modules/store-employee/announcements/announcements.html
+ * Purpose           : HTML template for Store Employee Announcements board page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : announcements.js
+ * Related CSS       : announcements.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Declarative layout structure containing:
+ * - Header banner card
+ * - Filters selection ribbon
+ * - Published announcements list feed
+ * - Modal overlay dialog details popup
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="employee-ann-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">Announcements Board</h2>
+      <p class="welcome-subtitle">
+        Store Bulletin &nbsp;·&nbsp; Unread Alerts: <span class="highlight-val" id="lbl-unread-alerts-count">0</span>
+      </p>
+    </div>
+    
+    <button id="btn-mark-all-read" class="btn btn-secondary flex align-center gap-xs" type="button">
+      <i data-lucide="check" aria-hidden="true"></i> Mark all as Read
+    </button>
+  </div>
+
+  <!-- ===== FILTERS SELECTION RIBBON ===== -->
+  <div class="filters-ribbon" role="navigation" aria-label="Announcement filters">
+    <button class="filter-pill" id="btn-filter-all" data-filter="all" type="button">All (0)</button>
+    <button class="filter-pill" id="btn-filter-unread" data-filter="unread" type="button">Unread (0)</button>
+    <button class="filter-pill" id="btn-filter-critical" data-filter="critical" type="button">Critical</button>
+  </div>
+
+  <!-- ===== MAIN CONTENT LIST FEED ===== -->
+  <div class="feed-layout-container">
+    <div class="announcements-feed-list" id="ann-feed-list-container">
+      <!-- Populated dynamically by JS -->
+    </div>
+  </div>
+
+  <!-- ===== DETAIL POPUP MODAL ===== -->
+  <div id="ann-modal-overlay" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up" id="ann-modal-content">
+      <!-- Loaded dynamically on card click -->
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== EMPTY FEED TEMPLATE ===== -->
+<template id="ann-empty-feed-tpl">
+  <div class="card glass empty-feed-card">
+    <i data-lucide="megaphone" class="empty-icon" aria-hidden="true"></i>
+    <span class="empty-title">No announcements found</span>
+    <span class="empty-subtitle">All caught up! Check back later for circulars.</span>
+  </div>
+</template>
+
+
+<!-- ===== ANNOUNCEMENT ITEM CARD TEMPLATE ===== -->
+<template id="ann-card-tpl">
+  <div class="ann-card">
+    <div class="item-top-row">
+      <span class="priority-label"></span>
+      <span class="date-label text-muted"></span>
+    </div>
+    
+    <h4 class="card-title">
+      <span class="title-text"></span>
+      <span class="unread-dot" aria-hidden="true"></span>
+    </h4>
+    
+    <p class="content-paragraph"></p>
+    
+    <div class="meta-row">
+      <span class="publisher-label"></span>
+      
+      <div class="read-status-group">
+        <button class="btn btn-mark-read-card" type="button">Readed</button>
+        <span class="readed-checkmark text-muted">✓ Readed</span>
+      </div>
+    </div>
+    
+    <!-- Reactions Row -->
+    <div class="reactions-row">
+      <button class="btn-react" data-type="thumbsUp" type="button">
+        👍 <span class="react-count font-bold">0</span>
+      </button>
+      <button class="btn-react" data-type="heart" type="button">
+        ❤️ <span class="react-count font-bold">0</span>
+      </button>
+      <button class="btn-react" data-type="lightbulb" type="button">
+        💡 <span class="react-count font-bold">0</span>
+      </button>
+      <button class="btn-react" data-type="coffee" type="button">
+        ☕ <span class="react-count font-bold">0</span>
+      </button>
+    </div>
+  </div>
+</template>

@@ -45,6 +45,7 @@ public class DashboardOverviewDTO {
     private Map<String, Object> franchiseDevelopment = new HashMap<>();
     private List<Map<String, Object>> alerts = new ArrayList<>();
     private List<Map<String, Object>> recentActivities = new ArrayList<>();
+    private List<Map<String, Object>> pendingApprovals = new ArrayList<>();
 
     /**
      * Retrieves metadata data from the database.
@@ -230,6 +231,9 @@ public class DashboardOverviewDTO {
      * @param recentActivities the recentActivities input value
      */
     public void setRecentActivities(List<Map<String, Object>> recentActivities) { this.recentActivities = recentActivities; }
+
+    public List<Map<String, Object>> getPendingApprovals() { return pendingApprovals; }
+    public void setPendingApprovals(List<Map<String, Object>> pendingApprovals) { this.pendingApprovals = pendingApprovals; }
 
     public static class Metadata {
         private String generatedAt;

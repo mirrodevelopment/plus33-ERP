@@ -1,0 +1,60 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Frontend Design System
+ * File              : cyber-dark.css
+ * Path              : frontend/theme/cyber-dark.css
+ * Purpose           : CSS Theme/Stylesheet: Cyber Dark design tokens
+ * Version           : 2.0.0
+ *
+ * Palette (from reference image)
+ * ---------------------------------------------------------------------------
+ *  Background     : #070b18  — Deep Navy Black
+ *  Card           : #0f1330  — Dark Purple-Navy
+ *  Accent Primary : #d400e8  — Neon Magenta / Violet
+ *  Accent 2nd     : #00d4aa  — Neon Teal / Cyan
+ *  Midtone        : #2d1a6e  — Purple Haze
+ ******************************************************************************/
+
+html[data-theme="cyber-dark"] {
+  /* ── Backgrounds ─────────────────────────────────────────────────────── */
+  --bg-app:        #070b18;
+  --bg-sidebar:    #0a0e22;
+  --bg-header:     #0a0e22;
+  --bg-card:       #0f1330;
+  --bg-card-hover: #181c45;
+
+  /* ── Borders ─────────────────────────────────────────────────────────── */
+  --border-color:       rgba(212, 0, 232, 0.18);
+  --border-color-hover: rgba(0, 212, 170, 0.5);
+
+  /* ── Text ────────────────────────────────────────────────────────────── */
+  --text-primary:   #f0eeff;
+  --text-secondary: #a8b0d8;
+  --text-muted:     #556090;
+
+  /* ── Accents ─────────────────────────────────────────────────────────── */
+  --accent-primary:   #d400e8;     /* Neon Magenta / Violet */
+  --accent-secondary: #00d4aa;     /* Neon Teal / Cyan */
+  --accent-glow:      rgba(212, 0, 232, 0.30);
+
+  /* ── Status ──────────────────────────────────────────────────────────── */
+  --status-success: #00d4aa;
+  --status-warning: #f59e0b;
+  --status-danger:  #ff3b6e;
+  --status-info:    #7b3bcc;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 8px rgba(0, 0, 0, 0.7);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.8), 0 0 1px rgba(212, 0, 232, 0.15);
+}
+
+/* Hard safety-net: page is never white in cyber-dark */
+html[data-theme="cyber-dark"],
+html[data-theme="cyber-dark"] body {
+  background-color: #070b18;
+  color: #f0eeff;
+}

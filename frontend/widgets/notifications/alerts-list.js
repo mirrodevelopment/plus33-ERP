@@ -41,18 +41,7 @@ export class AlertsList {
       count: a.count || 1
     }));
 
-    // Enrich with operational defaults if backend has few items
-    const defaults = [
-      { id: 'a1', message: 'Low stock alerts (WMS Zone B)', severity: 'warning', count: 27 },
-      { id: 'a2', message: 'Store rating below target', severity: 'danger', count: 43 },
-      { id: 'a3', message: 'Expiring lots: EV batteries close to limit', severity: 'warning', count: 56 },
-      { id: 'a4', message: 'Overdue compliance checks (ESG reporting)', severity: 'danger', count: 12 },
-      { id: 'a5', message: 'Unresolved customer complaints', severity: 'info', count: 18 }
-    ];
-
-    const rawAlerts = backendAlerts.length > 0
-      ? [...backendAlerts, ...defaults].slice(0, 6)
-      : defaults;
+    const rawAlerts = backendAlerts;
 
     const severityIcon = { danger: 'alert-circle', warning: 'alert-triangle', info: 'info' };
     const severityColor = {
@@ -68,7 +57,11 @@ export class AlertsList {
       </div>
       
       <div class="flex flex-col gap-sm">
-        ${rawAlerts.map(a => {
+        ${rawAlerts.length === 0 ? `
+          <div style="text-align: center; color: var(--text-muted); padding: var(--spacing-lg) 0; font-size: 0.72rem; border: 1px dashed rgba(255,255,255,0.05); border-radius: var(--radius-md);">
+            No pending alerts or notifications.
+          </div>
+        ` : rawAlerts.map(a => {
           const color = severityColor[a.severity] || severityColor.info;
           const icon = severityIcon[a.severity] || 'info';
           return `

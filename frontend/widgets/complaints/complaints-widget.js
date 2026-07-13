@@ -42,21 +42,18 @@ export class ComplaintsWidget {
     logger.debug('ComplaintsWidget', 'Rendering Complaints & Legal Overview...');
 
     // Pull from backend complianceOverview
-    const auditsCompleted = this.data.auditsCompleted ?? 32;
-    const correctiveActionsOpen = this.data.correctiveActionsOpen ?? 48;
-    const overdueActions = this.data.overdueActions ?? 11;
-    const complianceScore = this.data.complianceScore ?? 89.6;
+    const auditsCompleted = this.data.auditsCompleted || 0;
+    const correctiveActionsOpen = this.data.correctiveActionsOpen || 0;
+    const overdueActions = this.data.overdueActions || 0;
+    const complianceScore = this.data.complianceScore || 0;
 
     // Computed / enriched stats
-    /**
-     * Performs the totalComplaints operation in this module.
-     * @memberof Widgets Module
-     */
-    const totalComplaints = (correctiveActionsOpen || 0) + 167;
-    const resolved = totalComplaints - (correctiveActionsOpen || 0);
-    const openCases = Math.ceil((overdueActions || 0) * 1.1);
-    const inProgress = openCases > 2 ? openCases - 2 : openCases;
-    const closedCases = Math.max(0, auditsCompleted - openCases);
+    const totalComplaints = correctiveActionsOpen;
+    const resolved = 0;
+    const openCases = overdueActions;
+    const inProgress = 0;
+    const closedCases = auditsCompleted;
+
 
     container.innerHTML = `
       <div class="flex justify-between align-center mb-md" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: var(--spacing-xs);">

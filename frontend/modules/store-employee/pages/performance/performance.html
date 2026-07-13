@@ -1,0 +1,183 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Performance Analytics
+ * File              : performance.html
+ * Path              : frontend/modules/store-employee/performance/performance.html
+ * Purpose           : HTML template for Store Employee Performance page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : performance.js
+ * Related CSS       : performance.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Declarative layout containing:
+ * - Header eval period status banner
+ * - 4 KPI score card summary items
+ * - SVG Radar chart showing barista skills comparison axis
+ * - Manager Q1 appraisals & peer feedback timelines
+ * - Self evaluation score inputs & accomplishments textareas
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="employee-performance-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">Performance Analytics</h2>
+      <p class="welcome-subtitle">
+        Roster Rating &nbsp;·&nbsp; Profile: <span class="highlight-val" id="lbl-employee-role">—</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <i data-lucide="star" aria-hidden="true"></i>
+      <span>Q2 Evaluation Period</span>
+    </div>
+  </div>
+
+  <!-- ===== 4 KPI CARDS ROW ===== -->
+  <div class="kpi-grid-row" role="region" aria-label="Performance key indicators">
+    
+    <!-- KPI 1: Supervisor Score -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold" aria-hidden="true">
+        <i data-lucide="star"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpi-supervisor-score">—</span>
+          <span class="stars-stars-row" id="kpi-stars-mount">
+            <!-- Stars SVGs mounted dynamically -->
+          </span>
+        </div>
+        <div class="kpi-label">Overall Supervisor Score</div>
+      </div>
+    </div>
+
+    <!-- KPI 2: Grinder Accuracy -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--green" aria-hidden="true">
+        <i data-lucide="percent"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value">98.2%</div>
+        <div class="kpi-label">Grinder Calibration Accuracy</div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Customer NPS -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--blue" aria-hidden="true">
+        <i data-lucide="heart"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value">94 NPS</div>
+        <div class="kpi-label">Customer Net Promoter Score</div>
+      </div>
+    </div>
+
+    <!-- KPI 4: Attendance Adherence -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--green-alt" aria-hidden="true">
+        <i data-lucide="clock"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value">100%</div>
+        <div class="kpi-label">Attendance Adherence</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: Skill Radar Chart -->
+    <div class="layout-column-left">
+      <div class="card glass radar-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Barista Skill Radar</h3>
+          <i data-lucide="radar" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <!-- Dynamic SVG Radar Chart -->
+        <div class="radar-chart-container" id="radar-chart-container">
+          <!-- Loaded by JS/Controller -->
+        </div>
+
+        <div class="radar-disclaimer">
+          Barista metrics are computed automatically based on calibration logs and supervisor appraisals.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Supervisor reviews & self evaluations -->
+    <div class="layout-column-right">
+      
+      <!-- Manager appraisals -->
+      <div class="card glass reviews-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Manager Appraisals</h3>
+          <i data-lucide="message-square" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="reviews-feed-body">
+          <div class="review-item-block review-item-block--gold">
+            <strong class="reviewer-name">Manoj Kumar (Store Manager)</strong>
+            <span class="review-subtitle">Performance Review Period Q1</span>
+            <p class="review-comment-para">
+              "Neha maintains outstanding hygiene logs and grinder calibration scores. Espresso extraction yields have been consistent. Excellent customer interactions during busy morning rosters."
+            </p>
+          </div>
+
+          <div class="review-item-block review-item-block--green">
+            <strong class="reviewer-name">Rohan Sharma (Senior Barista)</strong>
+            <span class="review-subtitle">Shift Peer Feedback</span>
+            <p class="review-comment-para">
+              "Great coordination during peak rush hours last Friday. Maintained high speed without compromising espresso beverage safety standards."
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Self Evaluation Form -->
+      <div class="card glass self-eval-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Self Evaluation</h3>
+          <i data-lucide="edit" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="self-eval-form-body">
+          <div class="form-group">
+            <label for="self-eval-score" class="form-label">Rate Yourself (1 to 5 Stars)</label>
+            <input type="number" id="self-eval-score" class="form-input" min="1" max="5" step="0.5" placeholder="e.g. 4.5">
+          </div>
+
+          <div class="form-group">
+            <label for="self-eval-text" class="form-label">Key accomplishments &amp; Goals</label>
+            <textarea id="self-eval-text" class="form-textarea" placeholder="Detail your shift accomplishments..." rows="3"></textarea>
+          </div>
+
+          <button class="btn btn-primary btn-submit-eval" id="btn-submit-self-eval" type="button">
+            Submit Appraisal Review
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ===== STAR SVG BLUEPRINT ===== -->
+<template id="perf-star-svg-tpl">
+  <svg class="star-svg" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+  </svg>
+</template>

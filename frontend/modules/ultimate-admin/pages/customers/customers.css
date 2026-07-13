@@ -1,0 +1,375 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Customer Registry & CRM
+ * File              : customers.css
+ * Path              : frontend/modules/ultimate-admin/customers/customers.css
+ * Purpose           : Styling for CRM UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.crm-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Page Header and CRM Pill */
+.crm-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-sm);
+}
+
+.crm-live-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-success);
+}
+
+.crm-live-pill .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-success);
+  display: inline-block;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* KPI Metrics Grid */
+.crm-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+.crm-kpi-grid .kpi-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.kpi-icon-wrapper {
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon-wrapper i {
+  width: 24px;
+  height: 24px;
+}
+
+.kpi-icon-wrapper--gold {
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary);
+}
+
+.kpi-icon-wrapper--success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--status-success);
+}
+
+.kpi-icon-wrapper--info {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--status-info);
+}
+
+.kpi-icon-wrapper--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-danger);
+}
+
+.kpi-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+
+.crm-kpi-grid .kpi-card--success .kpi-value {
+  color: var(--status-success);
+}
+
+.crm-kpi-grid .kpi-card--danger .kpi-value {
+  color: var(--status-danger);
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Split Columns Grid */
+.crm-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.crm-left-panel {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.crm-right-panel {
+  grid-column: span 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 0;
+}
+
+.registry-card, .onboard-card, .credit-audit-card {
+  padding: var(--spacing-lg);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.registry-card {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Registry Table Header */
+.registry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.registry-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.registry-status-badge {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.table-scroll-wrapper {
+  overflow-x: auto;
+  flex-grow: 1;
+}
+
+/* Registry Table Row Styles */
+.registry-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+.registry-table th {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.registry-table td {
+  padding: var(--spacing-md);
+  vertical-align: middle;
+}
+
+.crm-table-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background var(--transition-fast);
+}
+
+.crm-table-row:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.col-code {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.col-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.col-email {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.type-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.type-badge--b2b {
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary);
+}
+
+.type-badge--b2c {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+
+.col-tier {
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.col-credit {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.status-indicator-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-indicator-wrapper--active {
+  color: var(--status-success);
+}
+
+.status-indicator-wrapper--active .status-dot {
+  background: var(--status-success);
+}
+
+.status-indicator-wrapper--suspended {
+  color: var(--status-danger);
+}
+
+.status-indicator-wrapper--suspended .status-dot {
+  background: var(--status-danger);
+}
+
+.col-actions {
+  text-align: right;
+}
+
+.col-actions .btn-toggle-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+}
+
+/* Onboard Form Side Card */
+.onboard-header, .audit-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.onboard-icon, .audit-icon {
+  color: var(--accent-primary);
+  width: 18px;
+  height: 18px;
+}
+
+.onboard-title, .audit-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.onboard-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.form-grid-flex {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.cust-type-group {
+  width: 110px;
+}
+
+.cust-credit-group {
+  width: 120px;
+}
+
+.btn-onboard {
+  margin-top: var(--spacing-xs);
+  padding: 8px;
+}
+
+/* B2B compliance risk log terminal */
+.audit-desc {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+}
+
+.audit-log-terminal {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  line-height: 1.4;
+  white-space: pre-line;
+}

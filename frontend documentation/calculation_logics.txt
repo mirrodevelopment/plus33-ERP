@@ -1,0 +1,59 @@
+==============================================================================
+PLUS33 COFFEE ERP -- DASHBOARD WIDGET CALCULATION LOGIC & FORMULAS
+==============================================================================
+
+This document details the updated business logic, metrics, and formulas used
+for the Sales Overview and Financial Overview (MTD) dashboard widgets.
+
+------------------------------------------------------------------------------
+1. SALES OVERVIEW WIDGET (Sales Chart)
+------------------------------------------------------------------------------
+The Sales Overview widget presents a consolidated national view of sales
+performance.
+
+* METRIC: Total Sales
+  - Description: The gross volume of sales aggregated from all active operating
+                 regions (France, India, UAE).
+  - Formula:
+    Total Sales = Sum(Regional Sales of France, India, UAE)
+
+* METRIC: Sales Target & Target Achievement
+  - Description: Since this view represents the consolidated national income
+                 without a defined baseline benchmark, there is no target
+                 assigned to this national Sales Overview dashboard view.
+  - Formula:
+    Sales Target = N/A (Hidden from UI)
+    Target Achievement % = N/A (Hidden from UI)
+
+------------------------------------------------------------------------------
+2. FINANCIAL OVERVIEW WIDGET (Financial Chart - MTD)
+------------------------------------------------------------------------------
+The Financial Overview widget displays month-to-date (MTD) summary metrics,
+comparing gross income against established store targets.
+
+* METRIC: Total Income
+  - Description: The total gross revenue generated from completed coffee and
+                 merchandise sales across all stores.
+  - Formula:
+    Total Income = Total Revenue (Gross Sales)
+
+* METRIC: Total Target
+  - Description: The consolidated sales target established for active stores. Each store
+                 has a fixed baseline target of 50,000.00 EUR. The regional target is
+                 the sum of all stores in the region, and the national target is the
+                 sum of all regions' targets.
+  - Formula:
+    Total Target = Active Store Count * 50,000.00 EUR
+
+* METRIC: Profit
+  - Description: The financial net margin calculated directly relative to the
+                 target.
+  - Formula:
+    Profit = Total Income - Total Target
+  - Note: Profit is represented as a negative currency value when under-target.
+
+* METRIC: Franchise Royalty
+  - Description: The royalty fee calculated on gross income.
+  - Formula:
+    Franchise Royalty = Total Income * 0.05
+==============================================================================

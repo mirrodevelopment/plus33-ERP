@@ -1,0 +1,258 @@
+================================================================================
+  PLUS33 Coffee ERP - Complete Database Table Purposes (Detailed Guide)
+================================================================================
+
+This document provides a highly detailed explanation of every table in the
+PLUS33 ERP database schema, mapping out their functional purpose, fields,
+relationships, constraints, and business domain roles.
+
+--------------------------------------------------------------------------------
+1. SECURITY & USER MANAGEMENT (Authentication & RBAC)
+--------------------------------------------------------------------------------
+
+Table: users
+* Purpose: Stores system security user profiles. Each record represents an identity 
+  capable of logging into the SPA. It handles authentication credentials, status flags, 
+  and is mapped to Spring Security UserDetails for session management.
+* Relationships: FK company_id -> companies (V7 organization scope).
+* Key Fields: id (PK), email (username, unique), password (bcrypt hash), active.
+
+Table: roles
+* Purpose: Defines the system security roles used for Role-Based Access Control 
+  (e.g., ULTIMATE_ADMIN, NATIONAL_ADMIN, REGIONAL_ADMIN, STORE_ADMIN).
+* Key Fields: id (PK), code (unique, e.g. "ROLE_STORE_ADMIN"), name (descriptive label).
+
+Table: permissions
+* Purpose: Defines granular security actions that can be authorized within the system 
+  (e.g. "READ_SALES", "APPROVE_PAYMENT", "UPDATE_INVENTORY"). Used by the custom 
+  permission evaluator to guard endpoints and UI controls.
+* Key Fields: id (PK), code (unique action key), name (descriptive label).
+
+Table: role_permissions
+* Purpose: A junction table that resolves the many-to-many relationship between 
+  roles and permissions.
+* Relationships: FK role_id -> roles, FK permission_id -> permissions.
+
+Table: user_roles
+* Purpose: A junction table that resolves the many-to-many assignment of security 
+  roles to users.
+* Relationships: FK user_id -> users, FK role_id -> roles.
+
+--------------------------------------------------------------------------------
+2. ORGANIZATIONAL STRUCTURE & MULTI-TENANCY
+--------------------------------------------------------------------------------
+
+Table: companies
+* Purpose: Represents top-level company entities (multi-tenant boundaries). Used to 
+  isolate transactional ledgers, charts of accounts, cost centers, and operations.
+* Key Fields: id (PK), code (unique ID), name, active.
+
+Table: regions
+* Purpose: Groups locations geographically under a parent company (e.g. France, India, UAE). 
+  Handles currency codes, language locales, tax rates, and regional managers.
+* Relationships: FK company_id -> companies.
+
+Table: warehouses
+* Purpose: Models bulk physical warehousing units responsible for holding inventory, 
+  receiving shipping shipments, executing cycle counts, and replenishing store stocks.
+* Relationships: FK region_id -> regions.
+
+Table: stores
+* Purpose: Models physical retail retail shops, coffee bars, or outlets that pull 
+  stock from a default warehouse and record direct sales.
+* Relationships: FK region_id -> regions, FK default_warehouse_id -> warehouses.
+
+Table: user_regions / user_warehouses / user_stores
+* Purpose: Junction tables managing data scoping access. Determines which locations, 
+  warehouses, or regions a specific user (e.g. Regional Manager, Store Employee) has 
+  rights to view and edit.
+
+--------------------------------------------------------------------------------
+3. WORKFORCE, SHIFTS, ATTENDANCE & PAYROLL
+--------------------------------------------------------------------------------
+
+Table: employees
+* Purpose: Comprehensive master profiles of all workforce members, storing names, 
+  employment codes, tax identifiers, contract statuses, base salaries, and emails.
+* Relationships: FK company_id -> companies, FK default_store_id -> stores, FK user_id -> users.
+
+Table: shifts
+* Purpose: Defines daily schedule intervals, templates, start and end times, and rest 
+  breaks configurations for employee shift rosters.
+
+Table: employee_shifts
+* Purpose: Junction table tracking shift schedules assignments for employees on 
+  particular calendar days.
+* Relationships: FK employee_id -> employees, FK shift_id -> shifts.
+
+Table: attendance
+* Purpose: Daily clock-in and clock-out logs recording actual hours worked, lunch breaks, 
+  lateness, latitudinal geofence tags, and overtime minutes for payroll calculations.
+* Relationships: FK employee_id -> employees, FK shift_id -> shifts.
+
+Table: leave_types
+* Purpose: Catalog of leave categories (e.g. Annual, Sick, Unpaid, Bereavement).
+
+Table: employee_leaves
+* Purpose: Tracks individual employee leave request entries, dates, balance deductions, 
+  reasons, and approval lifecycle states (DRAFT, SUBMITTED, APPROVED, REJECTED).
+* Relationships: FK employee_id -> employees, FK leave_type_id -> leave_types.
+
+Table: payroll_periods
+* Purpose: Calendar windows (monthly or bi-weekly) defining the start, end, and posting 
+  dates for employee wage calculation.
+
+Table: employee_payrolls
+* Purpose: Transactional ledger storing final payroll computations, base salary payments, 
+  overtime additions, deductions, taxes, and net payouts.
+* Relationships: FK employee_id -> employees, FK payroll_period_id -> payroll_periods.
+
+--------------------------------------------------------------------------------
+4. PRODUCTS, CATALOGS & INVENTORY STOCK
+--------------------------------------------------------------------------------
+
+Table: product_categories
+* Purpose: Groups catalog items for tracking, reporting, and accounting purposes 
+  (e.g., Raw Beans, Syrups, Machinery, Cups).
+
+Table: units_of_measure
+* Purpose: Unit catalog containing units of measurement (e.g. PCS, KG, LTR, BOX).
+
+Table: products
+* Purpose: Master catalog metadata for inventory items, raw ingredients, and services.
+* Relationships: FK category_id -> product_categories, FK uom_id -> units_of_measure.
+
+Table: inventory_stock
+* Purpose: Live balances tracking actual on-hand quantity vs. allocated/reserved quantity 
+  of stock items at a specific warehouse or store.
+* Key Fields: quantity (physical stock), reserved_quantity (committed to pick lists).
+
+Table: stock_movements
+* Purpose: Immutable audit log recording every single stock entry, transfer, deduction, 
+  reservation consume, or count variance. Used to build product history ledgers.
+* Relationships: FK product_id -> products, FK warehouse_id/store_id.
+
+--------------------------------------------------------------------------------
+5. PROCUREMENT, AP & VENDOR MANAGEMENT
+--------------------------------------------------------------------------------
+
+Table: suppliers
+* Purpose: Database of vendor companies from whom raw inventory, machinery, or services 
+  are purchased. Handles terms and base currency.
+* Relationships: FK company_id -> companies.
+
+Table: purchase_requests
+* Purpose: Initial requisitions generated by store managers or automatic replenishment 
+  schedulers requesting items to be ordered.
+* Relationships: FK warehouse_id -> warehouses, FK store_id -> stores (XOR location check).
+
+Table: purchase_request_items
+* Purpose: Detailed product lines, quantities, and estimated costs under a Purchase Request.
+
+Table: purchase_orders (PO)
+* Purpose: Formal contractual purchase agreements sent to vendors containing billing terms, 
+  delivery dates, and totals.
+* Relationships: FK supplier_id -> suppliers, FK purchase_request_id -> purchase_requests.
+
+Table: purchase_order_items
+* Purpose: Individual line item quantities and contracted unit costs under a PO.
+
+Table: goods_receipts
+* Purpose: Inward logistics documents completed upon delivery of a PO. Records actual 
+  received quantities, lot numbers, and damage logs.
+* Relationships: FK purchase_order_id -> purchase_orders.
+
+Table: supplier_invoices
+* Purpose: Accounts Payable invoices matching supplier bills to received POs.
+* Relationships: FK supplier_id -> suppliers, FK journal_entry_id -> journal_entries.
+
+Table: supplier_invoice_items
+* Purpose: Line item costs matched directly to Purchase Order items to verify bill accuracy.
+
+--------------------------------------------------------------------------------
+6. FINANCE & GENERAL LEDGER
+--------------------------------------------------------------------------------
+
+Table: chart_of_accounts
+* Purpose: General Ledger financial account definitions (e.g., Cash, AP, Revenue).
+* Relationships: FK company_id -> companies.
+
+Table: journal_entries
+* Purpose: Header for financial double-entry bookkeeping journal vouchers (e.g., AP invoices, 
+  sales postings, manual adjustments).
+* Key Fields: posting_date, status (DRAFT, POSTED), company_id.
+
+Table: journal_entry_lines
+* Purpose: Individual credit or debit offsets. Total credits must equal total debits 
+  for the parent journal entry to post.
+* Relationships: FK journal_entry_id -> journal_entries, FK account_id -> chart_of_accounts.
+
+Table: payments
+* Purpose: Outward check, wire, or card payments sent to suppliers or employee payroll.
+* Relationships: FK company_id -> companies, FK journal_entry_id -> journal_entries.
+
+Table: payment_allocations
+* Purpose: Maps payment cash amounts against outstanding supplier invoices.
+
+--------------------------------------------------------------------------------
+7. RETAIL & WAREHOUSE LOGISTICS OPERATIONS
+--------------------------------------------------------------------------------
+
+Table: recipes
+* Purpose: Store menu recipes defining component ingredients and quantities deducted 
+  during Point-of-Sale transactions (e.g., 1 Cappuccino deducts 15g beans, 150ml milk).
+
+Table: sales_transactions
+* Purpose: POS register transactions completed at stores. Stores payment method, 
+  timestamp, and transaction total.
+* Relationships: FK store_id -> stores, FK user_id (cashier) -> users.
+
+Table: waste_records
+* Purpose: Logs daily waste (e.g., spilled milk, burned beans, damaged cakes) to account 
+  for inventory shrinkage.
+
+Table: inventory_transfers
+* Purpose: Coordinates movements of products from a warehouse to a store or warehouse to 
+  warehouse. Validated by source/destination constraints.
+
+Table: inventory_adjustments
+* Purpose: Header for manually correcting stock due to expiry, damages, or counting errors.
+* Key Fields: adjustment_type (DAMAGE, EXPIRED, FOUND_STOCK).
+
+Table: stock_counts
+* Purpose: Coordinates stock count operations (e.g., monthly physical counts).
+* Key Fields: status (DRAFT, IN_PROGRESS, COMPLETED, POSTED).
+
+Table: inventory_lots
+* Purpose: Tracks manufacturing batches, lot numbers, and expiry dates for traceability.
+
+Table: inventory_serials
+* Purpose: Tracks individual products by serial numbers (e.g., expensive coffee grinders).
+
+--------------------------------------------------------------------------------
+8. SALES CLIENTS, ORDER PICK LISTS & CUSTOMER INVOICES
+--------------------------------------------------------------------------------
+
+Table: customers
+* Purpose: Stores client company profiles, billing addresses, credit limits, discount rates, 
+  and outstanding balance logs.
+* Relationships: FK company_id -> companies.
+
+Table: sales_orders
+* Purpose: Primary agreement documents for wholesale coffee supply to clients. Tracks order 
+  stages and totals.
+
+Table: sales_order_items
+* Purpose: Detailed quantities, unit prices, discounts, and taxes under a sales order.
+
+Table: pick_lists
+* Purpose: Warehouse instructions to pick and pack products for a Sales Order.
+* Key Fields: pick_number, status (DRAFT, RELEASED, PICKING, PICKED, PACKED, SHIPPED).
+
+Table: pick_list_items
+* Purpose: Quantities allocated, picked, and packed from inventory shelves.
+
+Table: customer_invoices
+* Purpose: Stores Accounts Receivable billing documents sent to customers.
+* Relationships: FK sales_order_id -> sales_orders, FK journal_entry_id -> journal_entries.
+================================================================================

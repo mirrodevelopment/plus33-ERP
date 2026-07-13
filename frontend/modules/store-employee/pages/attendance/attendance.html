@@ -1,0 +1,221 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Attendance & Timecard
+ * File              : attendance.html
+ * Path              : frontend/modules/store-employee/attendance/attendance.html
+ * Purpose           : HTML template for Store Employee Attendance page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : attendance.js
+ * Related CSS       : attendance.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of punch clocks, monthly metrics logs, duty status lights,
+ * timecard correction inputs, and tables records.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="employee-attendance-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">Attendance &amp; Timecard</h2>
+      <p class="welcome-subtitle">
+        Employee: <span class="highlight-val" id="lbl-employee-name">—</span> &nbsp;·&nbsp; Current Shift: <span class="highlight-val" id="lbl-current-shift">—</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>Database Connected</span>
+    </div>
+  </div>
+
+  <!-- ===== 4 KPI STATS ROW ===== -->
+  <div class="kpi-grid-row" role="region" aria-label="Attendance monthly metrics">
+    
+    <!-- KPI 1: Hours Logged -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold">
+        <i data-lucide="clock" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-logged-hours">—</div>
+        <div class="kpi-label">Hours Logged (Month)</div>
+      </div>
+    </div>
+
+    <!-- KPI 2: Shifts Attended -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--blue">
+        <i data-lucide="user-check" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-shifts-attended">—</div>
+        <div class="kpi-label">Shifts Attended</div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Attendance Rate -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--green">
+        <i data-lucide="activity" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-attendance-rate">—</div>
+        <div class="kpi-label">Attendance Rate</div>
+      </div>
+    </div>
+
+    <!-- KPI 4: Late Arrivals -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--red">
+        <i data-lucide="alert-circle" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value color-danger" id="kpi-late-arrivals">—</div>
+        <div class="kpi-label">Late Arrivals Logged</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: Clock punch & table list -->
+    <div class="layout-column-left">
+      
+      <!-- Punch card Clocker -->
+      <div class="card glass clocker-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Digital Punch Timecard</h3>
+          <i data-lucide="clock" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="clocker-status-ribbon">
+          <div class="clock-display-group">
+            <span class="ribbon-label">Digital Roster Time</span>
+            <div id="attendance-clock-run" class="digital-clock">--:--:--</div>
+          </div>
+          <div class="status-display-group text-right">
+            <span class="ribbon-label">Duty Status</span>
+            <div class="duty-status-wrapper" id="lbl-duty-status">
+              <!-- Loaded dynamically by JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="punch-actions-row">
+          <button class="btn btn-punch-in" id="btn-att-clock-in" type="button">
+            <i data-lucide="play" aria-hidden="true"></i> Clock In
+          </button>
+          <button class="btn btn-break-start" id="btn-att-break-start" type="button">
+            <i data-lucide="coffee" aria-hidden="true"></i> Break Start
+          </button>
+          <button class="btn btn-break-end" id="btn-att-break-end" type="button">
+            <i data-lucide="user-check" aria-hidden="true"></i> Break End
+          </button>
+          <button class="btn btn-punch-out" id="btn-att-clock-out" type="button">
+            <i data-lucide="square" aria-hidden="true"></i> Clock Out
+          </button>
+        </div>
+      </div>
+
+      <!-- Timecard Log list -->
+      <div class="card glass log-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Timecard Logs</h3>
+          <i data-lucide="history" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="table-scroller">
+          <table class="attendance-log-table">
+            <thead>
+              <tr class="table-header-row">
+                <th scope="col">Date</th>
+                <th scope="col">Shift Slot</th>
+                <th scope="col">Punch In</th>
+                <th scope="col">Punch Out</th>
+                <th scope="col">Logged Hours</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody id="attendance-log-tbody">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Discrepancy request form -->
+    <div class="layout-column-right">
+      
+      <!-- Discrepancy card -->
+      <div class="card glass correction-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">File Discrepancy</h3>
+          <i data-lucide="alert-triangle" class="card-split-icon text-warning" aria-hidden="true"></i>
+        </div>
+
+        <div class="correction-form-body">
+          <div class="form-group">
+            <label for="discrepancy-date" class="form-label">Shift Date</label>
+            <input type="date" id="discrepancy-date" class="form-input date-input">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="discrepancy-in" class="form-label">Corrected Punch In</label>
+              <input type="text" id="discrepancy-in" class="form-input" placeholder="e.g. 08:00 AM">
+            </div>
+            
+            <div class="form-group">
+              <label for="discrepancy-out" class="form-label">Corrected Punch Out</label>
+              <input type="text" id="discrepancy-out" class="form-input" placeholder="e.g. 04:00 PM">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="discrepancy-reason" class="form-label">Correction Reason</label>
+            <textarea id="discrepancy-reason" class="form-textarea" placeholder="Explain the timecard correction..." rows="3"></textarea>
+          </div>
+
+          <button class="btn btn-primary btn-submit-discrepancy" id="btn-submit-discrepancy" type="button">
+            Submit Timecard Correction
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ===== EMPTY LOGS TABLE ROW TEMPLATE ===== -->
+<template id="attendance-empty-row-tpl">
+  <tr>
+    <td colspan="6" class="empty-logs-cell">No attendance records found in DB.</td>
+  </tr>
+</template>
+
+
+<!-- ===== TIME LOG TABLE ROW TEMPLATE ===== -->
+<template id="attendance-row-tpl">
+  <tr class="log-row">
+    <td class="log-date-cell font-bold"></td>
+    <td class="log-shift-cell text-muted"></td>
+    <td class="log-check-in-cell font-mono"></td>
+    <td class="log-check-out-cell font-mono"></td>
+    <td class="log-hours-cell font-bold"></td>
+    <td class="log-status-cell font-bold"></td>
+  </tr>
+</template>

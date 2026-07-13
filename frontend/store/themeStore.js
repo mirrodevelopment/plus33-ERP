@@ -32,15 +32,23 @@ class ThemeStore {
    * @memberof Store Module
    */
   constructor() {
-    this.theme = storage.get('plus33-theme', 'coffee-dark');
+    const VALID_THEMES = ['coffee-dark', 'light', 'charcoal', 'cyber-dark', 'nation'];
+    const stored = storage.get('plus33-theme', 'coffee-dark');
+    // Guard against old/removed theme keys surviving in localStorage
+    this.theme = VALID_THEMES.includes(stored) ? stored : 'coffee-dark';
+    // Persist the sanitised value so next boot is clean
+    if (this.theme !== stored) {
+      storage.set('plus33-theme', this.theme);
+      logger.warn('ThemeStore', `Stored theme "${stored}" is no longer valid. Reset to "${this.theme}".`);
+    }
   }
 
   /**
    * Set theme
-   * @param {'light'|'dark'|'corporate'|'france'|'coffee-dark'} newTheme 
+   * @param {'coffee-dark'|'light'|'charcoal'|'cyber-dark'} newTheme 
    */
   setTheme(newTheme) {
-    const validThemes = ['light', 'dark', 'corporate', 'france', 'coffee-dark', 'charcoal'];
+    const validThemes = ['coffee-dark', 'light', 'charcoal', 'cyber-dark', 'nation'];
     if (!validThemes.includes(newTheme)) {
       logger.warn('ThemeStore', `Invalid theme "${newTheme}" requested.`);
       return;

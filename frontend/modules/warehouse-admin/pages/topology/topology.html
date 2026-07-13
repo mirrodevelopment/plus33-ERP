@@ -1,0 +1,84 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Warehouse Admin — WMS Topology
+ * File              : topology.html
+ * Path              : frontend/modules/warehouse-admin/topology/topology.html
+ * Purpose           : HTML template for WMS Topology layout page context
+ * Version           : 2.0.0
+ *
+ * Related JS        : topology.js
+ * Related CSS       : topology.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of physical zones and nodes for warehouse inventory tracking.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="wms-topology-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-title-banner">
+    <h2 class="page-title">WMS Physical Topology</h2>
+    <p class="page-subtitle">Interactive physical warehousing layout and telemetry nodes</p>
+  </div>
+
+  <!-- ===== WORKSPACE GRID LAYOUT ===== -->
+  <div class="topology-grid-layout">
+    
+    <!-- SVG Warehouse Zones Map Column -->
+    <div class="card glass map-card">
+      <svg width="100%" height="100%" viewBox="0 0 400 300" id="wms-svg-map" class="wms-svg-canvas">
+        <!-- Zone A (Top Left) -->
+        <rect id="zone-a" class="zone-rect" x="20" y="20" width="160" height="110" rx="6" />
+        <text x="100" y="80" class="zone-text" pointer-events="none">ZONE A (Raw)</text>
+        
+        <!-- Zone B (Top Right) -->
+        <rect id="zone-b" class="zone-rect" x="220" y="20" width="160" height="110" rx="6" />
+        <text x="300" y="80" class="zone-text" pointer-events="none">ZONE B (EV Assets)</text>
+        
+        <!-- Zone C (Bottom Left) -->
+        <rect id="zone-c" class="zone-rect" x="20" y="170" width="160" height="110" rx="6" />
+        <text x="100" y="230" class="zone-text" pointer-events="none">ZONE C (Dry Goods)</text>
+        
+        <!-- Zone D (Bottom Right) -->
+        <rect id="zone-d" class="zone-rect" x="220" y="170" width="160" height="110" rx="6" />
+        <text x="300" y="230" class="zone-text" pointer-events="none">ZONE D (Shipping)</text>
+      </svg>
+    </div>
+
+    <!-- Right Side Telemetry Card Panel -->
+    <div class="card glass telemetry-card">
+      <div class="telemetry-card-top">
+        <h3 id="panel-zone-title" class="telemetry-title">Zone A (Raw)</h3>
+        
+        <div class="metrics-list-group">
+          <div class="metric-row">
+            <span class="metric-label">Current Temperature:</span>
+            <strong id="txt-temp" class="metric-value">18.4°C</strong>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Humidity Index:</span>
+            <strong id="txt-humidity" class="metric-value">42.1%</strong>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">AMR Robotics Nodes:</span>
+            <strong id="txt-robots" class="metric-value color-success">3 Active</strong>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Occupancy Ratio:</span>
+            <strong id="txt-occupancy" class="metric-value">65.2%</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="telemetry-card-footer">
+        Click zones on the SVG map to check telemetries.
+      </div>
+    </div>
+
+  </div>
+
+</div>

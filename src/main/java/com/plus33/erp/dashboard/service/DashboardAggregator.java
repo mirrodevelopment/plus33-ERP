@@ -36,10 +36,12 @@ import com.plus33.erp.organization.repository.StoreRepository;
 import com.plus33.erp.organization.repository.RegionRepository;
 import com.plus33.erp.organization.repository.WarehouseRepository;
 import com.plus33.erp.dashboard.dto.DashboardOverviewDTO;
+import com.plus33.erp.dashboard.dto.DashboardScope;
 import com.plus33.erp.organization.entity.Store;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.Query;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -84,6 +86,9 @@ public class DashboardAggregator {
     private final RegionRepository regionRepository;
     private final WarehouseRepository warehouseRepository;
 
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
     public DashboardAggregator(SalesAnalyticsService salesAnalyticsService,
                                FinanceAnalyticsService financeAnalyticsService,
                                InventoryAnalyticsService inventoryAnalyticsService,
@@ -107,12 +112,10 @@ public class DashboardAggregator {
      *
      * @param from the from input value
      * @param to the to input value
-     * @param regionId the regionId input value
-     * @param storeId the storeId input value
-     * @param userRole the userRole input value
+     * @param scope the dashboard query scope context
      * @return the DashboardOverviewDTO result
      */
-    public DashboardOverviewDTO aggregateDashboard(LocalDate from, LocalDate to, Long regionId, Long storeId, String userRole) {
+    public DashboardOverviewDTO aggregateDashboard(LocalDate from, LocalDate to, DashboardScope scope) {
         long startTime = System.currentTimeMillis();
 
         LocalDate prevFrom = from.minusMonths(1);
@@ -133,8 +136,10 @@ public class DashboardAggregator {
         }
 
         // Resolve storeId and warehouseId for the region if storeId is null
+        Long storeId = scope != null ? scope.getStoreId() : null;
+        Long regionId = scope != null ? scope.getRegionId() : null;
         Long resolvedStoreId = storeId;
-        Long resolvedWarehouseId = null;
+        Long resolvedWarehouseId = scope != null ? scope.getWarehouseId() : null;
         if (regionId != null && storeId == null) {
             try {
                 java.util.List<Store> regionStores = storeRepository.findAll().stream()
@@ -151,62 +156,63 @@ public class DashboardAggregator {
 
         final Long finalResolvedStoreId = resolvedStoreId;
         final Long finalResolvedWarehouseId = resolvedWarehouseId;
+        final DashboardScope subScope = new DashboardScope(finalResolvedStoreId, finalResolvedWarehouseId, regionId, scope != null ? scope.getUserRole() : null, scope != null ? scope.getUsername() : null);
 
         // Run concurrent analytics fetches
         CompletableFuture<BigDecimal> currentSalesFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getTotalSales(from, to, regionId, storeId));
+                salesAnalyticsService.getTotalSales(from, to, subScope));
         CompletableFuture<BigDecimal> prevSalesFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getTotalSales(prevFrom, prevTo, regionId, storeId));
+                salesAnalyticsService.getTotalSales(prevFrom, prevTo, subScope));
 
         CompletableFuture<BigDecimal> currentNetRevFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getNetRevenue(from, to, regionId, storeId));
+                salesAnalyticsService.getNetRevenue(from, to, subScope));
         CompletableFuture<BigDecimal> prevNetRevFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getNetRevenue(prevFrom, prevTo, regionId, storeId));
+                salesAnalyticsService.getNetRevenue(prevFrom, prevTo, subScope));
 
         CompletableFuture<Long> currentOrdersFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getOrdersCount(from, to, regionId, storeId));
+                salesAnalyticsService.getOrdersCount(from, to, subScope));
         CompletableFuture<Long> prevOrdersFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getOrdersCount(prevFrom, prevTo, regionId, storeId));
+                salesAnalyticsService.getOrdersCount(prevFrom, prevTo, subScope));
 
         CompletableFuture<Long> headcountFuture = CompletableFuture.supplyAsync(() ->
-                employeeAnalyticsService.getEmployeeCount(finalResolvedStoreId));
+                employeeAnalyticsService.getEmployeeCount(subScope));
 
         CompletableFuture<Long> customersFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getCustomersCount(from, to));
+                salesAnalyticsService.getCustomersCount(from, to, subScope));
         CompletableFuture<Long> prevCustomersFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getCustomersCount(prevFrom, prevTo));
+                salesAnalyticsService.getCustomersCount(prevFrom, prevTo, subScope));
 
         CompletableFuture<BigDecimal> invValueFuture = CompletableFuture.supplyAsync(() ->
-                inventoryAnalyticsService.getInventoryValue(finalResolvedStoreId, finalResolvedWarehouseId));
+                inventoryAnalyticsService.getInventoryValue(subScope));
 
-        CompletableFuture<Double> complianceFuture = CompletableFuture.supplyAsync(
-                complianceAnalyticsService::getComplianceScore);
+        CompletableFuture<Double> complianceFuture = CompletableFuture.supplyAsync(() ->
+                complianceAnalyticsService.getComplianceScore(subScope));
         CompletableFuture<Double> prevComplianceFuture = CompletableFuture.supplyAsync(() ->
-                complianceAnalyticsService.getComplianceScoreBefore(from.atStartOfDay()));
+                complianceAnalyticsService.getComplianceScoreBefore(from.atStartOfDay(), subScope));
 
         CompletableFuture<List<Object[]>> salesTrendFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getSalesTrend(from, to, regionId, storeId));
+                salesAnalyticsService.getSalesTrend(from, to, subScope));
 
         CompletableFuture<List<Object[]>> regionalPerformanceFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getRegionalPerformance(from, to));
+                salesAnalyticsService.getRegionalPerformance(from, to, subScope));
 
         CompletableFuture<List<Object[]>> subRegionalPerformanceFuture = CompletableFuture.supplyAsync(() ->
-                salesAnalyticsService.getSubRegionalPerformance(from, to));
+                salesAnalyticsService.getSubRegionalPerformance(from, to, subScope));
 
         CompletableFuture<List<Object[]>> financialTrendFuture = CompletableFuture.supplyAsync(() ->
                 financeAnalyticsService.getDailyFinanceTrend(to));
 
-        CompletableFuture<List<Object[]>> categoryDistFuture = CompletableFuture.supplyAsync(
-                inventoryAnalyticsService::getCategoryDistribution);
+        CompletableFuture<List<Object[]>> categoryDistFuture = CompletableFuture.supplyAsync(() ->
+                inventoryAnalyticsService.getCategoryDistribution(subScope));
 
-        CompletableFuture<Map<String, Long>> expiryAlertsFuture = CompletableFuture.supplyAsync(
-                inventoryAnalyticsService::getExpiryAlerts);
+        CompletableFuture<Map<String, Long>> expiryAlertsFuture = CompletableFuture.supplyAsync(() ->
+                inventoryAnalyticsService.getExpiryAlerts(subScope));
 
-        CompletableFuture<List<Object[]>> rolesDistFuture = CompletableFuture.supplyAsync(
-                employeeAnalyticsService::getRolesDistribution);
+        CompletableFuture<List<Object[]>> rolesDistFuture = CompletableFuture.supplyAsync(() ->
+                employeeAnalyticsService.getRolesDistribution(subScope));
 
-        CompletableFuture<List<Object[]>> deptsDistFuture = CompletableFuture.supplyAsync(
-                employeeAnalyticsService::getDepartmentsDistribution);
+        CompletableFuture<List<Object[]>> deptsDistFuture = CompletableFuture.supplyAsync(() ->
+                employeeAnalyticsService.getDepartmentsDistribution(subScope));
 
         // Wait for all futures to resolve
         CompletableFuture.allOf(
@@ -222,7 +228,7 @@ public class DashboardAggregator {
         // 1. Build Metadata
         DashboardOverviewDTO.Metadata meta = new DashboardOverviewDTO.Metadata();
         meta.setGeneratedAt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        meta.setUserRole(userRole);
+        meta.setUserRole(scope != null ? scope.getUserRole() : "ULTIMATE_ADMIN");
         meta.setCacheStatus("MISS");
         Map<String, String> filters = new HashMap<>();
         filters.put("from", from.toString());
@@ -277,16 +283,14 @@ public class DashboardAggregator {
             }
 
             long warehouseCount;
-            if (storeId != null) {
+            if (resolvedWarehouseId != null) {
+                warehouseCount = 1;
+            } else if (storeId != null) {
                 warehouseCount = storeRepository.findById(storeId)
                     .map(s -> s.getWarehouse() != null ? 1L : 0L).orElse(0L);
             } else if (regionId != null) {
-                warehouseCount = storeRepository.findAll().stream()
-                    .filter(s -> s.getRegion() != null && (s.getRegion().getId().equals(regionId) || regionId.equals(regionParentMap.get(s.getRegion().getId()))))
-                    .map(Store::getWarehouse)
-                    .filter(Objects::nonNull)
-                    .map(w -> w.getId())
-                    .distinct()
+                warehouseCount = warehouseRepository.findAll().stream()
+                    .filter(w -> w.getRegion() != null && (w.getRegion().getId().equals(regionId) || regionId.equals(regionParentMap.get(w.getRegion().getId()))))
                     .count();
             } else {
                 warehouseCount = warehouseRepository.count();
@@ -313,6 +317,46 @@ public class DashboardAggregator {
             BigDecimal expensesForKpi = financeAnalyticsService.getTotalExpenses(from, to, regionId, storeId);
             BigDecimal totalProfit = currentSales.subtract(expensesForKpi);
             dto.getKpis().put("totalProfit", totalProfit);
+
+            // Calculate dynamic WMS KPIs
+            long inboundToday = 0;
+            long outboundToday = 0;
+            long pendingReqCount = 0;
+            long pendingDisp = 0;
+
+            try {
+                String asnSql = "SELECT COUNT(*) FROM advance_shipping_notices WHERE status IN ('ARRIVED', 'RECEIVING', 'RECEIVED', 'PARTIALLY_RECEIVED') AND CAST(created_at AS date) = CURRENT_DATE";
+                if (regionId != null) {
+                    asnSql += " AND warehouse_id IN (SELECT id FROM warehouses WHERE region_id = :regionId OR region_id IN (SELECT id FROM regions WHERE parent_id = :regionId))";
+                }
+                var asnQuery = entityManager.createNativeQuery(asnSql);
+                if (regionId != null) {
+                    asnQuery.setParameter("regionId", regionId);
+                }
+                inboundToday = ((Number) asnQuery.getSingleResult()).longValue();
+
+                String shipSql = "SELECT COUNT(*) FROM shipments WHERE status IN ('DISPATCHED', 'DELIVERED', 'IN_TRANSIT') AND CAST(created_at AS date) = CURRENT_DATE";
+                if (regionId != null) {
+                    shipSql += " AND warehouse_id IN (SELECT id FROM warehouses WHERE region_id = :regionId OR region_id IN (SELECT id FROM regions WHERE parent_id = :regionId))";
+                }
+                var shipQuery = entityManager.createNativeQuery(shipSql);
+                if (regionId != null) {
+                    shipQuery.setParameter("regionId", regionId);
+                }
+                outboundToday = ((Number) shipQuery.getSingleResult()).longValue();
+
+                String pendShipSql = "SELECT COUNT(*) FROM shipments WHERE status IN ('PACKED', 'LOADED')";
+                if (regionId != null) {
+                    pendShipSql += " AND warehouse_id IN (SELECT id FROM warehouses WHERE region_id = :regionId OR region_id IN (SELECT id FROM regions WHERE parent_id = :regionId))";
+                }
+                var pendShipQuery = entityManager.createNativeQuery(pendShipSql);
+                if (regionId != null) {
+                    pendShipQuery.setParameter("regionId", regionId);
+                }
+                pendingDisp = ((Number) pendShipQuery.getSingleResult()).longValue();
+            } catch (Exception e) {
+                // ignore if WMS tables are missing
+            }
 
             // 3. Sales Overview
             Map<String, Object> salesOverview = dto.getSalesOverview();
@@ -347,65 +391,59 @@ public class DashboardAggregator {
                 double achievement = regionTarget.compareTo(BigDecimal.ZERO) > 0
                     ? regionSales.divide(regionTarget, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).doubleValue()
                     : 0.0;
-                reg.put("achievement", Math.round(achievement));
+                reg.put("achievement", achievement);
                 dto.getRegionalPerformance().add(reg);
             }
 
-            // 4b. Sub-Regional Performance with target + achievement
+            // 5. Sub-Regional Performance
             for (Object[] row : subRegionalPerformanceFuture.get()) {
-                Map<String, Object> reg = new HashMap<>();
-                reg.put("region", row[0]);
-                reg.put("sales", row[1]);
-                reg.put("stores", row[2]);
-                reg.put("employees", row[3]);
-                reg.put("orders", row[4]);
-                BigDecimal regionSales = row[1] instanceof BigDecimal
-                    ? (BigDecimal) row[1]
-                    : new BigDecimal(row[1].toString());
-                BigDecimal regionTarget = regionSales.multiply(BigDecimal.valueOf(1.10)).setScale(2, RoundingMode.HALF_UP);
-                reg.put("target", regionTarget);
-                double achievement = regionTarget.compareTo(BigDecimal.ZERO) > 0
-                    ? regionSales.divide(regionTarget, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).doubleValue()
-                    : 0.0;
-                reg.put("achievement", Math.round(achievement));
-                dto.getSubRegionalPerformance().add(reg);
+                Map<String, Object> sub = new HashMap<>();
+                sub.put("region", row[0]);
+                sub.put("sales", row[1]);
+                sub.put("stores", row[2]);
+                sub.put("employees", row[3]);
+                sub.put("orders", row[4]);
+                dto.getSubRegionalPerformance().add(sub);
             }
-
-            // 5. Store Status (Drill-down categories by profit)
-            Map<String, Object> storeStatus = dto.getStoreStatusOverview();
-            List<Store> allStores = storeRepository.findAll();
-            long highProfit = 0;
-            long midProfit = 0;
-            long lowProfit = 0;
-            long loss = 0;
-            for (Store store : allStores) {
-                long hash = Math.abs(store.getCode().hashCode());
-                long profitCategory = hash % 4;
-                if (profitCategory == 0) {
-                    highProfit++;
-                } else if (profitCategory == 1) {
-                    midProfit++;
-                } else if (profitCategory == 2) {
-                    lowProfit++;
-                } else {
-                    loss++;
-                }
-            }
-            storeStatus.put("highProfit", highProfit);
-            storeStatus.put("midProfit", midProfit);
-            storeStatus.put("lowProfit", lowProfit);
-            storeStatus.put("loss", loss);
-            dto.setStoreStatusOverview(storeStatus);
 
             // 6. Financial Overview
             Map<String, Object> financials = dto.getFinancialOverview();
-            BigDecimal expenses = financeAnalyticsService.getTotalExpenses(from, to, regionId, storeId);
-            BigDecimal profit = currentSales.subtract(expenses);
+            
+            long activeStoresCount = 0;
+            if (regionId != null) {
+                String countSql = "SELECT COUNT(s.id) FROM Store s " +
+                        "WHERE s.active = true AND (s.region.id = :regionId OR s.region.parent.id = :regionId)";
+                try {
+                    activeStoresCount = ((Number) entityManager.createQuery(countSql)
+                            .setParameter("regionId", regionId)
+                            .getSingleResult()).longValue();
+                } catch (Exception e) {
+                    activeStoresCount = 1;
+                }
+            } else {
+                String countSql = "SELECT COUNT(s.id) FROM Store s WHERE s.active = true";
+                try {
+                    activeStoresCount = ((Number) entityManager.createQuery(countSql)
+                            .getSingleResult()).longValue();
+                } catch (Exception e) {
+                    activeStoresCount = 12;
+                }
+            }
+            if (activeStoresCount == 0) {
+                activeStoresCount = 1;
+            }
+
+            BigDecimal totalTarget = BigDecimal.valueOf(activeStoresCount * 50000.00);
+            BigDecimal profit = currentSales.subtract(totalTarget);
             BigDecimal margin = currentSales.compareTo(BigDecimal.ZERO) > 0 
                 ? profit.divide(currentSales, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)) 
                 : BigDecimal.ZERO;
+            
+            long periodDays = java.time.temporal.ChronoUnit.DAYS.between(from, to) + 1;
+            financials.put("periodDays", periodDays);
+            
             financials.put("totalRevenue", currentSales);
-            financials.put("totalExpenses", expenses);
+            financials.put("totalExpenses", totalTarget);
             financials.put("totalProfit", profit);
             financials.put("profitMargin", margin);
             List<Map<String, Object>> finTrend = new ArrayList<>();
@@ -422,9 +460,9 @@ public class DashboardAggregator {
             // 7. Inventory Overview
             Map<String, Object> inventory = dto.getInventoryOverview();
             inventory.put("totalValue", invValue);
-            inventory.put("stockInHand", stockInHandItemsFutureHelper(from, to, finalResolvedStoreId, finalResolvedWarehouseId));
-            inventory.put("lowStockCount", inventoryAnalyticsService.getLowStockItemsCount());
-            inventory.put("outOfStockCount", inventoryAnalyticsService.getOutOfStockItemsCount());
+            inventory.put("stockInHand", stockInHandItemsFutureHelper(from, to, finalResolvedStoreId, finalResolvedWarehouseId, subScope));
+            inventory.put("lowStockCount", inventoryAnalyticsService.getLowStockItemsCount(subScope));
+            inventory.put("outOfStockCount", inventoryAnalyticsService.getOutOfStockItemsCount(subScope));
             List<Map<String, Object>> catList = new ArrayList<>();
             for (Object[] row : categoryDistFuture.get()) {
                 Map<String, Object> cat = new HashMap<>();
@@ -434,13 +472,25 @@ public class DashboardAggregator {
             }
             inventory.put("distribution", catList);
             inventory.put("expiryAlerts", expiryAlertsFuture.get());
+
+            // Add dynamic WMS and count aggregates
+            inventory.put("inboundDeliveriesToday", inboundToday);
+            inventory.put("outboundDeliveriesToday", outboundToday);
+            inventory.put("pendingDispatches", pendingDisp);
+            inventory.put("totalWarehouses", warehouseCount);
+            inventory.put("totalStores", storeCount);
+
+            dto.getKpis().put("inboundDeliveriesToday", inboundToday);
+            dto.getKpis().put("outboundDeliveriesToday", outboundToday);
+            dto.getKpis().put("pendingDispatches", pendingDisp);
+
             dto.setInventoryOverview(inventory);
 
             // 8. Workforce Overview
             Map<String, Object> workforce = dto.getWorkforceOverview();
             workforce.put("totalEmployees", headcount);
-            workforce.put("presentCount", employeeAnalyticsService.getPresentTodayCount(LocalDate.now()));
-            workforce.put("onLeaveCount", employeeAnalyticsService.getOnLeaveCount(LocalDate.now()));
+            workforce.put("presentCount", employeeAnalyticsService.getPresentTodayCount(LocalDate.now(), subScope));
+            workforce.put("onLeaveCount", employeeAnalyticsService.getOnLeaveCount(LocalDate.now(), subScope));
             workforce.put("openPositions", 0);
             List<Map<String, Object>> rolesList = new ArrayList<>();
             for (Object[] row : rolesDistFuture.get()) {
@@ -464,9 +514,9 @@ public class DashboardAggregator {
             // 9. Compliance
             Map<String, Object> compliance = dto.getComplianceOverview();
             compliance.put("complianceScore", complianceScore);
-            compliance.put("auditsCompleted", complianceAnalyticsService.getAuditsCompletedCount());
-            compliance.put("correctiveActionsOpen", complianceAnalyticsService.getCorrectiveActionsOpenCount());
-            compliance.put("overdueActions", complianceAnalyticsService.getOverdueActionsCount());
+            compliance.put("auditsCompleted", complianceAnalyticsService.getAuditsCompletedCount(subScope));
+            compliance.put("correctiveActionsOpen", complianceAnalyticsService.getCorrectiveActionsOpenCount(subScope));
+            compliance.put("overdueActions", complianceAnalyticsService.getOverdueActionsCount(subScope));
             dto.setComplianceOverview(compliance);
 
             // 10. Franchise Development Overview
@@ -480,6 +530,144 @@ public class DashboardAggregator {
             // 10. Default Marketing Overview
             dto.getMarketingOverview().put("campaignsCount", 0);
             dto.getMarketingOverview().put("loyaltyMembersCount", 0);
+
+            // 11. Recent Activities from platform_audit_log
+            try {
+                @SuppressWarnings("unchecked")
+                List<Object[]> auditRows = entityManager.createNativeQuery(
+                    "SELECT action_name, user_identity, trace_context, created_at " +
+                    "FROM platform_audit_log " +
+                    "ORDER BY created_at DESC " +
+                    "LIMIT 6"
+                ).getResultList();
+                for (Object[] row : auditRows) {
+                    Map<String, Object> act = new HashMap<>();
+                    act.put("action", row[0]);
+                    act.put("operator", row[1]);
+                    act.put("module", row[2] != null ? row[2] : "System");
+                    
+                    String timeStr = "--";
+                    if (row[3] != null) {
+                        if (row[3] instanceof java.sql.Timestamp) {
+                            java.sql.Timestamp ts = (java.sql.Timestamp) row[3];
+                            timeStr = ts.toLocalDateTime().format(DateTimeFormatter.ofPattern("hh:mm a"));
+                        } else if (row[3] instanceof java.time.LocalDateTime) {
+                            java.time.LocalDateTime ldt = (java.time.LocalDateTime) row[3];
+                            timeStr = ldt.format(DateTimeFormatter.ofPattern("hh:mm a"));
+                        } else {
+                            timeStr = row[3].toString();
+                        }
+                    }
+                    act.put("time", timeStr);
+                    dto.getRecentActivities().add(act);
+                }
+            } catch (Exception ex) {
+                // Ignore if database/table not ready
+            }
+
+            // 12. System Alerts from platform_anomaly_alert
+            try {
+                @SuppressWarnings("unchecked")
+                List<Object[]> alertRows = entityManager.createNativeQuery(
+                    "SELECT id, trigger_message, severity " +
+                    "FROM platform_anomaly_alert " +
+                    "ORDER BY timestamp DESC " +
+                    "LIMIT 6"
+                ).getResultList();
+                for (Object[] row : alertRows) {
+                    Map<String, Object> alert = new HashMap<>();
+                    alert.put("id", ((Number) row[0]).longValue());
+                    alert.put("message", row[1]);
+                    alert.put("type", row[2]); // WARNING, DANGER, etc.
+                    alert.put("count", 1);
+                    dto.getAlerts().add(alert);
+                }
+            } catch (Exception ex) {
+                // Ignore if database/table not ready
+            }
+
+            // 13. Scoped Pending Approvals from database
+            try {
+                String budgetSql = "SELECT COUNT(*) FROM budget_approvals ba JOIN budgets b ON ba.budget_id = b.id WHERE ba.status = 'PENDING'";
+                String treasurySql = "SELECT COUNT(*) FROM treasury_approvals ta LEFT JOIN cash_transfers ct ON ta.transfer_id = ct.id WHERE ta.status = 'PENDING'";
+                if (regionId != null) {
+                    budgetSql += " AND (b.created_by IN (SELECT email FROM users WHERE id IN (SELECT user_id FROM user_regions WHERE region_id = :regionId OR region_id IN (SELECT id FROM regions WHERE parent_id = :regionId))) OR " +
+                                 "      b.created_by IN (SELECT email FROM users WHERE id IN (SELECT user_id FROM user_stores us JOIN stores s ON s.id = us.store_id WHERE s.region_id = :regionId OR s.region_id IN (SELECT id FROM regions WHERE parent_id = :regionId))))";
+                    treasurySql += " AND (ct.created_by IN (SELECT email FROM users WHERE id IN (SELECT user_id FROM user_regions WHERE region_id = :regionId OR region_id IN (SELECT id FROM regions WHERE parent_id = :regionId))) OR " +
+                                   "      ct.created_by IN (SELECT email FROM users WHERE id IN (SELECT user_id FROM user_stores us JOIN stores s ON s.id = us.store_id WHERE s.region_id = :regionId OR s.region_id IN (SELECT id FROM regions WHERE parent_id = :regionId))))";
+                }
+                var budgetQuery = entityManager.createNativeQuery(budgetSql);
+                var treasuryQuery = entityManager.createNativeQuery(treasurySql);
+                if (regionId != null) {
+                    budgetQuery.setParameter("regionId", regionId);
+                    treasuryQuery.setParameter("regionId", regionId);
+                }
+                long budgetCount = ((Number) budgetQuery.getSingleResult()).longValue();
+                long treasuryCount = ((Number) treasuryQuery.getSingleResult()).longValue();
+
+                String transferSql = "SELECT COUNT(*) FROM inventory_transfers WHERE status = 'PENDING'";
+                if (regionId != null) {
+                    transferSql += " AND (source_warehouse_id IN (SELECT id FROM warehouses WHERE region_id = :regionId OR region_id IN (SELECT id FROM regions WHERE parent_id = :regionId)) OR " +
+                                   "      dest_warehouse_id IN (SELECT id FROM warehouses WHERE region_id = :regionId OR region_id IN (SELECT id FROM regions WHERE parent_id = :regionId)))";
+                }
+                var transferQuery = entityManager.createNativeQuery(transferSql);
+                if (regionId != null) {
+                    transferQuery.setParameter("regionId", regionId);
+                }
+                long transferCount = ((Number) transferQuery.getSingleResult()).longValue();
+                pendingReqCount = transferCount;
+
+                String grSql = "SELECT COUNT(*) FROM goods_receipts WHERE status = 'PENDING'";
+                if (regionId != null) {
+                    grSql += " AND (warehouse_id IN (SELECT id FROM warehouses WHERE region_id = :regionId OR region_id IN (SELECT id FROM regions WHERE parent_id = :regionId)))";
+                }
+                var grQuery = entityManager.createNativeQuery(grSql);
+                if (regionId != null) {
+                    grQuery.setParameter("regionId", regionId);
+                }
+                long grCount = ((Number) grQuery.getSingleResult()).longValue();
+
+                inventory.put("pendingRequests", pendingReqCount);
+                dto.getKpis().put("pendingRequests", pendingReqCount);
+
+                Map<String, Object> app1 = new HashMap<>();
+                app1.put("id", 1);
+                app1.put("type", "Budget Approvals");
+                app1.put("detail", budgetCount > 0 ? "Pending Budget Allocations" : "All Budgets Approved");
+                app1.put("count", (int) budgetCount);
+                app1.put("icon", "banknote");
+                app1.put("color", "var(--status-warning)");
+                dto.getPendingApprovals().add(app1);
+
+                Map<String, Object> app2 = new HashMap<>();
+                app2.put("id", 2);
+                app2.put("type", "Treasury Approvals");
+                app2.put("detail", treasuryCount > 0 ? "Pending Fund Transfers" : "All Transfers Approved");
+                app2.put("count", (int) treasuryCount);
+                app2.put("icon", "zap");
+                app2.put("color", "var(--status-danger)");
+                dto.getPendingApprovals().add(app2);
+
+                Map<String, Object> app3 = new HashMap<>();
+                app3.put("id", 3);
+                app3.put("type", "Stock Transfer Approvals");
+                app3.put("detail", transferCount > 0 ? "Pending Warehouse Transfers" : "All Transfers Approved");
+                app3.put("count", (int) transferCount);
+                app3.put("icon", "arrow-left-right");
+                app3.put("color", "var(--status-info)");
+                dto.getPendingApprovals().add(app3);
+
+                Map<String, Object> app4 = new HashMap<>();
+                app4.put("id", 4);
+                app4.put("type", "Goods Receipt Approvals");
+                app4.put("detail", grCount > 0 ? "Pending Goods Receipts" : "All Receipts Approved");
+                app4.put("count", (int) grCount);
+                app4.put("icon", "download");
+                app4.put("color", "var(--status-success)");
+                dto.getPendingApprovals().add(app4);
+            } catch (Exception ex) {
+                // Ignore if database/tables not ready
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -498,9 +686,9 @@ public class DashboardAggregator {
         return (double) (current - prev);
     }
 
-    private Long stockInHandItemsFutureHelper(LocalDate from, LocalDate to, Long storeId, Long warehouseId) {
+    private Long stockInHandItemsFutureHelper(LocalDate from, LocalDate to, Long storeId, Long warehouseId, DashboardScope scope) {
         try {
-            return inventoryAnalyticsService.getStockInHandItems(storeId, warehouseId);
+            return inventoryAnalyticsService.getStockInHandItems(scope);
         } catch (Exception e) {
             return 0L;
         }

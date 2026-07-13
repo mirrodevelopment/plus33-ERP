@@ -40,32 +40,7 @@ export class ApprovalsList {
    * @memberof Widgets Module
    */
   mount(container, lifecycle) {
-    // Combine backend alert data + standard ERP pending approvals
-    const pendingApprovals = [
-      { id: 1, type: 'Budget Approvals', detail: 'Marketing Spend Q3 2026', count: 12, icon: 'banknote', color: 'var(--status-warning)' },
-      { id: 2, type: 'Store Openings', detail: 'Green Park Café, London', count: 8, icon: 'coffee', color: 'var(--accent-primary)' },
-      { id: 3, type: 'Vendor Approvals', detail: 'Bean supplies — Arabica Premium deal', count: 15, icon: 'package', color: 'var(--status-info)' },
-      { id: 4, type: 'Policy Approvals', detail: 'Zero-trust attestation policy v3', count: 6, icon: 'shield', color: 'var(--status-success)' },
-      { id: 5, type: 'Discrepancy Requests', detail: 'WMS inventory zone C override', count: 4, icon: 'alert-triangle', color: 'var(--status-danger)' },
-      { id: 6, type: 'Emergency Requests', detail: 'Regional stock redistribution', count: 3, icon: 'zap', color: 'var(--status-danger)' }
-    ];
-
-    // Enrich count from backend alert data if available
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Widgets Module
-     */
-    if (this.alerts.length > 0) {
-      this.alerts.forEach((alert, i) => {
-        /**
-         * Performs the fn operation in this module.
-         * @memberof Widgets Module
-         */
-        if (pendingApprovals[i]) {
-          pendingApprovals[i].detail = alert.message || pendingApprovals[i].detail;
-        }
-      });
-    }
+    const pendingApprovals = this.alerts || [];
 
     container.innerHTML = `
       <div class="flex justify-between align-center mb-md" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: var(--spacing-xs);">
@@ -74,10 +49,14 @@ export class ApprovalsList {
       </div>
       
       <div class="flex flex-col gap-sm">
-        ${pendingApprovals.map(a => `
+        ${pendingApprovals.length === 0 ? `
+          <div style="text-align: center; color: var(--text-muted); padding: var(--spacing-lg) 0; font-size: 0.72rem; border: 1px dashed rgba(255,255,255,0.05); border-radius: var(--radius-md);">
+            No pending approvals.
+          </div>
+        ` : pendingApprovals.map(a => `
           <div class="approval-item flex justify-between align-center" style="border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-md); background: rgba(255,255,255,0.01); padding: 7px 10px; cursor: pointer; transition: var(--transition-fast); min-width: 0; gap: var(--spacing-sm);" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='rgba(255,255,255,0.01)'">
             <div class="flex align-center gap-sm" style="min-width: 0; flex-grow: 1;">
-              <i data-lucide="${a.icon}" style="width:13px; height:13px; color:${a.color}; flex-shrink:0;"></i>
+              <i data-lucide="${a.icon || 'file-text'}" style="width:13px; height:13px; color:${a.color || 'var(--accent-primary)'}; flex-shrink:0;"></i>
               <div class="flex flex-col" style="min-width: 0;">
                 <span style="font-size: 0.75rem; color: var(--text-primary); font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${a.type}</span>
                 <span style="font-size: 0.65rem; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${a.detail}</span>

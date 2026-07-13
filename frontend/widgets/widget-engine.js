@@ -71,7 +71,7 @@ export class WidgetEngine {
           break;
         }
         case 'chart-sales':
-          const { SalesChart } = await import('./charts/sales-chart.js?v=' + Date.now());
+          const { SalesChart } = await import('./charts/sales-chart/sales-chart.js?v=' + Date.now());
           instance = new SalesChart(config, overview.salesOverview, overview.regionalPerformance);
           break;
         case 'regional-performance':
@@ -79,11 +79,11 @@ export class WidgetEngine {
           instance = new RegionalPerformance(config, overview.regionalPerformance);
           break;
         case 'chart-stock':
-          const { StockChart } = await import('./charts/stock-chart.js?v=' + Date.now());
+          const { StockChart } = await import('./charts/stock-chart/stock-chart.js?v=' + Date.now());
           instance = new StockChart(config, overview.storeStatusOverview);
           break;
         case 'chart-financial':
-          const { FinancialChart } = await import('./charts/financial-chart.js?v=' + Date.now());
+          const { FinancialChart } = await import('./charts/financial-chart/financial-chart.js?v=' + Date.now());
           instance = new FinancialChart(config, overview.financialOverview);
           break;
         case 'inventory-overview':
@@ -95,7 +95,7 @@ export class WidgetEngine {
           instance = new WorkforceWidget(config, overview.workforceOverview);
           break;
         case 'compliance-gauge':
-          const { ComplianceGauge } = await import('./charts/compliance-gauge.js');
+          const { ComplianceGauge } = await import('./charts/compliance-gauge/compliance-gauge.js');
           instance = new ComplianceGauge(config, overview.complianceOverview);
           break;
         case 'complaints-legal': {
@@ -110,7 +110,7 @@ export class WidgetEngine {
           break;
         case 'approvals':
           const { ApprovalsList } = await import('./approvals/approvals-list.js');
-          instance = new ApprovalsList(config, overview.alerts);
+          instance = new ApprovalsList(config, overview.pendingApprovals);
           break;
         case 'notifications':
           const { AlertsList } = await import('./notifications/alerts-list.js');

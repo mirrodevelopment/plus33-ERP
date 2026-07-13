@@ -37,10 +37,53 @@ const CREDENTIALS_MAP = {
   ultimateAdmin:  { email: 'ultimate123@plus33.com',          pass: 'pass123' },
   nationalAdmin:  { email: 'regional_ind@plus33.com',         pass: 'pass123' },
   regionalAdmin:  { email: 'regional_south_ind@plus33.com',   pass: 'pass123' },
-  warehouse:      { email: 'warehouse123@plus33.com',         pass: 'pass123' },
-  store:          { email: 'store123@plus33.com',             pass: 'pass123' },
-  storeEmployee:  { email: 'employee123@plus33.com',          pass: 'pass123' },
-  shiftSupervisor:{ email: 'supervisor123@plus33.com',        pass: 'pass123' }
+  nationalWarehouseAdmin: { email: 'national_wh_admin_fr@plus33.com',  pass: 'pass123' },
+  regionalWarehouseAdmin: { email: 'regional_wh_admin_fr_north@plus33.com', pass: 'pass123' },
+  store:          { email: 'admin_st_fr_reg_1_01@plus33.com', pass: 'pass123' },
+  storeEmployee:  { email: 'emp1_st_fr_reg_1_01@plus33.com',  pass: 'pass123' },
+  shiftSupervisor:{ email: 'sup1_st_fr_reg_1_01@plus33.com',  pass: 'pass123' }
+};
+
+/** Nation/Region subdivision credentials mapping */
+const SUBPROFILES_MAP = {
+  nationalAdmin: [
+    { name: 'France National Admin', email: 'regional_fr@plus33.com' },
+    { name: 'India National Admin', email: 'regional_ind@plus33.com' },
+    { name: 'UAE National Admin', email: 'regional_uae@plus33.com' }
+  ],
+  regionalAdmin: [
+    { name: 'North France (FR_NORTH)', email: 'regional_north_fr@plus33.com' },
+    { name: 'South India (IN_SOUTH)', email: 'regional_south_ind@plus33.com' },
+    { name: 'Dubai (UAE_DUBAI)', email: 'regional_dubai@plus33.com' },
+    { name: 'Ile-de-France (FR_REG_1)', email: 'regional_admin_fr_reg_1@plus33.com' },
+    { name: 'Provence-Alpes-Cote d\'Azur (FR_REG_2)', email: 'regional_admin_fr_reg_2@plus33.com' },
+    { name: 'Auvergne-Rhone-Alpes (FR_REG_3)', email: 'regional_admin_fr_reg_3@plus33.com' },
+    { name: 'Abu Dhabi (AE_REG_1)', email: 'regional_admin_ae_reg_1@plus33.com' },
+    { name: 'Sharjah (AE_REG_2)', email: 'regional_admin_ae_reg_2@plus33.com' },
+    { name: 'Ajman (AE_REG_3)', email: 'regional_admin_ae_reg_3@plus33.com' },
+    { name: 'West India (IN_REG_1)', email: 'regional_admin_in_reg_1@plus33.com' },
+    { name: 'North India (IN_REG_2)', email: 'regional_admin_in_reg_2@plus33.com' },
+    { name: 'East India (IN_REG_3)', email: 'regional_admin_in_reg_3@plus33.com' }
+  ],
+  nationalWarehouseAdmin: [
+    { name: 'France National Warehouse Admin', email: 'national_wh_admin_fr@plus33.com' },
+    { name: 'India National Warehouse Admin', email: 'national_wh_admin_in@plus33.com' },
+    { name: 'UAE National Warehouse Admin', email: 'national_wh_admin_ae@plus33.com' }
+  ],
+  regionalWarehouseAdmin: [
+    { name: 'North France (FR_NORTH) Warehouse Admin', email: 'regional_wh_admin_fr_north@plus33.com' },
+    { name: 'South India (IN_SOUTH) Warehouse Admin', email: 'regional_wh_admin_in_south@plus33.com' },
+    { name: 'Dubai (UAE_DUBAI) Warehouse Admin', email: 'regional_wh_admin_uae_dubai@plus33.com' },
+    { name: 'Ile-de-France (FR_REG_1) Warehouse Admin', email: 'regional_wh_admin_fr_reg_1@plus33.com' },
+    { name: 'Provence-Alpes-Cote d\'Azur (FR_REG_2) Warehouse Admin', email: 'regional_wh_admin_fr_reg_2@plus33.com' },
+    { name: 'Auvergne-Rhone-Alpes (FR_REG_3) Warehouse Admin', email: 'regional_wh_admin_fr_reg_3@plus33.com' },
+    { name: 'Abu Dhabi (AE_REG_1) Warehouse Admin', email: 'regional_wh_admin_ae_reg_1@plus33.com' },
+    { name: 'Sharjah (AE_REG_2) Warehouse Admin', email: 'regional_wh_admin_ae_reg_2@plus33.com' },
+    { name: 'Ajman (AE_REG_3) Warehouse Admin', email: 'regional_wh_admin_ae_reg_3@plus33.com' },
+    { name: 'West India (IN_REG_1) Warehouse Admin', email: 'regional_wh_admin_in_reg_1@plus33.com' },
+    { name: 'North India (IN_REG_2) Warehouse Admin', email: 'regional_wh_admin_in_reg_2@plus33.com' },
+    { name: 'East India (IN_REG_3) Warehouse Admin', email: 'regional_wh_admin_in_reg_3@plus33.com' }
+  ]
 };
 
 /** Post-login hash route map */
@@ -48,7 +91,8 @@ const ROLE_ROUTES = {
   ultimateAdmin:   '#ultimate-dashboard',
   nationalAdmin:   '#national-dashboard',
   regionalAdmin:   '#regional-dashboard',
-  warehouse:       '#national-dashboard',
+  nationalWarehouseAdmin: '#national-warehouse-dashboard',
+  regionalWarehouseAdmin: '#regional-warehouse-dashboard',
   store:           '#store-dashboard',
   storeEmployee:   '#employee-dashboard',
   shiftSupervisor: '#supervisor-dashboard'
@@ -138,6 +182,17 @@ export default class LoginPage {
       lifecycle.onCleanup(() => roleSelect.removeEventListener('change', onRoleChange));
     }
 
+    // Subprofile dropdown → update username value
+    const subprofileSelect = container.querySelector('#select-subprofile');
+    const emailInput = container.querySelector('#input-username');
+    if (subprofileSelect) {
+      const onSubprofileChange = () => {
+        if (emailInput) emailInput.value = subprofileSelect.value;
+      };
+      subprofileSelect.addEventListener('change', onSubprofileChange);
+      lifecycle.onCleanup(() => subprofileSelect.removeEventListener('change', onSubprofileChange));
+    }
+
     // Password visibility toggle
     if (togglePassBtn && passwordInput && eyeIcon) {
       const onTogglePass = () => {
@@ -190,16 +245,40 @@ export default class LoginPage {
    * @param {HTMLElement} container
    */
   _autoFill(container) {
-    const roleSelect    = container.querySelector('#select-role-profile');
-    const emailInput    = container.querySelector('#input-username');
-    const passwordInput = container.querySelector('#input-password');
+    const roleSelect       = container.querySelector('#select-role-profile');
+    const subprofileGroup  = container.querySelector('#group-subprofile');
+    const subprofileSelect = container.querySelector('#select-subprofile');
+    const emailInput       = container.querySelector('#input-username');
+    const passwordInput    = container.querySelector('#input-password');
 
     if (!roleSelect || !emailInput || !passwordInput) return;
 
-    const creds = CREDENTIALS_MAP[roleSelect.value];
-    if (creds) {
-      emailInput.value    = creds.email;
-      passwordInput.value = creds.pass;
+    const role = roleSelect.value;
+    const subprofiles = SUBPROFILES_MAP[role];
+
+    if (subprofiles && subprofiles.length > 0) {
+      const prevRole = subprofileSelect.dataset.lastRole;
+      if (prevRole !== role) {
+        subprofileSelect.innerHTML = '';
+        subprofiles.forEach(sp => {
+          const opt = document.createElement('option');
+          opt.value = sp.email;
+          opt.textContent = sp.name;
+          subprofileSelect.appendChild(opt);
+        });
+        subprofileSelect.dataset.lastRole = role;
+      }
+      if (subprofileGroup) subprofileGroup.style.display = 'block';
+      emailInput.value = subprofileSelect.value;
+      passwordInput.value = 'pass123';
+    } else {
+      if (subprofileGroup) subprofileGroup.style.display = 'none';
+      if (subprofileSelect) subprofileSelect.dataset.lastRole = '';
+      const creds = CREDENTIALS_MAP[role];
+      if (creds) {
+        emailInput.value    = creds.email;
+        passwordInput.value = creds.pass;
+      }
     }
   }
 

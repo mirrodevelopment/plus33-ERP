@@ -1,0 +1,41 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Warehouse Admin — Inventory Stock Ledger
+ * File              : stock-list.html
+ * Path              : frontend/modules/inventory/pages/stock-list.html
+ * Purpose           : HTML template for Inventory Stock Ledger layout context
+ * Version           : 2.0.0
+ *
+ * Related JS        : stock-list.js
+ * Related CSS       : stock-list.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of stock balances and lot recall triggers.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="inventory-ledger-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-title-banner">
+    <div class="page-title-left">
+      <h2 class="page-title">WMS Inventory Stock Ledger</h2>
+      <p class="page-subtitle">Real-time stock balances and lot expirations</p>
+    </div>
+    
+    <button id="btn-trigger-recall" class="btn btn-danger btn-recall animate-pulse" type="button">
+      ⚠️ Trigger Lot Recall
+    </button>
+  </div>
+
+  <!-- ===== STOCK LEDGER TABLE ===== -->
+  <div id="stock-ledger-table-container" class="card glass table-card">
+    <div class="spinner-container">
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+</div>

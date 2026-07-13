@@ -41,19 +41,7 @@ export class RecentActivity {
       module: a.module || 'ERP'
     }));
 
-    // Enrich with operational defaults to match screenshot density
-    const defaults = [
-      { action: 'New store Flagship Café initialized', time: '10:30 AM', operator: 'Jean-Pierre', module: 'Stores' },
-      { action: 'Policy update: Leave Policy v2.0', time: '09:45 AM', operator: 'HR Lead', module: 'HR' },
-      { action: 'Vendor Beans & Brew Supplies approved', time: '08:20 AM', operator: 'Procurement', module: 'Procurement' },
-      { action: 'Emergency stock request — North Region', time: '07:55 AM', operator: 'Store Admin', module: 'Inventory' },
-      { action: 'Audit report for West Region completed', time: '06:50 AM', operator: 'GRC Lead', module: 'Compliance' },
-      { action: 'Franchise application received — Lyon', time: 'Yesterday', operator: 'Franchise Mgr', module: 'Franchise' }
-    ];
-
-    const activities = backendActivities.length > 0
-      ? [...backendActivities, ...defaults].slice(0, 6)
-      : defaults;
+    const activities = backendActivities;
 
     const moduleColor = {
       'Stores': 'var(--accent-primary)',
@@ -83,7 +71,13 @@ export class RecentActivity {
             </tr>
           </thead>
           <tbody>
-            ${activities.map(a => {
+            ${activities.length === 0 ? `
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: var(--spacing-lg) 0; font-size: 0.72rem;">
+                  No recent activities recorded.
+                </td>
+              </tr>
+            ` : activities.map(a => {
               const color = moduleColor[a.module] || moduleColor.ERP;
               return `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='none'">

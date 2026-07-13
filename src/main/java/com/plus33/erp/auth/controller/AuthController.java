@@ -202,7 +202,18 @@ public class AuthController {
 
         List<com.plus33.erp.workforce.entity.UserRegion> userRegions = userRegionRepository.findByIdUserId(user.getId());
         if (userRegions != null && !userRegions.isEmpty() && userRegions.get(0).getRegion() != null) {
-            storeRegion = userRegions.get(0).getRegion().getName();
+            com.plus33.erp.organization.entity.Region region = userRegions.get(0).getRegion();
+            storeRegion = region.getName();
+            if (region.getCode() != null) {
+                String code = region.getCode().toUpperCase();
+                if (code.startsWith("FR")) {
+                    country = "France";
+                } else if (code.startsWith("AE") || code.startsWith("UAE")) {
+                    country = "UAE";
+                } else if (code.startsWith("IN")) {
+                    country = "India";
+                }
+            }
         }
 
         data.put("store", storeName);

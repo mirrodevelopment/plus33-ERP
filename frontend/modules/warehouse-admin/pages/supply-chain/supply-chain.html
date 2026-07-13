@@ -1,0 +1,286 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Warehouse Admin — Supply Chain
+ * File              : supply-chain.html
+ * Path              : frontend/modules/warehouse-admin/supply-chain/supply-chain.html
+ * Purpose           : HTML template for Supply Chain & Logistics Control Center
+ * Version           : 2.0.0
+ *
+ * Related JS        : supply-chain.js
+ * Related CSS       : supply-chain.css
+ * Related APIs      : POST /api/routing/dispatch/simulation/run
+ *                     POST /api/routing/optimization/carbon/emissions
+ *                     POST /api/logistics/vehicles
+ *                     POST /api/routing/optimization/cost/optimize
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural layout of the Supply Chain & Logistics Page.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="supply-chain-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header supply-chain-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="truck" aria-hidden="true"></i>
+        <span>Logistics Operations</span>
+      </div>
+      <h1 class="page-title">Supply Chain &amp; Logistics Control Center</h1>
+      <p class="page-subtitle">Enterprise Fleet Dispatching, Network Topology &amp; Smart Routing Optimization.</p>
+    </div>
+    <div class="page-header-right">
+      <div class="network-status-pill" role="status" aria-live="polite">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span>Network Active</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPI SUMMARY GRID ===== -->
+  <div class="supply-chain-kpi-grid" role="region" aria-label="Logistics summary metrics">
+    <div class="kpi-card kpi-card--gold">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold" aria-hidden="true">
+        <i data-lucide="truck"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-active-fleet">12 Vehicles</span>
+        <span class="kpi-label">Active Fleet</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--success">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--success" aria-hidden="true">
+        <i data-lucide="leaf"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-carbon-footprint">1.25 t CO2e</span>
+        <span class="kpi-label">Carbon Footprint</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--info">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--info" aria-hidden="true">
+        <i data-lucide="route"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-active-dispatches">8 Routes</span>
+        <span class="kpi-label">Active Dispatches</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--danger">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--danger" aria-hidden="true">
+        <i data-lucide="shield-alert"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-safety-alerts">0 Alerts</span>
+        <span class="kpi-label">Safety Violations</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN SUPPLY CHAIN GRID SPLIT ===== -->
+  <div class="supply-chain-layout-grid">
+    
+    <!-- Left Column: Interactive Topology Svg Map -->
+    <div class="supply-chain-left-panel">
+      <div class="card glass topology-card">
+        <div class="topology-header">
+          <h3 class="topology-title">Interactive Logistics Node Map</h3>
+          <span class="topology-status-badge">GIS &amp; SCADA Feeds</span>
+        </div>
+        
+        <div class="svg-map-wrapper">
+          <svg id="network-topology-svg" width="100%" height="380" class="network-svg">
+            <defs>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            
+            <!-- Connection Lanes (Paths) -->
+            <!-- Roastery to Central Hub -->
+            <line x1="200" y1="100" x2="200" y2="220" class="connection-lane connection-lane--dashed" />
+            <!-- Central Hub to Regional East -->
+            <line x1="200" y1="220" x2="380" y2="150" class="connection-lane connection-lane--east" />
+            <!-- Central Hub to Regional West -->
+            <line x1="200" y1="220" x2="50" y2="180" class="connection-lane connection-lane--west" />
+            <!-- Central Hub to Charging Station -->
+            <line x1="200" y1="220" x2="320" y2="280" class="connection-lane connection-lane--charging" />
+            
+            <!-- Roastery Node -->
+            <circle cx="200" cy="100" r="14" class="node-circle node-circle--hq" />
+            <text x="200" y="80" text-anchor="middle" class="node-label">Central Roastery (HQ)</text>
+            
+            <!-- Central WMS Hub Node -->
+            <circle cx="200" cy="220" r="12" class="node-circle node-circle--hub" />
+            <text x="200" y="242" text-anchor="middle" class="node-label">Central WMS Hub</text>
+            
+            <!-- Regional East Node -->
+            <circle cx="380" cy="150" r="10" class="node-circle node-circle--rdc" />
+            <text x="380" y="135" text-anchor="middle" class="node-label node-label--sub">RDC East</text>
+            
+            <!-- Regional West Node -->
+            <circle cx="50" cy="180" r="10" class="node-circle node-circle--rdc" />
+            <text x="50" y="165" text-anchor="middle" class="node-label node-label--sub">RDC West</text>
+            
+            <!-- Supercharger Node -->
+            <circle cx="320" cy="280" r="9" class="node-circle node-circle--charger" />
+            <text x="320" y="300" text-anchor="middle" class="node-label node-label--sub">Supercharger 05</text>
+          </svg>
+          
+          <div class="map-legend">
+            <div><span class="legend-dot legend-dot--hq"></span>HQ Plant</div>
+            <div><span class="legend-dot legend-dot--hub"></span>WMS Hub</div>
+            <div><span class="legend-dot legend-dot--rdc"></span>RDC</div>
+            <div><span class="legend-dot legend-dot--charger"></span>Charging</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Dispatch Optimization Console -->
+    <div class="supply-chain-right-panel">
+      <div class="card glass dispatch-card">
+        <div class="dispatch-header">
+          <i data-lucide="cpu" class="dispatch-icon" aria-hidden="true"></i>
+          <h3 class="dispatch-title">Dispatch Optimization</h3>
+        </div>
+        
+        <p class="dispatch-desc">Trigger real-time Monte Carlo simulations to optimize logistics costs and estimate carbon emissions.</p>
+        
+        <form id="dispatch-simulation-form" class="dispatch-form" novalidate>
+          <div class="form-group">
+            <label for="sim-scenario" class="form-label">Simulation Scenario</label>
+            <select id="sim-scenario" class="form-select">
+              <option value="SCENARIO-TRAFFIC-DELAY">Traffic Congestion Delay (RDC West)</option>
+              <option value="SCENARIO-RAIN-STORM">Severe Rain Storm (RDC East)</option>
+              <option value="SCENARIO-EV-CHARGE">EV Battery Charge Optimization</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="sim-fuel-type" class="form-label">Carbon Footprint Calculator</label>
+            <div class="calculator-flex-row">
+              <select id="sim-fuel-type" class="form-select flex-grow">
+                <option value="ELECTRIC">EV Battery Electric</option>
+                <option value="BIOFUEL">Biodiesel B20</option>
+                <option value="DIESEL">Conventional Diesel</option>
+              </select>
+              <input
+                type="number"
+                id="sim-distance"
+                class="form-input text-center distance-input"
+                value="120"
+                placeholder="Distance (km)"
+                required
+                aria-required="true"
+              >
+            </div>
+          </div>
+          
+          <button type="submit" id="btn-trigger-simulation" class="btn btn-primary btn-run-simulation">
+            <i data-lucide="play" aria-hidden="true"></i>
+            <span>Run Simulation</span>
+          </button>
+        </form>
+        
+        <div class="simulation-log-console">
+          <div class="console-header">Last Calculation Trace</div>
+          <div id="sim-trace-output" class="console-body">Ready for dispatch job trigger...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== BOTTOM PANEL: FLEET TELEMETRY & REGISTER ===== -->
+  <div class="card glass fleet-card">
+    <div class="fleet-header flex justify-between align-center flex-wrap gap-md">
+      <div class="fleet-title-wrapper">
+        <i data-lucide="radio" class="fleet-icon" aria-hidden="true"></i>
+        <h3 class="fleet-title">Fleet Telemetry &amp; Battery Status Monitor</h3>
+      </div>
+      
+      <!-- Quick Vehicle Registration Form -->
+      <form id="fleet-register-form" class="fleet-register-form">
+        <input
+          type="text"
+          id="reg-code"
+          class="form-input fleet-reg-input"
+          placeholder="Vehicle Code (e.g. EV-FLEET-06)"
+          required
+          aria-required="true"
+        >
+        <input
+          type="number"
+          step="0.1"
+          id="reg-capacity"
+          class="form-input capacity-input"
+          placeholder="Capacity (Tons)"
+          required
+          aria-required="true"
+        >
+        <button type="submit" class="btn btn-secondary btn-register-vehicle">
+          <span>+ Register Vehicle</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="table-scroll-wrapper">
+      <table class="fleet-table">
+        <thead>
+          <tr>
+            <th scope="col">Vehicle ID</th>
+            <th scope="col">Code</th>
+            <th scope="col">Type</th>
+            <th scope="col">Capacity Limit</th>
+            <th scope="col">Live Speed</th>
+            <th scope="col" width="160">Battery Charge</th>
+            <th scope="col">Operational Status</th>
+            <th scope="col" class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="fleet-telemetry-body">
+          <!-- Populated by supply-chain.js -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== TABLE ROW TEMPLATE ===== -->
+<template id="fleet-row-tpl">
+  <tr class="fleet-table-row">
+    <td class="col-id"></td>
+    <td class="col-code"></td>
+    <td class="col-type"></td>
+    <td class="col-capacity"></td>
+    <td class="col-speed"></td>
+    <td class="col-battery">
+      <div class="battery-bar-container">
+        <div class="battery-track">
+          <div class="battery-fill"></div>
+        </div>
+        <span class="battery-percentage"></span>
+      </div>
+    </td>
+    <td class="col-status">
+      <span class="status-indicator-wrapper">
+        <span class="status-dot"></span>
+        <span class="status-label"></span>
+      </span>
+    </td>
+    <td class="col-actions">
+      <button class="btn btn-secondary btn-optimize-cost" type="button">Optimize Cost</button>
+    </td>
+  </tr>
+</template>

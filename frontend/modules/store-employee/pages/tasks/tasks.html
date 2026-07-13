@@ -1,0 +1,201 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Daily Shift Tasks
+ * File              : tasks.html
+ * Path              : frontend/modules/store-employee/tasks/tasks.html
+ * Purpose           : HTML template for Store Employee Tasks page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : tasks.js
+ * Related CSS       : tasks.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of task list feeds, status filters pills, priority selector
+ * dropdown forms, add custom task inputs, and KPI stats cards.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="employee-tasks-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">Daily Shift Tasks</h2>
+      <p class="welcome-subtitle">
+        Role: <span class="highlight-val" id="lbl-employee-designation">—</span> &nbsp;·&nbsp; Location: <span class="highlight-val">Green Park Café</span>
+      </p>
+    </div>
+    
+    <button class="btn btn-secondary btn-reset-defaults" id="btn-reset-tasks" type="button">
+      <i data-lucide="rotate-ccw" aria-hidden="true"></i> Reset to Defaults
+    </button>
+  </div>
+
+  <!-- ===== KPI DASHBOARD STATS GRID ===== -->
+  <div class="kpi-grid-row" role="region" aria-label="Tasks count metrics">
+    
+    <!-- KPI 1: Assigned Roster -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold" aria-hidden="true">
+        <i data-lucide="check-square"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-total-tasks">—</div>
+        <div class="kpi-label">Assigned Roster</div>
+      </div>
+    </div>
+
+    <!-- KPI 2: Attention Required -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--red" aria-hidden="true">
+        <i data-lucide="alert-circle"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-pending-tasks">—</div>
+        <div class="kpi-label">Attention Required</div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Shift Goals Done -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--green" aria-hidden="true">
+        <i data-lucide="check-circle-2"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-completed-tasks">—</div>
+        <div class="kpi-label">Shift Goals Done</div>
+      </div>
+    </div>
+
+    <!-- KPI 4: Completion Rate Progress Bar -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--blue" aria-hidden="true">
+        <i data-lucide="trending-up"></i>
+      </div>
+      <div class="kpi-meta-details flex-1">
+        <div class="kpi-value" id="kpi-completion-rate">—</div>
+        <div class="kpi-progress-bg" aria-hidden="true">
+          <div class="kpi-progress-fill" id="kpi-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: Tasks Manager list -->
+    <div class="layout-column-left">
+      <div class="card glass list-card">
+        
+        <!-- Filters Ribbon toolbar -->
+        <div class="filters-ribbon-row">
+          <div class="status-pills-group">
+            <button class="filter-btn" id="btn-filter-all" data-status="all" type="button">All</button>
+            <button class="filter-btn" id="btn-filter-pending" data-status="pending" type="button">Pending</button>
+            <button class="filter-btn" id="btn-filter-completed" data-status="completed" type="button">Completed</button>
+          </div>
+
+          <div class="priority-select-group">
+            <label for="select-filter-priority" class="filter-label">Priority</label>
+            <select id="select-filter-priority" class="filter-select">
+              <option value="all">All Priorities</option>
+              <option value="high">High Only</option>
+              <option value="medium">Medium Only</option>
+              <option value="low">Low Only</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Dynamic List Feed Container -->
+        <div class="tasks-manager-list" id="tasks-manager-list">
+          <!-- Populated dynamically by JS -->
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right Column: Add Custom task form -->
+    <div class="layout-column-right">
+      <div class="card glass add-task-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Add New Shift Task</h3>
+          <i data-lucide="plus-circle" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="task-form-body">
+          <div class="form-group">
+            <label for="input-task-name" class="form-label">Task Goal / Name</label>
+            <input type="text" id="input-task-name" class="form-input" placeholder="e.g. Sanitize milk frothers">
+          </div>
+
+          <div class="form-group">
+            <label for="select-task-section" class="form-label">Task Station / Section</label>
+            <select id="select-task-section" class="form-select">
+              <option value="Espresso Bar">Espresso Bar</option>
+              <option value="Inventory">Inventory</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Safety Check">Safety Check</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="select-task-priority" class="form-label">Priority Level</label>
+            <select id="select-task-priority" class="form-select">
+              <option value="High Priority">High Priority</option>
+              <option value="Medium Priority" selected>Medium Priority</option>
+              <option value="Low Priority">Low Priority</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary btn-submit-task" id="btn-submit-task" type="button">
+            Create Roster Task
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ===== EMPTY LIST TEMPLATE ===== -->
+<template id="tasks-empty-list-tpl">
+  <div class="card glass empty-list-card">
+    <i data-lucide="clipboard-list" class="empty-icon" aria-hidden="true"></i>
+    <span class="empty-title">No matching tasks found</span>
+    <span class="empty-subtitle">Adjust filters or add a new custom task to start.</span>
+  </div>
+</template>
+
+
+<!-- ===== TASK ITEM ROW TEMPLATE ===== -->
+<template id="task-item-row-tpl">
+  <div class="task-detail-row">
+    <div class="task-meta-left">
+      <label class="custom-checkbox-lbl">
+        <input type="checkbox" class="task-manager-checkbox native-checkbox">
+        <span class="custom-checkbox-span" role="checkbox" aria-checked="false" tabindex="0">
+          <!-- Checkmark SVG appended dynamically by JS -->
+        </span>
+        <div class="task-text-group">
+          <div class="task-name-text font-bold"></div>
+          <span class="task-section-tag text-muted font-bold"></span>
+        </div>
+      </label>
+    </div>
+
+    <div class="task-meta-right">
+      <span class="priority-badge-label font-bold"></span>
+      <button class="btn-manager-delete-task" type="button" aria-label="Delete task">
+        <i data-lucide="trash-2" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</template>

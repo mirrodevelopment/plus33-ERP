@@ -1,0 +1,336 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Performance Analytics
+ * File              : performance.css
+ * Path              : frontend/modules/store-employee/performance/performance.css
+ * Purpose           : Styling for Store Employee Performance page UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.employee-performance-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Header Banner Card */
+.header-banner-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.welcome-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.welcome-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.welcome-subtitle .highlight-val {
+  color: var(--accent-primary);
+}
+
+.header-status-pill {
+  background: rgba(201, 164, 106, 0.12);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-status-pill i {
+  width: 14px;
+  height: 14px;
+}
+
+/* 4 KPI Performance Cards */
+.kpi-grid-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.kpi-block-card {
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.kpi-icon-wrapper {
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon-wrapper--gold {
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary);
+}
+
+.kpi-icon-wrapper--green {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--status-success);
+}
+
+.kpi-icon-wrapper--blue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.kpi-icon-wrapper--green-alt {
+  background: rgba(130, 163, 125, 0.1);
+  color: var(--status-success);
+}
+
+.kpi-icon-wrapper i {
+  width: 22px;
+  height: 22px;
+}
+
+.kpi-meta-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-value-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kpi-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+
+.stars-stars-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.star-svg {
+  width: 10px;
+  height: 10px;
+}
+
+.kpi-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Split Columns Grid */
+.workspace-grid-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .workspace-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.layout-column-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  align-items: center;
+}
+
+.layout-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.radar-card, .reviews-card, .self-eval-card {
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: left;
+  width: 100%;
+}
+
+.radar-card {
+  text-align: center;
+  align-items: center;
+}
+
+.card-header-split {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+}
+
+.card-split-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent-primary);
+}
+
+.card-split-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-primary);
+}
+
+/* SVG Radar Chart Wrapper */
+.radar-chart-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 10px 0;
+}
+
+.radar-chart-container svg {
+  overflow: visible;
+}
+
+.radar-disclaimer {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Reviews Feed */
+.reviews-feed-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  font-size: 0.74rem;
+}
+
+.review-item-block {
+  padding-left: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.review-item-block--gold {
+  border-left: 3.5px solid var(--accent-primary);
+}
+
+.review-item-block--green {
+  border-left: 3.5px solid var(--status-success);
+}
+
+.reviewer-name {
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  display: block;
+}
+
+.review-subtitle {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.review-comment-para {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.4;
+  display: block;
+}
+
+/* Self Appraisal Evaluation Form */
+.self-eval-form-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  font-size: 0.76rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.6rem;
+}
+
+.form-input, .form-textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
+  outline: none;
+}
+
+.form-textarea {
+  font-family: inherit;
+  resize: none;
+}
+
+.btn-submit-eval {
+  margin-top: 4px;
+}

@@ -1,0 +1,473 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Daily Shift Tasks
+ * File              : tasks.css
+ * Path              : frontend/modules/store-employee/tasks/tasks.css
+ * Purpose           : Styling for Store Employee Tasks page UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.employee-tasks-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Header Banner Card */
+.header-banner-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.welcome-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.welcome-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.welcome-subtitle .highlight-val {
+  color: var(--accent-primary);
+}
+
+.btn-reset-defaults {
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 4 KPI Cards Grid */
+.kpi-grid-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.kpi-block-card {
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.kpi-icon-wrapper {
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon-wrapper--gold {
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary);
+}
+
+.kpi-icon-wrapper--red {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-danger);
+}
+
+.kpi-icon-wrapper--green {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--status-success);
+}
+
+.kpi-icon-wrapper--blue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.kpi-icon-wrapper i {
+  width: 22px;
+  height: 22px;
+}
+
+.kpi-meta-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-meta-details.flex-1 {
+  flex: 1;
+}
+
+.kpi-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+
+.kpi-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.kpi-progress-bg {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.kpi-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--accent-primary);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* Split Columns Grid */
+.workspace-grid-layout {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .workspace-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.layout-column-left, .layout-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.list-card, .add-task-card {
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.card-header-split {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-split-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent-primary);
+}
+
+.card-split-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-primary);
+}
+
+/* Filters Ribbon */
+.filters-ribbon-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-sm);
+}
+
+.status-pills-group {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.72rem;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  transition: var(--transition-fast);
+}
+
+.filter-btn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  border-color: var(--accent-primary);
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary);
+}
+
+.priority-select-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.filter-select {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Tasks list feed */
+.tasks-manager-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  min-height: 300px;
+}
+
+.task-detail-row {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  transition: all 0.2s ease-out;
+}
+
+.task-detail-row:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.task-meta-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+.custom-checkbox-lbl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin: 0;
+  width: 100%;
+}
+
+.native-checkbox {
+  display: none;
+}
+
+.custom-checkbox-span {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.custom-checkbox-span.checked {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+}
+
+.task-text-group {
+  text-align: left;
+}
+
+.task-name-text {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.task-name-text.line-through {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.task-section-tag {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.task-meta-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.priority-badge-label {
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.01);
+  white-space: nowrap;
+}
+
+.priority-badge-label--high { color: var(--status-danger); }
+.priority-badge-label--medium { color: var(--status-warning); }
+.priority-badge-label--low { color: var(--text-muted); }
+
+.btn-manager-delete-task {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: color var(--transition-fast);
+}
+
+.btn-manager-delete-task:hover {
+  color: var(--status-danger);
+}
+
+/* Empty list styling */
+.empty-list-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  color: var(--text-muted);
+  border: 1.5px dashed rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  text-align: center;
+  background: none;
+}
+
+.empty-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 10px;
+  opacity: 0.3;
+}
+
+.empty-title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: block;
+}
+
+.empty-subtitle {
+  font-size: 0.68rem;
+  margin-top: 2px;
+  display: block;
+}
+
+/* Add custom task form */
+.task-form-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  font-size: 0.76rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.6rem;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
+  outline: none;
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.btn-submit-task {
+  margin-top: 4px;
+}

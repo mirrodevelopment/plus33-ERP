@@ -1,0 +1,115 @@
+<div class="compliance-header flex justify-between align-center mb-md">
+  <div class="flex align-center gap-xs">
+    <h3 class="m-0 compliance-title">{{TITLE}}</h3>
+    <button id="compliance-info-btn" title="Explain Compliance Scoring Process" class="compliance-info-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="info-icon"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    </button>
+  </div>
+  <a href="#compliance" class="compliance-view-all">
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> View All
+  </a>
+</div>
+
+<div class="compliance-body flex justify-between align-center">
+  <!-- Left: Gauge/Progress ring -->
+  <div class="compliance-gauge-wrapper">
+    <svg width="100" height="100" viewBox="0 0 36 36">
+      <path class="gauge-bg" stroke-width="4" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+      <path class="gauge-fill" stroke-width="4" stroke-dasharray="{{SCORE}}, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+    </svg>
+    <div class="compliance-gauge-text-container">
+      <span class="compliance-score-text">{{SCORE}}%</span>
+      <span class="compliance-score-label">Score</span>
+    </div>
+  </div>
+
+  <!-- Right: Differentiated Compliance list -->
+  <div class="compliance-list flex-grow">
+    
+    <!-- Audits Completed (Success Green) -->
+    <div class="compliance-item compliance-item--success flex justify-between align-center">
+      <div class="flex align-center gap-xs item-label-container">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <span>Audits Completed</span>
+      </div>
+      <span class="item-value">{{AUDITS}}</span>
+    </div>
+    
+    <!-- Corrective Actions (Warning Yellow) -->
+    <div class="compliance-item compliance-item--warning flex justify-between align-center">
+      <div class="flex align-center gap-xs item-label-container">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Corrective Actions</span>
+      </div>
+      <span class="item-value">{{CORRECTIVE}}</span>
+    </div>
+    
+    <!-- Overdue Actions (Danger Red) -->
+    <div class="compliance-item compliance-item--danger flex justify-between align-center">
+      <div class="flex align-center gap-xs item-label-container">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Overdue Actions</span>
+      </div>
+      <span class="item-value">{{OVERDUE}}</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- Explanation Modal -->
+<div id="compliance-explanation-modal" class="explanation-modal" hidden>
+  <div class="explanation-modal-content">
+    <!-- Header -->
+    <div class="explanation-modal-header">
+      <h3 class="explanation-modal-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Compliance Gauge Overview
+      </h3>
+      <button id="close-compliance-expl-modal" type="button" aria-label="Close dialog" class="explanation-modal-close-icon-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Body Content -->
+    <div class="explanation-modal-body">
+      <div>
+        <h4 class="explanation-modal-section-title">
+          <span class="bullet bullet--primary"></span>
+          Compliance Score
+        </h4>
+        <p>This is a composite index score representing the store or region's adherence to operational standards, health and safety, and licensing audits.</p>
+      </div>
+
+      <div>
+        <h4 class="explanation-modal-section-title">
+          <span class="bullet bullet--success"></span>
+          Audits Completed
+        </h4>
+        <p>The total count of formal quality assurance reviews and checklists executed during this period.</p>
+      </div>
+
+      <div>
+        <h4 class="explanation-modal-section-title">
+          <span class="bullet bullet--warning"></span>
+          Corrective Actions
+        </h4>
+        <p>Tasks assigned to resolve non-compliance items discovered during audits that are currently in progress.</p>
+      </div>
+
+      <div>
+        <h4 class="explanation-modal-section-title">
+          <span class="bullet bullet--danger"></span>
+          Overdue Actions
+        </h4>
+        <p>Critical remediation items that have passed their deadline and remain unresolved, negatively impacting the compliance rating.</p>
+      </div>
+    </div>
+    
+    <!-- Footer Close Button -->
+    <div class="explanation-modal-footer">
+      <button id="close-compliance-expl-modal-btn" class="explanation-modal-close-btn" type="button">
+        Got it
+      </button>
+    </div>
+  </div>
+</div>

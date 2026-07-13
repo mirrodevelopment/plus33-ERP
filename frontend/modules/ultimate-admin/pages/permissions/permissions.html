@@ -1,0 +1,193 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Roles & Permissions Matrix
+ * File              : permissions.html
+ * Path              : frontend/modules/ultimate-admin/permissions/permissions.html
+ * Purpose           : HTML skeleton for the Roles & Permissions page
+ * Version           : 2.0.0
+ *
+ * Related JS        : permissions.js
+ * Related CSS       : permissions.css
+ * Related Constants : shared/constants/permissions.js
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines structural layout of the RBAC Roles & Permissions Matrix.
+ * JavaScript (permissions.js) handles role selection lists, checkbox status
+ * toggles, custom role registration, and localStorage persistence.
+ * No inline styles. No inline onclick handlers.
+ ******************************************************************************
+-->
+
+<div class="permissions-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header permissions-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="shield-check" aria-hidden="true"></i>
+        <span>Administration</span>
+      </div>
+      <h1 class="page-title">Roles &amp; Permissions</h1>
+      <p class="page-subtitle">Configure enterprise-grade role-based access control (RBAC) rules and authority matrix mappings.</p>
+    </div>
+    <div class="page-header-right">
+      <button id="btn-add-role" class="btn btn-primary" type="button" aria-label="Create new custom security role">
+        <i data-lucide="plus" aria-hidden="true"></i>
+        <span>Create Custom Role</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== KPI SUMMARY ROW ===== -->
+  <div class="permissions-kpi-grid" role="region" aria-label="Security status summary">
+    <div class="kpi-card kpi-card--gold">
+      <span class="kpi-label">Security Roles</span>
+      <span class="kpi-value" id="kpi-total-roles">—</span>
+    </div>
+    <div class="kpi-card kpi-card--secondary">
+      <span class="kpi-label">Access Authorities</span>
+      <span class="kpi-value" id="kpi-total-permissions">—</span>
+    </div>
+    <div class="kpi-card kpi-card--success">
+      <span class="kpi-label">Active Mappings</span>
+      <span class="kpi-value" id="kpi-total-mappings">—</span>
+    </div>
+    <div class="kpi-card kpi-card--info">
+      <span class="kpi-label">Security Grade</span>
+      <span class="kpi-value">ENTERPRISE</span>
+    </div>
+  </div>
+
+  <!-- ===== SPLIT LAYOUT WORKSPACE ===== -->
+  <div class="permissions-columns">
+    
+    <!-- Left Column: Roles list -->
+    <div class="permissions-left-col">
+      <div class="card glass roles-panel">
+        <div class="panel-header">System Roles</div>
+        
+        <div id="roles-list-container" class="roles-list-container" role="tablist" aria-label="Select system roles">
+          <!-- Roles items injected here dynamically by permissions.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Granular permission toggles matrix -->
+    <div class="permissions-right-col">
+      <div class="card glass matrix-panel">
+        
+        <div class="matrix-header">
+          <div class="matrix-header-info">
+            <h3 id="active-role-title" class="active-role-title">—</h3>
+            <span class="active-role-subtitle">Authority Management Scope</span>
+          </div>
+          <div class="active-role-badge" id="active-role-mapped-count">— Mapped Keys</div>
+        </div>
+
+        <p class="active-role-desc" id="active-role-desc">—</p>
+
+        <div class="matrix-grid-section">
+          <div class="matrix-section-title">Granular Permissions Matrix</div>
+          
+          <div id="matrix-toggles-container" class="matrix-toggles-container" role="group" aria-label="Permission checkbox controls">
+            <!-- Dynamic checkboxes injected here by permissions.js -->
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /permissions-right-col -->
+
+  </div><!-- /permissions-columns -->
+
+</div><!-- /permissions-workspace -->
+
+
+<!-- ===== CREATE CUSTOM ROLE MODAL ===== -->
+<div
+  id="add-role-modal"
+  class="modal-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title-role"
+  hidden
+>
+  <div class="modal-card card glass">
+
+    <div class="modal-header">
+      <h3 id="modal-title-role" class="modal-title">Create Custom Security Role</h3>
+      <button id="btn-close-role-modal" class="btn-icon modal-close-btn" type="button" aria-label="Close dialog">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+    
+    <form id="form-add-role" class="modal-form" novalidate>
+      
+      <div class="form-group">
+        <label for="role-modal-name" class="form-label">Role Name</label>
+        <input
+          id="role-modal-name"
+          type="text"
+          class="form-input"
+          placeholder="e.g. Compliance Auditor"
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="role-modal-description" class="form-label">Role Description</label>
+        <textarea
+          id="role-modal-description"
+          class="form-textarea"
+          placeholder="Provide operational scope description..."
+          required
+          aria-required="true"
+        ></textarea>
+      </div>
+      
+      <button type="submit" class="btn btn-primary btn-modal-submit">
+        Register Security Role
+      </button>
+
+    </form>
+
+  </div>
+</div><!-- /add-role-modal -->
+
+
+<!-- ===== ROLE LIST ITEM TEMPLATE ===== -->
+<template id="role-item-tpl">
+  <div class="role-list-item" role="tab" aria-selected="false" tabindex="-1">
+    <!-- Delete button for custom roles -->
+    <button
+      class="btn-delete-role"
+      type="button"
+      title="Delete Custom Role"
+      hidden
+    >
+      <i data-lucide="trash-2" aria-hidden="true"></i>
+    </button>
+    <div class="role-item-name"></div>
+    <div class="role-item-code"></div>
+    <div class="role-item-desc"></div>
+  </div>
+</template>
+
+
+<!-- ===== GRANULAR PERMISSION TOGGLE TEMPLATE ===== -->
+<template id="perm-toggle-tpl">
+  <div class="perm-toggle-card">
+    <div class="perm-info">
+      <span class="perm-friendly-name"></span>
+      <span class="perm-constant-code"></span>
+    </div>
+    
+    <!-- Premium Slider Checkbox Toggle -->
+    <label class="premium-switch">
+      <input class="checkbox-toggle-permission" type="checkbox">
+      <span class="switch-slider"></span>
+    </label>
+  </div>
+</template>

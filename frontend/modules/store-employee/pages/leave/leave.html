@@ -1,0 +1,253 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Leave & Time-Off
+ * File              : leave.html
+ * Path              : frontend/modules/store-employee/leave/leave.html
+ * Purpose           : HTML template for Store Employee Leave page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : leave.js
+ * Related CSS       : leave.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Declarative layout structure containing:
+ * - Header banner card
+ * - Active blackout warning alerts
+ * - 10 balances KPI grid row blocks
+ * - Leave history ledger list
+ * - Application compose form with date picker and file uploads
+ * - Public holidays calendar panel
+ * - Document/Policy overlays dialogs
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="employee-leave-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">Leave &amp; Time-Off</h2>
+      <p class="welcome-subtitle">
+        Enterprise Leave Management &nbsp;·&nbsp; <span class="highlight-val" id="lbl-country-law">French Labour Law Compliant</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>API Connected</span>
+    </div>
+  </div>
+
+  <!-- ===== BLACKOUT ALERTS CONTAINER ===== -->
+  <div id="blackout-alerts-container" class="blackout-alerts-row">
+    <!-- Populated dynamically if active blackouts occur -->
+  </div>
+
+  <!-- ===== BALANCES KPI BLOCKS GRID ===== -->
+  <div class="kpi-grid-row" id="leave-balances-grid" role="region" aria-label="Leave entitlement balances">
+    <!-- 10 balance cards populated dynamically -->
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: History Table -->
+    <div class="layout-column-left">
+      <div class="card glass history-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Leave Request History</h3>
+          <i data-lucide="history" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <div class="table-scroller">
+          <table class="leave-history-table">
+            <thead>
+              <tr class="table-header-row">
+                <th scope="col">Type</th>
+                <th scope="col">Session</th>
+                <th scope="col">Days</th>
+                <th scope="col">Start</th>
+                <th scope="col">End</th>
+                <th scope="col">Reason</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="leave-history-tbody">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Apply Form & Public Holidays -->
+    <div class="layout-column-right">
+      
+      <!-- Apply Form Card -->
+      <div class="card glass apply-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Apply for Time Off</h3>
+          <i data-lucide="plane" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <div class="apply-form-body">
+          <!-- Leave Category Select -->
+          <div class="form-group">
+            <label for="leave-select-type" class="form-label">Leave Category</label>
+            <select id="leave-select-type" class="form-select">
+              <option value="">— Select Category —</option>
+              <!-- Loaded dynamically -->
+            </select>
+          </div>
+
+          <!-- Datepicker controls -->
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="leave-input-start" class="form-label">Start Date</label>
+              <input type="date" id="leave-input-start" class="form-input date-input">
+            </div>
+            
+            <div class="form-group">
+              <label for="leave-input-end" class="form-label">End Date</label>
+              <input type="date" id="leave-input-end" class="form-input date-input">
+            </div>
+          </div>
+
+          <!-- Reason text area -->
+          <div class="form-group">
+            <label for="leave-input-reason" class="form-label">Reason Justification</label>
+            <textarea id="leave-input-reason" rows="3" class="form-textarea" placeholder="Explain your time-off request..."></textarea>
+          </div>
+
+          <!-- Working Days Calculator Display -->
+          <div id="working-days-indicator" class="calculator-indicator-box">
+            📅 <span id="working-days-count">0</span> working day(s) — excl. weekends &amp; public holidays
+          </div>
+
+          <!-- Supporting Document Upload Section -->
+          <div id="doc-upload-section" class="doc-upload-box">
+            <label id="doc-upload-label" for="leave-input-doc" class="form-label">
+              📎 Supporting Document (Max 10MB) <span class="doc-optional-lbl">(Optional)</span>
+            </label>
+            <input type="file" id="leave-input-doc" class="file-input" accept="application/pdf,image/*">
+          </div>
+
+          <!-- Protected Leave Warning Notice -->
+          <div id="protected-notice" class="protected-alert-box">
+            🛡️ This is a <strong>legally protected</strong> leave type. It requires approval from a Supervisor or Store Admin, and can only be rejected with a written reason.
+          </div>
+
+          <button id="btn-submit-leave-request" class="btn btn-primary btn-submit-leave" type="button">
+            Submit Leave Application
+          </button>
+        </div>
+      </div>
+
+      <!-- Public Holidays Card -->
+      <div class="card glass holidays-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title" id="holidays-title">Public Holidays 2026</h3>
+          <i data-lucide="calendar" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <div class="holidays-details-list" id="holidays-details-container">
+          <!-- Loaded dynamically -->
+        </div>
+        
+        <div id="holidays-more-text" class="more-holidays-hint"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===== LEAVE POLICY TRIGGER CARD BUTTON ===== -->
+  <div id="btn-leave-policy" class="card glass policy-trigger-card" role="button" tabindex="0" aria-label="Open leave policy booklet">
+    <div class="policy-icon-wrapper">
+      <i data-lucide="book-open" aria-hidden="true"></i>
+    </div>
+    <div class="policy-meta-details">
+      <h4 class="policy-card-title">Leave Policy</h4>
+      <p class="policy-card-subtitle">View leave rules, entitlements &amp; approval workflows</p>
+    </div>
+    <i data-lucide="chevron-right" class="policy-arrow-icon" aria-hidden="true"></i>
+  </div>
+
+  <!-- ===== LEAVE POLICY MODAL OVERLAY ===== -->
+  <div id="leave-policy-modal" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel modal-content-panel--large animate-slide-up">
+      <div class="modal-header-split">
+        <h3 class="modal-title">📋 Leave Policy &amp; Rules</h3>
+        <button id="leave-policy-close" class="btn-close-modal" type="button" aria-label="Close modal">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="policy-desc-sub" id="policy-desc-country-info">
+        The following leave entitlements and rules apply to all employees as per company policy and French Labour Law.
+      </div>
+
+      <div class="table-scroller">
+        <table class="policy-rule-table">
+          <thead>
+            <tr class="table-header-row">
+              <th scope="col">Leave Type</th>
+              <th scope="col" class="text-center">Annual Limit</th>
+              <th scope="col" class="text-center">Accrual/Month</th>
+              <th scope="col" class="text-center">Max Consecutive</th>
+              <th scope="col" class="text-center">Notice (days)</th>
+              <th scope="col" class="text-center">Paid</th>
+              <th scope="col" class="text-center">Protected</th>
+              <th scope="col" class="text-center">Document</th>
+            </tr>
+          </thead>
+          <tbody id="policy-details-tbody">
+            <!-- Loaded dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="general-rules-box">
+        <h4 class="general-rules-title">General Rules</h4>
+        <ul class="general-rules-ul">
+          <li>Leave requests must be submitted at least the required notice period in advance.</li>
+          <li>Sick leave exceeding 3 consecutive days requires a medical certificate.</li>
+          <li>Protected leave types (🛡️) are auto-approved per Labour Code guidelines.</li>
+          <li>Unpaid leave does not accrue and is deducted from salary.</li>
+          <li>Leave cannot be applied during active <strong>blackout periods</strong>.</li>
+          <li>Approval workflow: Employee → Supervisor → Store Admin (for extended leaves).</li>
+          <li>Unused annual leave is subject to carry-forward policy (max 5 days).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CANCEL REQUEST MODAL PROMPT ===== -->
+  <div id="cancel-modal" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up">
+      <h3 id="cancel-modal-title" class="modal-title">Cancel Leave Request</h3>
+      
+      <div class="form-group">
+        <label for="cancel-reason-input" class="form-label">
+          <span>Cancellation Reason</span>
+          <span class="required-indicator">*</span>
+          <span class="hint">(min 10 chars)</span>
+        </label>
+        <textarea id="cancel-reason-input" rows="3" class="form-textarea" placeholder="Please provide a reason for cancellation..."></textarea>
+      </div>
+      
+      <div class="modal-actions-row">
+        <button id="cancel-modal-submit" class="btn btn-danger" type="button">Confirm</button>
+        <button id="cancel-modal-close" class="btn btn-secondary" type="button">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden global doc upload input for dynamic triggers in table rows -->
+  <input type="file" id="global-doc-upload-input" style="display: none;" accept="application/pdf,image/*">
+
+</div>

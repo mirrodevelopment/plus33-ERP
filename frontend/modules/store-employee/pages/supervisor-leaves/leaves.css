@@ -1,0 +1,420 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Supervisor Leaves
+ * File              : leaves.css
+ * Path              : frontend/modules/store-employee/supervisor-leaves/leaves.css
+ * Purpose           : Styling for Shift Supervisor leave approvals hub UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.supervisor-leaves-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Header Banner Card */
+.header-banner-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.welcome-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.welcome-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin: 2px 0 0 0;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+
+.welcome-subtitle .highlight-val {
+  color: var(--accent-primary);
+}
+
+.header-status-pill {
+  background: rgba(130, 163, 125, 0.12);
+  border: 1px solid rgba(130, 163, 125, 0.3);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--status-success);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Approvals Main Board card */
+.approvals-main-card {
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: left;
+  width: 100%;
+}
+
+.card-header-split {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-split-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent-primary);
+}
+
+.pending-count-badge {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  font-size: 0.65rem;
+  color: var(--status-danger);
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* Requests list grid */
+.requests-grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.leave-approval-card {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: rgba(201, 164, 106, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  text-align: left;
+}
+
+.leave-approval-card.cancellation-style {
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.employee-name-lbl {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.leave-type-badge {
+  font-size: 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cancellation-style .leave-type-badge {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-danger);
+}
+
+.request-details-body {
+  font-size: 0.72rem;
+  line-height: 1.4;
+  margin: 4px 0;
+}
+
+.duration-detail {
+  margin-bottom: 4px;
+}
+
+.reason-detail {
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.medical-cert-warning {
+  margin-top: 6px;
+  color: var(--status-danger);
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.medical-cert-warning.visible {
+  display: flex;
+}
+
+.medical-cert-warning i {
+  width: 12px;
+  height: 12px;
+}
+
+.comment-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.supervisor-comment-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 6px 8px;
+  font-size: 0.7rem;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+.action-buttons-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.btn-approve {
+  flex: 1;
+  background: var(--status-success);
+  color: #000;
+  font-weight: 800;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-approve.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.btn-reject {
+  flex: 1;
+  background: var(--status-danger);
+  color: #fff;
+  font-weight: 800;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-reject.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.btn-approve-cancel {
+  width: 100%;
+  background: var(--status-danger);
+  color: #fff;
+  font-weight: 800;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* Loading state box */
+.loading-state-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.spin-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--accent-primary);
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Empty list styling */
+.empty-list-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  color: var(--text-muted);
+  border: 1.5px dashed rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  text-align: center;
+  background: none;
+  width: 100%;
+}
+
+.empty-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 8px;
+  opacity: 0.3;
+  color: var(--status-success);
+}
+
+.empty-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  display: block;
+}
+
+.empty-subtitle {
+  font-size: 0.68rem;
+  margin-top: 2px;
+  display: block;
+}
+
+/* Rejection Modal overlay dialog details */
+.modal-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  padding: var(--spacing-md);
+}
+
+.modal-content-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.modal-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.0rem;
+  color: var(--status-danger);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.required-star {
+  color: var(--status-danger);
+}
+
+.form-textarea {
+  width: 100%;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
+  outline: none;
+  font-family: inherit;
+  resize: none;
+}
+
+.modal-actions-row {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.btn-confirm-rejection {
+  flex: 1;
+  background: var(--status-danger);
+  color: #fff;
+  font-weight: 800;
+  border: none;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.btn-cancel-rejection {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}

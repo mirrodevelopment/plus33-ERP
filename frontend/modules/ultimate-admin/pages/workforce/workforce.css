@@ -1,0 +1,374 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Workforce & Payroll
+ * File              : workforce.css
+ * Path              : frontend/modules/ultimate-admin/workforce/workforce.css
+ * Purpose           : Styling for Workforce UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.workforce-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Page Header and Payroll Pill */
+.workforce-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-sm);
+}
+
+.payroll-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-success);
+}
+
+.payroll-status-pill .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-success);
+  display: inline-block;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* KPI Summary Cards Grid */
+.workforce-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+.workforce-kpi-grid .kpi-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.kpi-icon-wrapper {
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon-wrapper i {
+  width: 24px;
+  height: 24px;
+}
+
+.kpi-icon-wrapper--gold {
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary);
+}
+
+.kpi-icon-wrapper--success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--status-success);
+}
+
+.kpi-icon-wrapper--info {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--status-info);
+}
+
+.kpi-icon-wrapper--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-danger);
+}
+
+.kpi-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+
+.workforce-kpi-grid .kpi-card--success .kpi-value {
+  color: var(--status-success);
+}
+
+.workforce-kpi-grid .kpi-card--danger .kpi-value {
+  color: var(--status-danger);
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Split Columns Layout */
+.workforce-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.workforce-left-panel {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.workforce-right-panel {
+  grid-column: span 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 0;
+}
+
+.roster-card, .onboard-card, .payroll-run-card {
+  padding: var(--spacing-lg);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.roster-card {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Roster Header */
+.roster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.roster-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.roster-status-badge {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.table-scroll-wrapper {
+  overflow-x: auto;
+  flex-grow: 1;
+}
+
+/* Registry Table Style Configurations */
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+.roster-table th {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.roster-table td {
+  padding: var(--spacing-md);
+  vertical-align: middle;
+}
+
+.roster-table-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background var(--transition-fast);
+}
+
+.roster-table-row:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.col-code {
+  font-weight: 700;
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+}
+
+.col-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.col-designation {
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  text-transform: capitalize;
+}
+
+.col-type {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.status-indicator-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-indicator-wrapper--active {
+  color: var(--status-success);
+}
+
+.status-indicator-wrapper--active .status-dot {
+  background: var(--status-success);
+}
+
+.status-indicator-wrapper--inactive {
+  color: var(--status-danger);
+}
+
+.status-indicator-wrapper--inactive .status-dot {
+  background: var(--status-danger);
+}
+
+.col-actions {
+  text-align: right;
+}
+
+.col-actions .btn-toggle-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+}
+
+/* Onboard Form Side Card */
+.onboard-header, .audit-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.onboard-icon, .audit-icon {
+  color: var(--accent-primary);
+  width: 18px;
+  height: 18px;
+}
+
+.onboard-title, .audit-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.onboard-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.form-grid-flex {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.emp-type-group {
+  width: 110px;
+}
+
+.emp-wage-group {
+  width: 100px;
+}
+
+.btn-onboard {
+  margin-top: var(--spacing-xs);
+  padding: 8px;
+}
+
+/* Payroll dispatch actions */
+.audit-desc {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+}
+
+.payroll-buttons-wrapper {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.btn-run {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+}
+
+.btn-export {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+.payroll-console-log {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  line-height: 1.4;
+  white-space: pre-line;
+}

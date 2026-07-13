@@ -1,0 +1,130 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Supervisor Broadcasts
+ * File              : announcements.html
+ * Path              : frontend/modules/store-employee/supervisor-announcements/announcements.html
+ * Purpose           : HTML template for Shift Supervisor announcements broadcast UI
+ * Version           : 2.0.0
+ *
+ * Related JS        : announcements.js
+ * Related CSS       : announcements.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of supervisor announcement creator forms, active broadcasts
+ * feeds lists, delete actions, and DB backed alerts badge indicators.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="supervisor-ann-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">
+        <i data-lucide="send" class="title-icon" aria-hidden="true"></i> Broadcast Announcements
+      </h2>
+      <p class="welcome-subtitle">
+        Publish shift bulletins and broadcast alerts to your active café roster
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <span class="live-pulse-dot" aria-hidden="true"></span>
+      <span>DB Backed</span>
+    </div>
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: Active Published Broadcasts -->
+    <div class="layout-column-left">
+      <div class="card glass feed-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">
+            <i data-lucide="rss" aria-hidden="true"></i> Active Broadcast Feed (<span id="lbl-broadcast-count">0</span>)
+          </h3>
+        </div>
+
+        <div class="announcements-list-feed" id="ann-feed-container">
+          <!-- Loaded dynamically by JS/Controller -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Broadcast Creator Form -->
+    <div class="layout-column-right">
+      <div class="card glass creator-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">
+            <i data-lucide="plus" aria-hidden="true"></i> Compose Broadcast Circular
+          </h3>
+        </div>
+        <span class="creator-subtitle">Publish alerts to the team dashboard in real-time</span>
+
+        <form id="form-broadcast-announcement" class="broadcast-form">
+          <div class="form-group">
+            <label for="input-ann-title" class="form-label">Bulletin Title</label>
+            <input type="text" id="input-ann-title" class="form-input" placeholder="e.g. Grinder Maintenance Reminder" required>
+          </div>
+
+          <div class="form-group">
+            <label for="select-ann-priority" class="form-label">Alert Priority / Category</label>
+            <select id="select-ann-priority" class="form-select">
+              <option value="Standard Notice">Standard Notice</option>
+              <option value="Critical Alert">Critical Alert</option>
+              <option value="Company Bulletin">Company Bulletin</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="input-ann-content" class="form-label">Broadcast Content</label>
+            <textarea id="input-ann-content" class="form-textarea" placeholder="Enter message for baristas..." rows="5" required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-publish-broadcast">
+            <i data-lucide="send" aria-hidden="true"></i> Publish &amp; Broadcast
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ===== EMPTY LIST TEMPLATE ===== -->
+<template id="ann-empty-feed-tpl">
+  <div class="card glass empty-feed-card">
+    <i data-lucide="rss" class="empty-icon" aria-hidden="true"></i>
+    <span class="empty-title">No active circulars broadcasted</span>
+    <span class="empty-subtitle">Create and publish a bulletin on the right to notify your barista roster.</span>
+  </div>
+</template>
+
+
+<!-- ===== ANNOUNCEMENT FEED CARD ITEM TEMPLATE ===== -->
+<template id="ann-item-card-tpl">
+  <div class="ann-item-row">
+    <div class="ann-header-split">
+      <div class="ann-title-group">
+        <span class="ann-priority-badge font-bold"></span>
+        <h4 class="ann-title-text font-bold"></h4>
+      </div>
+      <button class="btn-delete-announcement" type="button" aria-label="Delete announcement">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <p class="ann-content-para"></p>
+
+    <div class="ann-footer-row text-muted">
+      <span class="publisher-lbl">Published by: <strong></strong></span>
+      <span class="date-lbl">Date: <strong></strong></span>
+    </div>
+  </div>
+</template>

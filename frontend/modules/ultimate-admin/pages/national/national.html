@@ -1,0 +1,425 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — National Management
+ * File              : national.html
+ * Path              : frontend/modules/ultimate-admin/national/national.html
+ * Purpose           : HTML structure for the National Management page
+ * Version           : 2.0.0
+ *
+ * Related JS        : national.js
+ * Related CSS       : national.css
+ * Related APIs      : GET /api/v1/regions
+ *                     POST /api/v1/regions
+ *                     DELETE /api/v1/regions/:id
+ *                     GET /api/v1/stores
+ *                     GET /api/v1/dashboard/overview
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines all structural HTML for the National Management page.
+ * JavaScript (national.js) populates dynamic data and binds all events.
+ * No inline styles. No onclick attributes.
+ ******************************************************************************
+-->
+
+<div class="national-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header national-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="globe" aria-hidden="true"></i>
+        <span>Administration</span>
+      </div>
+      <h1 class="page-title">National Management</h1>
+      <p class="page-subtitle">Manage global countries, macro regions targets, and operational metrics.</p>
+    </div>
+    <div class="page-header-right">
+      <button id="btn-add-country" class="btn btn-primary" type="button" aria-label="Add new country">
+        <i data-lucide="plus" aria-hidden="true"></i>
+        <span>Add Country</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== FILTER RIBBON ===== -->
+  <div class="card glass national-filter-bar" role="search" aria-label="Country filters">
+    <div class="filter-row">
+
+
+      <!-- Nation Filter -->
+      <div class="filter-group">
+        <label for="filter-nation" class="filter-label">Nation</label>
+        <select id="filter-nation" class="filter-select" aria-label="Filter by specific nation">
+          <option value="all">All Nations</option>
+        </select>
+      </div>
+
+      <!-- Sort Filter -->
+      <div class="filter-group">
+        <label for="filter-sort-by" class="filter-label">Sort By</label>
+        <select id="filter-sort-by" class="filter-select" aria-label="Sort countries">
+          <option value="sales-desc">Highest Revenue</option>
+          <option value="sales-asc">Lowest Revenue</option>
+          <option value="stores-desc">Most Stores</option>
+          <option value="regions-desc">Most Regions</option>
+          <option value="name-asc">Name (A–Z)</option>
+        </select>
+      </div>
+
+      <!-- Date Preset Selector -->
+      <div class="filter-group">
+        <label for="filter-date-range" class="filter-label">Date Range</label>
+        <select id="filter-date-range" class="filter-select" aria-label="Select date range preset">
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="this-week">This Week</option>
+          <option value="last-week">Last Week</option>
+          <option value="this-month">This Month</option>
+          <option value="last-month">Last Month</option>
+          <option value="this-quarter">This Quarter</option>
+          <option value="this-year">This Year</option>
+          <option value="custom">Custom Range...</option>
+        </select>
+      </div>
+
+      <!-- From Date -->
+      <div class="filter-group filter-group--inline filter-date-custom hidden">
+        <label for="filter-date-from" class="filter-label">From</label>
+        <input type="date" id="filter-date-from" class="filter-input" aria-label="From date">
+      </div>
+
+      <!-- To Date -->
+      <div class="filter-group filter-group--inline filter-date-custom hidden">
+        <label for="filter-date-to" class="filter-label">To</label>
+        <input type="date" id="filter-date-to" class="filter-input" aria-label="To date">
+      </div>
+
+      <!-- Apply Button -->
+      <button id="btn-apply-page-filters" class="btn btn-primary btn-sm filter-apply-btn filter-date-custom hidden" type="button" aria-label="Apply date filters">
+        <i data-lucide="filter" aria-hidden="true"></i>
+        <span>Apply</span>
+      </button>
+
+      <!-- Refresh Button -->
+      <button id="btn-refresh-cards" class="btn-refresh-cards" type="button" aria-label="Refresh card positions" title="Refresh">
+        <i data-lucide="refresh-cw" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div><!-- /filter-bar -->
+
+  <!-- ===== KPI SUMMARY GRID ===== -->
+  <div class="national-kpi-grid" role="region" aria-label="National summary metrics">
+    <div class="kpi-card kpi-card--gold">
+      <span class="kpi-label">Total Countries</span>
+      <span class="kpi-value" id="kpi-total-countries">—</span>
+    </div>
+    <div class="kpi-card kpi-card--secondary">
+      <span class="kpi-label">Combined Country Revenue</span>
+      <span class="kpi-value" id="kpi-total-sales">—</span>
+    </div>
+    <div class="kpi-card kpi-card--success">
+      <span class="kpi-label">Avg Country Achievement</span>
+      <span class="kpi-value" id="kpi-avg-achievement">—</span>
+    </div>
+    <div class="kpi-card kpi-card--warning">
+      <span class="kpi-label">Global Stores</span>
+      <span class="kpi-value" id="kpi-total-stores">—</span>
+    </div>
+    <div class="kpi-card kpi-card--info">
+      <span class="kpi-label">Total Regions</span>
+      <span class="kpi-value" id="kpi-total-regions">—</span>
+    </div>
+    <div class="kpi-card kpi-card--purple">
+      <span class="kpi-label">Total Warehouses</span>
+      <span class="kpi-value" id="kpi-total-warehouses">—</span>
+    </div>
+    <div class="kpi-card kpi-card--pink">
+      <span class="kpi-label">Total Employees</span>
+      <span class="kpi-value" id="kpi-total-employees">—</span>
+    </div>
+    <div class="kpi-card kpi-card--orange">
+      <span class="kpi-label">Total Orders</span>
+      <span class="kpi-value" id="kpi-total-orders">—</span>
+    </div>
+  </div>
+
+  <!-- ===== NATIONAL PERFORMANCE PANEL (full-width, below KPIs) ===== -->
+  <div class="card glass national-chart-panel">
+
+    <!-- Header -->
+    <div class="chart-panel-header">
+      <h3 class="chart-panel-title">National Performance by Region</h3>
+      <a href="#" class="chart-panel-link">View All</a>
+    </div>
+
+    <!-- Side-by-Side Content Row -->
+    <div class="chart-content-row">
+
+      <!-- Donut SVG Left Column -->
+      <div class="donut-chart-wrapper">
+        <div class="donut-chart-container" id="donut-chart-container" aria-label="Country revenue share donut chart" role="img">
+          <svg
+            id="donut-chart-svg"
+            width="140"
+            height="140"
+            viewBox="0 0 42 42"
+            class="donut-svg"
+            aria-hidden="true"
+          >
+            <circle cx="21" cy="21" r="15.915" fill="transparent"></circle>
+            <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="rgba(255,255,255,0.03)" stroke-width="4.2"></circle>
+            <!-- Segments injected by JS -->
+          </svg>
+          <div class="donut-center-label" id="donut-center-label">
+            <span class="donut-total-value" id="donut-total-value">—</span>
+            <span class="donut-total-text">Total Income</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Right Column -->
+      <div class="legend-table-wrapper">
+        <table class="legend-table">
+          <colgroup>
+            <col style="width: 24%">
+            <col style="width: 20%">
+            <col style="width: 13%">
+            <col style="width: 14%">
+            <col style="width: 15%">
+            <col style="width: 14%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th style="text-align: left;">REGION</th>
+              <th style="text-align: right;">INCOME</th>
+              <th style="text-align: right;">SHARE</th>
+              <th style="text-align: right;">REGIONS</th>
+              <th style="text-align: right;">STORES</th>
+              <th style="text-align: right;">ACH.</th>
+            </tr>
+          </thead>
+          <tbody id="national-legend-list">
+            <!-- Legend items rendered here as tr by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Footer Action Buttons -->
+    <div class="chart-panel-footer">
+      <button class="btn btn-secondary btn-sm chart-action-btn" type="button">
+        <i data-lucide="eye" aria-hidden="true"></i>
+        <span>View Dashboard</span>
+      </button>
+      <button class="btn btn-secondary btn-sm chart-action-btn" type="button">
+        <i data-lucide="file-text" aria-hidden="true"></i>
+        <span>Improvement Plan</span>
+      </button>
+      <button class="btn btn-secondary btn-sm chart-action-btn" type="button">
+        <i data-lucide="user-plus" aria-hidden="true"></i>
+        <span>Assign Review</span>
+      </button>
+    </div>
+
+  </div><!-- /national-chart-panel -->
+
+  <!-- ===== FINANCIAL OVERVIEW WIDGET CONTAINER ===== -->
+  <div id="national-financial-widget-container" style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-lg);"></div>
+
+  <!-- ===== COUNTRY CARDS GRID ===== -->
+  <div id="countries-cards-grid" class="national-cards-grid" role="list" aria-label="Countries list">
+    <!-- Country cards rendered here by JS -->
+  </div>
+
+</div><!-- /national-workspace -->
+
+
+<!-- ===== ADD COUNTRY MODAL ===== -->
+<div
+  id="add-country-modal"
+  class="modal-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title-country"
+  hidden
+>
+  <div class="modal-card card glass">
+
+    <div class="modal-header">
+      <h3 id="modal-title-country" class="modal-title">Create New Country</h3>
+      <button id="btn-close-modal" class="btn-icon modal-close-btn" type="button" aria-label="Close dialog">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <form id="form-add-country" class="modal-form" novalidate>
+      <div class="form-group">
+        <label for="modal-input-name" class="form-label">Country Name</label>
+        <input
+          id="modal-input-name"
+          type="text"
+          class="form-input"
+          placeholder="e.g. Germany"
+          required
+          aria-required="true"
+        >
+      </div>
+      <div class="form-group">
+        <label for="modal-input-target" class="form-label">Target Sales (€)</label>
+        <input
+          id="modal-input-target"
+          type="number"
+          class="form-input"
+          placeholder="e.g. 100000"
+          min="0"
+          required
+          aria-required="true"
+        >
+      </div>
+      
+      <button id="btn-submit-country" type="submit" class="btn btn-primary btn-modal-submit">
+        Register Country
+      </button>
+    </form>
+
+  </div>
+</div><!-- /add-country-modal -->
+
+
+<!-- ===== COUNTRY OPERATIONS DETAILS MODAL ===== -->
+<div
+  id="details-modal"
+  class="modal-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="details-modal-title"
+  hidden
+>
+  <div class="modal-card card glass details-modal-card">
+
+    <div class="modal-header">
+      <h3 id="details-modal-title" class="modal-title">Country Operations Hub</h3>
+      <button id="btn-close-details-modal" class="btn-icon modal-close-btn" type="button" aria-label="Close details dialog">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+    
+    <!-- Modal Scrollable Body -->
+    <div id="details-modal-body" class="details-modal-body">
+      <!-- Dynamic detailed tables and charts injected here -->
+    </div>
+
+  </div>
+</div><!-- /details-modal -->
+
+
+<!-- ===== COUNTRY CARD TEMPLATE ===== -->
+<template id="country-card-tpl">
+  <div class="card glass national-card animate-slide-up" role="listitem">
+    
+    <!-- Delete Country button -->
+    <button
+      class="btn-delete-country"
+      type="button"
+      aria-label="Delete country"
+      hidden
+    >
+      <i data-lucide="trash-2" aria-hidden="true"></i>
+    </button>
+
+    <!-- Top Identity Row -->
+    <div class="national-card-top">
+      <div class="national-card-identity">
+        <h3 class="national-card-name" title=""></h3>
+        <div class="national-card-code"></div>
+      </div>
+      <div class="national-card-badges">
+        <div class="badge">
+          <i data-lucide="map" aria-hidden="true"></i>
+          <span class="regions-count">0</span>
+          <span>Regions</span>
+        </div>
+        <div class="badge">
+          <i data-lucide="coffee" aria-hidden="true"></i>
+          <span class="stores-count">0</span>
+          <span>Stores</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MTD Sales Metrics -->
+    <div class="national-card-metrics">
+      <div class="metric">
+        <div class="metric-label">Current Sales</div>
+        <div class="metric-value metric-value--primary"></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">MTD Target</div>
+        <div class="metric-value metric-value--muted"></div>
+      </div>
+    </div>
+
+    <!-- Stats summary details -->
+    <div class="national-card-details">
+      <div class="detail-row">
+        <span class="detail-label">Combined Orders</span>
+        <span class="detail-value orders-volume">—</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Corporate Staff</span>
+        <span class="detail-value staff-headcount">—</span>
+      </div>
+    </div>
+
+    <!-- Progress track bar -->
+    <div class="national-card-progress">
+      <div class="progress-header">
+        <span class="progress-label">Target Achievement</span>
+        <span class="progress-pct"></span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Card Action footer -->
+    <div class="national-card-footer">
+      <button class="btn-view-details text-btn" type="button">
+        <span>View Details</span>
+        <i data-lucide="arrow-right" aria-hidden="true"></i>
+      </button>
+      <span class="footer-code"></span>
+    </div>
+
+  </div>
+</template><!-- /country-card-tpl -->
+
+
+<!-- ===== LEGEND ITEM TEMPLATE ===== -->
+<template id="legend-item-tpl">
+  <tr class="legend-row">
+    <td style="text-align: left; vertical-align: middle; padding: 10px 0;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="legend-dot" style="width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;"></span>
+        <span class="legend-name" style="font-weight: 700; font-size: 0.75rem; white-space: nowrap;"></span>
+      </div>
+    </td>
+    <td class="legend-income" style="text-align: right; vertical-align: middle; font-size: 0.75rem; padding: 10px 0; font-weight: 600;"></td>
+    <td class="legend-share" style="text-align: right; vertical-align: middle; font-size: 0.75rem; color: var(--text-muted); padding: 10px 0;"></td>
+    <td class="legend-regions" style="text-align: right; vertical-align: middle; font-size: 0.75rem; color: var(--text-muted); padding: 10px 0;"></td>
+    <td class="legend-stores" style="text-align: right; vertical-align: middle; font-size: 0.75rem; color: var(--text-muted); padding: 10px 0;"></td>
+    <td class="legend-ach" style="text-align: right; vertical-align: middle; font-size: 0.75rem; font-weight: 700; padding: 10px 0;"></td>
+  </tr>
+</template>
+
+
+<!-- ===== EMPTY STATE TEMPLATE ===== -->
+<template id="national-empty-tpl">
+  <div class="card glass national-empty col-span-2" role="status" aria-live="polite">
+    <i data-lucide="info" aria-hidden="true"></i>
+    <p>No matching countries found.</p>
+  </div>
+</template>

@@ -1,0 +1,497 @@
+# PLUS33 ERP Project Structure
+
+This document details the complete directory and package layout tree for the **PLUS33 ERP** platform, showing the relationship between modular packages, resource directories, database migration scripts, and test suites.
+
+---
+
+## 1. Project Folder Tree
+
+```text
+plus33-erp/
+├── pom.xml                                  # Maven Project Object Model definition
+├── mvnw / mvnw.cmd                          # Maven wrapper executables
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── plus33/
+│   │   │           └── erp/
+│   │   │               ├── Plus33ErpApplication.java  # Main Spring Boot application class
+│   │   │               ├── agent/           # V46: AI Agent, prompt, tool, & memory runtime
+│   │   │               ├── analytics/       # Self-service BI query analyzers & validators
+│   │   │               ├── ap/              # Accounts Payable (vendor invoices, matches)
+│   │   │               ├── ar/              # Accounts Receivable (billing, credit checks)
+│   │   │               ├── auth/            # OAuth2 & JWT authentications controllers
+│   │   │               ├── bi/              # BI schema managers, dw sync schedulers
+│   │   │               ├── common/          # Common base classes, models, & utilities
+│   │   │               ├── config/          # Global Spring configuration classes
+│   │   │               ├── crm/             # CRM (customer leads, marketing channels)
+│   │   │               ├── edge/            # V52: Edge computing gateways, nodes config sync
+│   │   │               ├── esm/             # Field Service (work orders, van inventory, SLAs)
+│   │   │               ├── exception/       # Global exception handlers
+│   │   │               ├── finance/         # Finance & General Ledger (GL, fixed assets)
+│   │   │               ├── fleet/           # V53-V54: OTA deployments, zero-trust compliance
+│   │   │               ├── grc/             # GRC, Audit ledger, and OPA policy engine
+│   │   │               ├── hcm/             # HCM (employee records, payroll configurations)
+│   │   │               ├── integration/     # V42: Event mesh gateway, brokers, connectors
+│   │   │               ├── inventory/       # WMS integration, inventory adjustment journals
+│   │   │               ├── iot/             # V50: Machinery telemetry, SCADA controls
+│   │   │               ├── logistics/       # V49: Network nodes, topology, routing
+│   │   │               ├── manufacturing/   # BOM configurations, manufacturing orders
+│   │   │               ├── organization/    # Multi-tenant structure, cost centers
+│   │   │               ├── paymentrun/      # Automated payment runs engine
+│   │   │               ├── platform/        # Platform core (config versioning, permissions)
+│   │   │               ├── predictive/      # V55: Predictive maintenance policies
+│   │   │               ├── procurement/     # Purchase requests, vendor invoices
+│   │   │               ├── project/         # Project tracking, resource scheduling
+│   │   │               ├── routing/         # V56-V60: Route optimization, dispatch, fuel, EV, ESG
+│   │   │               ├── sales/           # Sales orders, shipments, invoices
+│   │   │               ├── security/        # Cryptography and role permissions
+│   │   │               ├── spatial/         # V51: Geofences, spatial queries indexes
+│   │   │               ├── store/           # Document store and file management
+│   │   │               ├── twin/            # V47: Digital twins & process mining engine
+│   │   │               ├── warehouse/       # Warehousing journals, location structures
+│   │   │               ├── wms/             # Warehouse management cycles & counts
+│   │   │               └── workforce/       # Workforce payroll processors
+│   │   └── resources/
+│   │       ├── application.yml              # Main application configuration
+│   │       ├── application-test.yml         # Test profile configuration
+│   │       └── db/
+│   │           └── migration/               # Flyway SQL schema migrations (V1 to V376)
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── plus33/
+│                   └── erp/
+│                       ├── APEnterpriseIntegrationTest.java
+│                       ├── AREnterpriseIntegrationTest.java
+│                       ├── BiEnterpriseIntegrationTest.java
+│                       ├── EsmEnterpriseIntegrationTest.java
+│                       ├── HcmEnterpriseIntegrationTest.java
+│                       ├── IntegrationPlatformIntegrationTest.java
+│                       ├── InventoryEnterpriseIntegrationTest.java
+│                       ├── ManufacturingEnterpriseIntegrationTest.java
+│                       ├── OpsPlatformIntegrationTest.java
+│                       ├── OrganizationIntegrationTest.java
+│                       ├── ProcurementEnterpriseIntegrationTest.java
+│                       ├── ProjectEnterpriseIntegrationTest.java
+│                       ├── SalesEnterpriseIntegrationTest.java
+│                       ├── StoreIntegrationTest.java
+│                       ├── platform/
+│                       │   ├── AgentConversationTest.java
+│                       │   ├── BatteryHealthTest.java
+│                       │   ├── CarbonFootprintTest.java
+│                       │   ├── ChargingSchedulerTest.java
+│                       │   ├── DeviceComplianceTest.java
+│                       │   ├── DispatchOptimizationTest.java
+│                       │   ├── EcoDrivingTest.java
+│                       │   ├── EsgComplianceTest.java
+│                       │   ├── EvEnergyTest.java
+│                       │   ├── FuelOptimizationTest.java
+│                       │   ├── RouteOptimizationTest.java
+│                       │   ├── Scope1EmissionsTest.java
+│                       │   ├── Scope2EmissionsTest.java
+│                       │   └── ...
+│                       ├── wms/
+│                       │   └── WarehouseManagementIntegrationTest.java
+│                       └── workforce/
+│                           └── PayrollEnterpriseIntegrationTest.java
+```
+
+---
+
+## 2. Frontend Directory & File Structure (Modular Architecture)
+
+The frontend folder is organized using a role-based, modular structure where pages and charts are nested in subdirectories:
+
+```text
+frontend/
+├── index.html                           # SPA entry-point
+├── main.js                              # Application bootstrap and shell rendering
+│
+├── api/                                 # API calls and HTTP configuration
+│   └── client.js                        # central axios-like client
+│
+├── core/                                # Core logic utilities
+│   ├── htmlLoader.js                    # dynamic asynchronous template loaders
+│   ├── logger.js                        # debug logger utility
+│   └── state.js                         # basic global reactive state stores
+│
+├── modules/                             # Role Modules
+│   ├── ultimate-admin/
+│   │   └── pages/                       # Folder-based pages
+│   │       ├── dashboard/               # Page with dedicated style, html, and js
+│   │       │   ├── dashboard.html
+│   │       │   ├── dashboard.css
+│   │       │   └── dashboard.js
+│   │       ├── customers/
+│   │       ├── settings/
+│   │       └── ...
+│   │
+│   ├── national-admin/
+│   │   ├── charts/                      # Role-specific charts
+│   │   │   └── national-sales-chart/
+│   │   │       ├── national-sales-chart.html
+│   │   │       ├── national-sales-chart.css
+│   │   │       └── national-sales-chart.js
+│   │   └── pages/
+│   │       └── dashboard/
+│   │
+│   ├── store-admin/
+│   │   └── pages/
+│   │       ├── dashboard/
+│   │       └── sales/
+│   │
+│   ├── store-employee/
+│   │   └── pages/
+│   │       ├── dashboard/
+│   │       └── schedule/
+│   │
+│   └── inventory/
+│       └── pages/
+│           └── stock-list/              # Clean page structures
+│               ├── stock-list.html
+│               ├── stock-list.css
+│               └── stock-list.js
+│
+├── navigation/                          # Routing tables & menu systems
+│   ├── routes.js                        # SPA navigation router definitions
+│   └── menus.js                         # Sidebar menu descriptors per user role
+│
+└── widgets/                             # Shared components & widgets
+    ├── widget-engine.js                 # Widget runtime engine & loader
+    └── charts/                          # Reusable shared dashboard charts
+        ├── sales-chart/
+        │   ├── sales-chart.html
+        │   ├── sales-chart.css
+        │   └── sales-chart.js
+        ├── financial-chart/
+        │   ├── financial-chart.html
+        │   ├── financial-chart.css
+        │   └── financial-chart.js
+        └── stock-chart/
+```
+
+---
+
+## 3. Backend Source (`src`) Directory & File Structure
+
+The Java backend uses a standard domain-driven layered package structure across all domain modules under `src/main/java/com/plus33/erp/`. Below is the complete listing of files and directories within the backend:
+
+```text
+src/main/java/com/plus33/erp/
+├── agent/                               # AI Cognitive Agent Package
+│   ├── core/
+│   │   └── AgentOrchestrator.java
+│   ├── knowledge/
+│   │   ├── ChunkingService.java
+│   │   └── RetrievalService.java
+│   ├── memory/
+│   │   └── AgentMemoryManager.java
+│   ├── prompt/
+│   │   └── PromptVersionManager.java
+│   ├── provider/
+│   │   ├── AIProvider.java
+│   │   └── LocalLlmProvider.java
+│   ├── tool/
+│   │   └── ToolExecutor.java
+│   ├── vector/
+│   │   └── VectorStoreCoordinator.java
+│   └── workflow/
+│       └── WorkflowAutomator.java
+│
+├── analytics/                           # BI Analytics & Reports
+│   ├── controller/
+│   │   ├── InventoryAnalyticsController.java
+│   │   └── ProcurementAnalyticsController.java
+│   ├── dto/
+│   │   ├── AnalyticsHealthResponse.java
+│   │   ├── InventoryDashboardResponse.java
+│   │   └── ...
+│   ├── entity/
+│   │   └── DashboardConfig.java
+│   ├── repository/
+│   │   └── DashboardConfigRepository.java
+│   └── service/
+│       ├── InventoryAnalyticsService.java
+│       └── ProcurementAnalyticsService.java
+│
+├── ap/                                  # Accounts Payable
+│   ├── controller/
+│   │   └── APController.java
+│   ├── dto/
+│   │   ├── APAgingResponse.java
+│   │   └── APDashboardResponse.java
+│   └── service/
+│       └── APService.java
+│
+├── ar/                                  # Accounts Receivable
+│   ├── controller/
+│   │   └── ARController.java
+│   ├── entity/
+│   │   └── ARWriteOff.java
+│   ├── repository/
+│   │   └── ARWriteOffRepository.java
+│   └── service/
+│       ├── ARService.java
+│       └── ARWriteOffService.java
+│
+├── auth/                                # Authentication JWT handlers
+│   ├── controller/
+│   │   └── AuthController.java
+│   └── dto/
+│       ├── LoginRequest.java
+│       └── TokenResponse.java
+│
+├── bi/                                  # Business Intelligence & DW
+│   ├── alert/
+│   │   └── AlertEngine.java
+│   ├── contract/
+│   │   ├── DataContractValidator.java
+│   │   └── SchemaEvolutionTracker.java
+│   ├── controller/
+│   │   ├── BiDashboardController.java
+│   │   ├── BiEtlController.java
+│   │   └── BiSelfServiceController.java
+│   ├── entity/
+│   │   ├── BiAlertRule.java
+│   │   ├── BiAnalyticsSnapshot.java
+│   │   ├── BiDataContract.java
+│   │   └── DimDate.java
+│   ├── etl/
+│   │   └── ExtractionEngine.java
+│   ├── forecast/
+│   │   └── ForecastService.java
+│   ├── lineage/
+│   │   └── DataLineageService.java
+│   ├── mdm/
+│   │   ├── MdmGoldenRecordService.java
+│   │   └── SurvivorshipEngine.java
+│   ├── repository/
+│   │   ├── BiAlertRuleRepository.java
+│   │   └── DimDateRepository.java
+│   └── service/
+│       └── SelfServiceAnalyticsService.java
+│
+├── common/                              # Shared exceptions and base classes
+│   ├── dto/
+│   │   ├── ApiResponse.java
+│   │   └── ErrorResponse.java
+│   ├── entity/
+│   │   └── AuditableEntity.java
+│   └── exception/
+│       ├── BusinessException.java
+│       └── ResourceNotFoundException.java
+│
+├── compliance/                          # GRC Attestation & policies
+│   ├── attestation/
+│   │   └── TpmAttestationValidator.java
+│   ├── controller/
+│   │   └── ComplianceController.java
+│   └── policy/
+│       ├── ComplianceChecker.java
+│       └── CompliancePolicyService.java
+│
+├── crm/                                 # Customer Relationship Management
+│   ├── controller/
+│   │   └── CrmController.java
+│   ├── entity/
+│   │   ├── CrmLead.java
+│   │   └── CrmQuote.java
+│   └── service/
+│       └── CrmService.java
+│
+├── edge/                                # Edge sync coordinator
+│   ├── gateway/
+│   │   └── EdgeSyncController.java
+│   └── service/
+│       └── EdgeConfigService.java
+│
+├── esm/                                 # Field Service & SLAs
+│   ├── controller/
+│   │   └── FieldServiceController.java
+│   └── service/
+│       └── EsmService.java
+│
+├── finance/                             # General Ledger & Fixed Assets
+│   ├── controller/
+│   │   └── LedgerController.java
+│   ├── entity/
+│   │   ├── JournalEntry.java
+│   │   └── GeneralLedgerAccount.java
+│   └── service/
+│       └── FinanceAnalyticsService.java
+│
+├── fleet/                               # Fleet deployment attestation
+│   └── service/
+│       └── FleetManagementService.java
+│
+├── grc/                                 # Governance & audit checks
+│   └── policy/
+│       └── OpaPolicyEngine.java
+│
+├── hcm/                                 # Payroll & HCM Employee profiles
+│   ├── controller/
+│   │   └── EmployeeController.java
+│   ├── entity/
+│   │   ├── Employee.java
+│   │   └── Payslip.java
+│   └── service/
+│       └── PayrollProcessor.java
+│
+├── integration/                         # Event mesh router
+│   └── broker/
+│       └── EventMeshGateway.java
+│
+├── inventory/                           # Inventory & Stock lists
+│   ├── controller/
+│   │   └── StockController.java
+│   ├── entity/
+│   │   └── StockItem.java
+│   └── service/
+│       └── InventoryService.java
+│
+├── iot/                                 # Telemetry ingestion endpoints
+│   └── service/
+│       └── ScadaController.java
+│
+├── logistics/                           # Network node topology
+│   └── entity/
+│       └── WarehouseNode.java
+│
+├── manufacturing/                       # BOM Manufacturing cycles
+│   ├── entity/
+│   │   └── BillOfMaterials.java
+│   └── service/
+│       └── ManufacturingOrderService.java
+│
+├── organization/                        # Cost centers organizational tree
+│   └── entity/
+│       └── CostCenter.java
+│
+├── paymentrun/                          # Auto payment scheduler run
+│   └── service/
+│       └── PaymentRunService.java
+│
+├── platform/                            # Central configuration registry
+│   └── service/
+│       └── ConfigRegistryService.java
+│
+├── predictive/                          # Predictive Maintenance ML policies
+│   └── service/
+│       └── MaintenancePredictor.java
+│
+├── procurement/                         # PO & Supplier approvals
+│   ├── controller/
+│   │   └── ProcurementController.java
+│   └── entity/
+│       └── PurchaseOrder.java
+│
+├── project/                             # Projects resource tracking tasks
+│   └── entity/
+│       └── ProjectTask.java
+│
+├── routing/                             # EvEnergy, ESG, fuel optimization
+│   ├── service/
+│   │   ├── CarbonAccountingService.java
+│   │   ├── EvEnergyManagementService.java
+│   │   ├── FuelOptimizationEngine.java
+│   │   └── RouteOptimizationEngine.java
+│   └── controller/
+│       └── RouteController.java
+│
+├── sales/                               # Sales Orders & metrics aggregator
+│   ├── controller/
+│   │   └── SalesController.java
+│   ├── entity/
+│   │   └── SalesOrder.java
+│   └── service/
+│       └── SalesAnalyticsService.java
+│
+├── security/                            # RBAC authentication filters
+│   ├── config/
+│   │   └── SecurityConfig.java
+│   └── service/
+│       └── CustomUserDetailsService.java
+│
+├── spatial/                             # GIS coordinates boundary maps
+│   └── service/
+│       └── SpatialGeofenceService.java
+│
+├── store/                               # Blob documents attachments
+│   └── service/
+│       └── AttachmentStoreService.java
+│
+├── twin/                                # Digital twin process mining
+│   ├── mining/
+│   │   └── VariantDiscoveryService.java
+│   └── service/
+│       └── TwinStateProjector.java
+│
+├── warehouse/                           # Warehouse locations journals
+│   └── entity/
+│       └── WarehouseLocation.java
+│
+├── wms/                                 # Cycle counts orchestrator
+│   └── service/
+│       └── CycleCountService.java
+│
+└── workforce/                           # Payroll processors
+    └── service/
+        └── PayrollProcessor.java
+```
+
+`src/main/resources/` Resources configuration mappings:
+* **`application.properties` / `application.yml`**: Database setup configurations, JWT configurations, profiles.
+* **`db/migration/`**: Flyway database schemas migrations (V1 to V376).
+
+---
+
+## 4. Core Module Descriptions
+
+### `agent` (AI Cognitive Engine)
+* **`provider`**: Vendor-agnostic AI LLM execution bindings (`AIProvider.java`, `LocalLlmProvider.java`).
+* **`core`**: Agent execution orchestration cycles (`AgentOrchestrator.java`).
+* **`tool`**: Permission-aware tool execution history trackers (`ToolExecutor.java`).
+* **`knowledge`**: Text splitting pipelines & semantic retrieval (`ChunkingService.java`, `RetrievalService.java`).
+* **`workflow`**: Multi-agent process orchestrators (`WorkflowAutomator.java`).
+* **`prompt`**: Prompt versions metadata managers (`PromptVersionManager.java`).
+* **`memory`**: Multi-scoped contextual memories (`AgentMemoryManager.java`).
+* **`vector`**: Embedding providers & vector indexing stores (`VectorStoreCoordinator.java`).
+
+### `twin` (Digital Twins & Process Mining)
+* **`telemetry`**: Sensor data ingestion pipelines (`TelemetryIngestionService.java`, `TelemetryNormalizer.java`).
+* **`device`**: Digital twin state projectors (`TwinStateProjector.java`).
+* **`anomaly`**: State anomaly checkers (`AnomalyDetector.java`).
+* **`mining`**: Pathway variant discovery engines (`CaseAssembler.java`, `VariantDiscoveryService.java`, `PerformanceAnalyzer.java`).
+* **`conformance`**: BPMN conformance checks & SLA risk predictions (`ConformanceEngine.java`, `SlaPredictionService.java`).
+* **`decision`**: Autonomous actions evaluator (`DecisionEngine.java`, `RecommendationEngine.java`).
+* **`simulation`**: Scenario forecasting engines (`SimulationService.java`).
+
+### `routing` (Fleet Routing & Emissions Compliance)
+* **`optimization`**: V56 route cost minimization algorithms and emissions factor engine (`RouteOptimizationEngine.java`).
+* **`dispatch`**: V57 AI-driven vehicle/driver fleet dispatching optimizer (`DispatchOptimizationEngine.java`).
+* **`fuel`**: V58 dynamic fuel optimization engines and eco-driving diagnostics logging (`FuelOptimizationEngine.java`).
+* **`ev`**: V59 EV energy management, battery health analytics, and charging schedules reservation scheduler (`EvEnergyManagementService.java`).
+* **`esg`**: V60 Scope 1 / Scope 2 greenhouse gas carbon accounting reporting compliance mappings (`CarbonAccountingService.java`).
+
+---
+
+## 5. Flyway SQL Database Migrations Mapping
+
+The database schema spans version migrations from `V1` up to `V376`:
+* **`V1`–`V100`**: Core transactional schema (Finance, GL, CRM, Purchasing, Inventory, Sales, HCM, Manufacturing).
+* **`V101`–`V121`**: Field service management (Van stocks, Work orders, Checklists, SLAs, Dispatch routing).
+* **`V122`–`V180`**: Advanced WMS & Project Management (Cycle counts, Warehouse ledger, Resource schedules).
+* **`V181`–`V216`**: Platforms HA, Leader elections, Blue/Green deployers, Tenants routing, Distributed cache nodes.
+* **`V217`–`V230`**: Observability logs, AIOps registry, FinOps chargeback, GRC compliance framework.
+* **`V231`–`V240`**: V46 AI agents metadata, Conversation logs, Prompt versions, Chunk indexes, Context memory tables.
+* **`V241`–`V250`**: V47 Process mining, Twin states, Telemetries, Simulation runs, Configuration versions, and Telemetry archival records.
+* **`V251`–`V280`**: V48 Knowledge graph entity resolutions, V49 Logistics network nodes registry maps.
+* **`V281`–`V310`**: V50 Machinery telemetry & SCADA triggers, V51 Spatial query indices, V52 Edge Node sync state registers.
+* **`V311`–`V330`**: V53 OTA deployment registry, V54 Zero-Trust attestation, V55 Predictive Maintenance policy tables.
+* **`V331`–`V350`**: V56 Route Carbon Footprints, V57 Dispatch AI-assignments, constraint validations, and Monte Carlo runs.
+* **`V351`–`V360`**: V58 Dynamic fuel optimization and Eco-Driving driver behaviors logs.
+* **`V361`–`V370`**: V59 EV Battery telemetry status and Charging reservation schedule allocations.
+* **`V371`–`V376`**: V60 ESG Greenhouse Gas Scope 1/2 carbon emissions logs and auditing verification signatures.
+* **`V377`–`V384`**: Complete Enterprise development seed dataset representing a French Coffee company (PLUS33 Coffee) with ~200 employees, 250 products, 3000 sales orders, CRM logs, stock counts, payroll records, and BI KPI analytics snapshots.

@@ -34,29 +34,26 @@ export class KpiCard {
    */
   mount(container, lifecycle) {
     // Primary value from backend metric field
-    const rawVal = this.metrics[this.config.metric] !== undefined
-      ? this.metrics[this.config.metric]
-      : 0;
-    const formattedVal = this.formatValue(rawVal, this.config.format);
+    const rawVal = this.metrics[this.config.metric];
+    const isAvailable = rawVal !== undefined && rawVal !== null && rawVal !== 0 && rawVal !== '0' && rawVal !== 0.0 && !isNaN(Number(rawVal));
+    const formattedVal = isAvailable ? this.formatValue(rawVal, this.config.format) : 'NA/DB';
 
     // Dynamic trend value — resolve from backend trendField or fall back to config
-    let trendDisplay = this.config.trendValue || '';
-    let trendStatus  = this.config.trendStatus || 'info';
+    let trendDisplay = isAvailable ? (this.config.trendValue || '') : 'NA/DB';
+    let trendStatus  = isAvailable ? (this.config.trendStatus || 'info') : 'info';
 
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Widgets Module
-     */
-    if (this.config.trendField && this.metrics[this.config.trendField] !== undefined) {
-      const trendRaw = Number(this.metrics[this.config.trendField]);
-      const sign     = trendRaw >= 0 ? '+' : '';
-      trendDisplay   = `${sign}${trendRaw.toFixed(1)}%`;
-      trendStatus    = trendRaw >= 0 ? 'success' : 'danger';
-    } else if (this.config.trendCountField && this.metrics[this.config.trendCountField] !== undefined) {
-      const trendRaw = Number(this.metrics[this.config.trendCountField]);
-      const sign     = trendRaw >= 0 ? '+' : '';
-      trendDisplay   = `${sign}${Math.round(trendRaw)}`;
-      trendStatus    = trendRaw >= 0 ? 'success' : 'danger';
+    if (isAvailable) {
+      if (this.config.trendField && this.metrics[this.config.trendField] !== undefined) {
+        const trendRaw = Number(this.metrics[this.config.trendField]);
+        const sign     = trendRaw >= 0 ? '+' : '';
+        trendDisplay   = `${sign}${trendRaw.toFixed(1)}%`;
+        trendStatus    = trendRaw >= 0 ? 'success' : 'danger';
+      } else if (this.config.trendCountField && this.metrics[this.config.trendCountField] !== undefined) {
+        const trendRaw = Number(this.metrics[this.config.trendCountField]);
+        const sign     = trendRaw >= 0 ? '+' : '';
+        trendDisplay   = `${sign}${Math.round(trendRaw)}`;
+        trendStatus    = trendRaw >= 0 ? 'success' : 'danger';
+      }
     }
 
     const trendColor = trendStatus === 'success'
@@ -97,6 +94,45 @@ export class KpiCard {
         </div>
       </div>
     `;
+
+    const routeMap = {
+      'kpi-revenue': '#sales',
+      'kpi-profit': '#finance',
+      'kpi-stores': '#stores',
+      'kpi-employees': '#workforce',
+      'kpi-countries': '#national-management',
+      'kpi-regions': '#regions',
+      'kpi-warehouses': '#warehouses',
+      'kpi-customers': '#customers',
+      'kpi-inventory': '#inventory',
+      'kpi-compliance': '#audit'
+    };
+
+    const targetHash = routeMap[this.config.id];
+    if (targetHash && lifecycle) {
+      container.style.cursor = 'pointer';
+      container.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
+      
+      const onEnter = () => {
+        container.style.transform = 'translateY(-2px)';
+      };
+      const onLeave = () => {
+        container.style.transform = 'none';
+      };
+      const onClick = () => {
+        window.location.hash = targetHash;
+      };
+
+      container.addEventListener('mouseenter', onEnter);
+      container.addEventListener('mouseleave', onLeave);
+      container.addEventListener('click', onClick);
+
+      lifecycle.onCleanup(() => {
+        container.removeEventListener('mouseenter', onEnter);
+        container.removeEventListener('mouseleave', onLeave);
+        container.removeEventListener('click', onClick);
+      });
+    }
   }
 
   /**

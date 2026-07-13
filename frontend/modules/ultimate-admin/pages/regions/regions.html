@@ -1,0 +1,378 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Regions Management
+ * File              : regions.html
+ * Path              : frontend/modules/ultimate-admin/regions/regions.html
+ * Purpose           : HTML structure for the Regions Management page
+ * Version           : 2.0.0
+ *
+ * Related JS        : regions.js
+ * Related CSS       : regions.css
+ * Related APIs      : GET /api/v1/regions?size=100
+ *                     POST /api/v1/regions
+ *                     DELETE /api/v1/regions/:id
+ *                     GET /api/v1/dashboard/overview
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines all structural HTML for the Regions Management page.
+ * JavaScript (regions.js) populates dynamic data and binds all events.
+ * No inline styles. No onclick attributes.
+ ******************************************************************************
+-->
+
+<div class="regions-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header regions-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="map-pin" aria-hidden="true"></i>
+        <span>Administration</span>
+      </div>
+      <h1 class="page-title">Regions Management</h1>
+      <p class="page-subtitle">Manage territory definitions, franchise targets, and operational metrics.</p>
+    </div>
+    <div class="page-header-right">
+      <button id="btn-add-region" class="btn btn-primary" type="button" aria-label="Add new region">
+        <i data-lucide="plus" aria-hidden="true"></i>
+        <span>Add Region</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== KPI SUMMARY ROW ===== -->
+  <div class="regions-kpi-grid" role="region" aria-label="Regions summary metrics">
+    <div class="kpi-card kpi-card--gold">
+      <span class="kpi-label">Total Territories</span>
+      <span class="kpi-value" id="kpi-total-regions">—</span>
+    </div>
+    <div class="kpi-card kpi-card--secondary">
+      <span class="kpi-label">Combined Revenue</span>
+      <span class="kpi-value" id="kpi-total-sales">—</span>
+    </div>
+    <div class="kpi-card kpi-card--success">
+      <span class="kpi-label">Avg Achievement</span>
+      <span class="kpi-value" id="kpi-avg-achievement">—</span>
+    </div>
+    <div class="kpi-card kpi-card--warning">
+      <span class="kpi-label">Franchise Stores</span>
+      <span class="kpi-value" id="kpi-total-stores">—</span>
+    </div>
+  </div>
+
+  <!-- ===== FILTER BAR ===== -->
+  <div class="card glass regions-filter-bar" role="search" aria-label="Region filters">
+
+    <!-- Search -->
+    <div class="filter-search-wrapper">
+      <i data-lucide="search" class="filter-search-icon" aria-hidden="true"></i>
+      <input
+        id="input-search-regions"
+        type="search"
+        class="filter-search-input"
+        placeholder="Search region names..."
+        autocomplete="off"
+        aria-label="Search regions"
+      >
+    </div>
+
+    <!-- Country Filter — populated by JS -->
+    <div class="filter-group">
+      <label for="filter-parent-country" class="filter-label">Country</label>
+      <select id="filter-parent-country" class="filter-select" aria-label="Filter by country">
+        <option value="">All Countries</option>
+      </select>
+    </div>
+
+    <!-- Region Filter — populated by JS -->
+    <div class="filter-group">
+      <label for="filter-region-id" class="filter-label">Region</label>
+      <select id="filter-region-id" class="filter-select" aria-label="Filter by region">
+        <option value="">All Regions</option>
+      </select>
+    </div>
+
+    <!-- Sort By -->
+    <div class="filter-group">
+      <label for="filter-sort-by" class="filter-label">Sort By</label>
+      <select id="filter-sort-by" class="filter-select" aria-label="Sort regions">
+        <option value="sales-desc">Highest Revenue</option>
+        <option value="sales-asc">Lowest Revenue</option>
+        <option value="stores-desc">Most Stores</option>
+        <option value="name-asc">Name (A–Z)</option>
+      </select>
+    </div>
+
+    <!-- Date Range Preset -->
+    <div class="filter-group">
+      <label for="filter-date-range" class="filter-label">Date Range</label>
+      <select id="filter-date-range" class="filter-select" aria-label="Select date range preset">
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="this-week">This Week</option>
+        <option value="last-week">Last Week</option>
+        <option value="this-month" selected>This Month</option>
+        <option value="last-month">Last Month</option>
+        <option value="this-quarter">This Quarter</option>
+        <option value="this-year">This Year</option>
+        <option value="custom">Custom Range</option>
+      </select>
+    </div>
+
+    <!-- Custom Date Inputs (shown only for custom range) -->
+    <div class="filter-group filter-custom-dates hidden">
+      <label for="filter-date-from" class="filter-label">From</label>
+      <input type="date" id="filter-date-from" class="filter-input" aria-label="From date">
+    </div>
+    <div class="filter-group filter-custom-dates hidden">
+      <label for="filter-date-to" class="filter-label">To</label>
+      <input type="date" id="filter-date-to" class="filter-input" aria-label="To date">
+    </div>
+    <button id="btn-apply-page-filters" class="btn btn-primary btn-sm filter-apply-btn filter-custom-dates hidden" type="button" aria-label="Apply date filters">
+      <i data-lucide="filter" aria-hidden="true"></i>
+      <span>Apply</span>
+    </button>
+
+    <!-- Refresh Button -->
+    <button id="btn-refresh-cards" class="btn-refresh-cards" type="button" aria-label="Refresh" title="Refresh">
+      <i data-lucide="refresh-cw" aria-hidden="true"></i>
+    </button>
+
+  </div><!-- /filter-bar -->
+
+
+  <!-- ===== TERRITORY PERFORMANCE PANEL (full-width, below KPIs) ===== -->
+  <div class="card glass regions-chart-panel">
+
+    <!-- Header -->
+    <div class="chart-panel-header">
+      <h3 class="chart-panel-title">Territory Income Share</h3>
+      <a href="#" class="chart-panel-link">View All</a>
+    </div>
+
+    <!-- Side-by-Side Content Row -->
+    <div class="chart-content-row">
+
+      <!-- Donut SVG -->
+      <div class="donut-chart-wrapper">
+        <div class="donut-chart-container" id="donut-chart-container" aria-label="Territory revenue donut chart" role="img">
+          <svg
+            id="donut-chart-svg"
+            width="140"
+            height="140"
+            viewBox="0 0 42 42"
+            class="donut-svg"
+            aria-hidden="true"
+          >
+            <circle cx="21" cy="21" r="15.915" fill="transparent"></circle>
+            <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="rgba(255,255,255,0.03)" stroke-width="4.2"></circle>
+            <!-- Donut segments injected here by JS -->
+          </svg>
+          <div class="donut-center-label" id="donut-center-label">
+            <span class="donut-total-value" id="donut-total-value">—</span>
+            <span class="donut-total-text">Combined Sales</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend Table -->
+      <div class="legend-table-wrapper">
+        <table class="legend-table">
+          <colgroup>
+            <col style="width: 24%">
+            <col style="width: 20%">
+            <col style="width: 13%">
+            <col style="width: 14%">
+            <col style="width: 15%">
+            <col style="width: 14%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th style="text-align: left;">REGION</th>
+              <th style="text-align: right;">INCOME</th>
+              <th style="text-align: right;">SHARE</th>
+              <th style="text-align: right;">COUNTRY</th>
+              <th style="text-align: right;">STORES</th>
+              <th style="text-align: right;">ACH.</th>
+            </tr>
+          </thead>
+          <tbody id="regions-legend-list">
+            <!-- Legend rows rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /chart-content-row -->
+
+  </div><!-- /regions-chart-panel -->
+
+  <!-- ===== REGION CARDS GRID ===== -->
+  <div id="regions-cards-grid" class="regions-cards-grid" role="list" aria-label="Region cards">
+    <!-- Region cards rendered here by regions.js -->
+  </div>
+
+</div><!-- /regions-workspace -->
+
+
+<!-- ===== ADD REGION MODAL ===== -->
+<div
+  id="add-region-modal"
+  class="modal-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title-region"
+  hidden
+>
+  <div class="modal-card card glass">
+
+    <div class="modal-header">
+      <h3 id="modal-title-region" class="modal-title">Create New Region</h3>
+      <button id="btn-close-modal" class="btn-icon modal-close-btn" type="button" aria-label="Close dialog">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <form id="form-add-region" class="modal-form" novalidate>
+
+      <div class="form-group">
+        <label for="modal-input-country" class="form-label">Country</label>
+        <select id="modal-input-country" class="form-select" required aria-required="true">
+          <option value="">— Select Country —</option>
+          <!-- Country options populated by JS -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="modal-input-name" class="form-label">Region Name</label>
+        <input
+          id="modal-input-name"
+          type="text"
+          class="form-input"
+          placeholder="e.g. Occitanie"
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="modal-input-target" class="form-label">Target Sales (€)</label>
+        <input
+          id="modal-input-target"
+          type="number"
+          class="form-input"
+          placeholder="e.g. 50000"
+          min="0"
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <!-- Hidden helper fields -->
+      <div class="visually-hidden" aria-hidden="true">
+        <input id="modal-input-stores"    type="number" value="0" tabindex="-1">
+        <input id="modal-input-employees" type="number" value="0" tabindex="-1">
+      </div>
+
+      <button id="btn-submit-region" type="submit" class="btn btn-primary btn-modal-submit">
+        Register Region
+      </button>
+
+    </form>
+
+  </div>
+</div><!-- /add-region-modal -->
+
+
+<!-- ===== REGION CARD TEMPLATE ===== -->
+<template id="region-card-tpl">
+  <div class="card glass regions-card animate-slide-up" role="listitem">
+
+    <!-- Delete Button — shown only for non-nationalAdmin, inserted by JS -->
+    <button
+      class="btn-delete-region"
+      type="button"
+      aria-label="Delete region"
+      hidden
+    >
+      <i data-lucide="trash-2" aria-hidden="true"></i>
+    </button>
+
+    <!-- Card Top -->
+    <div class="regions-card-top">
+      <div class="regions-card-identity">
+        <h3 class="regions-card-name" title=""></h3>
+        <div class="regions-card-meta"></div>
+      </div>
+      <div class="regions-card-stores-badge">
+        <i data-lucide="coffee" aria-hidden="true"></i>
+        <span class="stores-count">0</span>
+        <span>Stores</span>
+      </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="regions-card-metrics">
+      <div class="metric">
+        <div class="metric-label">Current Sales</div>
+        <div class="metric-value metric-value--primary"></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">MTD Target</div>
+        <div class="metric-value metric-value--muted"></div>
+      </div>
+    </div>
+
+    <!-- Details Row -->
+    <div class="regions-card-details">
+      <div class="detail-row">
+        <span class="detail-label">Orders Volume</span>
+        <span class="detail-value orders-volume">—</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Active Staff</span>
+        <span class="detail-value active-staff">—</span>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="regions-card-progress">
+      <div class="progress-header">
+        <span class="progress-label">Target Achievement</span>
+        <span class="progress-pct"></span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+
+  </div>
+</template><!-- /region-card-tpl -->
+
+
+<!-- ===== LEGEND ITEM TEMPLATE ===== -->
+<template id="legend-item-tpl">
+  <tr class="legend-row">
+    <td style="text-align: left; vertical-align: middle; padding: 10px 0;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="legend-dot" style="width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;"></span>
+        <span class="legend-name" style="font-weight: 700; font-size: 0.75rem; white-space: nowrap;"></span>
+      </div>
+    </td>
+    <td class="legend-income" style="text-align: right; vertical-align: middle; font-size: 0.75rem; padding: 10px 0; font-weight: 600;"></td>
+    <td class="legend-share" style="text-align: right; vertical-align: middle; font-size: 0.75rem; color: var(--text-muted); padding: 10px 0;"></td>
+    <td class="legend-country" style="text-align: right; vertical-align: middle; font-size: 0.75rem; color: var(--text-muted); padding: 10px 0;"></td>
+    <td class="legend-stores" style="text-align: right; vertical-align: middle; font-size: 0.75rem; color: var(--text-muted); padding: 10px 0;"></td>
+    <td class="legend-ach" style="text-align: right; vertical-align: middle; font-size: 0.75rem; font-weight: 700; padding: 10px 0;"></td>
+  </tr>
+</template>
+
+
+<!-- ===== EMPTY STATE TEMPLATE ===== -->
+<template id="regions-empty-tpl">
+  <div class="card glass regions-empty col-span-2" role="status" aria-live="polite">
+    <i data-lucide="info" aria-hidden="true"></i>
+    <p>No matching regions found.</p>
+  </div>
+</template>

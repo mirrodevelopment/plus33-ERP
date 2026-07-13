@@ -1,0 +1,227 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Finance & General Ledger
+ * File              : finance.html
+ * Path              : frontend/modules/ultimate-admin/finance/finance.html
+ * Purpose           : HTML skeleton for Finance Overview
+ * Version           : 2.0.0
+ *
+ * Related JS        : finance.js
+ * Related CSS       : finance.css
+ * Related APIs      : GET /api/v1/customer-invoices
+ *                     POST /api/v1/customer-invoices
+ *                     POST /api/v1/customer-invoices/:id/submit
+ *                     POST /api/v1/customer-invoices/:id/approve
+ *                     POST /api/v1/customer-invoices/:id/cancel
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural financial journal layout.
+ * JavaScript (finance.js) maps the accounts receivable ledgers.
+ * No inline styles. No inline click listeners.
+ ******************************************************************************
+-->
+
+<div class="finance-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header finance-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="badge-dollar-sign" aria-hidden="true"></i>
+        <span>Financial Operations</span>
+      </div>
+      <h1 class="page-title">Financial Overview &amp; Accounts Receivable</h1>
+      <p class="page-subtitle">Audit customer invoices, double-entry General Ledger postings, and credit control workflow submissions.</p>
+    </div>
+    <div class="page-header-right">
+      <div class="ledger-pill" role="status" aria-live="polite">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span>Ledger Balanced</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPI METRICS GRID ===== -->
+  <div class="finance-kpi-grid" role="region" aria-label="Financial summary metrics">
+    <div class="kpi-card kpi-card--gold">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold" aria-hidden="true">
+        <i data-lucide="badge-dollar-sign"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-receivables">—</span>
+        <span class="kpi-label">Total Receivables</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--danger">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--danger" aria-hidden="true">
+        <i data-lucide="alert-circle"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-outstanding">—</span>
+        <span class="kpi-label">AR Outstanding</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--info">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--info" aria-hidden="true">
+        <i data-lucide="file-text"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-drafts">—</span>
+        <span class="kpi-label">Draft Volume</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--success">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--success" aria-hidden="true">
+        <i data-lucide="check-square"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-closed">— Closed</span>
+        <span class="kpi-label">Paid Invoices</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SPLIT FINANCE GRID ===== -->
+  <div class="finance-layout-grid">
+    
+    <!-- Left Column: Billing Journal List -->
+    <div class="finance-left-panel">
+      <div class="card glass journal-card">
+        <div class="journal-header">
+          <h3 class="journal-title">Billing &amp; Invoice Journal</h3>
+          <span class="journal-status-badge">Live DB Synced</span>
+        </div>
+        
+        <div class="table-scroll-wrapper">
+          <table class="journal-table">
+            <thead>
+              <tr>
+                <th scope="col">Invoice #</th>
+                <th scope="col">Cust ID</th>
+                <th scope="col">Invoice Date</th>
+                <th scope="col">Status</th>
+                <th scope="col">Total Amount</th>
+                <th scope="col" class="text-right">Workflow Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoice-roster-body">
+              <!-- Invoice rows dynamically mapped by finance.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Create Invoice & GL compliance reconciliation -->
+    <div class="finance-right-panel">
+      
+      <!-- Panel 1: Generate Draft Form -->
+      <div class="card glass invoice-draft-card">
+        <div class="onboard-header">
+          <i data-lucide="file-plus" class="onboard-icon" aria-hidden="true"></i>
+          <h3 class="onboard-title">Create Draft Invoice</h3>
+        </div>
+        
+        <form id="create-invoice-form" class="onboard-form" novalidate>
+          <div class="form-group">
+            <label for="inv-num" class="form-label">Invoice Number</label>
+            <input
+              type="text"
+              id="inv-num"
+              class="form-input"
+              placeholder="INV-2026-001"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="form-grid-flex">
+            <div class="form-group flex-grow">
+              <label for="inv-cust-id" class="form-label">Customer ID</label>
+              <input
+                type="number"
+                id="inv-cust-id"
+                class="form-input text-center"
+                value="1"
+                required
+                aria-required="true"
+              >
+            </div>
+            <div class="form-group flex-grow">
+              <label for="inv-amount" class="form-label" id="lbl-inv-amount">Invoice Amount (€)</label>
+              <input
+                type="number"
+                id="inv-amount"
+                class="form-input text-center"
+                value="25000"
+                required
+                aria-required="true"
+                aria-labelledby="lbl-inv-amount"
+              >
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-onboard">
+            <i data-lucide="plus" aria-hidden="true"></i>
+            <span>Generate Draft</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Panel 2: General Ledger Reconciliation double-entry -->
+      <div class="card glass gl-audit-card">
+        <div class="audit-header">
+          <i data-lucide="scale" class="audit-icon" aria-hidden="true"></i>
+          <h3 class="audit-title">General Ledger Reconciliation</h3>
+        </div>
+        
+        <p class="audit-desc">Double-entry postings trace audit for accounts receivable (Debits) vs. sales revenues (Credits).</p>
+
+        <div class="gl-terminal-log" role="region" aria-label="General ledger balances">
+          <div class="gl-log-row">
+            <span>AR Account (Dr)</span>
+            <span class="gl-val" id="gl-val-debit">—</span>
+          </div>
+          <div class="gl-log-row">
+            <span>Revenue Account (Cr)</span>
+            <span class="gl-val" id="gl-val-credit">—</span>
+          </div>
+          <div class="gl-status-row">
+            <strong>Status Check</strong>
+            <strong class="gl-status-success">✔ BALANCED</strong>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /finance-right-panel -->
+
+  </div><!-- /finance-layout-grid -->
+
+</div><!-- /finance-workspace -->
+
+
+<!-- ===== TABLE ROW TEMPLATE ===== -->
+<template id="invoice-row-tpl">
+  <tr class="finance-table-row">
+    <td class="col-num"></td>
+    <td class="col-cust-id"></td>
+    <td class="col-date"></td>
+    <td class="col-status">
+      <span class="status-indicator-wrapper">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-label"></span>
+      </span>
+    </td>
+    <td class="col-amount"></td>
+    <td class="col-actions">
+      <div class="actions-flex-wrapper">
+        <!-- Dynamically injected workflow action buttons by JS -->
+      </div>
+    </td>
+  </tr>
+</template>

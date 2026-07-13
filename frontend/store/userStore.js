@@ -24,6 +24,7 @@
 
 import { eventBus } from '../core/eventBus.js';
 import { logger } from '../core/logger.js';
+import { storage } from '../core/storage.js';
 
 class UserStore {
   /**
@@ -44,7 +45,7 @@ class UserStore {
         phone: '+91 98765 43210',
         gender: 'Male'
       },
-      'warehouse': {
+      'nationalWarehouseAdmin': {
         name: 'Geordi La Forge',
         email: 'geordi.laforge@plus33.coffee',
         department: 'Logistics & Supply Chain',
@@ -54,7 +55,21 @@ class UserStore {
         avatarUrl: 'imgs/male-avatar.png',
         joinedDate: '2025-03-22',
         phone: '+33 6 12 34 56 78',
-        gender: 'Male'
+        gender: 'Male',
+        designation: 'National Warehouse Admin'
+      },
+      'regionalWarehouseAdmin': {
+        name: 'Miles O\'Brien',
+        email: 'miles.obrien@plus33.coffee',
+        department: 'Logistics & Supply Chain',
+        store: 'North France Logistics',
+        storeRegion: 'North France',
+        country: 'France',
+        avatarUrl: 'imgs/male-avatar.png',
+        joinedDate: '2025-04-12',
+        phone: '+33 6 87 65 43 21',
+        gender: 'Male',
+        designation: 'Regional Warehouse Admin'
       },
       'store': {
         name: 'Beverly Crusher',
@@ -125,7 +140,8 @@ class UserStore {
    * @memberof Store Module
    */
   getProfile(role) {
-    return this.profiles[role] || {
+    const loggedUser = storage.get('plus33-user');
+    const baseProfile = this.profiles[role] || {
       name: 'Standard Employee',
       email: 'employee@plus33.coffee',
       department: 'General Staff',
@@ -137,6 +153,15 @@ class UserStore {
       phone: '',
       gender: 'Other'
     };
+
+    if (loggedUser && loggedUser.role === role) {
+      return {
+        ...baseProfile,
+        name: loggedUser.name || baseProfile.name,
+        email: loggedUser.username || baseProfile.email
+      };
+    }
+    return baseProfile;
   }
 
   /**

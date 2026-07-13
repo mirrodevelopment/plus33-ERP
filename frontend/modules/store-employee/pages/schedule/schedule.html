@@ -1,0 +1,185 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — My Barista Roster
+ * File              : schedule.html
+ * Path              : frontend/modules/store-employee/schedule/schedule.html
+ * Purpose           : HTML template for Store Employee Schedule page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : schedule.js
+ * Related CSS       : schedule.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of shift calendar grid calendars, peer request trades form,
+ * pending swap tables logs, weekend toggle boxes, and modal panels overlays.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="employee-schedule-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">My Barista Roster</h2>
+      <p class="welcome-subtitle">
+        Employee: <span class="highlight-val" id="lbl-employee-name">—</span> &nbsp;·&nbsp; Location: <span class="highlight-val" id="lbl-store-name">Green Park Café</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>Schedule Synced</span>
+    </div>
+  </div>
+
+  <!-- ===== CAPACITY RULE WARNING BANNER ===== -->
+  <div class="capacity-rule-ribbon" role="alert">
+    <i data-lucide="info" class="capacity-info-icon" aria-hidden="true"></i>
+    <span>Shift Capacity Rules: Maximum store capacity of 30 employees. Maximum 10 employees allowed per active shift.</span>
+  </div>
+
+  <!-- ===== WEEKLY CALENDAR GRID CONTAINER ===== -->
+  <div class="card glass calendar-card">
+    <div class="calendar-header-split">
+      <h3 class="calendar-split-title">Shift Calendar: Current Week</h3>
+      <span class="calendar-week-range" id="lbl-week-range">06 July - 12 July 2026</span>
+    </div>
+
+    <div class="schedule-grid" id="schedule-cards-grid">
+      <!-- Calendar day cards loaded dynamically by JS -->
+    </div>
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: Shift Swap Station -->
+    <div class="layout-column-left">
+      <div class="card glass swap-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Request Shift Swap</h3>
+          <i data-lucide="refresh-cw" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="swap-form-body">
+          <div class="form-group">
+            <label for="swap-my-shift" class="form-label">Select My Shift</label>
+            <select id="swap-my-shift" class="form-select">
+              <option value="">-- Choose one of your shifts --</option>
+              <!-- Populated dynamically by JS -->
+            </select>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="swap-peer-name" class="form-label">Peer Barista Name</label>
+              <input type="text" id="swap-peer-name" class="form-input" placeholder="e.g. Rohan Sharma">
+            </div>
+            
+            <div class="form-group">
+              <label for="swap-peer-shift" class="form-label">Peer Shift Details</label>
+              <input type="text" id="swap-peer-shift" class="form-input" placeholder="e.g. Tue (Morning Shift)">
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-submit-swap" id="btn-submit-swap" type="button">
+            Submit Roster Swap Request
+          </button>
+        </div>
+
+        <!-- Pending and Past Trades Logs -->
+        <div class="swap-log-section">
+          <h4 class="swap-log-title">Pending &amp; Past Swap Requests</h4>
+          <div class="table-scroller">
+            <table class="swap-requests-table">
+              <thead>
+                <tr class="table-header-row">
+                  <th scope="col">My Shift</th>
+                  <th scope="col">Peer Barista</th>
+                  <th scope="col">Peer Target</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody id="swap-requests-tbody">
+                <!-- Loaded dynamically by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Preferences Availability Form -->
+    <div class="layout-column-right">
+      <div class="card glass preferences-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Shift Preferences</h3>
+          <i data-lucide="settings" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="preferences-form-body">
+          <!-- Preferred Shift -->
+          <div class="form-group">
+            <label class="form-label">Preferred Shift Slot</label>
+            <div class="preference-pills-row" id="pref-slots-row">
+              <!-- Loaded dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- Weekend Availability checkbox -->
+          <div class="form-group">
+            <label class="form-label">Weekend Availability</label>
+            <label class="custom-checkbox-wrapper" id="pref-weekend-lbl">
+              <input type="checkbox" id="pref-weekend" class="native-checkbox">
+              <span id="pref-weekend-box" class="custom-checkbox-span" role="checkbox" aria-checked="false" tabindex="0">
+                <!-- Checkmark SVG added by JS when checked -->
+              </span>
+              <span class="checkbox-label-text">I am available to work weekend holiday shifts</span>
+            </label>
+          </div>
+
+          <!-- Target working hours -->
+          <div class="form-group">
+            <label for="pref-hours" class="form-label">Target Hours Per Week</label>
+            <input type="number" id="pref-hours" class="form-input" min="10" max="60" value="40">
+          </div>
+
+          <button class="btn btn-secondary btn-save-pref" id="btn-save-preferences" type="button">
+            Update Schedule Preferences
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SHIFT DETAILS MODAL PANEL OVERLAY ===== -->
+  <div id="schedule-modal-overlay" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up" id="schedule-modal-content">
+      <!-- Modal details injected here by JS -->
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== EMPTY TRADES ROW TEMPLATE ===== -->
+<template id="swap-empty-row-tpl">
+  <tr>
+    <td colspan="4" class="empty-swaps-cell">No trade requests filed in cache.</td>
+  </tr>
+</template>
+
+
+<!-- ===== TRADE REQUEST ITEM ROW TEMPLATE ===== -->
+<template id="swap-row-tpl">
+  <tr class="swap-row">
+    <td class="swap-my-cell font-bold"></td>
+    <td class="swap-peer-cell"></td>
+    <td class="swap-target-cell"></td>
+    <td class="swap-status-cell font-bold"></td>
+  </tr>
+</template>

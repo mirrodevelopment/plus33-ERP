@@ -1,0 +1,123 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Admin — Broadcast Bulletins
+ * File              : announcements.html
+ * Path              : frontend/modules/store-admin/announcements/announcements.html
+ * Purpose           : HTML template for Store Announcements page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : announcements.js
+ * Related CSS       : announcements.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural layout for creating and viewing store announcements.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="store-announcements-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-title-banner">
+    <div class="page-title-left">
+      <h2 class="page-title">
+        <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        <span>Broadcast Store Bulletins</span>
+      </h2>
+      <p class="page-subtitle">Publish storewide updates and compliance alerts to all employees &amp; supervisors</p>
+    </div>
+    
+    <span class="db-backed-badge">
+      <span class="pulse-dot" aria-hidden="true"></span>
+      <span>DB BACKED</span>
+    </span>
+  </div>
+
+  <!-- ===== TWO-COLUMN GRID ===== -->
+  <div class="announcements-grid-layout">
+    
+    <!-- Column 1: Active Published Bulletins -->
+    <div class="card glass feed-column-card">
+      <h3 class="column-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="gold-icon" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+        <span>Published Bulletins Feed (<span id="bulletins-count">0</span>)</span>
+      </h3>
+      
+      <div id="announcements-feed-container" class="feed-scroll-container">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </div>
+
+    <!-- Column 2: Compose Creator Form -->
+    <div class="card glass creator-column-card">
+      <h3 class="column-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="gold-icon" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <span>Compose Storewide Bulletin</span>
+      </h3>
+      <span class="column-subtitle">Broadcast a notification to all store employees &amp; supervisors</span>
+      
+      <form id="form-broadcast-announcement" class="creator-form">
+        <div class="form-group">
+          <label for="input-ann-title" class="form-label">Bulletin Title</label>
+          <input type="text" id="input-ann-title" class="form-input" placeholder="e.g. Mandatory Store Safety Drills" required>
+        </div>
+
+        <div class="form-group">
+          <label for="select-ann-priority" class="form-label">Priority / Classification</label>
+          <select id="select-ann-priority" class="form-select">
+            <option value="Standard Notice">Standard Notice</option>
+            <option value="Critical Alert">Critical Alert</option>
+            <option value="Company Bulletin">Company Bulletin</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="input-ann-content" class="form-label">Bulletin Content</label>
+          <textarea id="input-ann-content" class="form-textarea" placeholder="Enter message for all shift supervisor &amp; barista staff..." rows="5" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-submit-broadcast">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span>Broadcast Storewide</span>
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ===== EMPTY FEED COMPONENT ===== -->
+<template id="ann-empty-feed-tpl">
+  <div class="empty-feed-banner">
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+    <p class="empty-feed-title">No active store bulletins</p>
+    <p class="empty-feed-subtitle">Create and publish a bulletin on the right to notify your entire employee roster.</p>
+  </div>
+</template>
+
+
+<!-- ===== BULLETIN CARD ITEM TEMPLATE ===== -->
+<template id="ann-bulletin-card-tpl">
+  <div class="bulletin-card">
+    <div class="bulletin-top-row">
+      <div class="bulletin-header-meta">
+        <span class="priority-badge"></span>
+        <h4 class="bulletin-title"></h4>
+      </div>
+      <button type="button" class="btn-delete-announcement" aria-label="Delete bulletin">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    
+    <p class="bulletin-content"></p>
+    
+    <div class="bulletin-footer-meta">
+      <span>Publisher: <strong class="publisher-name"></strong></span>
+      <span>Date: <strong class="published-date"></strong></span>
+    </div>
+  </div>
+</template>

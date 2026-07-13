@@ -1,0 +1,95 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Frontend Design System
+ * File              : nation.css
+ * Path              : frontend/theme/nation.css
+ * Purpose           : CSS Theme/Stylesheet: French Flag "Nation" design tokens
+ * Version           : 1.0.0
+ *
+ * Palette
+ * ---------------------------------------------------------------------------
+ *  Blue Accent    : #000091
+ *  Red Accent     : #E1000F
+ *  White Base     : #FFFFFF
+ ******************************************************************************/
+
+html[data-theme="nation"] {
+  /* ── Backgrounds ─────────────────────────────────────────────────────── */
+  --bg-app:        #f5f7fa;   /* Clean light grey-blue */
+  --bg-sidebar:    #000091;   /* French Deep Blue */
+  --bg-header:     #ffffff;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #edf1f7;
+
+  /* ── Borders ─────────────────────────────────────────────────────────── */
+  --border-color:       #d3dbe8;
+  --border-color-hover: #000091;
+
+  /* ── Text ────────────────────────────────────────────────────────────── */
+  --text-primary:   #0a0f24;   /* Deep navy */
+  --text-secondary: #4a5a70;
+  --text-muted:     #8c9cb2;
+
+  /* ── Accents ─────────────────────────────────────────────────────────── */
+  --accent-primary:   #e1000f;   /* Red */
+  --accent-secondary: #000091;   /* Blue */
+  --accent-glow:      rgba(225, 0, 15, 0.12);
+
+  /* ── Status ──────────────────────────────────────────────────────────── */
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger:  #e1000f;
+  --status-info:    #000091;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(10, 15, 36, 0.05), 0 1px 2px rgba(10, 15, 36, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(10, 15, 36, 0.08), 0 2px 4px -1px rgba(10, 15, 36, 0.04);
+}
+
+/* Hard safety-net: ensure page is white-blue in nation */
+html[data-theme="nation"],
+html[data-theme="nation"] body {
+  background-color: #f5f7fa;
+  color: #0a0f24;
+}
+
+/* Sidebar theme overrides to keep text readable on deep blue background */
+html[data-theme="nation"] .sidebar {
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #9cacf2;
+  --border-color: rgba(255, 255, 255, 0.12);
+  --bg-card-hover: rgba(255, 255, 255, 0.1);
+  --accent-primary: #e1000f; /* Red indicators on deep blue sidebar */
+}
+
+/* Brand text should stand out on blue background */
+html[data-theme="nation"] .brand-text {
+  color: #ffffff !important;
+}
+
+/* Active indicator border */
+html[data-theme="nation"] .nav-item.active {
+  border-left-color: #e1000f !important;
+}
+
+/* Filter bar overrides to look crisp on light-grey background */
+html[data-theme="nation"] .filter-search-wrapper,
+html[data-theme="nation"] .filter-select,
+html[data-theme="nation"] .filter-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+/* Premium gradient primary buttons */
+html[data-theme="nation"] .btn-primary {
+  background: linear-gradient(135deg, #000091 0%, #e1000f 100%) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 145, 0.2) !important;
+}
+html[data-theme="nation"] .btn-primary:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 145, 0.35) !important;
+}

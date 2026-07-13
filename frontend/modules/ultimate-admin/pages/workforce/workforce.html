@@ -1,0 +1,271 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Workforce & Payroll
+ * File              : workforce.html
+ * Path              : frontend/modules/ultimate-admin/workforce/workforce.html
+ * Purpose           : HTML structure for Workforce & Payroll Management
+ * Version           : 2.0.0
+ *
+ * Related JS        : workforce.js
+ * Related CSS       : workforce.css
+ * Related APIs      : GET /api/v1/employees
+ *                     POST /api/v1/employees
+ *                     POST /api/v2/payroll
+ *                     POST /api/v2/payroll/:id/calculate
+ *                     GET /api/v2/payroll/1/export/csv
+ *                     POST /api/v1/employees/:id/activate
+ *                     POST /api/v1/employees/:id/deactivate
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural workforce panel layout.
+ * JavaScript (workforce.js) handles roster elements mapping and actions.
+ * No inline styles. No inline click listeners.
+ ******************************************************************************
+-->
+
+<div class="workforce-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header workforce-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="users" aria-hidden="true"></i>
+        <span>Workforce Operations</span>
+      </div>
+      <h1 class="page-title">Workforce &amp; Payroll Control Center</h1>
+      <p class="page-subtitle">Manage employee rosters, dynamic regional assignments, and monthly payroll disbursement runs.</p>
+    </div>
+    <div class="page-header-right">
+      <div class="payroll-status-pill" role="status" aria-live="polite">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span>Payroll Active</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPI METRICS GRID ===== -->
+  <div class="workforce-kpi-grid" role="region" aria-label="Workforce summary metrics">
+    <div class="kpi-card kpi-card--gold">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold" aria-hidden="true">
+        <i data-lucide="users"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-total-staff">— Staff</span>
+        <span class="kpi-label">Active Roster</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--success">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--success" aria-hidden="true">
+        <i data-lucide="dollar-sign"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-gross-payroll">—</span>
+        <span class="kpi-label">Gross Payroll</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--danger">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--danger" aria-hidden="true">
+        <i data-lucide="landmark"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-tax-deduction">—</span>
+        <span class="kpi-label">Taxes Deducted</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--info">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--info" aria-hidden="true">
+        <i data-lucide="wallet"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-net-disbursement">—</span>
+        <span class="kpi-label">Net Disbursed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN WORKFORCE SPLIT GRID ===== -->
+  <div class="workforce-layout-grid">
+    
+    <!-- Left Column: Active Staff Roster List -->
+    <div class="workforce-left-panel">
+      <div class="card glass roster-card">
+        <div class="roster-header">
+          <h3 class="roster-title">Active Staff Roster</h3>
+          <span class="roster-status-badge">Live DB Synced</span>
+        </div>
+        
+        <div class="table-scroll-wrapper">
+          <table class="roster-table">
+            <thead>
+              <tr>
+                <th scope="col">Code</th>
+                <th scope="col">Name</th>
+                <th scope="col">Designation</th>
+                <th scope="col">Emp Type</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="employee-roster-body">
+              <!-- Employee rows dynamically mapped by workforce.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Registration & Payroll processing actions -->
+    <div class="workforce-right-panel">
+      
+      <!-- Panel 1: Register New Employee Form -->
+      <div class="card glass onboard-card">
+        <div class="onboard-header">
+          <i data-lucide="user-plus" class="onboard-icon" aria-hidden="true"></i>
+          <h3 class="onboard-title">Register New Employee</h3>
+        </div>
+        
+        <form id="create-employee-form" class="onboard-form" novalidate>
+          <div class="form-grid-flex">
+            <div class="form-group flex-grow">
+              <label for="emp-code" class="form-label">Emp Code</label>
+              <input
+                type="text"
+                id="emp-code"
+                class="form-input"
+                placeholder="EMP-101"
+                required
+                aria-required="true"
+              >
+            </div>
+            <div class="form-group emp-type-group">
+              <label for="emp-job-type" class="form-label">Job Type</label>
+              <select id="emp-job-type" class="form-select">
+                <option value="FULL_TIME">Full Time</option>
+                <option value="PART_TIME">Part Time</option>
+                <option value="CONTRACT">Contract</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-flex">
+            <div class="form-group">
+              <label for="emp-first-name" class="form-label">First Name</label>
+              <input
+                type="text"
+                id="emp-first-name"
+                class="form-input"
+                placeholder="John"
+                required
+                aria-required="true"
+              >
+            </div>
+            <div class="form-group">
+              <label for="emp-last-name" class="form-label">Last Name</label>
+              <input
+                type="text"
+                id="emp-last-name"
+                class="form-input"
+                placeholder="Doe"
+                required
+                aria-required="true"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="emp-email" class="form-label">Email Address</label>
+            <input
+              type="email"
+              id="emp-email"
+              class="form-input"
+              placeholder="johndoe@plus33.com"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="form-grid-flex">
+            <div class="form-group flex-grow">
+              <label for="emp-designation" class="form-label">Designation</label>
+              <select id="emp-designation" class="form-select">
+                <option value="BARISTA">Barista</option>
+                <option value="STORE_MANAGER">Store Manager</option>
+                <option value="ROASTER_OPERATOR">Roaster Operator</option>
+                <option value="LOGISTICS_DRIVER">Logistics Driver</option>
+              </select>
+            </div>
+            <div class="form-group emp-wage-group">
+              <label for="emp-wage-rate" class="form-label" id="lbl-wage-rate">Wage Rate (€/hr)</label>
+              <input
+                type="number"
+                id="emp-wage-rate"
+                class="form-input text-center"
+                value="180"
+                aria-labelledby="lbl-wage-rate"
+              >
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-onboard">
+            <i data-lucide="plus" aria-hidden="true"></i>
+            <span>Create Profile</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Panel 2: Payroll Run calculations dispatcher -->
+      <div class="card glass payroll-run-card">
+        <div class="audit-header">
+          <i data-lucide="calculator" class="audit-icon" aria-hidden="true"></i>
+          <h3 class="audit-title">Process Payroll Run</h3>
+        </div>
+        
+        <p class="audit-desc">Trigger calculations for current month wages, tax holdbacks, and generate accounting journal lines.</p>
+
+        <div class="payroll-buttons-wrapper">
+          <button id="btn-calculate-payroll" class="btn btn-secondary btn-run" type="button" aria-label="Calculate current monthly payroll run">
+            <i data-lucide="play" aria-hidden="true"></i>
+            <span>Calculate Run</span>
+          </button>
+          
+          <button id="btn-export-payroll-csv" class="btn btn-primary btn-export" type="button" aria-label="Export payroll results to CSV sheet">
+            <i data-lucide="download" aria-hidden="true"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+        
+        <div id="payroll-console-status" class="payroll-console-log" role="status" aria-live="polite">
+          System standby. Ready to process.
+        </div>
+      </div>
+
+    </div><!-- /workforce-right-panel -->
+
+  </div><!-- /workforce-layout-grid -->
+
+</div><!-- /workforce-workspace -->
+
+
+<!-- ===== TABLE ROW TEMPLATE ===== -->
+<template id="employee-row-tpl">
+  <tr class="roster-table-row">
+    <td class="col-code"></td>
+    <td class="col-name"></td>
+    <td class="col-designation"></td>
+    <td class="col-type"></td>
+    <td class="col-status">
+      <span class="status-indicator-wrapper">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-label"></span>
+      </span>
+    </td>
+    <td class="col-actions">
+      <button class="btn btn-secondary btn-toggle-status" type="button"></button>
+    </td>
+  </tr>
+</template>

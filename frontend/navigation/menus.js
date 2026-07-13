@@ -80,7 +80,7 @@ export function getMenuItems() {
     ];
   }
 
-  if (role === 'warehouse') {
+  if (role === 'nationalWarehouseAdmin' || role === 'regionalWarehouseAdmin') {
     return [
       {
         title: 'OPERATIONS',

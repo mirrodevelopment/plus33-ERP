@@ -1,0 +1,194 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Earnings Statement (Payslips)
+ * File              : payslips.html
+ * Path              : frontend/modules/store-employee/payslips/payslips.html
+ * Purpose           : HTML template for Store Employee Payslips page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : payslips.js
+ * Related CSS       : payslips.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of monthly paycheck balances, releases history ledger tables,
+ * dispute inquiry tickets form composer, and breakdown modal popups.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="employee-payroll-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">Earnings Statement</h2>
+      <p class="welcome-subtitle">
+        Employee: <span class="highlight-val" id="lbl-barista-name">—</span> &nbsp;·&nbsp; Role: <span class="highlight-val" id="lbl-barista-role">—</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <i data-lucide="check" aria-hidden="true"></i>
+      <span>Salary Account Active (France FR Region)</span>
+    </div>
+  </div>
+
+  <!-- ===== 4 PAYROLL KPI CARDS ===== -->
+  <div class="kpi-grid-row" role="region" aria-label="Payslip monthly summary metrics">
+    
+    <!-- KPI 1: Net Salary -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--green" aria-hidden="true">
+        <i data-lucide="banknote"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-net-salary">—</div>
+        <div class="kpi-label">Net Salary (Latest)</div>
+      </div>
+    </div>
+
+    <!-- KPI 2: Gross Earnings -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--normal" aria-hidden="true">
+        <i data-lucide="wallet"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-gross-earnings">—</div>
+        <div class="kpi-label">Gross Earnings</div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Overtime & Allowances -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--blue" aria-hidden="true">
+        <i data-lucide="plus-circle"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-overtime-allowances">—</div>
+        <div class="kpi-label">Overtime &amp; Allowances</div>
+      </div>
+    </div>
+
+    <!-- KPI 4: Deductions & Taxes -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--red" aria-hidden="true">
+        <i data-lucide="minus-circle"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-deductions-taxes">—</div>
+        <div class="kpi-label">Deductions &amp; Taxes</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: History releases table -->
+    <div class="layout-column-left">
+      <div class="card glass history-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Payroll Release History</h3>
+          <i data-lucide="history" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="table-scroller">
+          <table class="payslip-history-table">
+            <thead>
+              <tr class="table-header-row">
+                <th scope="col">Billing Period</th>
+                <th scope="col">Gross Pay</th>
+                <th scope="col">Deductions</th>
+                <th scope="col">Net Paid</th>
+                <th scope="col">Run #</th>
+                <th scope="col" class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="payslip-history-tbody">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Inquiry tickets composer -->
+    <div class="layout-column-right">
+      <div class="card glass inquiry-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Payroll Inquiry</h3>
+          <i data-lucide="help-circle" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="inquiry-form-body">
+          <p class="inquiry-hint-para">
+            File a ticket directly with store accounts and HR regarding shift counts, salary credits, or benefit discrepancies.
+          </p>
+
+          <div class="form-group">
+            <label for="query-billing-period" class="form-label">Select billing Period</label>
+            <select id="query-billing-period" class="form-select">
+              <!-- Loaded dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="query-topic" class="form-label">Inquiry Topic</label>
+            <select id="query-topic" class="form-select">
+              <option value="overtime">Incorrect Overtime Hours Calculation</option>
+              <option value="tax">Tax/PF Deduction Discrepancy</option>
+              <option value="bank">Delay in Bank Remittance</option>
+              <option value="other">Other Issues</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="query-details" class="form-label">Details &amp; Evidence</label>
+            <textarea id="query-details" class="form-textarea" placeholder="Describe the paycheck calculation dispute..." rows="3"></textarea>
+          </div>
+
+          <button class="btn btn-primary btn-submit-query" id="btn-submit-payroll-query" type="button">
+            Submit Accounts Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== BREAKDOWN MODAL OVERLAY ===== -->
+  <div id="payslip-modal-overlay" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up" id="payslip-modal-content">
+      <!-- Loaded dynamically on breakdown click -->
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== EMPTY HISTORIES TABLE ROW TEMPLATE ===== -->
+<template id="payslip-empty-row-tpl">
+  <tr>
+    <td colspan="6" class="empty-releases-cell">No paycheck releases found in system database.</td>
+  </tr>
+</template>
+
+
+<!-- ===== HISTORY TABLE ITEM ROW TEMPLATE ===== -->
+<template id="payslip-row-tpl">
+  <tr class="payslip-row">
+    <td class="period-cell font-bold"></td>
+    <td class="gross-cell font-mono"></td>
+    <td class="deductions-cell font-mono color-danger"></td>
+    <td class="net-cell font-bold font-mono"></td>
+    <td class="run-cell font-bold text-muted"></td>
+    <td class="actions-cell text-center">
+      <button class="btn btn-secondary btn-view-payslip" type="button">
+        View Breakdown
+      </button>
+    </td>
+  </tr>
+</template>

@@ -1,0 +1,580 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Admin — Leave Management
+ * File              : leave.css
+ * Path              : frontend/modules/store-admin/leave/leave.css
+ * Purpose           : Styling for Store Leave approvals UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.store-leave-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Header Banner Card */
+.header-banner-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.welcome-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.welcome-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.welcome-subtitle .highlight-val {
+  color: var(--accent-primary);
+}
+
+.header-status-pill {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--status-success);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-status-pill .live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-success);
+  display: inline-block;
+}
+
+/* KPI Cards Grid */
+.kpi-grid-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.kpi-grid-row .kpi-block-card {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  text-align: left;
+}
+
+.kpi-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.kpi-block-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted);
+}
+
+.kpi-block-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.kpi-block-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+/* Split Columns Layout */
+.workspace-grid-layout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .workspace-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.layout-column-left, .layout-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.queue-card, .cancellation-card, .summary-card, .policy-card, .holidays-card {
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.cancellation-card {
+  border-color: rgba(234, 179, 8, 0.2);
+}
+
+.card-header-split {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-split-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+}
+
+.card-header-split .card-split-title span {
+  display: inline-block;
+}
+
+.badge-warning {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--status-warning);
+  background: rgba(234,179,8,0.12);
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-left: 6px;
+}
+
+.card-split-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-primary);
+}
+
+.card-header-split i[data-lucide="x-circle"] {
+  color: var(--status-warning);
+}
+
+.card-header-split h3[style*="color:var(--status-warning)"] {
+  color: var(--status-warning);
+}
+
+/* Scroll Containers */
+.queue-scroll-list, .cancellations-scroll-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+/* Empty banners */
+.empty-list-banner {
+  text-align: center;
+  padding: var(--spacing-lg);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.empty-list-banner i {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 6px;
+  opacity: 0.3;
+}
+
+.empty-list-banner .success-icon {
+  color: var(--status-success);
+}
+
+.empty-list-title {
+  font-weight: 600;
+  display: block;
+}
+
+.empty-list-subtitle {
+  font-size: 0.62rem;
+  margin-top: 2px;
+  display: block;
+}
+
+/* Item Cards in Queues */
+.pending-approval-item-card {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.item-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.employee-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.employee-name {
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.leave-details-subline {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.badges-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sla-warning-span {
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 99px;
+  display: inline-block;
+}
+
+.sla-warning-span--overdue {
+  font-weight: 700;
+  color: var(--status-danger);
+  background: rgba(239,68,68,0.12);
+}
+
+.sla-warning-span--near {
+  font-weight: 700;
+  color: var(--status-warning);
+  background: rgba(234,179,8,0.12);
+}
+
+.sla-warning-span--normal {
+  color: var(--text-muted);
+}
+
+.protected-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #818cf8;
+  background: rgba(129,140,248,0.12);
+  padding: 2px 6px;
+  border-radius: 99px;
+}
+
+.document-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--status-danger);
+  background: rgba(239,68,68,0.08);
+  padding: 2px 6px;
+  border-radius: 99px;
+}
+
+.dates-subline {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.reason-quote-box {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent-primary);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 6px 8px;
+  font-size: 0.7rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.action-buttons-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-buttons-row button {
+  flex: 1;
+  font-weight: 800;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+
+.btn-approve-leave, .btn-approve-cancellation {
+  background: var(--status-success);
+  color: #000;
+}
+
+.btn-reject-leave {
+  background: var(--status-danger);
+  color: #fff;
+}
+
+.action-buttons-row button:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.document-warning-note {
+  font-size: 0.62rem;
+  text-align: center;
+}
+
+/* Cancellation Request Item Card */
+.cancellation-request-item-card {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(234,179,8,0.25);
+  background: rgba(234,179,8,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.cancellation-request-item-card .employee-name {
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.cancellation-request-item-card .leave-details-subline {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.cancellation-request-item-card .reason-quote-box {
+  font-size: 0.7rem;
+  color: var(--status-warning);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border-left: none;
+}
+
+/* Right side list details */
+.summary-details-list, .policy-details-list, .holidays-details-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-row, .policy-row, .holiday-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.summary-row .label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.summary-row .val {
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.policy-row .label {
+  font-size: 0.68rem;
+  color: var(--text-primary);
+}
+
+.policy-badge-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.policy-badge-group .level-badge {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.policy-badge-group .limit-val {
+  font-size: 0.6rem;
+  color: var(--accent-primary);
+}
+
+.policy-badge-group .limit-val--open {
+  color: var(--text-muted);
+}
+
+.holiday-row .label {
+  font-size: 0.68rem;
+  color: var(--text-primary);
+}
+
+.holiday-row .val {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* Modal Overlay backdrop for popup elements */
+.modal-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+}
+
+.modal-content-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.modal-title.color-danger {
+  color: var(--status-danger);
+}
+
+.modal-description {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.form-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.required-indicator {
+  color: var(--status-danger);
+}
+
+.hint {
+  font-weight: 400;
+}
+
+.form-textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--status-danger);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
+  outline: none;
+  font-family: inherit;
+  resize: none;
+}
+
+.char-counter-text {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.modal-actions-row {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.modal-actions-row button {
+  flex: 1;
+  padding: var(--spacing-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+}

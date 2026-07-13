@@ -74,6 +74,15 @@ export const dashboardLayout = {
     if (avatarEl) avatarEl.src = profile?.avatarUrl || 'imgs/male-avatar.png';
     if (nameEl) nameEl.textContent = profile?.name || 'User';
     if (roleEl) roleEl.textContent = user?.role || '—';
+
+    // Populate header profile card
+    const avatarHeader = document.getElementById('user-avatar-header');
+    const nameHeader = document.getElementById('user-name-header');
+    const roleHeader = document.getElementById('user-role-header');
+
+    if (avatarHeader) avatarHeader.src = profile?.avatarUrl || 'imgs/male-avatar.png';
+    if (nameHeader) nameHeader.textContent = profile?.name || 'User';
+    if (roleHeader) roleHeader.textContent = user?.role || '—';
   },
 
   /**

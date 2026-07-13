@@ -91,8 +91,11 @@ public class WebServer {
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod(t.getRequestMethod());
                     
-                    // Copy Request Headers
+                    // Copy Request Headers (ignoring Cookie to prevent too large request header error)
                     for (String headerKey : t.getRequestHeaders().keySet()) {
+                        if (headerKey != null && headerKey.equalsIgnoreCase("Cookie")) {
+                            continue;
+                        }
                         conn.setRequestProperty(headerKey, t.getRequestHeaders().getFirst(headerKey));
                     }
                     
@@ -110,7 +113,9 @@ public class WebServer {
                     
                     // Copy Response Headers
                     for (String headerKey : conn.getHeaderFields().keySet()) {
-                        if (headerKey != null && !headerKey.equalsIgnoreCase("Transfer-Encoding")) {
+                        if (headerKey != null 
+                            && !headerKey.equalsIgnoreCase("Transfer-Encoding")
+                            && !headerKey.equalsIgnoreCase("WWW-Authenticate")) {
                             t.getResponseHeaders().set(headerKey, conn.getHeaderField(headerKey));
                         }
                     }

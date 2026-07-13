@@ -1,0 +1,178 @@
+================================================================================
+  PLUS33 Coffee ERP - Frontend File Structure
+  (Modular Architecture — Updated and Validated)
+================================================================================
+
+Project-level folders are unchanged. All role-specific code lives inside
+modules/<role>/pages/ (for pages) and modules/<role>/charts/ (for charts).
+
+frontend/
+├── index.html
+├── main.js
+│
+├── api/                         # HTTP Client Wrapper
+│   └── client.js
+│
+├── core/                        # Core utilities
+│   ├── htmlLoader.js
+│   ├── logger.js
+│   └── state.js
+│
+├── modules/                     # SPA Role Modules
+│   │
+│   ├── ultimate-admin/
+│   │   └── pages/
+│   │       ├── dashboard/
+│   │       │   ├── dashboard.html
+│   │       │   ├── dashboard.css
+│   │       │   └── dashboard.js
+│   │       ├── customers/
+│   │       │   ├── customers.html
+│   │       │   ├── customers.css
+│   │       │   └── customers.js
+│   │       ├── finance/
+│   │       ├── national/
+│   │       ├── permissions/
+│   │       ├── regions/
+│   │       ├── settings/
+│   │       ├── stores/
+│   │       ├── users/
+│   │       ├── warehouses/
+│   │       └── workforce/
+│   │
+│   ├── national-admin/
+│   │   ├── charts/
+│   │   │   └── national-sales-chart/
+│   │   │       ├── national-sales-chart.html
+│   │   │       ├── national-sales-chart.css   # Added placeholder CSS
+│   │   │       └── national-sales-chart.js
+│   │   └── pages/
+│   │       └── dashboard/
+│   │           ├── dashboard.html
+│   │           ├── dashboard.css
+│   │           └── dashboard.js
+│   │
+│   ├── regional-admin/
+│   │   └── pages/
+│   │       └── dashboard/
+│   │           ├── dashboard.html
+│   │           ├── dashboard.css
+│   │           └── dashboard.js
+│   │
+│   ├── store-admin/
+│   │   └── pages/
+│   │       ├── dashboard/
+│   │       ├── sales/
+│   │       ├── announcements/
+│   │       └── leave/
+│   │
+│   ├── store-employee/
+│   │   └── pages/
+│   │       ├── dashboard/
+│   │       ├── announcements/
+│   │       ├── attendance/
+│   │       ├── documents/
+│   │       ├── leave/
+│   │       ├── payslips/
+│   │       ├── performance/
+│   │       ├── schedule/
+│   │       ├── supervisor-announcements/
+│   │       ├── supervisor-dashboard/
+│   │       ├── supervisor-leaves/
+│   │       ├── tasks/
+│   │       └── training/
+│   │
+│   ├── warehouse-admin/
+│   │   └── pages/
+│   │       ├── topology/
+│   │       ├── supply-chain/
+│   │       └── logs/
+│   │
+│   └── inventory/
+│       └── pages/
+│           └── stock-list/             # Aligned with page folder convention
+│               ├── stock-list.html
+│               ├── stock-list.css
+│               └── stock-list.js
+│
+├── navigation/
+│   ├── breadcrumbs.js
+│   ├── menus.js
+│   └── routes.js               # Updated route references to include pages/ and stock-list/
+│
+├── routing/
+│   └── router.js
+│
+├── services/
+│   ├── auth/
+│   ├── dashboard/
+│   └── sales/
+│
+├── shared/                      # Global common sub-views
+│   ├── login/
+│   ├── profile/
+│   └── not-implemented/
+│
+├── store/
+│   ├── authStore.js
+│   ├── permissionStore.js
+│   ├── themeStore.js
+│   └── userStore.js
+│
+├── theme/
+│   ├── variables.css
+│   ├── coffee-dark.css
+│   ├── light.css
+│   ├── charcoal.css
+│   ├── cyber-dark.css
+│   ├── nation.css
+│   ├── colors.css
+│   ├── spacing.css
+│   ├── typography.css
+│   ├── animations.css
+│   └── theme-registry.js
+│
+└── widgets/                     # Shared reusable widgets
+    ├── widget-engine.js
+    └── charts/                  # Folder-based shared widgets structure
+        ├── sales-chart/
+        │   ├── sales-chart.html
+        │   ├── sales-chart.css
+        │   └── sales-chart.js
+        ├── financial-chart/
+        │   ├── financial-chart.html
+        │   ├── financial-chart.css
+        │   └── financial-chart.js
+        ├── stock-chart/
+        │   ├── stock-chart.html
+        │   ├── stock-chart.css
+        │   └── stock-chart.js
+        └── compliance-gauge/
+            ├── compliance-gauge.html
+            ├── compliance-gauge.css
+            └── compliance-gauge.js
+
+================================================================================
+  Architecture Rules
+================================================================================
+
+1. Every page follows:       modules/<role>/pages/<page-name>/
+                               ├── <page-name>.html
+                               ├── <page-name>.css
+                               └── <page-name>.js
+
+2. Every role-specific chart:modules/<role>/charts/<chart-name>/
+                               ├── <chart-name>.html
+                               ├── <chart-name>.css
+                               └── <chart-name>.js
+
+3. Every shared chart follows:widgets/charts/<chart-name>/
+                               ├── <chart-name>.html
+                               ├── <chart-name>.css
+                               └── <chart-name>.js
+
+4. Page imports depth:       '../../../../' (e.g. '../../../../core/logger.js')
+5. Chart imports depth:      '../../../../' (e.g. '../../../../core/logger.js')
+
+6. No flat chart files or empty folders remain.
+================================================================================

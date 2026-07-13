@@ -1,0 +1,524 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Warehouse Admin — Supply Chain
+ * File              : supply-chain.css
+ * Path              : frontend/modules/warehouse-admin/supply-chain/supply-chain.css
+ * Purpose           : Styling for Supply Chain UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.supply-chain-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Page Header & Pulse Indicator */
+.supply-chain-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-sm);
+}
+
+.network-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-success);
+}
+
+.network-status-pill .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-success);
+  display: inline-block;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* KPI Summary Cards Grid */
+.supply-chain-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+.supply-chain-kpi-grid .kpi-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.kpi-icon-wrapper {
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon-wrapper i {
+  width: 24px;
+  height: 24px;
+}
+
+.kpi-icon-wrapper--gold {
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary);
+}
+
+.kpi-icon-wrapper--success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--status-success);
+}
+
+.kpi-icon-wrapper--info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.kpi-icon-wrapper--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-danger);
+}
+
+.kpi-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Split Columns Layout */
+.supply-chain-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.supply-chain-left-panel {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.supply-chain-right-panel {
+  grid-column: span 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topology-card, .dispatch-card, .fleet-card {
+  padding: var(--spacing-lg);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.topology-card {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dispatch-card {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Topology Header */
+.topology-header, .dispatch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.topology-title, .dispatch-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.topology-status-badge {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.svg-map-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  position: relative;
+}
+
+.network-svg {
+  background: transparent;
+}
+
+/* Svg Connections lane path styles */
+.connection-lane {
+  stroke-width: 3;
+}
+
+.connection-lane--dashed {
+  stroke: rgba(201, 164, 106, 0.3);
+  stroke-dasharray: 5 5;
+  animation: svg-dash 10s linear infinite;
+}
+
+.connection-lane--east, .connection-lane--west {
+  stroke: rgba(59, 130, 246, 0.4);
+}
+
+.connection-lane--charging {
+  stroke: rgba(130, 163, 125, 0.4);
+  stroke-width: 2;
+}
+
+@keyframes svg-dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+/* Node Circle shapes */
+.node-circle {
+  cursor: pointer;
+  transition: r 0.2s ease;
+}
+
+.node-circle:hover {
+  r: 15;
+}
+
+.node-circle--hq {
+  fill: var(--accent-primary);
+  filter: drop-shadow(0 0 8px var(--accent-primary));
+}
+
+.node-circle--hub {
+  fill: #3b82f6;
+  filter: drop-shadow(0 0 6px #3b82f6);
+}
+
+.node-circle--rdc {
+  fill: #a78bfa;
+}
+
+.node-circle--charger {
+  fill: #82a37d;
+}
+
+.node-label {
+  fill: #fff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.node-label--sub {
+  fill: rgba(255, 255, 255, 0.7);
+  font-size: 8px;
+  font-weight: 400;
+}
+
+/* Map Legend overlay */
+.map-legend {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.legend-dot--hq { background: var(--accent-primary); }
+.legend-dot--hub { background: #3b82f6; }
+.legend-dot--rdc { background: #a78bfa; }
+.legend-dot--charger { background: #82a37d; }
+
+/* Dispatch Console Right Panel */
+.dispatch-header {
+  justify-content: flex-start;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.dispatch-icon {
+  color: var(--accent-primary);
+  width: 18px;
+  height: 18px;
+}
+
+.dispatch-desc {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: var(--spacing-lg);
+}
+
+.dispatch-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.calculator-flex-row {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.distance-input {
+  width: 100px;
+}
+
+.btn-run-simulation {
+  letter-spacing: 0.05em;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.simulation-log-console {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-md);
+  text-align: left;
+}
+
+.simulation-log-console .console-header {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.simulation-log-console .console-body {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-primary);
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+/* Fleet Telemetry Bottom Card */
+.fleet-card {
+  padding: var(--spacing-lg);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.fleet-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.fleet-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.fleet-icon {
+  color: var(--accent-primary);
+  width: 18px;
+  height: 18px;
+}
+
+.fleet-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.fleet-register-form {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.fleet-reg-input {
+  padding: 6px 12px;
+}
+
+.capacity-input {
+  padding: 6px 12px;
+  width: 110px;
+}
+
+.btn-register-vehicle {
+  padding: 6px 14px;
+}
+
+.table-scroll-wrapper {
+  overflow-x: auto;
+}
+
+/* Telemetry Table Styles */
+.fleet-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+.fleet-table th {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.fleet-table td {
+  padding: var(--spacing-md);
+  vertical-align: middle;
+}
+
+.fleet-table-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background var(--transition-fast);
+}
+
+.fleet-table-row:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.col-id {
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.col-code {
+  font-weight: 700;
+  color: #fff;
+}
+
+.col-type {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.col-capacity {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.col-speed {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Battery meter progress */
+.battery-bar-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.battery-track {
+  flex-grow: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 80px;
+}
+
+.battery-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.battery-percentage {
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: 30px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-indicator-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.col-actions {
+  text-align: right;
+}
+
+.col-actions .btn-optimize-cost {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+}

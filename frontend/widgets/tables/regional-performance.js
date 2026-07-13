@@ -82,15 +82,33 @@ export class RegionalPerformance {
       return `<circle class="donut-segment" cx="21" cy="21" r="15.915" fill="transparent" stroke="${stroke}" stroke-width="4.2" stroke-dasharray="${dash}" stroke-dashoffset="${offset}" style="transition: stroke-dasharray 0.3s ease;"></circle>`;
     }).join('');
 
+    let currencyCode = 'EUR';
+    let locale = 'fr-FR';
+    let currencySymbol = '€';
+    const storedGeneral = localStorage.getItem('plus33-settings-general');
+    if (storedGeneral) {
+      try {
+        const parsed = JSON.parse(storedGeneral);
+        if (parsed.defaultCurrency) {
+          currencyCode = parsed.defaultCurrency;
+          if (currencyCode === 'USD') { locale = 'en-US'; currencySymbol = '$'; }
+          else if (currencyCode === 'INR') { locale = 'en-IN'; currencySymbol = '₹'; }
+          else if (currencyCode === 'AED') { locale = 'en-US'; currencySymbol = 'د.إ'; }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
     // Format total sales for chart center text
     /**
      * Performs the formatTotalCompact operation in this module.
      * @memberof Widgets Module
      */
     const formatTotalCompact = (val) => {
-      if (val >= 1_000_000) return `€${(val / 1_000_000).toFixed(1)}M`;
-      if (val >= 1_000) return `€${(val / 1_000).toFixed(1)}K`;
-      return `€${val.toFixed(0)}`;
+      if (val >= 1_000_000) return `${currencySymbol}${(val / 1_000_000).toFixed(1)}M`;
+      if (val >= 1_000) return `${currencySymbol}${(val / 1_000).toFixed(1)}K`;
+      return `${currencySymbol}${val.toFixed(0)}`;
     };
 
     container.innerHTML = `
@@ -139,23 +157,6 @@ export class RegionalPerformance {
                  */
                 const sharePct = ((salesVal / totalSales) * 100).toFixed(1);
                 const achievement = Number(r.achievement || ((salesVal / (r.target || salesVal * 1.1)) * 100)).toFixed(1);
-                
-                let currencyCode = 'EUR';
-                let locale = 'fr-FR';
-                const storedGeneral = localStorage.getItem('plus33-settings-general');
-                if (storedGeneral) {
-                  try {
-                    const parsed = JSON.parse(storedGeneral);
-                    if (parsed.defaultCurrency) {
-                      currencyCode = parsed.defaultCurrency;
-                      if (currencyCode === 'USD') locale = 'en-US';
-                      else if (currencyCode === 'INR') locale = 'en-IN';
-                      else if (currencyCode === 'AED') locale = 'en-US';
-                    }
-                  } catch (e) {
-                    // ignore
-                  }
-                }
 
                 const salesFormatted = new Intl.NumberFormat(locale, {
                   style: 'currency',

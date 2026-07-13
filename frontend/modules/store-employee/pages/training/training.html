@@ -1,0 +1,180 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — L&D Training Academy
+ * File              : training.html
+ * Path              : frontend/modules/store-employee/training/training.html
+ * Purpose           : HTML template for Store Employee Training page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : training.js
+ * Related CSS       : training.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of curriculum syllabus modules, qualifications badges, S2 quiz
+ * options triggers, certificate download cards, and popups modal overlays.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="employee-training-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">L&amp;D Training Academy</h2>
+      <p class="welcome-subtitle">
+        Barista Curriculum &nbsp;·&nbsp; Profile: <span class="highlight-val" id="lbl-employee-level">—</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <i data-lucide="award" aria-hidden="true"></i>
+      <span>Curriculum Active</span>
+    </div>
+  </div>
+
+  <!-- ===== 4 ACADEMY STATS CARDS ===== -->
+  <div class="kpi-grid-row" role="region" aria-label="Academy training metrics">
+    
+    <!-- KPI 1: Overall Completion -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold" aria-hidden="true">
+        <i data-lucide="graduation-cap"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-training-progress">—</div>
+        <div class="kpi-label">Overall Completion</div>
+      </div>
+    </div>
+
+    <!-- KPI 2: Active Credentials -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--green" aria-hidden="true">
+        <i data-lucide="shield-check"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-certified-count">—</div>
+        <div class="kpi-label">Active Credentials</div>
+      </div>
+    </div>
+
+    <!-- KPI 3: In-Progress Modules -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--blue" aria-hidden="true">
+        <i data-lucide="book-open"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-enrolled-count">—</div>
+        <div class="kpi-label">In-Progress Modules</div>
+      </div>
+    </div>
+
+    <!-- KPI 4: Prerequisites Locked -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--locked" aria-hidden="true">
+        <i data-lucide="lock"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-locked-count">1 Locked</div>
+        <div class="kpi-label">Prerequisites Remaining</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: Syllabus course module cards -->
+    <div class="layout-column-left">
+      <div class="card glass curriculum-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Curriculum Track Syllabus</h3>
+          <i data-lucide="bookmark" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="curriculum-modules-feed" id="training-modules-feed">
+          <!-- Loaded dynamically by JS/Controller -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Qualification badges list & memo -->
+    <div class="layout-column-right">
+      
+      <!-- Active Qualifications list -->
+      <div class="card glass qualifications-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Active Qualifications</h3>
+          <i data-lucide="award" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+
+        <div class="qualifications-list-body" id="qualifications-list-body">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Guidelines Memo -->
+      <div class="card glass guidelines-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Academy Guidelines</h3>
+          <i data-lucide="info" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        <p class="guidelines-para">
+          All store baristas must hold active S1 Food Safety credentials. Senior Baristas must complete S2 Espresso Extraction modules within 30 days of roster assignments to lead active store barista slots.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===== QUIZ & CERTIFICATE MODAL PANEL OVERLAY ===== -->
+  <div id="training-modal-overlay" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up" id="training-modal-content">
+      <!-- Injected dynamically by JS -->
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== MODULE COURSE DETAIL BLOCK TEMPLATE ===== -->
+<template id="training-module-card-tpl">
+  <div class="training-module-row">
+    <div class="module-header-meta">
+      <div class="module-title-group">
+        <span class="module-code-lbl"></span>
+        <h4 class="module-name-text"></h4>
+      </div>
+      <span class="module-status-badge font-bold"></span>
+    </div>
+
+    <div class="module-progress-bar-row">
+      <div class="module-progress-bg" aria-hidden="true">
+        <div class="module-progress-fill"></div>
+      </div>
+      <span class="module-progress-percent font-bold"></span>
+    </div>
+
+    <div class="module-action-buttons-row">
+      <!-- Buttons appended by JS depending on module completion status -->
+    </div>
+  </div>
+</template>
+
+
+<!-- ===== ACTIVE QUALIFICATION BADGE ITEM TEMPLATE ===== -->
+<template id="qualification-badge-tpl">
+  <div class="qualification-badge-row">
+    <div class="badge-icon-circle" aria-hidden="true">
+      <i data-lucide="award"></i>
+    </div>
+    <div class="badge-text-meta">
+      <strong class="badge-title font-bold"></strong>
+      <span class="badge-subtitle text-muted"></span>
+    </div>
+  </div>
+</template>

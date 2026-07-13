@@ -32,6 +32,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.plus33.erp.dashboard.dto.DashboardScope;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -69,63 +70,121 @@ public class ComplianceAnalyticsService {
     /**
      * Retrieves compliance score data from the database.
      *
+     * @param scope the dashboard query scope context
      * @return the Double result
-     * @throws ResourceNotFoundException if the entity is not found
      */
-    public Double getComplianceScore() {
-        // Passed checks / total checks tested
-        Long total = (Long) entityManager.createQuery("SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result IN ('PASSED', 'FAILED')").getSingleResult();
-        if (total == 0) {
-            return 0.0;
+    public Double getComplianceScore(DashboardScope scope) {
+        Long regionId = scope != null ? scope.getRegionId() : null;
+        if (regionId == null) {
+            Long total = (Long) entityManager.createQuery("SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result IN ('PASSED', 'FAILED')").getSingleResult();
+            if (total == 0) {
+                return 0.0;
+            }
+            Long passed = (Long) entityManager.createQuery("SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result = 'PASSED'").getSingleResult();
+            return (double) passed / total * 100.0;
+        } else {
+            String totalJpql = "SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result IN ('PASSED', 'FAILED') AND " +
+                    "(ctr.testedById IN (SELECT ur.user.id FROM UserRegion ur WHERE ur.region.id = :regionId OR ur.region.parent.id = :regionId) OR " +
+                    " ctr.testedById IN (SELECT us.user.id FROM UserStore us JOIN Store s ON s.id = us.store.id WHERE s.region.id = :regionId OR s.region.parent.id = :regionId))";
+            String passedJpql = "SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result = 'PASSED' AND " +
+                    "(ctr.testedById IN (SELECT ur.user.id FROM UserRegion ur WHERE ur.region.id = :regionId OR ur.region.parent.id = :regionId) OR " +
+                    " ctr.testedById IN (SELECT us.user.id FROM UserStore us JOIN Store s ON s.id = us.store.id WHERE s.region.id = :regionId OR s.region.parent.id = :regionId))";
+            Long total = (Long) entityManager.createQuery(totalJpql).setParameter("regionId", regionId).getSingleResult();
+            if (total == 0) return 0.0;
+            Long passed = (Long) entityManager.createQuery(passedJpql).setParameter("regionId", regionId).getSingleResult();
+            return (double) passed / total * 100.0;
         }
-        Long passed = (Long) entityManager.createQuery("SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result = 'PASSED'").getSingleResult();
-        return (double) passed / total * 100.0;
     }
 
-    public Double getComplianceScoreBefore(java.time.LocalDateTime dateTime) {
-        Long total = (Long) entityManager.createQuery("SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result IN ('PASSED', 'FAILED') AND ctr.testedAt < :dateTime")
-                .setParameter("dateTime", dateTime)
-                .getSingleResult();
-        if (total == 0) {
-            return 0.0;
+    public Double getComplianceScoreBefore(java.time.LocalDateTime dateTime, DashboardScope scope) {
+        Long regionId = scope != null ? scope.getRegionId() : null;
+        if (regionId == null) {
+            Long total = (Long) entityManager.createQuery("SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result IN ('PASSED', 'FAILED') AND ctr.testedAt < :dateTime")
+                    .setParameter("dateTime", dateTime)
+                    .getSingleResult();
+            if (total == 0) {
+                return 0.0;
+            }
+            Long passed = (Long) entityManager.createQuery("SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result = 'PASSED' AND ctr.testedAt < :dateTime")
+                    .setParameter("dateTime", dateTime)
+                    .getSingleResult();
+            return (double) passed / total * 100.0;
+        } else {
+            String totalJpql = "SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result IN ('PASSED', 'FAILED') AND ctr.testedAt < :dateTime AND " +
+                    "(ctr.testedById IN (SELECT ur.user.id FROM UserRegion ur WHERE ur.region.id = :regionId OR ur.region.parent.id = :regionId) OR " +
+                    " ctr.testedById IN (SELECT us.user.id FROM UserStore us JOIN Store s ON s.id = us.store.id WHERE s.region.id = :regionId OR s.region.parent.id = :regionId))";
+            String passedJpql = "SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result = 'PASSED' AND ctr.testedAt < :dateTime AND " +
+                    "(ctr.testedById IN (SELECT ur.user.id FROM UserRegion ur WHERE ur.region.id = :regionId OR ur.region.parent.id = :regionId) OR " +
+                    " ctr.testedById IN (SELECT us.user.id FROM UserStore us JOIN Store s ON s.id = us.store.id WHERE s.region.id = :regionId OR s.region.parent.id = :regionId))";
+            Long total = (Long) entityManager.createQuery(totalJpql).setParameter("dateTime", dateTime).setParameter("regionId", regionId).getSingleResult();
+            if (total == 0) return 0.0;
+            Long passed = (Long) entityManager.createQuery(passedJpql).setParameter("dateTime", dateTime).setParameter("regionId", regionId).getSingleResult();
+            return (double) passed / total * 100.0;
         }
-        Long passed = (Long) entityManager.createQuery("SELECT COUNT(ctr) FROM ControlTestResult ctr WHERE ctr.result = 'PASSED' AND ctr.testedAt < :dateTime")
-                .setParameter("dateTime", dateTime)
-                .getSingleResult();
-        return (double) passed / total * 100.0;
     }
 
     /**
      * Retrieves audits completed count data from the database.
      *
+     * @param scope the dashboard query scope context
      * @return the numeric result value
-     * @throws ResourceNotFoundException if the entity is not found
      */
-    public Long getAuditsCompletedCount() {
-        return (Long) entityManager.createQuery("SELECT COUNT(ae) FROM AuditEngagement ae WHERE ae.status IN ('COMPLETED', 'CLOSED')")
-                .getSingleResult();
+    public Long getAuditsCompletedCount(DashboardScope scope) {
+        Long regionId = scope != null ? scope.getRegionId() : null;
+        if (regionId == null) {
+            return (Long) entityManager.createQuery("SELECT COUNT(ae) FROM AuditEngagement ae WHERE ae.status IN ('COMPLETED', 'CLOSED')")
+                    .getSingleResult();
+        } else {
+            return (Long) entityManager.createQuery("SELECT COUNT(ae) FROM AuditEngagement ae " +
+                    "WHERE ae.status IN ('COMPLETED', 'CLOSED') AND " +
+                    "(ae.leadAuditorId IN (SELECT ur.user.id FROM UserRegion ur WHERE ur.region.id = :regionId OR ur.region.parent.id = :regionId) OR " +
+                    " ae.leadAuditorId IN (SELECT us.user.id FROM UserStore us JOIN Store s ON s.id = us.store.id WHERE s.region.id = :regionId OR s.region.parent.id = :regionId))")
+                    .setParameter("regionId", regionId)
+                    .getSingleResult();
+        }
     }
 
     /**
      * Retrieves corrective actions open count data from the database.
      *
+     * @param scope the dashboard query scope context
      * @return the numeric result value
-     * @throws ResourceNotFoundException if the entity is not found
      */
-    public Long getCorrectiveActionsOpenCount() {
-        return (Long) entityManager.createQuery("SELECT COUNT(cap) FROM CorrectiveActionPlan cap WHERE cap.status = 'OPEN'")
-                .getSingleResult();
+    public Long getCorrectiveActionsOpenCount(DashboardScope scope) {
+        Long regionId = scope != null ? scope.getRegionId() : null;
+        if (regionId == null) {
+            return (Long) entityManager.createQuery("SELECT COUNT(cap) FROM CorrectiveActionPlan cap WHERE cap.status = 'OPEN'")
+                    .getSingleResult();
+        } else {
+            return (Long) entityManager.createQuery("SELECT COUNT(cap) FROM CorrectiveActionPlan cap " +
+                    "WHERE cap.status = 'OPEN' AND " +
+                    "(cap.ownerId IN (SELECT ur.user.id FROM UserRegion ur WHERE ur.region.id = :regionId OR ur.region.parent.id = :regionId) OR " +
+                    " cap.ownerId IN (SELECT us.user.id FROM UserStore us JOIN Store s ON s.id = us.store.id WHERE s.region.id = :regionId OR s.region.parent.id = :regionId))")
+                    .setParameter("regionId", regionId)
+                    .getSingleResult();
+        }
     }
 
     /**
      * Retrieves overdue actions count data from the database.
      *
+     * @param scope the dashboard query scope context
      * @return the numeric result value
-     * @throws ResourceNotFoundException if the entity is not found
      */
-    public Long getOverdueActionsCount() {
-        return (Long) entityManager.createQuery("SELECT COUNT(cap) FROM CorrectiveActionPlan cap WHERE cap.status = 'OPEN' AND cap.dueDate < :today")
-                .setParameter("today", LocalDate.now())
-                .getSingleResult();
+    public Long getOverdueActionsCount(DashboardScope scope) {
+        Long regionId = scope != null ? scope.getRegionId() : null;
+        if (regionId == null) {
+            return (Long) entityManager.createQuery("SELECT COUNT(cap) FROM CorrectiveActionPlan cap WHERE cap.status = 'OPEN' AND cap.dueDate < :today")
+                    .setParameter("today", LocalDate.now())
+                    .getSingleResult();
+        } else {
+            return (Long) entityManager.createQuery("SELECT COUNT(cap) FROM CorrectiveActionPlan cap " +
+                    "WHERE cap.status = 'OPEN' AND cap.dueDate < :today AND " +
+                    "(cap.ownerId IN (SELECT ur.user.id FROM UserRegion ur WHERE ur.region.id = :regionId OR ur.region.parent.id = :regionId) OR " +
+                    " cap.ownerId IN (SELECT us.user.id FROM UserStore us JOIN Store s ON s.id = us.store.id WHERE s.region.id = :regionId OR s.region.parent.id = :regionId))")
+                    .setParameter("today", LocalDate.now())
+                    .setParameter("regionId", regionId)
+                    .getSingleResult();
+        }
     }
 }

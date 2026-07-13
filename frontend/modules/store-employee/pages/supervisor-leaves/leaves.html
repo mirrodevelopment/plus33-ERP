@@ -1,0 +1,136 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — Supervisor Leaves
+ * File              : leaves.html
+ * Path              : frontend/modules/store-employee/supervisor-leaves/leaves.html
+ * Purpose           : HTML template for Shift Supervisor leave approvals hub UI
+ * Version           : 2.0.0
+ *
+ * Related JS        : leaves.js
+ * Related CSS       : leaves.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of pending requests feeds lists, cancellation requests lists,
+ * reject comment popup modals, and loading indicator slots.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="supervisor-leaves-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-details">
+      <h2 class="welcome-title">Time Off Requests</h2>
+      <p class="welcome-subtitle">
+        Barista Approvals Hub &nbsp;·&nbsp; <span class="highlight-val">Supervisor Dashboard</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <span class="live-dot" aria-hidden="true">●</span> Active
+    </div>
+  </div>
+
+  <!-- ===== REQUESTS FEED CONTAINER ===== -->
+  <div class="card glass approvals-main-card">
+    <div class="card-header-split">
+      <h3 class="card-split-title">Pending Barista Time Off Requests Awaiting Your Approval</h3>
+      <span class="pending-count-badge font-bold" id="lbl-pending-count">0 Pending</span>
+    </div>
+
+    <!-- Dynamic list grid loader mount point -->
+    <div class="requests-grid-wrapper" id="requests-grid-container">
+      <!-- Injected dynamically by JS/Controller -->
+    </div>
+  </div>
+
+  <!-- ===== REJECTION MODAL DIALOG OVERLAY ===== -->
+  <div id="reject-modal" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel">
+      <h3 class="modal-title">Reject Barista Leave</h3>
+      
+      <div class="form-group">
+        <label for="reject-reason-input" class="form-label">
+          Rejection Reason <span class="required-star">*</span> (min 10 chars)
+        </label>
+        <textarea id="reject-reason-input" class="form-textarea" rows="3" placeholder="State reason for rejection..." required></textarea>
+      </div>
+
+      <div class="modal-actions-row">
+        <button id="reject-modal-submit" class="btn btn-danger btn-confirm-rejection" type="button">Confirm Rejection</button>
+        <button id="reject-modal-close" class="btn btn-secondary btn-cancel-rejection" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== LOADING TEMPLATE ===== -->
+<template id="leaves-loading-tpl">
+  <div class="loading-state-box">
+    <i data-lucide="loader-2" class="spin-icon" aria-hidden="true"></i>
+    <span class="loading-text font-bold">Loading time off requests...</span>
+  </div>
+</template>
+
+
+<!-- ===== EMPTY LIST TEMPLATE ===== -->
+<template id="leaves-empty-list-tpl">
+  <div class="card glass empty-list-card">
+    <i data-lucide="check-circle" class="empty-icon" aria-hidden="true"></i>
+    <span class="empty-title">All Barista Requests Signed Off</span>
+    <span class="empty-subtitle">No pending leave applications or cancellation requests to process.</span>
+  </div>
+</template>
+
+
+<!-- ===== LEAVE APPLICATION REQUEST CARD TEMPLATE ===== -->
+<template id="leave-request-card-tpl">
+  <div class="leave-approval-card card glass">
+    <div class="card-header-row">
+      <strong class="employee-name-lbl"></strong>
+      <span class="leave-type-badge font-bold"></span>
+    </div>
+
+    <div class="request-details-body text-muted">
+      <div class="duration-detail"><strong>Duration:</strong> <span class="duration-val"></span></div>
+      <div class="reason-detail"></div>
+      <div class="medical-cert-warning font-bold">
+        <i data-lucide="alert-circle" aria-hidden="true"></i> Medical Certificate Required
+      </div>
+    </div>
+
+    <div class="comment-input-row">
+      <input type="text" class="supervisor-comment-input form-input" placeholder="Optional approval comment...">
+    </div>
+
+    <div class="action-buttons-row">
+      <button class="btn btn-approve btn-approve-leave" type="button">Approve</button>
+      <button class="btn btn-reject btn-reject-leave" type="button">Reject</button>
+    </div>
+  </div>
+</template>
+
+
+<!-- ===== CANCELLATION REQUEST CARD TEMPLATE ===== -->
+<template id="cancellation-request-card-tpl">
+  <div class="leave-approval-card card glass cancellation-style">
+    <div class="card-header-row">
+      <strong class="employee-name-lbl"></strong>
+      <span class="leave-type-badge font-bold"></span>
+    </div>
+
+    <div class="request-details-body text-muted">
+      <div class="duration-detail"><strong>Duration:</strong> <span class="duration-val"></span></div>
+      <div class="reason-detail"></div>
+    </div>
+
+    <div class="action-buttons-row">
+      <button class="btn btn-approve-cancel" type="button">Approve Cancellation</button>
+    </div>
+  </div>
+</template>

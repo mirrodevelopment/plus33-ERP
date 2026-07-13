@@ -1,0 +1,213 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Admin — Sales Ledger
+ * File              : sales.html
+ * Path              : frontend/modules/store-admin/sales/sales.html
+ * Purpose           : HTML template for Store Admin Sales Ledger page layout
+ * Version           : 2.0.0
+ *
+ * Related JS        : sales.js
+ * Related CSS       : sales.css
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Structural layout of sales metrics, ledger filters, table rows, and modals.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="store-sales-workspace animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-title-banner">
+    <div class="page-title-left">
+      <div class="page-eyebrow">
+        <i data-lucide="bar-chart-3" aria-hidden="true"></i>
+        <span>Operations</span>
+      </div>
+      <h1 class="page-title">Sales Overview</h1>
+      <p class="page-subtitle">Trace customer wholesale invoices, check retail order status, and review gross revenue metrics.</p>
+    </div>
+    
+    <div class="page-actions-row">
+      <button id="btn-download-sales" class="btn btn-secondary" type="button">
+        <i data-lucide="download" aria-hidden="true"></i> Export CSV
+      </button>
+      <button id="btn-print-sales" class="btn btn-secondary" type="button">
+        <i data-lucide="printer" aria-hidden="true"></i> Print Report
+      </button>
+      <button id="btn-add-order" class="btn btn-primary" type="button">
+        <i data-lucide="plus" aria-hidden="true"></i> Place Sales Order
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== KPI CARDS GRID ===== -->
+  <div class="kpi-grid-row" role="region" aria-label="Sales summary metrics">
+    
+    <!-- Card 1: Gross Revenue -->
+    <div class="kpi-block-card">
+      <div class="kpi-accent-bar kpi-accent-bar--gold" aria-hidden="true"></div>
+      <span class="kpi-label">Gross Revenue</span>
+      <span class="kpi-value" id="kpi-gross-revenue">—</span>
+    </div>
+
+    <!-- Card 2: Invoiced Orders -->
+    <div class="kpi-block-card">
+      <div class="kpi-accent-bar kpi-accent-bar--success" aria-hidden="true"></div>
+      <span class="kpi-label">Invoiced Orders</span>
+      <span class="kpi-value color-success" id="kpi-invoiced-count">—</span>
+    </div>
+
+    <!-- Card 3: Pending Approvals -->
+    <div class="kpi-block-card">
+      <div class="kpi-accent-bar kpi-accent-bar--warning" aria-hidden="true"></div>
+      <span class="kpi-label">Pending Approvals</span>
+      <span class="kpi-value color-warning" id="kpi-pending-count">—</span>
+    </div>
+
+    <!-- Card 4: Average Order Value -->
+    <div class="kpi-block-card">
+      <div class="kpi-accent-bar kpi-accent-bar--info" aria-hidden="true"></div>
+      <span class="kpi-label">Average Order Value</span>
+      <span class="kpi-value" id="kpi-avg-order">—</span>
+    </div>
+
+  </div>
+
+  <!-- ===== FILTERS TOOLBAR ===== -->
+  <div class="card glass filters-toolbar" role="search" aria-label="Order filters">
+    <!-- Search Box -->
+    <div class="filter-search-box">
+      <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
+      <input id="input-search-orders" type="text" class="search-input" placeholder="Search order number or client...">
+    </div>
+
+    <!-- Status Filter select -->
+    <div class="filter-select-group">
+      <span class="filter-label">Filter Status:</span>
+      <select id="select-filter-status" class="filter-select">
+        <option value="all">All Orders</option>
+        <option value="PENDING">PENDING</option>
+        <option value="INVOICED">INVOICED</option>
+        <option value="CANCELLED">CANCELLED</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ===== DATA TABLE LEDGER ===== -->
+  <div class="card glass table-card">
+    <div class="table-scroller">
+      <table class="sales-ledger-table">
+        <thead>
+          <tr class="table-header-row">
+            <th scope="col">Order Code</th>
+            <th scope="col">Order Date</th>
+            <th scope="col">Customer</th>
+            <th scope="col" class="text-right">Amount</th>
+            <th scope="col" class="text-center">Status</th>
+            <th scope="col" class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="sales-orders-tbody">
+          <!-- Populated dynamically by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== ADD ORDER MODAL ===== -->
+  <div id="add-order-modal" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up">
+      <div class="modal-header-split">
+        <h3 class="modal-title">Record New Sales Order</h3>
+        <button id="btn-close-order-modal" class="btn-close-modal" type="button" aria-label="Close modal">&times;</button>
+      </div>
+      
+      <form id="form-add-order" class="modal-form">
+        <div class="form-group">
+          <label for="order-modal-customer" class="form-label">Customer Name</label>
+          <input id="order-modal-customer" type="text" class="form-input" placeholder="e.g. Café de Flore" required>
+        </div>
+        
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="order-modal-amount" class="form-label">Order Total Amount (<span class="currency-symbol">€</span>)</label>
+            <input id="order-modal-amount" type="number" step="0.01" min="0.01" class="form-input" placeholder="e.g. 125.50" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="order-modal-date" class="form-label">Order Date</label>
+            <input id="order-modal-date" type="date" class="form-input date-input" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="order-modal-status" class="form-label">Initial Status</label>
+          <select id="order-modal-status" class="form-select" required>
+            <option value="PENDING">PENDING</option>
+            <option value="INVOICED" selected>INVOICED (Completed)</option>
+          </select>
+        </div>
+
+        <button id="btn-order-submit" type="submit" class="btn btn-primary btn-submit-record">
+          Register Order Record
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== VIEW DETAILS MODAL ===== -->
+  <div id="view-order-modal" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up">
+      <div class="modal-header-split">
+        <h3 class="modal-title flex align-center gap-xs">
+          <i data-lucide="file-text" class="accent-icon" aria-hidden="true"></i> Wholesale Sales Invoice
+        </h3>
+        <button id="btn-close-view-modal" class="btn-close-modal" type="button" aria-label="Close modal">&times;</button>
+      </div>
+      
+      <div id="view-order-details-content" class="invoice-details-scroller">
+        <!-- Loaded dynamically -->
+      </div>
+      
+      <div class="modal-footer-actions">
+        <button id="modal-btn-download" class="btn btn-secondary" type="button">
+          <i data-lucide="download" aria-hidden="true"></i> Download CSV
+        </button>
+        <button id="modal-btn-print" class="btn btn-primary" type="button">
+          <i data-lucide="printer" aria-hidden="true"></i> Print Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== LEDGER ROW TEMPLATE ===== -->
+<template id="sales-row-tpl">
+  <tr class="stock-table-row sales-row">
+    <td class="order-code-cell font-bold"></td>
+    <td class="order-date-cell"></td>
+    <td class="customer-cell font-bold"></td>
+    <td class="amount-cell text-right font-bold"></td>
+    <td class="status-cell text-center">
+      <span class="status-badge"></span>
+    </td>
+    <td class="actions-cell text-right">
+      <div class="flex gap-xs justify-end">
+        <button class="btn-action-view" type="button" aria-label="View invoice detail">
+          <i data-lucide="eye"></i>
+        </button>
+        <button class="btn-action-invoice" type="button" aria-label="Generate invoice">
+          <i data-lucide="receipt"></i>
+        </button>
+        <button class="btn-action-cancel" type="button" aria-label="Cancel order">
+          <i data-lucide="trash-2"></i>
+        </button>
+      </div>
+    </td>
+  </tr>
+</template>

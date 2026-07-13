@@ -1,0 +1,137 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Warehouse Admin — WMS Topology
+ * File              : topology.css
+ * Path              : frontend/modules/warehouse-admin/topology/topology.css
+ * Purpose           : Styling for WMS Topology UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.wms-topology-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-xxl);
+}
+
+.page-title-banner {
+  margin-bottom: var(--spacing-lg);
+  text-align: left;
+}
+
+.page-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+}
+
+.page-subtitle {
+  margin: 2px 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.topology-grid-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .topology-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.map-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  background: var(--bg-card);
+}
+
+.wms-svg-canvas {
+  max-width: 400px;
+  max-height: 300px;
+}
+
+.zone-rect {
+  cursor: pointer;
+  fill: rgba(201, 164, 106, 0.05);
+  stroke: var(--border-color);
+  stroke-width: 2;
+  transition: all 0.25s ease-out;
+}
+
+.zone-text {
+  fill: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+/* Telemetry Card Right */
+.telemetry-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  background: var(--bg-card);
+  text-align: left;
+}
+
+.telemetry-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--accent-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--spacing-sm);
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+}
+
+.metrics-list-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-label {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.metric-value {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.metric-value.color-success {
+  color: var(--status-success);
+}
+
+.telemetry-card-footer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}

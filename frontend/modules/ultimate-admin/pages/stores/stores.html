@@ -1,0 +1,278 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Stores Management
+ * File              : stores.html
+ * Path              : frontend/modules/ultimate-admin/stores/stores.html
+ * Purpose           : HTML template for the Stores Management page
+ * Version           : 2.0.0
+ *
+ * Related JS        : stores.js
+ * Related CSS       : stores.css
+ * Related APIs      : GET /api/v1/stores
+ *                     POST /api/v1/stores
+ *                     DELETE /api/v1/stores/:id
+ *                     PATCH /api/v1/stores/:id/activate
+ *                     PATCH /api/v1/stores/:id/deactivate
+ *                     GET /api/v1/regions
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the static HTML structure of the Stores Management workspace.
+ * JavaScript (stores.js) manages fetching, DOM injection, and events.
+ * No inline styles. No inline onclick handlers.
+ ******************************************************************************
+-->
+
+<div class="stores-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header stores-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="coffee" aria-hidden="true"></i>
+        <span>Operations</span>
+      </div>
+      <h1 class="page-title">Stores Management</h1>
+      <p class="page-subtitle">Configure local coffee house franchise locations, operational state, and regional mappings.</p>
+    </div>
+    <div class="page-header-right">
+      <button id="btn-add-store" class="btn btn-primary" type="button" aria-label="Add new store location">
+        <i data-lucide="plus" aria-hidden="true"></i>
+        <span>Add Store</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== KPI SUMMARY ROW ===== -->
+  <div class="stores-kpi-grid" role="region" aria-label="Stores summary metrics">
+    <div class="kpi-card kpi-card--gold">
+      <span class="kpi-label">Total Franchise Stores</span>
+      <span class="kpi-value" id="kpi-total-stores">—</span>
+    </div>
+    <div class="kpi-card kpi-card--success">
+      <span class="kpi-label">Active Locations</span>
+      <span class="kpi-value" id="kpi-active-stores">—</span>
+    </div>
+    <div class="kpi-card kpi-card--danger">
+      <span class="kpi-label">Inactive/Suspended</span>
+      <span class="kpi-value" id="kpi-inactive-stores">—</span>
+    </div>
+    <div class="kpi-card kpi-card--secondary">
+      <span class="kpi-label">Represented Regions</span>
+      <span class="kpi-value" id="kpi-represented-regions">—</span>
+    </div>
+  </div>
+
+  <!-- ===== FILTER BAR ===== -->
+  <div class="card glass stores-filter-bar" role="search" aria-label="Store filters">
+    
+    <!-- Search Box -->
+    <div class="filter-search-wrapper">
+      <i data-lucide="search" class="filter-search-icon" aria-hidden="true"></i>
+      <input
+        id="input-search-stores"
+        type="search"
+        class="filter-search-input"
+        placeholder="Search store name or code..."
+        autocomplete="off"
+        aria-label="Search stores"
+      >
+    </div>
+
+    <!-- Region Dropdown Filter -->
+    <div class="filter-group">
+      <label for="select-filter-region" class="filter-label">Filter Territory:</label>
+      <select id="select-filter-region" class="filter-select" aria-label="Filter stores by territory region">
+        <option value="all">All Regions</option>
+        <!-- Dynamic options populated by JS -->
+      </select>
+    </div>
+
+  </div><!-- /stores-filter-bar -->
+
+  <!-- ===== STORES CARDS GRID ===== -->
+  <div id="stores-cards-grid" class="stores-cards-grid" role="list" aria-label="Franchise stores list">
+    <!-- Store cards populated here by stores.js -->
+  </div>
+
+</div><!-- /stores-workspace -->
+
+
+<!-- ===== ADD STORE MODAL ===== -->
+<div
+  id="add-store-modal"
+  class="modal-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title-store"
+  hidden
+>
+  <div class="modal-card card glass">
+
+    <div class="modal-header">
+      <h3 id="modal-title-store" class="modal-title">Create New Store</h3>
+      <button id="btn-close-store-modal" class="btn-icon modal-close-btn" type="button" aria-label="Close dialog">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <form id="form-add-store" class="modal-form" novalidate>
+
+      <div class="form-group">
+        <label for="store-modal-name" class="form-label">Store Name</label>
+        <input
+          id="store-modal-name"
+          type="text"
+          class="form-input"
+          placeholder="e.g. PLUS33 Coffee - Versailles"
+          required
+          aria-required="true"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="store-modal-region" class="form-label">Territory Region</label>
+        <select id="store-modal-region" class="form-select" required aria-required="true">
+          <option value="" disabled selected>— Select Region —</option>
+          <!-- Dynamic options populated by JS -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="store-modal-address" class="form-label">Address</label>
+        <input
+          id="store-modal-address"
+          type="text"
+          class="form-input"
+          placeholder="e.g. 5 Place d'Armes, 78000 Versailles"
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="store-modal-phone" class="form-label">Phone Number</label>
+          <input
+            id="store-modal-phone"
+            type="text"
+            class="form-input"
+            placeholder="+33-1-000-00"
+            required
+            aria-required="true"
+          >
+        </div>
+        <div class="form-group">
+          <label for="store-modal-email" class="form-label">Store Email</label>
+          <input
+            id="store-modal-email"
+            type="email"
+            class="form-input"
+            placeholder="store@plus33.com"
+            required
+            aria-required="true"
+          >
+        </div>
+      </div>
+
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="store-modal-timezone" class="form-label">Timezone</label>
+          <input
+            id="store-modal-timezone"
+            type="text"
+            class="form-input"
+            value="Europe/Paris"
+            required
+            aria-required="true"
+          >
+        </div>
+        <div class="form-group">
+          <label for="store-modal-date" class="form-label">Opening Date</label>
+          <input
+            id="store-modal-date"
+            type="date"
+            class="form-input"
+            required
+            aria-required="true"
+          >
+        </div>
+      </div>
+      
+      <button id="btn-store-submit" type="submit" class="btn btn-primary btn-modal-submit">
+        Register Store
+      </button>
+
+    </form>
+
+  </div>
+</div><!-- /add-store-modal -->
+
+
+<!-- ===== STORE CARD TEMPLATE ===== -->
+<template id="store-card-tpl">
+  <div class="card glass stores-card animate-slide-up" role="listitem">
+    
+    <!-- Action buttons container -->
+    <div class="store-actions-wrapper">
+      <button
+        class="btn-toggle-store-state"
+        type="button"
+        title="Toggle store operational state"
+      >
+        <i data-lucide="toggle-left" aria-hidden="true"></i>
+      </button>
+      <button
+        class="btn-delete-store"
+        type="button"
+        title="Delete Store location"
+        hidden
+      >
+        <i data-lucide="trash-2" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <!-- Top Identity Details -->
+    <div class="store-card-header">
+      <div class="store-code"></div>
+      <h3 class="store-name" title=""></h3>
+      <div class="store-region-badge">
+        <i data-lucide="map-pin" aria-hidden="true"></i>
+        <span class="region-code"></span>
+      </div>
+    </div>
+
+    <!-- Contact Info Block -->
+    <div class="store-contact-info">
+      <div class="contact-row">
+        <i data-lucide="navigation" aria-hidden="true"></i>
+        <span class="contact-address" title=""></span>
+      </div>
+      <div class="contact-row">
+        <i data-lucide="phone" aria-hidden="true"></i>
+        <span class="contact-phone"></span>
+      </div>
+      <div class="contact-row">
+        <i data-lucide="mail" aria-hidden="true"></i>
+        <span class="contact-email" title=""></span>
+      </div>
+    </div>
+
+    <!-- Footer Meta Row -->
+    <div class="store-card-footer">
+      <div class="store-status-badge"></div>
+      <div class="store-opening-date"></div>
+    </div>
+
+  </div>
+</template><!-- /store-card-tpl -->
+
+
+<!-- ===== EMPTY STATE TEMPLATE ===== -->
+<template id="stores-empty-tpl">
+  <div class="card glass stores-empty col-span-3" role="status" aria-live="polite">
+    <i data-lucide="info" aria-hidden="true"></i>
+    <p>No matching store locations found.</p>
+  </div>
+</template>

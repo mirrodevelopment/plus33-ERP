@@ -88,7 +88,7 @@ public class DashboardOverviewController {
             @RequestParam(required = false) Long regionId,
             @RequestParam(required = false) Long storeId) {
         if (from == null) {
-            from = LocalDate.now().withDayOfMonth(1);
+            from = LocalDate.now().minusDays(29);
         }
         if (to == null) {
             to = LocalDate.now();

@@ -1,0 +1,317 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Users & Roles
+ * File              : users.html
+ * Path              : frontend/modules/ultimate-admin/users/users.html
+ * Purpose           : HTML structure for the Users & Roles Management page
+ * Version           : 2.0.0
+ *
+ * Related JS        : users.js
+ * Related CSS       : users.css
+ * Related APIs      : GET /api/v1/employees
+ *                     POST /api/v1/employees
+ *                     DELETE /api/v1/employees/:id
+ *                     PATCH /api/v1/employees/:id/activate
+ *                     PATCH /api/v1/employees/:id/deactivate
+ *                     GET /api/v1/regions
+ *                     GET /api/v1/stores
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural layout of the Users & Roles page.
+ * JavaScript (users.js) populates all dynamic statistics, cards, and binds events.
+ * No inline styles. No inline onclick handlers.
+ ******************************************************************************
+-->
+
+<div class="users-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header users-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="users" aria-hidden="true"></i>
+        <span>Administration</span>
+      </div>
+      <h1 class="page-title">Users &amp; Roles</h1>
+      <p class="page-subtitle">Manage operator login access, system security profiles, and regional/store workforce scoping.</p>
+    </div>
+    <div class="page-header-right">
+      <button id="btn-add-user" class="btn btn-primary" type="button" aria-label="Add new operator user profile">
+        <i data-lucide="plus" aria-hidden="true"></i>
+        <span>Add User</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== KPI SUMMARY ROW ===== -->
+  <div class="users-kpi-grid" role="region" aria-label="Workforce summary metrics">
+    <div class="kpi-card kpi-card--gold">
+      <span class="kpi-label">Total Enterprise Staff</span>
+      <span class="kpi-value" id="kpi-total-staff">—</span>
+    </div>
+    <div class="kpi-card kpi-card--success">
+      <span class="kpi-label">Active Operators</span>
+      <span class="kpi-value" id="kpi-active-operators">—</span>
+    </div>
+    <div class="kpi-card kpi-card--secondary">
+      <span class="kpi-label">Permanent Contracts</span>
+      <span class="kpi-value" id="kpi-permanent-contracts">—</span>
+    </div>
+    <div class="kpi-card kpi-card--info">
+      <span class="kpi-label">Mapped Designations</span>
+      <span class="kpi-value" id="kpi-mapped-roles">—</span>
+    </div>
+  </div>
+
+  <!-- ===== FILTER BAR ===== -->
+  <div class="card glass users-filter-bar" role="search" aria-label="Workforce filters">
+    
+    <!-- Search box -->
+    <div class="filter-search-wrapper">
+      <i data-lucide="search" class="filter-search-icon" aria-hidden="true"></i>
+      <input
+        id="input-search-users"
+        type="search"
+        class="filter-search-input"
+        placeholder="Search user name, email..."
+        autocomplete="off"
+        aria-label="Search users"
+      >
+    </div>
+
+    <!-- Dropdown filters container -->
+    <div class="filter-group-container">
+      
+      <!-- Region selector -->
+      <div class="filter-group">
+        <label for="select-filter-region" class="filter-label">Territory:</label>
+        <select id="select-filter-region" class="filter-select" aria-label="Filter by territory region">
+          <option value="all">All Regions</option>
+          <!-- Dynamic options populated by JS -->
+        </select>
+      </div>
+
+      <!-- Role selector -->
+      <div class="filter-group">
+        <label for="select-filter-role" class="filter-label">System Role:</label>
+        <select id="select-filter-role" class="filter-select" aria-label="Filter by system role designation">
+          <option value="all">All Roles</option>
+          <!-- Dynamic options populated by JS -->
+        </select>
+      </div>
+
+    </div>
+
+  </div><!-- /users-filter-bar -->
+
+  <!-- ===== WORKFORCE CARDS GRID ===== -->
+  <div id="users-cards-grid" class="users-cards-grid" role="list" aria-label="User profiles list">
+    <!-- User profiles cards populated here by users.js -->
+  </div>
+
+</div><!-- /users-workspace -->
+
+
+<!-- ===== ADD USER PROFILE MODAL ===== -->
+<div
+  id="add-user-modal"
+  class="modal-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title-user"
+  hidden
+>
+  <div class="modal-card card glass">
+
+    <div class="modal-header">
+      <h3 id="modal-title-user" class="modal-title">Register New User Profile</h3>
+      <button id="btn-close-user-modal" class="btn-icon modal-close-btn" type="button" aria-label="Close dialog">
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+    </div>
+    
+    <form id="form-add-user" class="modal-form" novalidate>
+      
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="user-modal-firstname" class="form-label">First Name</label>
+          <input
+            id="user-modal-firstname"
+            type="text"
+            class="form-input"
+            placeholder="John"
+            required
+            aria-required="true"
+          >
+        </div>
+        <div class="form-group">
+          <label for="user-modal-lastname" class="form-label">Last Name</label>
+          <input
+            id="user-modal-lastname"
+            type="text"
+            class="form-input"
+            placeholder="Doe"
+            required
+            aria-required="true"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="user-modal-email" class="form-label">User Email</label>
+        <input
+          id="user-modal-email"
+          type="email"
+          class="form-input"
+          placeholder="john.doe@plus33coffee.fr"
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="user-modal-designation" class="form-label">System Role / Designation</label>
+          <select id="user-modal-designation" class="form-select" required aria-required="true">
+            <option value="Regional Director">Regional Director</option>
+            <option value="Store Manager">Store Manager</option>
+            <option value="Warehouse Admin">Warehouse Admin</option>
+            <option value="Barista">Barista</option>
+            <option value="Operations Manager">Operations Manager</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="user-modal-emptype" class="form-label">Employment Type</label>
+          <select id="user-modal-emptype" class="form-select" required aria-required="true">
+            <option value="PERMANENT">PERMANENT</option>
+            <option value="FULL_TIME">FULL_TIME</option>
+            <option value="PART_TIME">PART_TIME</option>
+            <option value="CONTRACTOR">CONTRACTOR</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="user-modal-region" class="form-label">Assigned Region</label>
+          <select id="user-modal-region" class="form-select">
+            <option value="">— No Region —</option>
+            <!-- Regions dynamically populated by JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="user-modal-store" class="form-label">Assigned Store</label>
+          <select id="user-modal-store" class="form-select">
+            <option value="">— No Store —</option>
+            <!-- Stores dynamically populated by JS -->
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="user-modal-phone" class="form-label">Phone Number</label>
+          <input
+            id="user-modal-phone"
+            type="text"
+            class="form-input"
+            placeholder="+33-1-000-00"
+          >
+        </div>
+        <div class="form-group">
+          <label for="user-modal-date" class="form-label">Hire Date</label>
+          <input
+            id="user-modal-date"
+            type="date"
+            class="form-input"
+            required
+            aria-required="true"
+          >
+        </div>
+      </div>
+
+      <button id="btn-user-submit" type="submit" class="btn btn-primary btn-modal-submit">
+        Register User Profile
+      </button>
+
+    </form>
+
+  </div>
+</div><!-- /add-user-modal -->
+
+
+<!-- ===== WORKER CARD TEMPLATE ===== -->
+<template id="user-card-tpl">
+  <div class="card glass users-card animate-slide-up" role="listitem">
+    
+    <!-- Action buttons (top-right) -->
+    <div class="user-actions-wrapper">
+      <button
+        class="btn-toggle-user-state"
+        type="button"
+        title="Toggle user operational state"
+      >
+        <i data-lucide="toggle-left" aria-hidden="true"></i>
+      </button>
+      <button
+        class="btn-delete-user"
+        type="button"
+        title="Delete User account"
+      >
+        <i data-lucide="trash-2" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <!-- Identity details block -->
+    <div class="user-card-header">
+      <div class="user-avatar-initial" aria-hidden="true">U</div>
+      <div class="user-identity-details">
+        <div class="user-code"></div>
+        <h3 class="user-fullname" title=""></h3>
+        <span class="user-designation-badge"></span>
+      </div>
+    </div>
+
+    <!-- Mappings Assignments Block -->
+    <div class="user-assignments-info">
+      <div class="assignment-row">
+        <span class="assignment-label">Region Domain</span>
+        <span class="assignment-value region-domain" title=""></span>
+      </div>
+      <div class="assignment-row">
+        <span class="assignment-label">Assigned Store</span>
+        <span class="assignment-value assigned-store" title=""></span>
+      </div>
+    </div>
+
+    <!-- Contact Info Block -->
+    <div class="user-contact-info">
+      <div class="contact-row">
+        <i data-lucide="mail" aria-hidden="true"></i>
+        <span class="contact-email" title=""></span>
+      </div>
+      <div class="contact-row">
+        <i data-lucide="phone" aria-hidden="true"></i>
+        <span class="contact-phone"></span>
+      </div>
+    </div>
+
+    <!-- Footer status row -->
+    <div class="user-card-footer">
+      <div class="user-status-badge"></div>
+      <div class="user-hire-date"></div>
+    </div>
+
+  </div>
+</template><!-- /user-card-tpl -->
+
+
+<!-- ===== EMPTY STATE TEMPLATE ===== -->
+<template id="users-empty-tpl">
+  <div class="card glass users-empty col-span-3" role="status" aria-live="polite">
+    <i data-lucide="info" aria-hidden="true"></i>
+    <p>No matching operator user profiles found.</p>
+  </div>
+</template>

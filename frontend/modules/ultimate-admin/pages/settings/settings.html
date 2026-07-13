@@ -1,0 +1,286 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Settings Management
+ * File              : settings.html
+ * Path              : frontend/modules/ultimate-admin/settings/settings.html
+ * Purpose           : HTML skeleton for the Settings page
+ * Version           : 2.0.0
+ *
+ * Related JS        : settings.js
+ * Related CSS       : settings.css
+ * Related APIs      : GET /api/platform/metrics
+ *                     GET /api/platform/config/flags
+ *                     POST /api/platform/cache/evict
+ *                     POST /api/platform/flag
+ *                     GET /api/platform/audit-logs
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines structural tab selectors and card windows of the settings workspace.
+ * Templates exist for audit rows, feature flag rows, and theme options.
+ * No inline styles. No inline onclicks.
+ ******************************************************************************
+-->
+
+<div class="settings-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header settings-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="settings" aria-hidden="true"></i>
+        <span>Administration</span>
+      </div>
+      <h1 class="page-title">System Settings</h1>
+      <p class="page-subtitle">Configure general ERP parameters, platform feature flags, cache eviction, and monitor hardware telemetry.</p>
+    </div>
+  </div>
+
+  <!-- ===== LAYOUT SPLIT: LEFT NAV, RIGHT PANELS ===== -->
+  <div class="settings-split-layout">
+    
+    <!-- Left side tab buttons menu -->
+    <div class="card glass settings-nav-panel" role="tablist" aria-label="Settings categories">
+      <button class="settings-tab-btn" data-tab="general" role="tab" aria-selected="true" tabindex="0" type="button">
+        <i data-lucide="sliders" aria-hidden="true"></i>
+        <span>General Setup</span>
+      </button>
+      <button class="settings-tab-btn" data-tab="flags" role="tab" aria-selected="false" tabindex="-1" type="button">
+        <i data-lucide="toggle-right" aria-hidden="true"></i>
+        <span>Feature Flags</span>
+      </button>
+      <button class="settings-tab-btn" data-tab="devops" role="tab" aria-selected="false" tabindex="-1" type="button">
+        <i data-lucide="activity" aria-hidden="true"></i>
+        <span>DevOps Telemetry</span>
+      </button>
+      <button class="settings-tab-btn" data-tab="audit" role="tab" aria-selected="false" tabindex="-1" type="button">
+        <i data-lucide="shield-alert" aria-hidden="true"></i>
+        <span>Platform Audit</span>
+      </button>
+    </div>
+
+    <!-- Right side settings config panels mount -->
+    <div class="card glass settings-content-panel" id="settings-panel-mount">
+      <!-- Dynamic settings panels are injected/rendered here by settings.js -->
+    </div>
+
+  </div><!-- /settings-split-layout -->
+
+</div><!-- /settings-workspace -->
+
+
+<!-- ===== TEMPLATE: GENERAL PANEL ===== -->
+<template id="settings-general-tpl">
+  <div class="animate-slide-up panel-container">
+    
+    <div class="panel-section-header">
+      <h3 class="panel-title">General Configuration</h3>
+      <span class="panel-subtitle">Manage global core variables</span>
+    </div>
+
+    <form id="form-general-settings" class="general-settings-form" novalidate>
+      <div class="form-group">
+        <label for="input-instance-name" class="form-label">ERP Instance Name</label>
+        <input id="input-instance-name" type="text" class="form-input" required aria-required="true">
+      </div>
+      
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="select-currency" class="form-label">System Currency</label>
+          <select id="select-currency" class="form-select">
+            <option value="EUR">EUR (€)</option>
+            <option value="AED">AED (AED)</option>
+            <option value="USD">USD ($)</option>
+            <option value="INR">INR (₹)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="select-timezone" class="form-label">Default Timezone</label>
+          <select id="select-timezone" class="form-select">
+            <option value="Europe/Paris">Europe/Paris</option>
+            <option value="Asia/Dubai">Asia/Dubai</option>
+            <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+            <option value="UTC">UTC (GMT)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="select-loglevel" class="form-label">System Log Level</label>
+          <select id="select-loglevel" class="form-select">
+            <option value="DEBUG">DEBUG</option>
+            <option value="INFO">INFO</option>
+            <option value="WARN">WARN</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="select-timeformat" class="form-label">Time Display Format</label>
+          <select id="select-timeformat" class="form-select">
+            <option value="24h">24-Hour (14:30)</option>
+            <option value="12h">12-Hour (02:30 PM)</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-save">
+        Save Setup Values
+      </button>
+    </form>
+
+    <!-- Theme Profile Selection -->
+    <div class="theme-selection-section">
+      <h4 class="section-title">System Theme / Skin</h4>
+      <p class="section-desc">Select a theme profile for the user interface layout skin.</p>
+      
+      <div id="theme-cards-container" class="theme-grid">
+        <!-- Dynamic theme cards rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Cache Eviction Section -->
+    <div class="cache-maintenance-section">
+      <h4 class="section-title">Platform Cache Maintenance</h4>
+      <p class="section-desc">Evict distributed application memory cache entries to force fresh SQL database fetches.</p>
+      <button id="btn-evict-cache" class="btn btn-danger" type="button" aria-label="Evict Redis and Global memory cache">
+        Evict Redis &amp; Global Cache
+      </button>
+    </div>
+
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: THEME CARD ROW ===== -->
+<template id="theme-card-tpl">
+  <div class="theme-card-option" role="radio" aria-checked="false" tabindex="-1">
+    <div class="theme-card-header">
+      <span class="theme-card-name"></span>
+      <span class="theme-accent-indicator"></span>
+    </div>
+    <span class="theme-card-desc"></span>
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: FEATURE FLAGS PANEL ===== -->
+<template id="settings-flags-tpl">
+  <div class="animate-slide-up panel-container">
+    
+    <div class="panel-section-header">
+      <h3 class="panel-title">Feature Flags</h3>
+      <span class="panel-subtitle">Toggle platform operations models dynamically</span>
+    </div>
+
+    <div id="feature-flags-container" class="flags-list" role="group" aria-label="Platform feature toggles">
+      <!-- Feature flags rows dynamically mapped by JS -->
+    </div>
+
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: FLAG ROW ITEM ===== -->
+<template id="flag-row-tpl">
+  <div class="flag-row-card">
+    <div class="flag-info">
+      <h4 class="flag-name"></h4>
+      <div class="flag-key"></div>
+      <p class="flag-desc"></p>
+    </div>
+
+    <!-- Toggle Switch -->
+    <label class="premium-switch">
+      <input class="checkbox-toggle-flag" type="checkbox">
+      <span class="switch-slider"></span>
+    </label>
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: DEVOPS TELEMETRY ===== -->
+<template id="settings-devops-tpl">
+  <div class="animate-slide-up panel-container">
+    
+    <div class="panel-section-header">
+      <h3 class="panel-title">DevOps Telemetry</h3>
+      <span class="panel-subtitle">Monitor real-time server runtime metrics</span>
+    </div>
+
+    <!-- Health indicators -->
+    <div class="devops-gauges-grid">
+      <div class="card glass gauge-card">
+        <span class="gauge-label">PostgreSQL Pool Status</span>
+        <span class="gauge-value gauge-value--success">8 / 100 Connections</span>
+        <div class="gauge-track">
+          <div class="gauge-fill gauge-fill--success" style="width: 8%;"></div>
+        </div>
+      </div>
+
+      <div class="card glass gauge-card">
+        <span class="gauge-label">JVM Heap Allocation</span>
+        <span class="gauge-value gauge-value--warning">2.4 GB / 8.0 GB Used</span>
+        <div class="gauge-track">
+          <div class="gauge-fill gauge-fill--warning" style="width: 30%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CPU & uptime details -->
+    <div class="devops-stats-details">
+      <div class="stats-row">
+        <span class="stats-label">Spring Boot Port Binding</span>
+        <span class="stats-value stats-value--mono">8080</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Prometheus Exporter Status</span>
+        <span class="stats-value stats-value--success">RUNNING (/api/platform/metrics)</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Active Service SLO</span>
+        <span class="stats-value stats-value--success">99.98% (Within error budget)</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Uptime</span>
+        <span class="stats-value">4 days, 16 hours, 21 mins</span>
+      </div>
+    </div>
+
+    <button id="btn-refresh-metrics" class="btn btn-primary btn-refresh" type="button" aria-label="Refresh telemetry status metrics">
+      Query Server Metrics
+    </button>
+
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: AUDIT LOGS ===== -->
+<template id="settings-audit-tpl">
+  <div class="animate-slide-up panel-container">
+    
+    <div class="panel-section-header">
+      <h3 class="panel-title">Platform Audit Logs</h3>
+      <span class="panel-subtitle">Trace system modifications done by operators</span>
+    </div>
+
+    <div class="audit-table-wrapper">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th scope="col">Timestamp</th>
+            <th scope="col">Action</th>
+            <th scope="col">Operator</th>
+            <th scope="col">Details</th>
+          </tr>
+        </thead>
+        <tbody id="audit-logs-rows-mount">
+          <!-- Table audit records injected here dynamically by JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</template>

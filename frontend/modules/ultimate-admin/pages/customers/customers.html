@@ -1,0 +1,247 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Customer Registry & CRM
+ * File              : customers.html
+ * Path              : frontend/modules/ultimate-admin/customers/customers.html
+ * Purpose           : HTML structure for B2B/B2C Customer Management
+ * Version           : 2.0.0
+ *
+ * Related JS        : customers.js
+ * Related CSS       : customers.css
+ * Related APIs      : GET /api/v1/customers
+ *                     POST /api/v1/customers
+ *                     POST /api/v1/customers/:id/activate
+ *                     POST /api/v1/customers/:id/deactivate
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural CRM dashboard.
+ * JavaScript (customers.js) populates all dynamic B2B/B2C registries.
+ * No inline styles. No inline click listeners.
+ ******************************************************************************
+-->
+
+<div class="crm-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header crm-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="users" aria-hidden="true"></i>
+        <span>CRM Operations</span>
+      </div>
+      <h1 class="page-title">Customer Registry &amp; CRM Control Center</h1>
+      <p class="page-subtitle">Manage B2B commercial accounts, individual B2C clients, pricing tiers, and credit limit exposures.</p>
+    </div>
+    <div class="page-header-right">
+      <div class="crm-live-pill" role="status" aria-live="polite">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span>CRM Live</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPI METRICS GRID ===== -->
+  <div class="crm-kpi-grid" role="region" aria-label="Customer statistics summary">
+    <div class="kpi-card kpi-card--gold">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold" aria-hidden="true">
+        <i data-lucide="book-open"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-total-accounts">— Accounts</span>
+        <span class="kpi-label">Total Accounts</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--success">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--success" aria-hidden="true">
+        <i data-lucide="check-circle"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-active-accounts">— Active</span>
+        <span class="kpi-label">Active Status</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--info">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--info" aria-hidden="true">
+        <i data-lucide="shield-check"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-avg-credit">—</span>
+        <span class="kpi-label">Avg Credit Line</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--danger">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--danger" aria-hidden="true">
+        <i data-lucide="clock"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-overdue-balance">—</span>
+        <span class="kpi-label">Overdue Balances</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CRM SPLIT GRID ===== -->
+  <div class="crm-layout-grid">
+    
+    <!-- Left Column: Customer table registry -->
+    <div class="crm-left-panel">
+      <div class="card glass registry-card">
+        <div class="registry-header">
+          <h3 class="registry-title">Client Accounts Registry</h3>
+          <span class="registry-status-badge">Live DB Synced</span>
+        </div>
+        
+        <div class="table-scroll-wrapper">
+          <table class="registry-table">
+            <thead>
+              <tr>
+                <th scope="col">Code</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Type</th>
+                <th scope="col">Pricing Tier</th>
+                <th scope="col">Credit Line</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customer-roster-body">
+              <!-- Client account records mapped here by customers.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Account creation & Audit logs -->
+    <div class="crm-right-panel">
+      
+      <!-- Panel 1: Onboard Client Form -->
+      <div class="card glass onboard-card">
+        <div class="onboard-header">
+          <i data-lucide="user-plus" class="onboard-icon" aria-hidden="true"></i>
+          <h3 class="onboard-title">Onboard Client Account</h3>
+        </div>
+        
+        <form id="create-customer-form" class="onboard-form" novalidate>
+          <div class="form-grid-flex">
+            <div class="form-group flex-grow">
+              <label for="cust-code" class="form-label">Client Code</label>
+              <input
+                type="text"
+                id="cust-code"
+                class="form-input"
+                placeholder="CUST-102"
+                required
+                aria-required="true"
+              >
+            </div>
+            <div class="form-group cust-type-group">
+              <label for="cust-type" class="form-label">Channel Type</label>
+              <select id="cust-type" class="form-select">
+                <option value="B2B">B2B Commercial</option>
+                <option value="B2C">B2C Retail</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cust-name" class="form-label">Company / Client Name</label>
+            <input
+              type="text"
+              id="cust-name"
+              class="form-input"
+              placeholder="Chennai Franchise Operators"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="cust-email" class="form-label">Email Address</label>
+            <input
+              type="email"
+              id="cust-email"
+              class="form-input"
+              placeholder="contact@chennaicoffee.in"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="form-grid-flex">
+            <div class="form-group flex-grow">
+              <label for="cust-tier" class="form-label">Pricing Tier</label>
+              <select id="cust-tier" class="form-select">
+                <option value="STANDARD">Standard Base</option>
+                <option value="PREMIUM">Premium Tier</option>
+                <option value="VIP">VIP Elite</option>
+              </select>
+            </div>
+            <div class="form-group cust-credit-group">
+              <label for="cust-credit-limit" class="form-label" id="lbl-credit-limit">Credit Line (€)</label>
+              <input
+                type="number"
+                id="cust-credit-limit"
+                class="form-input text-center"
+                value="100000"
+                aria-labelledby="lbl-credit-limit"
+              >
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-onboard">
+            <i data-lucide="plus" aria-hidden="true"></i>
+            <span>Create Client Profile</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Panel 2: Credit Risk Audit logs -->
+      <div class="card glass credit-audit-card">
+        <div class="audit-header">
+          <i data-lucide="activity" class="audit-icon" aria-hidden="true"></i>
+          <h3 class="audit-title">Credit Exposure Audit</h3>
+        </div>
+        
+        <p class="audit-desc">Automatic compliance checker for franchise accounts against max net terms credit ceilings.</p>
+
+        <div id="credit-audit-log" class="audit-log-terminal" role="log" aria-live="polite">
+          <!-- Text dynamically loaded by customers.js -->
+        </div>
+      </div>
+
+    </div><!-- /crm-right-panel -->
+
+  </div><!-- /crm-layout-grid -->
+
+</div><!-- /crm-workspace -->
+
+
+<!-- ===== TABLE ROW TEMPLATE ===== -->
+<template id="customer-row-tpl">
+  <tr class="crm-table-row">
+    <td class="col-code"></td>
+    <td class="col-name"></td>
+    <td class="col-email"></td>
+    <td class="col-type">
+      <span class="type-badge"></span>
+    </td>
+    <td class="col-tier"></td>
+    <td class="col-credit"></td>
+    <td class="col-status">
+      <span class="status-indicator-wrapper">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-label"></span>
+      </span>
+    </td>
+    <td class="col-actions">
+      <button class="btn btn-secondary btn-toggle-status" type="button"></button>
+    </td>
+  </tr>
+</template>

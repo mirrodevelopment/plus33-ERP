@@ -28,6 +28,7 @@
 package com.plus33.erp.sales.entity;
 
 import com.plus33.erp.organization.entity.Company;
+import com.plus33.erp.organization.entity.Store;
 import com.plus33.erp.security.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -71,6 +72,10 @@ public class SalesOrder {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private Store store;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)

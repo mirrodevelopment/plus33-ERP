@@ -27,7 +27,7 @@
 
     <!-- Brand Logo -->
     <div class="sidebar-brand" id="sidebar-brand">
-      <img src="imgs/logo-gold.png" alt="PLUS33 Coffee Logo" class="sidebar-logo" id="sidebar-logo">
+      <img src="imgs/logo-gold.png" alt="PLUS33 Coffee Logo" class="sidebar-logo" id="sidebar-logo" width="32" height="32" style="width: 32px !important; height: 32px !important; object-fit: contain !important; flex-shrink: 0 !important;">
       <span class="brand-text">PLUS33 Coffee</span>
     </div>
 
@@ -101,10 +101,31 @@
       </div>
 
       <div class="header-right">
+        <!-- Live Status Badge (Left of notifications) -->
+        <div id="header-sync-status-badge" class="sync-badge" role="status" aria-label="Data sync status" style="display: none;">
+          <span class="sync-dot" aria-hidden="true"></span>
+          <span class="sync-label">Live</span>
+        </div>
+
         <!-- Notification Bell -->
         <button class="btn-icon notification-btn" id="btn-notifications" type="button" title="Notifications" aria-label="Notifications">
           <i data-lucide="bell"></i>
           <span class="notification-badge" id="notification-badge" hidden>0</span>
+        </button>
+
+        <!-- User Profile Header Card -->
+        <div class="header-profile" id="header-profile-card">
+          <img class="user-avatar" src="imgs/male-avatar.png" alt="User Profile" id="user-avatar-header">
+          <div class="user-info-header">
+            <span class="user-name-header" id="user-name-header">Loading...</span>
+            <span class="user-role-header" id="user-role-header">—</span>
+          </div>
+        </div>
+
+        <!-- Refresh Button (Right of profile card) -->
+        <button id="header-btn-refresh-dashboard" class="btn btn-ghost btn-sm" type="button" aria-label="Refresh dashboard data" style="display: none; margin-left: var(--spacing-sm);">
+          <i data-lucide="refresh-cw" aria-hidden="true"></i>
+          <span>Refresh</span>
         </button>
       </div>
 

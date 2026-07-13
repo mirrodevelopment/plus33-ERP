@@ -42,31 +42,41 @@ export class QuickActions {
     logger.debug('QuickActions', 'Rendering Quick Actions panel...');
 
     container.innerHTML = `
-      <div class="flex justify-between align-center mb-md" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: var(--spacing-xs);">
-        <h3 class="m-0" style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">${this.config.title}</h3>
+      <div class="flex justify-between align-center mb-md" style="border-bottom: 1px solid var(--border-color); padding-bottom: var(--spacing-xs);">
+        <h3 class="m-0" style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em;">${this.config.title}</h3>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-sm); font-size: 0.75rem;">
-        <button class="btn btn-secondary btn-qa-apps" style="padding: var(--spacing-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
-          <span>📋</span> Review Franchise Applications
+      <div class="qa-grid">
+        <button class="qa-btn btn-qa-apps" type="button" aria-label="Review Franchise Applications">
+          <i data-lucide="file-text" aria-hidden="true"></i>
+          <span>Review Franchise Applications</span>
         </button>
-        <button class="btn btn-secondary btn-qa-budgets" style="padding: var(--spacing-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
-          <span>💵</span> Approve Budgets
+        <button class="qa-btn btn-qa-budgets" type="button" aria-label="Approve Budgets">
+          <i data-lucide="wallet" aria-hidden="true"></i>
+          <span>Approve Budgets</span>
         </button>
-        <button class="btn btn-secondary btn-qa-vendors" style="padding: var(--spacing-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
-          <span>🤝</span> Approve Vendors
+        <button class="qa-btn btn-qa-vendors" type="button" aria-label="Approve Vendors">
+          <i data-lucide="users" aria-hidden="true"></i>
+          <span>Approve Vendors</span>
         </button>
-        <button class="btn btn-secondary btn-qa-audit" style="padding: var(--spacing-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
-          <span>🛡️</span> Create Audit
+        <button class="qa-btn btn-qa-audit" type="button" aria-label="Create Audit">
+          <i data-lucide="shield" aria-hidden="true"></i>
+          <span>Create Audit</span>
         </button>
-        <button class="btn btn-secondary btn-qa-visit" style="padding: var(--spacing-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
-          <span>🚨</span> Schedule Surprise Visit
+        <button class="qa-btn btn-qa-visit" type="button" aria-label="Schedule Surprise Visit">
+          <i data-lucide="bell-ring" aria-hidden="true"></i>
+          <span>Schedule Surprise Visit</span>
         </button>
-        <button class="btn btn-secondary btn-qa-reports" style="padding: var(--spacing-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
-          <span>📊</span> View Executive Reports
+        <button class="qa-btn btn-qa-reports" type="button" aria-label="View Executive Reports">
+          <i data-lucide="bar-chart-2" aria-hidden="true"></i>
+          <span>View Executive Reports</span>
         </button>
       </div>
     `;
+
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
 
     this.bindEvents(container, lifecycle);
   }

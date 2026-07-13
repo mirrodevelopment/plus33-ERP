@@ -64,7 +64,8 @@ class Router {
         if (role === 'ultimateAdmin') hash = '#ultimate-dashboard';
         else if (role === 'nationalAdmin') hash = '#national-dashboard';
         else if (role === 'regionalAdmin') hash = '#regional-dashboard';
-        else if (role === 'warehouse') hash = '#national-dashboard';
+        else if (role === 'nationalWarehouseAdmin') hash = '#national-warehouse-dashboard';
+        else if (role === 'regionalWarehouseAdmin') hash = '#regional-warehouse-dashboard';
         else if (role === 'store') hash = '#store-dashboard';
         else if (role === 'storeEmployee') hash = '#employee-dashboard';
         else if (role === 'shiftSupervisor') hash = '#supervisor-dashboard';
@@ -118,7 +119,7 @@ class Router {
 
     // 4. Load & Render Page Dynamically
     try {
-      const pageModule = await import(`../${matchedRoute.page}`);
+      const pageModule = await import(`../${matchedRoute.page}?v=${Date.now()}`);
       const pageContainer = document.getElementById('main-content') || document.getElementById('app');
       
       /**
@@ -154,7 +155,7 @@ class Router {
   async loadLayout(layoutName) {
     logger.debug('Router', `Loading layout framework: ${layoutName}`);
     try {
-      const layoutModule = await import(`../layouts/${layoutName}.js`);
+      const layoutModule = await import(`../layouts/${layoutName}.js?v=${Date.now()}`);
       const layout = layoutModule.default || layoutModule[Object.keys(layoutModule)[0]];
       
       const appContainer = document.getElementById('app');

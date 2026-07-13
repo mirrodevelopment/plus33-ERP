@@ -1,0 +1,594 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee — L&D Training Academy
+ * File              : training.css
+ * Path              : frontend/modules/store-employee/training/training.css
+ * Purpose           : Styling for Store Employee Training page UI
+ * Version           : 2.0.0
+ ******************************************************************************/
+
+.employee-training-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Header Banner Card */
+.header-banner-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.welcome-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.welcome-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.welcome-subtitle .highlight-val {
+  color: var(--accent-primary);
+}
+
+.header-status-pill {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-status-pill i {
+  width: 14px;
+  height: 14px;
+}
+
+/* 4 Academy Stats Cards Row */
+.kpi-grid-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.kpi-block-card {
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.kpi-icon-wrapper {
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon-wrapper--gold {
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary);
+}
+
+.kpi-icon-wrapper--green {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--status-success);
+}
+
+.kpi-icon-wrapper--blue {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.kpi-icon-wrapper--locked {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+
+.kpi-icon-wrapper i {
+  width: 22px;
+  height: 22px;
+}
+
+.kpi-meta-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+
+.kpi-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Split Columns Grid */
+.workspace-grid-layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .workspace-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.layout-column-left, .layout-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.curriculum-card, .qualifications-card, .guidelines-card {
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: left;
+  width: 100%;
+}
+
+.card-header-split {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-split-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent-primary);
+}
+
+.card-split-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-primary);
+}
+
+/* Modules Feed list */
+.curriculum-modules-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.training-module-row {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.training-module-row--certified {
+  border-color: rgba(74, 222, 128, 0.1);
+}
+
+.training-module-row--locked {
+  opacity: 0.5;
+}
+
+.module-header-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.module-title-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.module-code-lbl {
+  font-size: 0.6rem;
+  color: var(--accent-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.module-name-text {
+  margin: 4px 0 0 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.module-status-badge {
+  font-size: 0.62rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  text-transform: uppercase;
+}
+
+.module-status-badge--certified { color: var(--status-success); }
+.module-status-badge--inprogress { color: var(--status-info); }
+.module-status-badge--locked { color: var(--text-muted); }
+
+.module-progress-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: 4px;
+}
+
+.module-progress-bg {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.module-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--status-info));
+  border-radius: 3px;
+}
+
+.training-module-row--certified .module-progress-fill {
+  background: linear-gradient(90deg, var(--accent-primary), var(--status-success));
+}
+
+.module-progress-percent {
+  font-size: 0.7rem;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.module-action-buttons-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: 4px;
+}
+
+.btn-download-cert {
+  padding: 4px 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.btn-download-cert i {
+  width: 11px;
+  height: 11px;
+  color: var(--accent-primary);
+}
+
+.btn-resume-quiz {
+  background: transparent;
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  padding: 4px 12px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-resume-quiz:hover {
+  background: rgba(201, 164, 106, 0.1);
+}
+
+.btn-resume-quiz i {
+  width: 11px;
+  height: 11px;
+}
+
+/* Qualifications Active Badge item list */
+.qualifications-list-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.qualification-badge-row {
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  transition: all var(--transition-fast);
+}
+
+.qualification-badge-row--active {
+  background: rgba(130, 163, 125, 0.08);
+  border: 1px solid rgba(130, 163, 125, 0.2);
+}
+
+.qualification-badge-row--locked {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  opacity: 0.55;
+}
+
+.badge-icon-circle {
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qualification-badge-row--active .badge-icon-circle {
+  background: rgba(130, 163, 125, 0.15);
+  color: var(--status-success);
+}
+
+.qualification-badge-row--locked .badge-icon-circle {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+}
+
+.badge-icon-circle i {
+  width: 18px;
+  height: 18px;
+}
+
+.badge-text-meta {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.badge-title {
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  display: block;
+}
+
+.badge-subtitle {
+  font-size: 0.65rem;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* guidelines card */
+.guidelines-para {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+/* Popup overlay styles */
+.modal-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+}
+
+.modal-content-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.modal-header-split {
+  border-bottom: 1.5px solid var(--accent-primary);
+  padding-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  margin: 0;
+  font-weight: 800;
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+}
+
+.btn-close-modal {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.btn-close-modal:hover {
+  color: var(--text-primary);
+}
+
+/* Certificate View Inside Modal */
+.cert-dashed-outline {
+  border: 2px dashed var(--accent-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  text-align: center;
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.cert-dashed-outline h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: #fff;
+  font-weight: 800;
+}
+
+.cert-dashed-outline p.cert-intro {
+  margin: 0;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.cert-dashed-outline h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.cert-dashed-outline p.cert-desc {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.cert-dashed-outline span.cert-footer {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+/* Quiz questions details */
+.quiz-body {
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quiz-intro-para {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.quiz-question-box {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  border-radius: var(--radius-md);
+}
+
+.quiz-box-lbl {
+  color: var(--accent-primary);
+  font-size: 0.78rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.quiz-question-text {
+  font-weight: 600;
+  line-height: 1.35;
+  display: block;
+}
+
+.quiz-options-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-quiz-option {
+  padding: 10px;
+  border-radius: var(--radius-md);
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.72rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-quiz-option:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.btn-quiz-option.option-incorrect {
+  border-color: var(--status-danger);
+  background: rgba(239, 68, 68, 0.1);
+}

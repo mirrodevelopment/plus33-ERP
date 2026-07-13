@@ -1,0 +1,200 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Shift Supervisor — Dashboard
+ * File              : dashboard.html
+ * Path              : frontend/modules/store-employee/supervisor-dashboard/dashboard.html
+ * Purpose           : HTML template for the Shift Supervisor Dashboard
+ * Version           : 2.0.0
+ *
+ * Related JS        : dashboard.js
+ * Related CSS       : dashboard.css
+ * Related APIs      : GET /api/v1/auth/me
+ *                     GET /leaves/pending
+ *                     PUT /leaves/:id/approve
+ *                     PUT /leaves/:id/reject
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Defines the structural layout of the Shift Supervisor Dashboard page context.
+ * No inline styles, no inline javascript event handlers.
+ ******************************************************************************
+-->
+
+<div class="supervisor-dashboard-workspace">
+
+  <!-- ===== HEADER BANNER CARD ===== -->
+  <div class="card glass header-banner-card">
+    <div class="welcome-section">
+      <h2 class="welcome-title">
+        <span>Welcome back, Supervisor</span>
+        <span id="welcome-name">Rohan Sharma</span>!
+      </h2>
+      <p class="welcome-subtitle">
+        Store: <span id="meta-store-name" class="highlight-val">Green Park Café, City Center</span> &nbsp;·&nbsp;
+        Active Shift: <span id="meta-shift-details" class="highlight-val">Morning Roster (08:00 AM - 04:00 PM)</span>
+      </p>
+    </div>
+    
+    <div class="header-status-pill" role="status" aria-live="polite">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>Shift Running</span>
+    </div>
+  </div>
+
+  <!-- ===== 4 KPI CARDS ===== -->
+  <div class="kpi-grid-row" role="region" aria-label="Shift supervisor performance metrics">
+    
+    <!-- Card 1: Active Baristas Count -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold" aria-hidden="true">
+        <i data-lucide="users"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-active-baristas-count">— Baristas</span>
+        <span class="kpi-label">Clocked-in Team</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Shift Orders Fulfilled -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--info" aria-hidden="true">
+        <i data-lucide="shopping-cart"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-shift-orders">— Orders</span>
+        <span class="kpi-label">Shift Orders Fulfillment</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Avg Beverage Prep Speed -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--success" aria-hidden="true">
+        <i data-lucide="zap"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-prep-speed">— min</span>
+        <span class="kpi-label">Avg Beverage Prep Speed</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Leave Requests Awaiting -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--danger" aria-hidden="true">
+        <i data-lucide="calendar"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-value" id="kpi-pending-leaves">— Pending</span>
+        <span class="kpi-label">Leave Requests Awaiting</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== MAIN GRID SPLIT ===== -->
+  <div class="workspace-grid-layout">
+    
+    <!-- Left Column: Shift Team Status Monitor -->
+    <div class="card glass team-monitor-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Shift Team Monitor</h3>
+        <i data-lucide="activity" class="card-split-icon" aria-hidden="true"></i>
+      </div>
+
+      <div class="team-rows-list" id="active-team-list">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </div>
+
+    <!-- Right Column: Integrated Leave Approvals Center -->
+    <div class="card glass leave-approvals-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Leave Approvals Hub</h3>
+        <i data-lucide="shield-check" class="card-split-icon" aria-hidden="true"></i>
+      </div>
+
+      <div class="approvals-scroll-list" id="pending-approvals-list">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== REJECT MODAL PROMPT ===== -->
+  <div id="reject-modal" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="card glass modal-content-panel animate-slide-up">
+      <h3 class="modal-title color-danger">Reject Barista Leave</h3>
+      
+      <div class="form-group">
+        <label for="reject-reason-input" class="form-label">
+          <span>Rejection Reason</span>
+          <span class="required-indicator">*</span>
+          <span class="hint">(min 10 chars)</span>
+        </label>
+        <textarea id="reject-reason-input" rows="3" class="form-textarea" placeholder="State reason for rejection..."></textarea>
+      </div>
+
+      <div class="modal-actions-row">
+        <button id="reject-modal-submit" class="btn btn-danger" type="button">Confirm Rejection</button>
+        <button id="reject-modal-close" class="btn btn-secondary" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ===== BARISTA ROW TEMPLATE ===== -->
+<template id="team-row-tpl">
+  <div class="team-row-item">
+    <div class="barista-details-col">
+      <div class="user-avatar-icon" aria-hidden="true">
+        <i data-lucide="user"></i>
+      </div>
+      <div class="barista-meta">
+        <strong class="barista-name"></strong>
+        <span class="barista-station-info"></span>
+        
+        <!-- Checklist progress bar -->
+        <div class="checklist-progress-group">
+          <span class="progress-label">Checklist Progress:</span>
+          <div class="progress-track">
+            <div class="progress-fill"></div>
+          </div>
+          <strong class="progress-percentage-text"></strong>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary btn-ping-barista" type="button">
+      <i data-lucide="bell" aria-hidden="true"></i>
+      <span>Ping</span>
+    </button>
+  </div>
+</template>
+
+
+<!-- ===== LEAVE REQUEST TEMPLATE ===== -->
+<template id="leave-approval-tpl">
+  <div class="leave-request-approval-card">
+    <div class="card-top-row">
+      <strong class="employee-name"></strong>
+      <span class="leave-type-code-badge"></span>
+    </div>
+
+    <div class="duration-details">
+      <div class="duration-days"><strong>Duration:</strong> <span class="days-val">0</span> day(s) (<span class="dates-val"></span>)</div>
+      <div class="reason-quote"></div>
+      <div class="document-warning-alert color-danger font-bold">⚠ Medical Certificate Required</div>
+    </div>
+
+    <div class="comment-group form-group">
+      <input type="text" class="supervisor-comment-input form-input" placeholder="Optional approval comment...">
+    </div>
+
+    <div class="action-buttons-row">
+      <button class="btn btn-success btn-approve-leave" type="button">Approve</button>
+      <button class="btn btn-danger btn-reject-leave" type="button">Reject</button>
+    </div>
+  </div>
+</template>

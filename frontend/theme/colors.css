@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
  * Project           : PLUS33 Coffee ERP
  * Developed By      : Haulo
  * Developed For     : PLUS33 Coffee
@@ -116,12 +116,28 @@ body {
   z-index: 100;
   transition: width var(--transition-normal), background-color var(--transition-normal), border-color var(--transition-normal);
 }
+.sidebar.sidebar--collapsed {
+  width: 0 !important;
+  border-right: none !important;
+  overflow: hidden !important;
+}
+.sidebar.sidebar--collapsed * {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
 .sidebar-brand {
   padding: var(--spacing-lg);
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
   border-bottom: 1px solid var(--border-color);
+}
+.sidebar-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 .brand-logo {
   font-size: 1.5rem;
@@ -176,6 +192,18 @@ body {
   align-items: center;
   gap: var(--spacing-sm);
 }
+.sidebar-profile-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none !important;
+  color: inherit !important;
+  flex: 1;
+  min-width: 0;
+}
+.sidebar-profile-link:hover .user-name {
+  color: var(--accent-primary) !important;
+}
 .user-avatar {
   width: 40px;
   height: 40px;
@@ -193,10 +221,13 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--text-primary);
+  text-decoration: none !important;
 }
 .user-role {
   font-size: 0.75rem;
   color: var(--text-muted);
+  text-decoration: none !important;
 }
 .btn-logout {
   background: none;
@@ -218,46 +249,177 @@ body {
   min-width: 0;
 }
 .header {
-  height: 70px;
-  background-color: var(--bg-header);
+  height: 62px;
+  background: var(--bg-header);
   border-bottom: 1px solid var(--border-color);
+  border-top: 2px solid var(--accent-primary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--spacing-lg);
+  gap: var(--spacing-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
 }
-.header-left, .header-right {
+
+.header-left,
+.header-right {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
-.btn-icon {
-  background: none;
-  border: none;
+
+/* Sidebar toggle icon button */
+#sidebar-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  transition: background 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+#sidebar-toggle:hover {
+  background: var(--bg-card-hover);
   color: var(--text-primary);
-  font-size: 1.25rem;
+}
+
+/* ── Global Search ── */
+.header-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.header-search .search-icon {
+  position: absolute;
+  left: 10px;
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+.header-search input {
+  height: 34px;
+  width: 220px;
+  padding: 0 12px 0 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  outline: none;
+  transition: all 0.2s ease;
+  caret-color: var(--accent-primary);
+}
+.header-search input::placeholder {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.header-search input:focus {
+  width: 280px;
+  background: var(--bg-card-hover);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.header-search:focus-within .search-icon {
+  color: var(--accent-primary);
+}
+
+/* ── Breadcrumbs ── */
+.breadcrumbs {
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: var(--spacing-sm);
+  border-left: 1px solid var(--border-color);
+  margin-left: 4px;
+}
+.breadcrumb-item {
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+.breadcrumb-item:hover {
+  color: var(--text-secondary);
+}
+.breadcrumb-item.active {
+  color: var(--accent-primary);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.breadcrumb-sep {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  user-select: none;
+}
+
+/* ── Profile card ── */
+.header-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.header-profile:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-color-hover);
+}
+.user-info-header {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.user-name-header {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.user-role-header {
+  font-size: 0.66rem;
+  color: var(--accent-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Generic icon buttons in topbar ── */
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xs);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  padding: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
 }
-.breadcrumbs {
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-.breadcrumb-item {
-  color: var(--text-muted);
-}
-.breadcrumb-item.active {
+.btn-icon:hover {
+  background: var(--bg-card-hover);
   color: var(--text-primary);
-  font-weight: 500;
 }
-.breadcrumb-sep {
-  color: var(--text-muted);
+.btn-icon svg,
+.btn-icon i {
+  width: 16px;
+  height: 16px;
 }
+
 
 .content-area {
   flex: 1;
@@ -376,8 +538,9 @@ select, input, button {
 
 /* Glassmorphism class helper */
 .glass {
-  background: rgba(255, 255, 255, 0.03) !important;
+  background: var(--bg-card) !important;
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
@@ -399,3 +562,70 @@ select, input, button {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Premium Quick Actions Widget styling */
+.qa-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.qa-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column; /* Centered column layout is clean and handles wrapping perfectly */
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+  min-height: 96px;
+  box-shadow: var(--shadow-sm);
+  outline: none;
+}
+
+.qa-btn span {
+  display: block;
+  line-height: 1.2;
+}
+
+.qa-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), 0 0 10px var(--accent-glow);
+}
+
+.qa-btn:active {
+  transform: translateY(0);
+}
+
+.qa-btn i {
+  width: 20px;
+  height: 20px;
+  color: var(--accent-primary);
+  stroke-width: 2.2;
+  transition: transform var(--transition-normal) ease;
+}
+
+.qa-btn:hover i {
+  transform: scale(1.15) rotate(-3deg);
+  color: var(--accent-secondary);
+}
+
+@media (max-width: 576px) {
+  .qa-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

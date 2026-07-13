@@ -1,0 +1,549 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Ultimate Admin — Dashboard Styling
+ * File              : dashboard.css
+ * Path              : frontend/modules/ultimate-admin/dashboard/dashboard.css
+ * Purpose           : Specific layout formatting for the Ultimate Admin Dashboard
+ * Version           : 3.0.0
+ ******************************************************************************/
+
+/* ===== PREMIUM GRADIENT TITLES ===== */
+.dashboard-header h1,
+.dashboard-title-row h1,
+#main-content h1 {
+  background: linear-gradient(135deg, #ffe5b4 0%, #d4af37 50%, #c9a46a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* ===== FILTERS RIBBON — RESTYLE v2 ===== */
+.filters-ribbon {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  margin-bottom: var(--spacing-lg);
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-top: 2px solid var(--accent-primary) !important;
+  border-radius: 12px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+}
+
+
+.filters-ribbon .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 120px;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.filters-ribbon .filter-group--date-range {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 6px;
+  flex: 1.6 1 200px;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.filters-ribbon .filter-group--date-range[hidden] {
+  display: none !important;
+}
+
+.filters-ribbon .filter-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding-left: 1px;
+  white-space: nowrap;
+}
+
+/* Dropdowns */
+.filters-ribbon .filter-select,
+.filters-ribbon .filter-input {
+  width: 100%;
+  padding: 0 28px 0 9px !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-bottom: 2px solid var(--accent-primary) !important;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  height: 32px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' viewBox='0 0 9 5'%3E%3Cpath d='M1 1l3.5 3L8 1' stroke='%232563eb' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 9px center !important;
+  background-size: 9px 5px !important;
+}
+
+.filters-ribbon .filter-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.filters-ribbon .filter-select:hover,
+.filters-ribbon .filter-input:hover {
+  border-color: var(--border-color-hover) !important;
+  border-bottom-color: var(--accent-primary) !important;
+  background: var(--bg-card-hover) !important;
+}
+
+.filters-ribbon .filter-select:focus,
+.filters-ribbon .filter-input:focus {
+  border-color: var(--border-color-hover) !important;
+  border-bottom-color: var(--accent-primary) !important;
+  background: var(--bg-card-hover) !important;
+  box-shadow: 0 2px 0 0 var(--accent-primary) !important;
+}
+
+/* Actions — bottom-align with the inputs */
+.filters-ribbon .filter-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+  padding-left: 10px;
+  margin-left: 4px;
+  border-left: 1px solid var(--border-color);
+  padding-bottom: 0;
+}
+
+/* Apply button */
+.filters-ribbon .filter-actions .btn-primary,
+.filters-ribbon .filter-actions #btn-apply-filters {
+  height: 32px !important;
+  padding: 0 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: linear-gradient(135deg, #b8913e 0%, #d4af37 45%, #e8c96a 100%) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  color: #0e0f14 !important;
+  font-size: 0.76rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow:
+    0 3px 12px rgba(201, 164, 106, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.filters-ribbon .filter-actions .btn-primary:hover,
+.filters-ribbon .filter-actions #btn-apply-filters:hover {
+  transform: translateY(-1px) !important;
+  box-shadow:
+    0 5px 18px rgba(201, 164, 106, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  background: linear-gradient(135deg, #c9a46a 0%, #e8c96a 50%, #f5d97a 100%) !important;
+}
+
+.filters-ribbon .filter-actions .btn-primary:active,
+.filters-ribbon .filter-actions #btn-apply-filters:active {
+  transform: translateY(0) scale(0.97) !important;
+  box-shadow: 0 2px 8px rgba(201, 164, 106, 0.3) !important;
+}
+
+/* Reset button */
+.filters-ribbon .filter-actions .btn-secondary,
+.filters-ribbon .filter-actions #btn-reset-filters {
+  height: 32px !important;
+  padding: 0 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+  color: var(--text-muted) !important;
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap;
+}
+
+.filters-ribbon .filter-actions .btn-secondary:hover,
+.filters-ribbon .filter-actions #btn-reset-filters:hover {
+  background: rgba(255, 80, 80, 0.08) !important;
+  border-color: rgba(255, 80, 80, 0.3) !important;
+  color: #ff6b6b !important;
+}
+
+.filters-ribbon .filter-actions .btn-secondary:active,
+.filters-ribbon .filter-actions #btn-reset-filters:active {
+  transform: scale(0.97) !important;
+}
+
+/* Icon sizing inside filter buttons */
+.filters-ribbon .filter-actions .btn svg,
+.filters-ribbon .filter-actions .btn i {
+  width: 12px !important;
+  height: 12px !important;
+  opacity: 0.85;
+}
+
+
+/* ===== KPI ROW GRID FORMATTING ===== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: var(--spacing-xs) !important; /* compact gap to fit on one line */
+  margin-bottom: var(--spacing-xl);
+  width: 100%;
+}
+
+.kpi-grid .card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: var(--spacing-xs) var(--spacing-sm) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Compact overrides for KPI card inner contents */
+.kpi-grid .kpi-icon-wrapper {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 5px !important;
+}
+
+.kpi-grid .kpi-icon-wrapper svg,
+.kpi-grid .kpi-icon-wrapper i {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.kpi-grid .kpi-title {
+  font-size: 0.55rem !important;
+  letter-spacing: 0.02em !important;
+}
+
+.kpi-grid .kpi-value {
+  font-size: 0.95rem !important;
+  margin: 1px 0 !important;
+}
+
+.kpi-grid .kpi-trend {
+  font-size: 0.58rem !important;
+}
+
+.kpi-grid .card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(201, 164, 106, 0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.kpi-grid .card:hover::before {
+  transform: translateX(100%);
+}
+
+.kpi-grid .card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-color-hover) !important;
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== WIDGET DECORATIONS & GLASS EFFECTS ===== */
+#dashboard-grid-mount .card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: var(--spacing-lg) !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#dashboard-grid-mount .card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-color-hover) !important;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===== INNER COMPONENT STYLE ENHANCEMENTS ===== */
+
+/* Table styles inside widgets */
+#dashboard-grid-mount table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--spacing-md);
+  font-size: 0.8rem;
+}
+
+#dashboard-grid-mount th {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  letter-spacing: 0.08em;
+}
+
+#dashboard-grid-mount td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+#dashboard-grid-mount tr:hover td {
+  background: var(--bg-card-hover);
+}
+
+/* Progress bar styling inside lists */
+#dashboard-grid-mount .progress-bar {
+  background: var(--border-color);
+  border-radius: var(--radius-sm);
+  height: 6px;
+  overflow: hidden;
+}
+
+#dashboard-grid-mount .progress-fill {
+  background: linear-gradient(90deg, var(--accent-primary), #ffe5b4);
+  height: 100%;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Scrollbar customization inside widgets */
+#dashboard-grid-mount .scrollable,
+#dashboard-grid-mount .table-wrapper,
+#dashboard-grid-mount div {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 164, 106, 0.15) transparent;
+}
+
+#dashboard-grid-mount ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+#dashboard-grid-mount ::-webkit-scrollbar-thumb {
+  background: rgba(201, 164, 106, 0.25);
+  border-radius: var(--radius-sm);
+}
+
+#dashboard-grid-mount ::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* ===== RESPONSIVE BREAKPOINTS FOR WIDGETS & KPIS ===== */
+@media (max-width: 1024px) {
+  .kpi-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-sm) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== SALES OVERVIEW METRICS OVERFLOW FIXES ===== */
+#sales-metric-total,
+#sales-metric-target {
+  font-size: 1.12rem !important; /* Scale down font size to prevent truncation */
+  letter-spacing: -0.01em !important;
+}
+
+/* Adjust column grid ratios to give left side more width */
+#dashboard-grid-mount div[style*="display: grid; grid-template-columns"] {
+  grid-template-columns: minmax(0, 7.8fr) minmax(0, 4.2fr) !important;
+  gap: var(--spacing-sm) !important;
+}
+
+/* Compact spacing for metrics row */
+#dashboard-grid-mount .flex.gap-lg.mb-md {
+  gap: var(--spacing-md) !important;
+}
+
+#dashboard-grid-mount div[style*="border-left: 1px solid rgba(255,255,255,0.1)"] {
+  padding-left: var(--spacing-md) !important;
+}
+
+/* ===== SYNC STATUS PILL — PREMIUM REDESIGN ===== */
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 8px;
+  border-radius: 50px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid transparent;
+  cursor: default;
+  user-select: none;
+}
+
+.sync-badge.online {
+  background: rgba(46, 204, 113, 0.08);
+  border-color: rgba(46, 204, 113, 0.3);
+  color: #3ddc84;
+  box-shadow:
+    0 0 14px rgba(46, 204, 113, 0.08),
+    inset 0 1px 0 rgba(46, 204, 113, 0.12);
+}
+
+.sync-badge.offline {
+  background: rgba(231, 76, 60, 0.08);
+  border-color: rgba(231, 76, 60, 0.3);
+  color: #ff6b6b;
+  box-shadow:
+    0 0 14px rgba(231, 76, 60, 0.08),
+    inset 0 1px 0 rgba(231, 76, 60, 0.12);
+}
+
+/* Pulsing Sync Dot */
+.sync-badge .sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.sync-badge.online .sync-dot {
+  background: #2ecc71;
+  box-shadow: 0 0 5px rgba(46, 204, 113, 0.7);
+}
+
+.sync-badge.online .sync-dot::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  border-radius: 50%;
+  background: #2ecc71;
+  animation: sync-pulse-green 1.8s infinite ease-out;
+}
+
+.sync-badge.offline .sync-dot {
+  background: #e74c3c;
+  box-shadow: 0 0 5px rgba(231, 76, 60, 0.7);
+}
+
+.sync-badge.offline .sync-dot::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  border-radius: 50%;
+  background: #e74c3c;
+  animation: sync-pulse-red 1.8s infinite ease-out;
+}
+
+@keyframes sync-pulse-green {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(2.8); opacity: 0;   }
+  100% { transform: scale(2.8); opacity: 0;   }
+}
+
+@keyframes sync-pulse-red {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(2.8); opacity: 0;   }
+  100% { transform: scale(2.8); opacity: 0;   }
+}
+
+/* ===== TOPBAR REFRESH BUTTON — PREMIUM REDESIGN ===== */
+#header-btn-refresh-dashboard {
+  background: rgba(201, 164, 106, 0.06) !important;
+  border: 1px solid rgba(201, 164, 106, 0.22) !important;
+  border-radius: 50% !important;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: rgba(201, 164, 106, 0.75) !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(201, 164, 106, 0.08);
+  flex-shrink: 0;
+}
+
+#header-btn-refresh-dashboard span {
+  display: none !important;
+}
+
+#header-btn-refresh-dashboard:hover {
+  background: rgba(201, 164, 106, 0.14) !important;
+  border-color: rgba(201, 164, 106, 0.5) !important;
+  color: #d4af37 !important;
+  box-shadow:
+    0 0 0 3px rgba(201, 164, 106, 0.1),
+    0 0 16px rgba(201, 164, 106, 0.2) !important;
+  transform: scale(1.08);
+}
+
+#header-btn-refresh-dashboard:active {
+  transform: scale(0.93) rotate(90deg) !important;
+  transition-duration: 0.15s !important;
+}
+
+#header-btn-refresh-dashboard svg,
+#header-btn-refresh-dashboard i {
+  width: 14px !important;
+  height: 14px !important;
+  transition: transform 0.4s ease !important;
+}
+
+/* Spin the icon when the spinning class is active */
+#header-btn-refresh-dashboard .icon-spinning {
+  animation: refresh-spin 0.7s linear infinite !important;
+}
+
+@keyframes refresh-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
