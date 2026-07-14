@@ -1,516 +1,507 @@
 <!--
  ******************************************************************************
  * Project           : PLUS33 Coffee ERP
- * Module            : National Admin — Dashboard
+ * Module            : National Warehouse Admin — Dashboard
  * File              : dashboard.html
- * Path              : frontend/modules/national-admin/dashboard/dashboard.html
- * Purpose           : HTML template for the National Admin Dashboard
+ * Path              : frontend/modules/national-warehouse-admin/dashboard/dashboard.html
+ * Purpose           : HTML template for the National Warehouse Admin Dashboard (WMS Overview)
  * Version           : 2.0.0
- *
- * Related JS        : dashboard.js
- * Related CSS       : dashboard.css
- * Related APIs      : GET /api/v1/dashboard/overview
- *                     GET /api/v1/regions
- *                     GET /api/v1/stores
- *                     GET /api/v1/warehouses
- *                     GET /api/v1/suppliers
- *
- * Description
- * ---------------------------------------------------------------------------
- * Defines the structural layout of the National Admin Dashboard.
- * No inline styles, no inline javascript handlers.
  ******************************************************************************
 -->
 
-<div class="national-admin-dashboard-workspace">
+<div class="national-warehouse-dashboard-workspace">
 
-  <!-- ===== PAGE HEADER CARD ===== -->
+  <!-- ===== PAGE HEADER ===== -->
   <div class="card glass dashboard-header-card">
     <div class="header-details">
       <h2 class="header-title">
-        <i data-lucide="layout-dashboard" class="header-icon" aria-hidden="true"></i>
-        <span>National Admin Dashboard</span>
+        <i data-lucide="warehouse" class="header-icon" aria-hidden="true"></i>
+        <span>National Warehouse Admin Dashboard</span>
       </h2>
       <span class="header-metadata">
+        Warehouse: <span id="header-warehouse-name" class="highlight-val">—</span> &nbsp;·&nbsp;
+        Warehouse ID: <span id="header-warehouse-id" class="highlight-val">—</span> &nbsp;·&nbsp;
         Active: <span id="header-region-name" class="highlight-val">—</span> &nbsp;·&nbsp;
         Region ID: <span id="header-region-id" class="highlight-val">—</span> &nbsp;·&nbsp;
         User: <span id="header-user-profile" class="highlight-val">—</span>
       </span>
     </div>
     <div class="header-actions">
-      <div id="dashboard-clock" class="dashboard-clock-panel" role="status" aria-live="off">
+      <!-- Warehouse Selector Dropdown -->
+      <div class="filter-group select-wrapper">
+        <select id="header-warehouse-select" class="filter-select">
+          <!-- populated dynamically -->
+        </select>
+      </div>
+      <!-- Timeframe selector -->
+      <div class="filter-group select-wrapper">
+        <select id="filter-timeframe" class="filter-select">
+          <option value="Today">Today</option>
+          <option value="Week" selected>This Week</option>
+          <option value="Month">This Month</option>
+        </select>
+      </div>
+      <!-- Date Display -->
+      <div id="dashboard-clock" class="dashboard-clock-panel">
         --:--:--
       </div>
+      <!-- Notifications count -->
       <div class="notifications-indicator" title="Unread notifications">
         <i data-lucide="bell" aria-hidden="true"></i>
         <span id="dashboard-notif-count" class="badge-count">0</span>
       </div>
+      <!-- User profile info -->
+      <div class="user-profile-widget">
+        <img src="imgs/male-avatar.png" alt="Warehouse Admin" class="user-avatar-img">
+        <div class="user-profile-details">
+          <span class="profile-name">Warehouse Admin</span>
+          <span class="profile-role">National Admin</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- ===== FILTER PANEL RIBBON ===== -->
-  <div class="card glass filters-card" role="search" aria-label="Dashboard filters">
-    <div class="filter-group">
-      <label for="filter-timeframe" class="filter-label">Timeframe</label>
-      <select id="filter-timeframe" class="filter-select">
-        <option value="Today">Today</option>
-        <option value="Week">This Week</option>
-        <option value="Month">This Month</option>
-      </select>
+  <!-- ===== KPI METRIC SUMMARY GRID (8 Cards in a Row) ===== -->
+  <div class="kpi-row-grid">
+    <!-- Card 1: Total Inventory Value -->
+    <div class="kpi-mini-card">
+      <div class="kpi-mini-header">
+        <span class="kpi-mini-title">Total Inventory Value</span>
+        <i data-lucide="dollar-sign" class="kpi-mini-icon text-accent" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-mini-body">
+        <h4 class="kpi-mini-value" id="kpi-inventory-val">₹ 84,75,250</h4>
+        <span class="kpi-mini-trend trend--success">vs Last Month <span class="trend-val">▲ 0.45%</span></span>
+      </div>
     </div>
 
-    <div class="filter-group">
-      <label for="filter-store" class="filter-label">Store Location</label>
-      <select id="filter-store" class="filter-select">
-        <!-- populated dynamically -->
-      </select>
+    <!-- Card 2: Stock in Hand -->
+    <div class="kpi-mini-card">
+      <div class="kpi-mini-header">
+        <span class="kpi-mini-title">Stock in Hand (Items)</span>
+        <i data-lucide="package" class="kpi-mini-icon text-accent" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-mini-body">
+        <h4 class="kpi-mini-value" id="kpi-stock-hand">2,568</h4>
+        <span class="kpi-mini-trend trend--success">vs Last Month <span class="trend-val">▲ 6.12%</span></span>
+      </div>
     </div>
 
-    <div class="filter-group">
-      <label for="filter-warehouse" class="filter-label">Warehouse</label>
-      <select id="filter-warehouse" class="filter-select">
-        <!-- populated dynamically -->
-      </select>
+    <!-- Card 3: Inbound Today -->
+    <div class="kpi-mini-card">
+      <div class="kpi-mini-header">
+        <span class="kpi-mini-title">Inbound Today</span>
+        <i data-lucide="arrow-down-left" class="kpi-mini-icon text-accent" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-mini-body">
+        <h4 class="kpi-mini-value" id="kpi-inbound-today">24 Receipts</h4>
+        <span class="kpi-mini-trend trend--success">vs Yesterday <span class="trend-val">▲ 14.29%</span></span>
+      </div>
     </div>
 
-    <div class="filter-group">
-      <label for="filter-vendor" class="filter-label">Vendor</label>
-      <select id="filter-vendor" class="filter-select">
-        <!-- populated dynamically -->
-      </select>
+    <!-- Card 4: Outbound Today -->
+    <div class="kpi-mini-card">
+      <div class="kpi-mini-header">
+        <span class="kpi-mini-title">Outbound Today</span>
+        <i data-lucide="truck" class="kpi-mini-icon text-accent" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-mini-body">
+        <h4 class="kpi-mini-value" id="kpi-outbound-today">36 Dispatches</h4>
+        <span class="kpi-mini-trend trend--success">vs Yesterday <span class="trend-val">▲ 20.00%</span></span>
+      </div>
     </div>
 
-    <button id="btn-apply-filters" class="btn btn-primary btn-refresh-dashboard" type="button" aria-label="Refresh dashboard data">
-      <i data-lucide="filter" aria-hidden="true"></i>
-      <span>Refresh Dashboard</span>
-    </button>
+    <!-- Card 5: Pending Supply Requests -->
+    <div class="kpi-mini-card">
+      <div class="kpi-mini-header">
+        <span class="kpi-mini-title">Pending Supply Requests</span>
+        <i data-lucide="clipboard-list" class="kpi-mini-icon text-accent" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-mini-body">
+        <h4 class="kpi-mini-value" id="kpi-pending-req">18 Requests</h4>
+        <span class="kpi-mini-trend trend--danger">vs Yesterday <span class="trend-val">▼ 10.00%</span></span>
+      </div>
+    </div>
+
+    <!-- Card 6: Pending Dispatches -->
+    <div class="kpi-mini-card">
+      <div class="kpi-mini-header">
+        <span class="kpi-mini-title">Pending Dispatches</span>
+        <i data-lucide="clock" class="kpi-mini-icon text-accent" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-mini-body">
+        <h4 class="kpi-mini-value" id="kpi-pending-disp">12 Orders</h4>
+        <span class="kpi-mini-trend trend--danger">vs Yesterday <span class="trend-val">▲ 14.29%</span></span>
+      </div>
+    </div>
+
+    <!-- Card 7: Low Stock Items -->
+    <div class="kpi-mini-card">
+      <div class="kpi-mini-header">
+        <span class="kpi-mini-title">Low Stock Items</span>
+        <i data-lucide="alert-triangle" class="kpi-mini-icon text-accent" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-mini-body">
+        <h4 class="kpi-mini-value" id="kpi-low-stock">27 Items</h4>
+        <span class="kpi-mini-trend trend--success">vs Yesterday <span class="trend-val">▲ 0.00%</span></span>
+      </div>
+    </div>
+
+    <!-- Card 8: Expiring Items -->
+    <div class="kpi-mini-card">
+      <div class="kpi-mini-header">
+        <span class="kpi-mini-title">Expiring Items</span>
+        <i data-lucide="hourglass" class="kpi-mini-icon text-accent" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-mini-body">
+        <h4 class="kpi-mini-value" id="kpi-expiring-soon">14 Items</h4>
+        <span class="kpi-mini-trend trend--warning">within 30 Days</span>
+      </div>
+    </div>
   </div>
 
-  <!-- ===== KPI METRIC SUMMARY GRID (8 Cards) ===== -->
-  <div class="kpi-grid-container" role="region" aria-label="National key performance indicators">
+  <!-- ===== ROW 1: INVENTORY OVERVIEW + STOCK STATUS + INBOUND/OUTBOUND CHART ===== -->
+  <div class="layout-three-columns">
     
-    <!-- KPI 1: Total Sales -->
-    <div class="kpi-block-card kpi-block-card--sales">
-      <div class="kpi-block-header">
-        <span class="kpi-block-title">Total Sales</span>
-        <i data-lucide="trending-up" class="kpi-block-icon" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-block-body">
-        <h4 class="kpi-block-value" id="kpi-total-sales">—</h4>
-        <span class="kpi-block-trend">▲ 4.8% vs target</span>
-      </div>
-    </div>
-
-    <!-- KPI 2: Target Achievement -->
-    <div class="kpi-block-card kpi-block-card--achievement">
-      <div class="kpi-block-header">
-        <span class="kpi-block-title">Target Achievement</span>
-        <i data-lucide="target" class="kpi-block-icon" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-block-body">
-        <h4 class="kpi-block-value" id="kpi-target-achievement">—</h4>
-        <span class="kpi-block-subtext" id="kpi-target-value">Target: —</span>
-      </div>
-    </div>
-
-    <!-- KPI 3: Active Stores -->
-    <div class="kpi-block-card kpi-block-card--stores">
-      <div class="kpi-block-header">
-        <span class="kpi-block-title">Active Stores</span>
-        <i data-lucide="store" class="kpi-block-icon" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-block-body">
-        <h4 class="kpi-block-value" id="kpi-total-stores">—</h4>
-        <span class="kpi-block-trend">100% Operational</span>
-      </div>
-    </div>
-
-    <!-- KPI 4: Regional Profit -->
-    <div class="kpi-block-card kpi-block-card--profit">
-      <div class="kpi-block-header">
-        <span class="kpi-block-title">Regional Profit</span>
-        <i data-lucide="dollar-sign" class="kpi-block-icon" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-block-body">
-        <h4 class="kpi-block-value" id="kpi-total-profit">—</h4>
-        <span class="kpi-block-subtext" id="kpi-profit-margin">Margin: —</span>
-      </div>
-    </div>
-
-    <!-- KPI 5: Compliance Score -->
-    <div class="kpi-block-card kpi-block-card--compliance">
-      <div class="kpi-block-header">
-        <span class="kpi-block-title">Compliance Score</span>
-        <i data-lucide="shield" class="kpi-block-icon" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-block-body">
-        <h4 class="kpi-block-value" id="kpi-compliance-score">—</h4>
-        <span class="kpi-block-trend kpi-block-trend--warning">2 Overdue Actions</span>
-      </div>
-    </div>
-
-    <!-- KPI 6: Total Regions -->
-    <div class="kpi-block-card kpi-block-card--regions">
-      <div class="kpi-block-header">
-        <span class="kpi-block-title">Total Regions</span>
-        <i data-lucide="map-pin" class="kpi-block-icon" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-block-body">
-        <h4 class="kpi-block-value" id="kpi-total-regions">—</h4>
-        <span class="kpi-block-subtext">Active Territories</span>
-      </div>
-    </div>
-
-    <!-- KPI 7: Total Warehouses -->
-    <div class="kpi-block-card kpi-block-card--warehouses">
-      <div class="kpi-block-header">
-        <span class="kpi-block-title">Total Warehouses</span>
-        <i data-lucide="archive" class="kpi-block-icon" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-block-body">
-        <h4 class="kpi-block-value" id="kpi-total-warehouses">—</h4>
-        <span class="kpi-block-trend">Fulfilled Directly</span>
-      </div>
-    </div>
-
-    <!-- KPI 8: Total Employees -->
-    <div class="kpi-block-card kpi-block-card--employees">
-      <div class="kpi-block-header">
-        <span class="kpi-block-title">Total Employees</span>
-        <i data-lucide="users" class="kpi-block-icon" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-block-body">
-        <h4 class="kpi-block-value" id="kpi-total-employees">—</h4>
-        <span class="kpi-block-subtext">Active Staff</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ===== ROW 1: SALES OVERVIEW + STORE PERFORMANCE SPLIT ===== -->
-  <div class="layout-grid-split">
-    
-    <!-- Widget: Dynamic Sales Overview Chart Widget (Left) -->
-    <div id="national-admin-sales-widget-container" style="min-width: 0;"></div>
-
-    <!-- Widget: Store Performance Tabs List (Right) -->
-    <div class="card glass store-performance-card">
+    <!-- Column 1: Inventory Overview (Donut) -->
+    <div class="card glass layout-col-item inventory-col">
       <div class="card-header-split">
-        <h3 class="card-split-title">Store Performance</h3>
+        <h3 class="card-split-title">Inventory Overview</h3>
+        <a href="#inventory" class="detail-link">View full inventory report →</a>
       </div>
-      <div class="tab-selectors-row">
-        <button class="dashboard-tab active" data-tab="top" type="button">Top</button>
-        <button class="dashboard-tab" data-tab="under" type="button">Underperformers</button>
-        <button class="dashboard-tab" data-tab="below" type="button">Below Target</button>
+      <div class="inventory-overview-body">
+        <div class="donut-chart-container">
+          <svg width="140" height="140" viewBox="0 0 42 42" id="inv-donut-svg">
+            <circle cx="21" cy="21" r="15.915" fill="transparent" class="donut-bg-circle"></circle>
+            <g id="inv-donut-segments"></g>
+          </svg>
+          <div class="donut-center-overlay">
+            <span class="donut-overlay-value" id="inv-total-items">2,568</span>
+            <span class="donut-overlay-label">Total Items</span>
+          </div>
+        </div>
+        <div class="inventory-stats-list">
+          <div class="stat-row"><span class="legend-color legend--available"></span> Available: <strong id="inv-available">1,784</strong> <span class="pct-sub">(69.5%)</span></div>
+          <div class="stat-row"><span class="legend-color legend--reserved"></span> Reserved: <strong id="inv-reserved">342</strong> <span class="pct-sub">(13.3%)</span></div>
+          <div class="stat-row"><span class="legend-color legend--transit"></span> In Transit: <strong id="inv-transit">212</strong> <span class="pct-sub">(8.3%)</span></div>
+          <div class="stat-row"><span class="legend-color legend--low"></span> Low Stock: <strong id="inv-low">157</strong> <span class="pct-sub">(6.1%)</span></div>
+          <div class="stat-row"><span class="legend-color legend--out"></span> Out of Stock: <strong id="inv-out">73</strong> <span class="pct-sub">(2.8%)</span></div>
+          <div class="stat-row"><span class="legend-color legend--expiring"></span> Expiring (30d): <strong id="inv-expiring">14</strong></div>
+        </div>
       </div>
-      <div class="tab-table-scroll-wrapper">
+      <div class="performance-footer-actions border-top-divider pt-xs">
+        <button class="quick-action-btn" id="qa-inv-view" type="button"><i data-lucide="eye" aria-hidden="true"></i><span>View Inventory</span></button>
+        <button class="quick-action-btn" id="qa-inv-transfer" type="button"><i data-lucide="move" aria-hidden="true"></i><span>Create Transfer</span></button>
+        <button class="quick-action-btn" id="qa-inv-adjust" type="button"><i data-lucide="sliders" aria-hidden="true"></i><span>Adjust Inventory</span></button>
+        <button class="quick-action-btn" id="qa-inv-count" type="button"><i data-lucide="check-square" aria-hidden="true"></i><span>Start Count</span></button>
+      </div>
+    </div>
+
+    <!-- Column 2: Stock Status Cards -->
+    <div class="card glass layout-col-item status-col">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Stock Status</h3>
+      </div>
+      <div class="stock-status-grid">
+        <!-- Card 1: Low Stock Items -->
+        <div class="stock-status-subcard subcard--low">
+          <div class="subcard-header">
+            <i data-lucide="alert-triangle" class="subcard-icon color-danger" aria-hidden="true"></i>
+            <span class="subcard-title">Low Stock Items</span>
+          </div>
+          <div class="subcard-body">
+            <span class="subcard-val" id="lbl-low-stock-count">27</span>
+            <button class="btn-subcard-action" id="btn-view-low-stock-details">View Details</button>
+          </div>
+        </div>
+        <!-- Card 2: Out of Stock Items -->
+        <div class="stock-status-subcard subcard--out">
+          <div class="subcard-header">
+            <i data-lucide="alert-circle" class="subcard-icon color-danger" aria-hidden="true"></i>
+            <span class="subcard-title">Out of Stock Items</span>
+          </div>
+          <div class="subcard-body">
+            <span class="subcard-val" id="lbl-out-stock-count">9</span>
+            <button class="btn-subcard-action" id="btn-view-out-stock-details">View Details</button>
+          </div>
+        </div>
+        <!-- Card 3: Expiring in 7 Days -->
+        <div class="stock-status-subcard subcard--expiring">
+          <div class="subcard-header">
+            <i data-lucide="hourglass" class="subcard-icon color-warning" aria-hidden="true"></i>
+            <span class="subcard-title">Expiring in 7 Days</span>
+          </div>
+          <div class="subcard-body">
+            <span class="subcard-val" id="lbl-exp7-count">14</span>
+            <button class="btn-subcard-action" id="btn-view-exp7-details">View Details</button>
+          </div>
+        </div>
+        <!-- Card 4: Expiring in 30 Days -->
+        <div class="stock-status-subcard subcard--expiring30">
+          <div class="subcard-header">
+            <i data-lucide="calendar" class="subcard-icon color-info" aria-hidden="true"></i>
+            <span class="subcard-title">Expiring in 30 Days</span>
+          </div>
+          <div class="subcard-body">
+            <span class="subcard-val" id="lbl-exp30-count">36</span>
+            <button class="btn-subcard-action" id="btn-view-exp30-details">View Details</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Inbound & Outbound Overview Chart -->
+    <div class="card glass layout-col-item chart-col">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Inbound &amp; Outbound Overview</h3>
+        <span class="badge-pill">Today</span>
+      </div>
+      <div class="inbound-outbound-chart-body">
+        <div class="chart-summary-row">
+          <div class="summary-stat">
+            <span class="summary-label">Inbound (Receipts)</span>
+            <span class="summary-val" id="lbl-inbound-val">24</span>
+            <span class="summary-trend color-success">▲ 14.29% vs Yesterday</span>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-label">Outbound (Dispatched)</span>
+            <span class="summary-val" id="lbl-outbound-val">36</span>
+            <span class="summary-trend color-success">▲ 20.00% vs Yesterday</span>
+          </div>
+        </div>
+        <!-- Custom Bar Chart rendering -->
+        <div class="bar-chart-visual">
+          <div class="bar-container"><div class="bar bar--inbound" style="height: 35%;"></div><div class="bar bar--outbound" style="height: 50%;"></div><span class="bar-lbl">03</span></div>
+          <div class="bar-container"><div class="bar bar--inbound" style="height: 55%;"></div><div class="bar bar--outbound" style="height: 65%;"></div><span class="bar-lbl">06</span></div>
+          <div class="bar-container"><div class="bar bar--inbound" style="height: 80%;"></div><div class="bar bar--outbound" style="height: 90%;"></div><span class="bar-lbl">09</span></div>
+          <div class="bar-container"><div class="bar bar--inbound" style="height: 45%;"></div><div class="bar bar--outbound" style="height: 60%;"></div><span class="bar-lbl">12</span></div>
+          <div class="bar-container"><div class="bar bar--inbound" style="height: 70%;"></div><div class="bar bar--outbound" style="height: 75%;"></div><span class="bar-lbl">16</span></div>
+          <div class="bar-container"><div class="bar bar--inbound" style="height: 95%;"></div><div class="bar bar--outbound" style="height: 85%;"></div><span class="bar-lbl">20</span></div>
+          <div class="bar-container"><div class="bar bar--inbound" style="height: 30%;"></div><div class="bar bar--outbound" style="height: 40%;"></div><span class="bar-lbl">24</span></div>
+        </div>
+        <div class="chart-footer">
+          <a href="#supply-chain" class="detail-link center-text">View all inbound &amp; outbound →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 2: PENDING SUPPLY REQUESTS + PENDING DISPATCHES + TRANSPORTATION STATUS ===== -->
+  <div class="layout-three-columns">
+    
+    <!-- Column 1: Store Supply Requests -->
+    <div class="card glass layout-col-item">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Store Supply Requests</h3>
+        <a href="#supply-requests" class="detail-link">View All</a>
+      </div>
+      <div class="table-scroll-wrapper">
         <table class="performance-table">
           <thead>
             <tr>
-              <th scope="col">Code</th>
-              <th scope="col">Name</th>
-              <th scope="col">Sales</th>
-              <th scope="col">Target %</th>
+              <th>Request ID</th>
+              <th>Store</th>
+              <th>Items</th>
+              <th>Requested On</th>
+              <th>Status</th>
             </tr>
           </thead>
-          <tbody id="store-performance-tbody">
-            <!-- Rows dynamically written by dashboard.js -->
+          <tbody id="supply-requests-tbody">
+            <!-- populated dynamically -->
           </tbody>
         </table>
       </div>
-      <div class="performance-footer-actions">
-        <button class="quick-action-btn" id="btn-schedule-visit" type="button">
-          <i data-lucide="calendar" aria-hidden="true"></i>
-          <span>Schedule Visit</span>
-        </button>
-        <button class="quick-action-btn" id="btn-improvement-plan" type="button">
-          <i data-lucide="file-text" aria-hidden="true"></i>
-          <span>Action Plan</span>
-        </button>
+      <div class="performance-footer-actions border-top-divider pt-xs">
+        <button class="quick-action-btn" id="btn-approve-supply-reqs" type="button"><i data-lucide="check-square" aria-hidden="true"></i><span>Approve Requests</span></button>
+        <button class="quick-action-btn" id="btn-allocate-inv" type="button"><i data-lucide="box" aria-hidden="true"></i><span>Allocate Inventory</span></button>
+        <button class="quick-action-btn" id="btn-sched-dispatch" type="button"><i data-lucide="calendar" aria-hidden="true"></i><span>Schedule Dispatch</span></button>
       </div>
     </div>
 
-  </div>
-
-  <!-- ===== ROW 2: NATIONAL PERFORMANCE BY REGION DONUT GRAPH ===== -->
-  <div class="card glass regional-performance-container">
-    <div class="card-header-split">
-      <h3 class="card-split-title">National Performance by Region</h3>
-      <a href="#regions" class="detail-link">View All</a>
-    </div>
-
-    <div class="regional-performance-body">
-      <!-- Donut Circle Chart -->
-      <div class="donut-chart-container">
-        <svg width="140" height="140" viewBox="0 0 42 42" id="donut-svg-element">
-          <circle cx="21" cy="21" r="15.915" fill="transparent" class="donut-bg-circle"></circle>
-          <g id="donut-segments-group"></g>
-        </svg>
-        <div class="donut-center-overlay">
-          <span class="donut-overlay-value" id="donut-val-total-sales">—</span>
-          <span class="donut-overlay-label">Total Income</span>
-        </div>
+    <!-- Column 2: Pending Dispatches -->
+    <div class="card glass layout-col-item">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Pending Dispatches</h3>
+        <a href="#supply-chain" class="detail-link">View All</a>
       </div>
-
-      <!-- Regional Share Table -->
-      <div class="regional-table-wrapper">
-        <table class="regional-table">
+      <div class="table-scroll-wrapper">
+        <table class="performance-table">
           <thead>
             <tr>
-              <th scope="col">Region</th>
-              <th scope="col" class="text-right">Income</th>
-              <th scope="col" class="text-right">Share</th>
-              <th scope="col" class="text-right">Ach.</th>
+              <th>Dispatch ID</th>
+              <th>Store</th>
+              <th>Items</th>
+              <th>Dispatch Date</th>
+              <th>Status</th>
             </tr>
           </thead>
-          <tbody id="regional-performance-tbody">
-            <!-- populated by script -->
+          <tbody id="pending-dispatches-tbody">
+            <!-- populated dynamically -->
           </tbody>
         </table>
       </div>
+      <div class="chart-footer">
+        <a href="#supply-chain" class="detail-link center-text">View all dispatches →</a>
+      </div>
     </div>
 
-    <div class="performance-footer-actions border-top-divider">
-      <button class="quick-action-btn" id="btn-view-performance-dashboard" type="button">
-        <i data-lucide="eye" aria-hidden="true"></i>
-        <span>View Dashboard</span>
-      </button>
-      <button class="quick-action-btn" id="btn-performance-improvement" type="button">
-        <i data-lucide="file-text" aria-hidden="true"></i>
-        <span>Improvement Plan</span>
-      </button>
-      <button class="quick-action-btn" id="btn-performance-assign" type="button">
-        <i data-lucide="user-check" aria-hidden="true"></i>
-        <span>Assign Review</span>
-      </button>
+    <!-- Column 3: Transportation Status -->
+    <div class="card glass layout-col-item">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Transportation Status</h3>
+        <a href="#transport" class="detail-link">View All</a>
+      </div>
+      <div class="transportation-body-layout">
+        <div class="transportation-metrics">
+          <div class="row-value-item"><span>Active Deliveries</span><span class="item-value color-info" id="trans-active-val">16 Deliveries</span></div>
+          <div class="row-value-item"><span>Available Vehicles</span><span class="item-value color-success" id="trans-avail-val">8 Vehicles</span></div>
+          <div class="row-value-item"><span>Vehicles Under Maint.</span><span class="item-value color-warning" id="trans-maint-val">2 Vehicles</span></div>
+          <div class="row-value-item"><span>Delayed Deliveries</span><span class="item-value color-danger" id="trans-delayed-val">4 Deliveries</span></div>
+        </div>
+        <div class="route-simulation-panel flex-grow">
+          <div class="route-header">Active Route Tracking</div>
+          <div class="route-details">
+            <div>Vehicle: <strong>MH12-AB1234</strong></div>
+            <div>Driver: <strong>Suresh Kumar</strong></div>
+            <div>To: <strong>MG Road Cafe</strong></div>
+            <div>ETA: <strong>03:00 PM</strong></div>
+            <div class="status-text color-success">In Transit</div>
+          </div>
+        </div>
+      </div>
+      <div class="performance-footer-actions border-top-divider pt-xs">
+        <button class="quick-action-btn" id="btn-assign-vehicle" type="button"><i data-lucide="truck" aria-hidden="true"></i><span>Assign Vehicle</span></button>
+        <button class="quick-action-btn" id="btn-assign-driver" type="button"><i data-lucide="user-check" aria-hidden="true"></i><span>Assign Driver</span></button>
+        <button class="quick-action-btn" id="btn-track-deliveries" type="button"><i data-lucide="navigation" aria-hidden="true"></i><span>Track Deliveries</span></button>
+      </div>
     </div>
+
   </div>
 
-  <!-- ===== ROW 3: WORKFORCE SUMMARY + REGIONAL WAREHOUSE STOCKS ===== -->
-  <div class="layout-grid-split">
+  <!-- ===== ROW 3: PURCHASE ORDERS + RECENT ACTIVITIES + ALERTS & NOTIFICATIONS ===== -->
+  <div class="layout-three-columns">
     
-    <!-- Workforce Overview -->
-    <div class="card glass workforce-summary-card">
+    <!-- Column 1: Vendor Overview -->
+    <div class="card glass layout-col-item">
       <div class="card-header-split">
-        <h3 class="card-split-title">Workforce Overview</h3>
-        <span class="badge-pill">Staff Active</span>
+        <h3 class="card-split-title">Vendor Overview</h3>
+        <a href="#purchase-orders" class="detail-link">View All</a>
       </div>
-      <div class="workforce-card-body">
-        <div class="progress-radial-container">
-          <svg width="100" height="100" viewBox="0 0 36 36" class="radial-svg">
-            <circle cx="18" cy="18" r="15.9155" fill="none" class="radial-track" />
-            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--status-success)" class="radial-segment" stroke-dasharray="75 100" />
-            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--status-warning)" class="radial-segment" stroke-dasharray="15 100" stroke-dashoffset="-75" />
-            <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--status-danger)" class="radial-segment" stroke-dasharray="10 100" stroke-dashoffset="-90" />
-          </svg>
-          <div class="radial-label-overlay">
-            <h4 class="radial-percentage">90%</h4>
-            <span class="radial-status">On Duty</span>
-          </div>
-        </div>
-        <div class="workforce-list-indicators">
-          <div class="indicator-row">
-            <span><i data-lucide="check-circle-2" class="color-success" aria-hidden="true"></i> On Duty</span>
-            <span class="weight-bold">75 Baristas</span>
-          </div>
-          <div class="indicator-row">
-            <span><i data-lucide="plane-takeoff" class="color-warning" aria-hidden="true"></i> On Leave</span>
-            <span class="weight-bold">15 Approved</span>
-          </div>
-          <div class="indicator-row">
-            <span><i data-lucide="alert-octagon" class="color-danger" aria-hidden="true"></i> Unplanned Absent</span>
-            <span class="weight-bold">2 Incidents</span>
-          </div>
-          <div class="indicator-row border-top-divider pt-xs">
-            <span>Open Recruitment Requests</span>
-            <span class="weight-bold color-gold">3 Pending</span>
-          </div>
-        </div>
+      <div class="table-scroll-wrapper">
+        <table class="performance-table">
+          <thead>
+            <tr>
+              <th>PO Number</th>
+              <th>Vendor</th>
+              <th>Items</th>
+              <th>Order Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="vendor-pos-tbody">
+            <!-- populated dynamically -->
+          </tbody>
+        </table>
       </div>
-      <div class="performance-footer-actions">
-        <button class="quick-action-btn" id="btn-approve-recruitment" type="button">
-          <i data-lucide="user-plus" aria-hidden="true"></i>
-          <span>Approve Recruitment</span>
-        </button>
-        <button class="quick-action-btn" id="btn-view-workforce" type="button">
-          <i data-lucide="users" aria-hidden="true"></i>
-          <span>View Roster</span>
-        </button>
+      <div class="performance-footer-actions border-top-divider pt-xs">
+        <button class="quick-action-btn" id="btn-create-pr" type="button"><i data-lucide="plus-circle" aria-hidden="true"></i><span>Create PR</span></button>
+        <button class="quick-action-btn" id="btn-view-vendors" type="button"><i data-lucide="users" aria-hidden="true"></i><span>View Vendors</span></button>
+        <button class="quick-action-btn" id="btn-review-invoices" type="button"><i data-lucide="file-text" aria-hidden="true"></i><span>Review Invoices</span></button>
       </div>
     </div>
 
-    <!-- Warehouse Overview -->
-    <div class="card glass warehouse-summary-card">
+    <!-- Column 2: Recent Activities -->
+    <div class="card glass layout-col-item">
       <div class="card-header-split">
-        <h3 class="card-split-title">Regional Warehouse Overview</h3>
-        <span class="badge-pill">Dynamic stock tracking</span>
+        <h3 class="card-split-title">Recent Activities</h3>
+        <a href="#docs" class="detail-link">View All</a>
       </div>
-      <div class="warehouse-card-body">
-        <div class="grid-sub-cards">
-          <div class="sub-stat-card">
-            <span class="sub-stat-label">Stock Value</span>
-            <span class="sub-stat-value" id="val-warehouse-stock-value">—</span>
-            <span class="sub-stat-desc" id="val-warehouse-units-count">— Stocked Units</span>
-          </div>
-          <div class="sub-stat-card">
-            <span class="sub-stat-label">WMS Alerts</span>
-            <span class="sub-stat-value" id="val-wms-alerts-count">— Low / — Out</span>
-            <span class="sub-stat-desc">WMS Health OK</span>
-          </div>
-        </div>
-        <div class="warehouse-bottom-data border-top-divider">
-          <span>Pending Store Requests: <strong id="val-pending-requests-count">—</strong></span>
-          <span>Today's Dispatches: <strong id="val-dispatches-count">—</strong></span>
-        </div>
+      <div class="activity-feed-rows" id="recent-activities-rows">
+        <!-- populated dynamically -->
       </div>
-      <div class="performance-footer-actions">
-        <button class="quick-action-btn" id="btn-warehouse-dashboard" type="button">
-          <i data-lucide="warehouse" aria-hidden="true"></i>
-          <span>Warehouse Hub</span>
-        </button>
-        <button class="quick-action-btn" id="btn-emergency-procurement" type="button">
-          <i data-lucide="shopping-cart" aria-hidden="true"></i>
-          <span>Emergency Buy</span>
-        </button>
+    </div>
+
+    <!-- Column 3: Alerts & Notifications -->
+    <div class="card glass layout-col-item">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Alerts &amp; Notifications</h3>
+      </div>
+      <div class="alerts-feed-rows" id="alerts-feed-rows">
+        <!-- populated dynamically -->
       </div>
     </div>
 
   </div>
 
-  <!-- ===== ROW 4: DYNAMIC FINANCIAL OVERVIEW ===== -->
-  <div id="national-admin-financial-widget-container" style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-lg);"></div>
-
-  <!-- ===== ROW 5: CRITICAL LEGAL ISSUES + AUDIT COMPLIANCE ===== -->
-  <div class="layout-grid-split">
-
-    <!-- GRC: Complaints & Legal Cases -->
-    <div class="card glass legal-cases-card">
-      <div class="card-header-split">
-        <h3 class="card-split-title">Complaints &amp; Legal Cases</h3>
-        <span class="badge-pill badge-pill--danger">GRC Alerts</span>
-      </div>
-      <div class="panel-body-data flex-grow">
-        <div class="row-value-item">
-          <span>Customer Complaints</span>
-          <span class="item-value" id="grc-complaints">— Open (High: —)</span>
-        </div>
-        <div class="row-value-item">
-          <span>Active Legal Investigations</span>
-          <span class="item-value color-warning" id="grc-legal-cases">— Cases (High: —)</span>
-        </div>
-        <div class="row-value-item border-top-divider">
-          <span>Vendor Disputes</span>
-          <span class="item-value color-muted">0 Disputes Pending</span>
-        </div>
-      </div>
-      <div class="performance-footer-actions">
-        <button class="quick-action-btn w-100 justify-center" id="btn-escalate-case" type="button">
-          <i data-lucide="alert-triangle" aria-hidden="true"></i>
-          <span>Escalate Case</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Compliance & Audit Score -->
-    <div class="card glass compliance-audit-card">
-      <div class="card-header-split">
-        <h3 class="card-split-title">Compliance &amp; Audit</h3>
-        <span class="badge-pill" id="compliance-score-badge">Score: —</span>
-      </div>
-      <div class="panel-body-data flex-grow">
-        <div class="row-value-item">
-          <span>Surprise Audits Completed</span>
-          <span class="item-value color-success" id="audit-completed">— Audits</span>
-        </div>
-        <div class="row-value-item">
-          <span>Planned Audits Pending</span>
-          <span class="item-value" id="audit-pending">— Scheduled</span>
-        </div>
-        <div class="row-value-item border-top-divider">
-          <span>Overdue Corrective Actions</span>
-          <span class="item-value color-danger" id="audit-overdue-actions">— Actions</span>
-        </div>
-      </div>
-      <div class="performance-footer-actions">
-        <button class="quick-action-btn w-100 justify-center" id="btn-schedule-audit" type="button">
-          <i data-lucide="check-square" aria-hidden="true"></i>
-          <span>Schedule Audit</span>
-        </button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ===== ROW 5: PENDING APPROVALS + CRITICAL ALERTS FEED ===== -->
-  <div class="layout-grid-split">
+  <!-- ===== ROW 4: PENDING APPROVALS + COMPLIANCE + QUICK SHORTCUTS ===== -->
+  <div class="layout-three-columns">
     
-    <!-- Approvals list panel -->
-    <div class="card glass pending-approvals-card">
+    <!-- Column 1: Pending Approvals -->
+    <div class="card glass layout-col-item">
       <div class="card-header-split">
         <h3 class="card-split-title">Pending Approvals</h3>
-        <span class="badge-pill">Dynamic</span>
       </div>
-      <div class="approvals-feed-rows" id="pending-approvals-list">
-        <!-- Approvals list loaded by JS -->
+      <div class="panel-body-data flex-grow" id="pending-approvals-panel">
+        <!-- populated dynamically -->
       </div>
     </div>
 
-    <!-- Database alerts notifications feed -->
-    <div class="card glass critical-alerts-card">
+    <!-- Column 2: Compliance & Audit Overview -->
+    <div class="card glass layout-col-item">
       <div class="card-header-split">
-        <h3 class="card-split-title">Critical Alerts</h3>
-        <span class="badge-pill badge-pill--danger">Database Sync</span>
+        <h3 class="card-split-title">Compliance &amp; Audit</h3>
       </div>
-      <div class="alerts-feed-rows" id="critical-alerts-list">
-        <!-- Alerts logs rendered by JS -->
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ===== ROW 6: RECENT ACTIVITIES + QUICK SHORTCUTS ===== -->
-  <div class="layout-grid-split">
-    
-    <!-- Recent Activity log feed -->
-    <div class="card glass activity-feed-card">
-      <div class="card-header-split">
-        <h3 class="card-split-title">Recent Activity Feed</h3>
-      </div>
-      <div class="activity-feed-rows" id="recent-activity-list">
-        <!-- Dynamic activities rows list -->
+      <div class="panel-body-data flex-grow" id="compliance-panel">
+        <!-- populated dynamically -->
       </div>
     </div>
 
-    <!-- Quick Actions matrix shortcuts panel -->
-    <div class="card glass quick-shortcuts-card">
+    <!-- Column 3: Quick Actions Panel -->
+    <div class="card glass layout-col-item">
       <div class="card-header-split">
         <h3 class="card-split-title">Quick Actions Panel</h3>
       </div>
       <div class="shortcuts-matrix-grid">
-        <button class="quick-shortcut-btn" id="qa-schedule-visit" type="button">
-          <i data-lucide="calendar" class="icon-gold" aria-hidden="true"></i>
-          <span>Schedule Visit</span>
-        </button>
-        <button class="quick-shortcut-btn" id="qa-approve-vendor" type="button">
-          <i data-lucide="check-square" class="icon-success" aria-hidden="true"></i>
-          <span>Approve Vendor</span>
-        </button>
-        <button class="quick-shortcut-btn" id="qa-approve-recruitment" type="button">
-          <i data-lucide="user-plus" class="icon-info" aria-hidden="true"></i>
-          <span>Approve Hires</span>
-        </button>
-        <button class="quick-shortcut-btn" id="qa-review-complaints" type="button">
-          <i data-lucide="alert-triangle" class="icon-danger" aria-hidden="true"></i>
-          <span>Review GRC</span>
-        </button>
-        <button class="quick-shortcut-btn" id="qa-approve-procurement" type="button">
-          <i data-lucide="shopping-cart" class="icon-gold" aria-hidden="true"></i>
-          <span>Approve PO</span>
-        </button>
-        <button class="quick-shortcut-btn" id="qa-view-reports" type="button">
-          <i data-lucide="file-text" aria-hidden="true"></i>
-          <span>View Reports</span>
-        </button>
+        <button class="quick-shortcut-btn" id="qa-approve-req" type="button"><i data-lucide="check-circle" class="icon-success" aria-hidden="true"></i><span>Approve Requests</span></button>
+        <button class="quick-shortcut-btn" id="qa-create-pr-shortcut" type="button"><i data-lucide="plus-circle" class="icon-gold" aria-hidden="true"></i><span>Create Purchase Req</span></button>
+        <button class="quick-shortcut-btn" id="qa-stock-transfer-shortcut" type="button"><i data-lucide="move" class="icon-info" aria-hidden="true"></i><span>Stock Transfer</span></button>
+        <button class="quick-shortcut-btn" id="qa-assign-vehicle" type="button"><i data-lucide="truck" class="icon-success" aria-hidden="true"></i><span>Assign Vehicle</span></button>
+        <button class="quick-shortcut-btn" id="qa-start-count" type="button"><i data-lucide="check-square" class="icon-danger" aria-hidden="true"></i><span>Start Stock Count</span></button>
+        <button class="quick-shortcut-btn" id="qa-view-reports" type="button"><i data-lucide="file-text" aria-hidden="true"></i><span>View Reports</span></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ROW 5: WORKFORCE + EMERGENCY PROCUREMENT ===== -->
+  <div class="layout-grid-split">
+    
+    <!-- Workforce Overview -->
+    <div class="card glass workforce-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Workforce Overview</h3>
+      </div>
+      <div class="panel-body-data flex-grow" id="workforce-panel">
+        <!-- populated dynamically -->
+      </div>
+      <div class="performance-footer-actions border-top-divider pt-xs">
+        <button class="quick-action-btn" id="btn-assign-tasks" type="button"><i data-lucide="check-square" aria-hidden="true"></i><span>Assign Tasks</span></button>
+        <button class="quick-action-btn" id="btn-view-schedules" type="button"><i data-lucide="calendar" aria-hidden="true"></i><span>View Schedules</span></button>
+      </div>
+    </div>
+
+    <!-- Emergency Procurement Overview -->
+    <div class="card glass emergency-procurement-card">
+      <div class="card-header-split">
+        <h3 class="card-split-title">Emergency Procurement</h3>
+      </div>
+      <div class="panel-body-data flex-grow" id="emergency-procurement-panel">
+        <!-- populated dynamically -->
+      </div>
+      <div class="performance-footer-actions border-top-divider pt-xs">
+        <button class="quick-action-btn" id="btn-create-emerg-req" type="button"><i data-lucide="alert-circle" aria-hidden="true"></i><span>Create Emergency Req</span></button>
+        <button class="quick-action-btn" id="btn-approve-emerg" type="button"><i data-lucide="shield-check" aria-hidden="true"></i><span>Approve Emergency</span></button>
       </div>
     </div>
 
