@@ -2372,6 +2372,7 @@ com\plus33\erp\finance\treasury\entity\CashPool.class
 com\plus33\erp\edge\registry\ProvisioningService.class
 com\plus33\erp\finance\assets\repository\FixedAssetTransferRepository.class
 com\plus33\erp\store\repository\WasteRecordRepository.class
+com\plus33\erp\dashboard\dto\DashboardScope.class
 com\plus33\erp\platform\entity\PlatformTwinConfigHistory.class
 com\plus33\erp\inventory\dto\InventoryTransferItemResponse.class
 com\plus33\erp\sales\controller\CustomerInvoiceController.class

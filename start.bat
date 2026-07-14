@@ -27,7 +27,7 @@ if errorlevel 1 (
 )
 
 echo [3/4] Starting Spring Boot Backend (Port 8080)...
-start "PLUS33 Java Backend (Port 8080)" /D "%~dp0" cmd /k "java -Dspring.config.location=file:target/classes/application.properties -cp target/classes;target/dependency/* com.plus33.erp.Plus33ErpApplication"
+start "PLUS33 Java Backend (Port 8080)" /D "%~dp0" cmd /k "java -Dspring.config.location=classpath:/application.properties -cp target/classes;target/dependency/* com.plus33.erp.Plus33ErpApplication"
 
 echo.
 echo Waiting for Java backend to start on Port 8080 (this may take up to 60 seconds)...
