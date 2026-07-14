@@ -26,6 +26,53 @@
     </div>
   </div>
 
+  <!-- ===== FILTER PANEL RIBBON ===== -->
+  <div class="card glass filters-card" role="search" aria-label="Dashboard filters">
+    <div class="filter-group">
+      <label for="filter-timeframe" class="filter-label">DATE RANGE</label>
+      <select id="filter-timeframe" class="filter-select">
+        <option value="Today">Today</option>
+        <option value="Week">This Week</option>
+        <option value="Month" selected>This Month</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-nation" class="filter-label">NATION</label>
+      <select id="filter-nation" class="filter-select">
+        <option value="ALL">All Nations</option>
+        <!-- dynamic options -->
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-region" class="filter-label">REGION</label>
+      <select id="filter-region" class="filter-select">
+        <option value="ALL">All Regions</option>
+        <!-- dynamic options -->
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-store" class="filter-label">STORE</label>
+      <select id="filter-store" class="filter-select">
+        <option value="ALL">All Stores</option>
+        <!-- dynamic options -->
+      </select>
+    </div>
+
+    <div class="filter-actions-row">
+      <button id="btn-apply-filters" class="btn btn-primary btn-apply" type="button">
+        <i data-lucide="filter" aria-hidden="true"></i>
+        <span>APPLY</span>
+      </button>
+      <button id="btn-reset-filters" class="btn btn-secondary btn-reset" type="button">
+        <i data-lucide="x-circle" aria-hidden="true"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </div>
+
   <!-- ===== KPI METRIC SUMMARY GRID (8 Cards in a Row) ===== -->
   <div class="kpi-row-grid">
     <!-- Card 1: Total Inventory Value -->

@@ -27,15 +27,13 @@ export default class NationalWarehouseAdminDashboard {
     this.user = null;
     this.profile = null;
     this._clockInterval = null;
+    this.data = null;
     this.filters = {
       timeframe: 'Month', // 'Today', 'Week', 'Month'
-      store: 'ALL',
-      warehouse: 'ALL',
-      vendor: 'ALL'
+      nation: 'ALL',
+      region: 'ALL',
+      store: 'ALL'
     };
-    this.data = null;
-
-    // Lists populated from DB
     this.regionsList = [];
     this.stores = [];
     this.warehouses = [];
@@ -110,8 +108,10 @@ export default class NationalWarehouseAdminDashboard {
       if (this.filters.store && this.filters.store !== 'ALL') {
         params.storeId = this.filters.store;
       }
-      if (this.filters.warehouse && this.filters.warehouse !== 'ALL') {
-        params.warehouseId = this.filters.warehouse;
+      if (this.filters.region && this.filters.region !== 'ALL') {
+        params.regionId = this.filters.region;
+      } else if (this.filters.nation && this.filters.nation !== 'ALL') {
+        params.regionId = this.filters.nation;
       }
 
       // Fetch dynamic dashboard overview from the backend
@@ -209,6 +209,74 @@ export default class NationalWarehouseAdminDashboard {
 
     const totalUnreadNotifications = this.data?.alerts?.length || 4;
     if (notificationCountEl) notificationCountEl.textContent = String(totalUnreadNotifications);
+
+    // 2.5. Populate filter ribbon options dynamically
+    const timeframeSelect = container.querySelector('#filter-timeframe');
+    const nationSelect = container.querySelector('#filter-nation');
+    const regionSelect = container.querySelector('#filter-region');
+    const storeSelect = container.querySelector('#filter-store');
+
+    if (timeframeSelect) {
+      timeframeSelect.value = this.filters.timeframe;
+    }
+
+    if (nationSelect) {
+      nationSelect.replaceChildren();
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = 'ALL';
+      defaultOpt.textContent = 'All Nations';
+      nationSelect.appendChild(defaultOpt);
+
+      const nations = this.regionsList.filter(r => !r.parentId || r.parentId === null);
+      nations.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = n.id || n.code;
+        opt.textContent = n.name;
+        if (String(this.filters.nation) === String(n.id) || this.filters.nation === n.code) {
+          opt.selected = true;
+        }
+        nationSelect.appendChild(opt);
+      });
+    }
+
+    if (regionSelect) {
+      regionSelect.replaceChildren();
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = 'ALL';
+      defaultOpt.textContent = 'All Regions';
+      regionSelect.appendChild(defaultOpt);
+
+      const selectedNation = this.regionsList.find(r => String(r.id) === String(this.filters.nation) || r.code === this.filters.nation);
+      const regions = this.regionsList.filter(r => r.parentId && r.parentId !== null && (!selectedNation || r.parentId === selectedNation.id));
+      
+      regions.forEach(reg => {
+        const opt = document.createElement('option');
+        opt.value = reg.id || reg.code;
+        opt.textContent = reg.name;
+        if (String(this.filters.region) === String(reg.id) || this.filters.region === reg.code) {
+          opt.selected = true;
+        }
+        regionSelect.appendChild(opt);
+      });
+    }
+
+    if (storeSelect) {
+      storeSelect.replaceChildren();
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = 'ALL';
+      defaultOpt.textContent = 'All Stores';
+      storeSelect.appendChild(defaultOpt);
+
+      this.stores.forEach(st => {
+        const opt = document.createElement('option');
+        opt.value = st.code || st.id;
+        opt.textContent = st.name;
+        if (String(this.filters.store) === String(st.id) || this.filters.store === st.code) {
+          opt.selected = true;
+        }
+        storeSelect.appendChild(opt);
+      });
+    }
 
     // Populate dynamic warehouse selector options
     if (headerWarehouseSelect) {
@@ -604,24 +672,91 @@ export default class NationalWarehouseAdminDashboard {
     if (filterTimeframe) {
       const handleTimeframe = (e) => {
         this.filters.timeframe = e.target.value;
-        this._triggerRefresh(container);
       };
       filterTimeframe.addEventListener('change', handleTimeframe);
       lifecycle.onCleanup(() => filterTimeframe.removeEventListener('change', handleTimeframe));
     }
 
-    const headerWarehouseSelect = container.querySelector('#header-warehouse-select');
-    if (headerWarehouseSelect) {
-      const handleWarehouse = (e) => {
-        this.filters.warehouse = e.target.value;
-        this._triggerRefresh(container);
+    const filterNation = container.querySelector('#filter-nation');
+    if (filterNation) {
+      const handleNation = (e) => {
+        this.filters.nation = e.target.value;
+        this._updateRegionOptions(container);
       };
-      headerWarehouseSelect.addEventListener('change', handleWarehouse);
-      lifecycle.onCleanup(() => headerWarehouseSelect.removeEventListener('change', handleWarehouse));
+      filterNation.addEventListener('change', handleNation);
+      lifecycle.onCleanup(() => filterNation.removeEventListener('change', handleNation));
+    }
+
+    const filterRegion = container.querySelector('#filter-region');
+    if (filterRegion) {
+      const handleRegion = (e) => {
+        this.filters.region = e.target.value;
+      };
+      filterRegion.addEventListener('change', handleRegion);
+      lifecycle.onCleanup(() => filterRegion.removeEventListener('change', handleRegion));
+    }
+
+    const filterStore = container.querySelector('#filter-store');
+    if (filterStore) {
+      const handleStore = (e) => {
+        this.filters.store = e.target.value;
+      };
+      filterStore.addEventListener('change', handleStore);
+      lifecycle.onCleanup(() => filterStore.removeEventListener('change', handleStore));
+    }
+
+    const btnApply = container.querySelector('#btn-apply-filters');
+    if (btnApply) {
+      const handleApply = async () => {
+        btnApply.disabled = true;
+        await this._triggerRefresh(container);
+        btnApply.disabled = false;
+      };
+      btnApply.addEventListener('click', handleApply);
+      lifecycle.onCleanup(() => btnApply.removeEventListener('click', handleApply));
+    }
+
+    const btnReset = container.querySelector('#btn-reset-filters');
+    if (btnReset) {
+      const handleReset = async () => {
+        this.filters = {
+          timeframe: 'Month',
+          nation: 'ALL',
+          region: 'ALL',
+          store: 'ALL'
+        };
+        await this._triggerRefresh(container);
+      };
+      btnReset.addEventListener('click', handleReset);
+      lifecycle.onCleanup(() => btnReset.removeEventListener('click', handleReset));
     }
 
     // Interactive actions
     this._bindActionShortcuts(container, lifecycle);
+  }
+
+  _updateRegionOptions(container) {
+    const regionSelect = container.querySelector('#filter-region');
+    if (!regionSelect) return;
+    regionSelect.replaceChildren();
+    
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = 'ALL';
+    defaultOpt.textContent = 'All Regions';
+    regionSelect.appendChild(defaultOpt);
+
+    const selectedNation = this.regionsList.find(r => String(r.id) === String(this.filters.nation) || r.code === this.filters.nation);
+    const regions = this.regionsList.filter(r => r.parentId && r.parentId !== null && (!selectedNation || r.parentId === selectedNation.id));
+    
+    regions.forEach(reg => {
+      const opt = document.createElement('option');
+      opt.value = reg.id || reg.code;
+      opt.textContent = reg.name;
+      if (String(this.filters.region) === String(reg.id) || this.filters.region === reg.code) {
+        opt.selected = true;
+      }
+      regionSelect.appendChild(opt);
+    });
   }
 
   async _triggerRefresh(container) {
