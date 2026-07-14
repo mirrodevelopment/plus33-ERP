@@ -183,28 +183,28 @@ export default class RegionalWarehouseAdminDashboard {
     };
 
     // 1. Resolve Active Region details dynamically
-    let activeRegionName = "FR_NORTH";
-    let activeRegionId = this.data?.metadata?.appliedFilters?.regionId || "FR_NORTH";
-    if (activeRegionId === "7" || activeRegionId === "FR_COUNTRY") activeRegionName = "France";
-    else if (activeRegionId === "8" || activeRegionId === "AE_COUNTRY") activeRegionName = "UAE";
-    else if (activeRegionId === "9" || activeRegionId === "IN_COUNTRY") activeRegionName = "India";
-    else if (activeRegionId === "10" || activeRegionId === "FR_NORTH") activeRegionName = "North France";
-    else if (activeRegionId === "11" || activeRegionId === "IN_SOUTH") activeRegionName = "South India";
-    else if (activeRegionId === "12" || activeRegionId === "UAE_DUBAI") activeRegionName = "Dubai Region";
-
-    // Fallback to activeRegionId string names
-    if (String(activeRegionId).includes("FR_NORTH")) activeRegionName = "North France";
-    else if (String(activeRegionId).includes("IN_SOUTH")) activeRegionName = "South India";
-    else if (String(activeRegionId).includes("UAE_DUBAI")) activeRegionName = "Dubai Region";
+    let activeRegionName = "All Regions";
+    let activeRegionId = this.data?.metadata?.appliedFilters?.regionId || "ALL";
+    if (activeRegionId === "7" || activeRegionId === "FR_COUNTRY" || activeRegionId === "FR_NORTH") activeRegionName = "France Region";
+    else if (activeRegionId === "8" || activeRegionId === "AE_COUNTRY" || activeRegionId === "UAE_DUBAI") activeRegionName = "UAE Region";
+    else if (activeRegionId === "9" || activeRegionId === "IN_COUNTRY" || activeRegionId === "IN_SOUTH") activeRegionName = "India Region";
+    else if (activeRegionId === "10") activeRegionName = "North France Region";
+    else if (activeRegionId === "11") activeRegionName = "South India Region";
+    else if (activeRegionId === "12") activeRegionName = "Dubai Region";
+    else if (activeRegionId === "19") activeRegionName = "West India Region";
+    else if (activeRegionId === "20") activeRegionName = "North India Region";
+    else if (activeRegionId === "21") activeRegionName = "East India Region";
 
     const headerRegionName = container.querySelector('#header-region-name');
+    const headerRegionId = container.querySelector('#header-region-id');
+    const headerUser = container.querySelector('#header-user-profile');
     const headerWarehouseSelect = container.querySelector('#header-warehouse-select');
-    const headerUserGreeting = container.querySelector('#header-user-profile-name');
     const widgetProfileName = container.querySelector('.user-profile-widget .profile-name');
     const widgetProfileRole = container.querySelector('.user-profile-widget .profile-role');
 
     if (headerRegionName) headerRegionName.textContent = activeRegionName;
-    if (headerUserGreeting) headerUserGreeting.textContent = this.profile?.name || "Rohit Sharma";
+    if (headerRegionId) headerRegionId.textContent = `REG-${activeRegionId}`;
+    if (headerUser) headerUser.textContent = this.user?.username || this.profile?.email || "—";
     if (widgetProfileName) widgetProfileName.textContent = this.profile?.name || "Rohit Sharma";
     if (widgetProfileRole) widgetProfileRole.textContent = this.profile?.designation || "Warehouse Admin";
 
