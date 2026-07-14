@@ -207,7 +207,7 @@ export default class NationalWarehouseAdminDashboard {
     if (profileNameEl) profileNameEl.textContent = this.profile?.name || this.user?.username.split('@')[0] || "Admin";
     if (profileRoleEl) profileRoleEl.textContent = "National Warehouse Admin";
 
-    const totalUnreadNotifications = notificationStore.getUnreadCount() || 4;
+    const totalUnreadNotifications = this.data?.alerts?.length || 4;
     if (notificationCountEl) notificationCountEl.textContent = String(totalUnreadNotifications);
 
     // Populate dynamic warehouse selector options
