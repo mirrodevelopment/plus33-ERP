@@ -29,25 +29,17 @@ export default class NationalWarehouseAdminDashboard {
     this._clockInterval = null;
     this.data = null;
     this.filters = {
-      timeframe: 'Month', // 'Today', 'Week', 'Month'
-      nation: 'ALL',
-      region: 'ALL',
-      store: 'ALL'
+      from: '',
+      to: '',
+      nationId: '',
+      regionId: '',
+      storeId: '',
+      rangeType: 'thisMonth'
     };
     this.regionsList = [];
     this.stores = [];
     this.warehouses = [];
     this.suppliers = [];
-
-    // LocalStorage persisted filters retrieval
-    const saved = localStorage.getItem('national_wh_admin_dashboard_filters');
-    if (saved) {
-      try {
-        this.filters = { ...this.filters, ...JSON.parse(saved) };
-      } catch (e) {
-        // ignore
-      }
-    }
   }
 
   // ---------------------------------------------------------------------------
@@ -59,6 +51,12 @@ export default class NationalWarehouseAdminDashboard {
 
     // Dynamically load WMS styles
     this._loadCss();
+
+    // Restore persisted filters
+    this._restoreFilters();
+
+    // Resolve date bounds for the selected range type
+    this.resolveDates();
 
     // 1. Inject skeleton template
     await this._loadTemplate(container);
@@ -90,28 +88,18 @@ export default class NationalWarehouseAdminDashboard {
 
   async _loadData() {
     try {
-      const params = {};
-      const toDate = new Date();
-      let fromDate = new Date();
-      if (this.filters.timeframe === 'Today') {
-        // Today
-      } else if (this.filters.timeframe === 'Week') {
-        fromDate.setDate(toDate.getDate() - 7);
-      } else {
-        fromDate.setDate(1); // Start of month
-      }
+      const params = {
+        from: this.filters.from,
+        to: this.filters.to
+      };
 
-      const formatDate = (d) => d.toISOString().split('T')[0];
-      params.from = formatDate(fromDate);
-      params.to = formatDate(toDate);
-
-      if (this.filters.store && this.filters.store !== 'ALL') {
-        params.storeId = this.filters.store;
+      if (this.filters.regionId) {
+        params.regionId = this.filters.regionId;
+      } else if (this.filters.nationId) {
+        params.regionId = this.filters.nationId;
       }
-      if (this.filters.region && this.filters.region !== 'ALL') {
-        params.regionId = this.filters.region;
-      } else if (this.filters.nation && this.filters.nation !== 'ALL') {
-        params.regionId = this.filters.nation;
+      if (this.filters.storeId) {
+        params.storeId = this.filters.storeId;
       }
 
       // Fetch dynamic dashboard overview from the backend
@@ -211,72 +199,11 @@ export default class NationalWarehouseAdminDashboard {
     if (notificationCountEl) notificationCountEl.textContent = String(totalUnreadNotifications);
 
     // 2.5. Populate filter ribbon options dynamically
-    const timeframeSelect = container.querySelector('#filter-timeframe');
-    const nationSelect = container.querySelector('#filter-nation');
-    const regionSelect = container.querySelector('#filter-region');
-    const storeSelect = container.querySelector('#filter-store');
-
-    if (timeframeSelect) {
-      timeframeSelect.value = this.filters.timeframe;
-    }
-
-    if (nationSelect) {
-      nationSelect.replaceChildren();
-      const defaultOpt = document.createElement('option');
-      defaultOpt.value = 'ALL';
-      defaultOpt.textContent = 'All Nations';
-      nationSelect.appendChild(defaultOpt);
-
-      const nations = this.regionsList.filter(r => !r.parentId || r.parentId === null);
-      nations.forEach(n => {
-        const opt = document.createElement('option');
-        opt.value = n.id || n.code;
-        opt.textContent = n.name;
-        if (String(this.filters.nation) === String(n.id) || this.filters.nation === n.code) {
-          opt.selected = true;
-        }
-        nationSelect.appendChild(opt);
-      });
-    }
-
-    if (regionSelect) {
-      regionSelect.replaceChildren();
-      const defaultOpt = document.createElement('option');
-      defaultOpt.value = 'ALL';
-      defaultOpt.textContent = 'All Regions';
-      regionSelect.appendChild(defaultOpt);
-
-      const selectedNation = this.regionsList.find(r => String(r.id) === String(this.filters.nation) || r.code === this.filters.nation);
-      const regions = this.regionsList.filter(r => r.parentId && r.parentId !== null && (!selectedNation || r.parentId === selectedNation.id));
-      
-      regions.forEach(reg => {
-        const opt = document.createElement('option');
-        opt.value = reg.id || reg.code;
-        opt.textContent = reg.name;
-        if (String(this.filters.region) === String(reg.id) || this.filters.region === reg.code) {
-          opt.selected = true;
-        }
-        regionSelect.appendChild(opt);
-      });
-    }
-
-    if (storeSelect) {
-      storeSelect.replaceChildren();
-      const defaultOpt = document.createElement('option');
-      defaultOpt.value = 'ALL';
-      defaultOpt.textContent = 'All Stores';
-      storeSelect.appendChild(defaultOpt);
-
-      this.stores.forEach(st => {
-        const opt = document.createElement('option');
-        opt.value = st.code || st.id;
-        opt.textContent = st.name;
-        if (String(this.filters.store) === String(st.id) || this.filters.store === st.code) {
-          opt.selected = true;
-        }
-        storeSelect.appendChild(opt);
-      });
-    }
+    this._populateNationDropdown(container);
+    this._populateRegionDropdown(container);
+    this._updateStoreDropdown(container);
+    this._restoreFilterValues(container);
+    this._toggleCustomDates(container);
 
     // Populate dynamic warehouse selector options
     if (headerWarehouseSelect) {
@@ -668,95 +595,301 @@ export default class NationalWarehouseAdminDashboard {
   // ---------------------------------------------------------------------------
 
   _bindEvents(container, lifecycle) {
-    const filterTimeframe = container.querySelector('#filter-timeframe');
-    if (filterTimeframe) {
-      const handleTimeframe = (e) => {
-        this.filters.timeframe = e.target.value;
+    const rangeSelect  = container.querySelector('#filter-range-type');
+    const nationSelect = container.querySelector('#filter-nation');
+    const regionSelect = container.querySelector('#filter-region');
+    const storeSelect  = container.querySelector('#filter-store');
+    const dateFrom     = container.querySelector('#filter-date-from');
+    const dateTo       = container.querySelector('#filter-date-to');
+    const applyBtn     = container.querySelector('#btn-apply-filters');
+    const resetBtn     = container.querySelector('#btn-reset-filters');
+
+    const applyFilters = () => {
+      this.filters.rangeType = rangeSelect?.value || 'thisMonth';
+      if (this.filters.rangeType === 'custom') {
+        this.filters.from = dateFrom?.value || '';
+        this.filters.to   = dateTo?.value   || '';
+      } else {
+        this.resolveDates();
+      }
+      this.filters.nationId = nationSelect?.value || '';
+      this.filters.regionId = regionSelect?.value || '';
+      this.filters.storeId  = storeSelect?.value  || '';
+      localStorage.setItem('national_wh_admin_dashboard_filters', JSON.stringify(this.filters));
+      this._triggerRefresh(container);
+    };
+
+    // Date range type change
+    if (rangeSelect) {
+      const handleRangeChange = () => {
+        this.filters.rangeType = rangeSelect.value;
+        this.resolveDates();
+        this._toggleCustomDates(container);
+        const fromEl = container.querySelector('#filter-date-from');
+        const toEl   = container.querySelector('#filter-date-to');
+        if (fromEl) fromEl.value = this.filters.from;
+        if (toEl)   toEl.value   = this.filters.to;
+        if (rangeSelect.value !== 'custom') {
+          applyFilters();
+        }
       };
-      filterTimeframe.addEventListener('change', handleTimeframe);
-      lifecycle.onCleanup(() => filterTimeframe.removeEventListener('change', handleTimeframe));
+      rangeSelect.addEventListener('change', handleRangeChange);
+      lifecycle.onCleanup(() => rangeSelect.removeEventListener('change', handleRangeChange));
     }
 
-    const filterNation = container.querySelector('#filter-nation');
-    if (filterNation) {
-      const handleNation = (e) => {
-        this.filters.nation = e.target.value;
-        this._updateRegionOptions(container);
+    // Nation change → update region dropdown options and reset sub-filters
+    if (nationSelect) {
+      const handleNationChange = () => {
+        this._populateRegionDropdown(container);
+        if (regionSelect) regionSelect.value = '';
+        this._updateStoreDropdown(container);
+        if (storeSelect) storeSelect.value = '';
+        applyFilters();
       };
-      filterNation.addEventListener('change', handleNation);
-      lifecycle.onCleanup(() => filterNation.removeEventListener('change', handleNation));
+      nationSelect.addEventListener('change', handleNationChange);
+      lifecycle.onCleanup(() => nationSelect.removeEventListener('change', handleNationChange));
     }
 
-    const filterRegion = container.querySelector('#filter-region');
-    if (filterRegion) {
-      const handleRegion = (e) => {
-        this.filters.region = e.target.value;
+    // Region change → update store dropdown
+    if (regionSelect) {
+      const handleRegionChange = () => {
+        this._updateStoreDropdown(container);
+        if (storeSelect) storeSelect.value = '';
+        applyFilters();
       };
-      filterRegion.addEventListener('change', handleRegion);
-      lifecycle.onCleanup(() => filterRegion.removeEventListener('change', handleRegion));
+      regionSelect.addEventListener('change', handleRegionChange);
+      lifecycle.onCleanup(() => regionSelect.removeEventListener('change', handleRegionChange));
     }
 
-    const filterStore = container.querySelector('#filter-store');
-    if (filterStore) {
-      const handleStore = (e) => {
-        this.filters.store = e.target.value;
+    // Store change
+    if (storeSelect) {
+      const handleStoreChange = () => {
+        applyFilters();
       };
-      filterStore.addEventListener('change', handleStore);
-      lifecycle.onCleanup(() => filterStore.removeEventListener('change', handleStore));
+      storeSelect.addEventListener('change', handleStoreChange);
+      lifecycle.onCleanup(() => storeSelect.removeEventListener('change', handleStoreChange));
     }
 
-    const btnApply = container.querySelector('#btn-apply-filters');
-    if (btnApply) {
-      const handleApply = async () => {
-        btnApply.disabled = true;
-        await this._triggerRefresh(container);
-        btnApply.disabled = false;
+    // Custom date changes
+    if (dateFrom) {
+      const handleDateFromChange = () => {
+        if (rangeSelect?.value === 'custom' && dateFrom.value && dateTo?.value) {
+          applyFilters();
+        }
       };
-      btnApply.addEventListener('click', handleApply);
-      lifecycle.onCleanup(() => btnApply.removeEventListener('click', handleApply));
+      dateFrom.addEventListener('change', handleDateFromChange);
+      lifecycle.onCleanup(() => dateFrom.removeEventListener('change', handleDateFromChange));
+    }
+    if (dateTo) {
+      const handleDateToChange = () => {
+        if (rangeSelect?.value === 'custom' && dateFrom?.value && dateTo.value) {
+          applyFilters();
+        }
+      };
+      dateTo.addEventListener('change', handleDateToChange);
+      lifecycle.onCleanup(() => dateTo.removeEventListener('change', handleDateToChange));
     }
 
-    const btnReset = container.querySelector('#btn-reset-filters');
-    if (btnReset) {
-      const handleReset = async () => {
-        this.filters = {
-          timeframe: 'Month',
-          nation: 'ALL',
-          region: 'ALL',
-          store: 'ALL'
-        };
-        await this._triggerRefresh(container);
+    // Apply filters
+    if (applyBtn) {
+      const handleApply = () => applyFilters();
+      applyBtn.addEventListener('click', handleApply);
+      lifecycle.onCleanup(() => applyBtn.removeEventListener('click', handleApply));
+    }
+
+    // Reset filters
+    if (resetBtn) {
+      const handleReset = () => {
+        this.filters = { from: '', to: '', nationId: '', regionId: '', storeId: '', rangeType: 'thisMonth' };
+        this.resolveDates();
+        if (rangeSelect)  rangeSelect.value  = this.filters.rangeType;
+        if (nationSelect) nationSelect.value = '';
+        if (regionSelect) regionSelect.value = '';
+        if (storeSelect)  storeSelect.value  = '';
+        if (dateFrom)     dateFrom.value     = '';
+        if (dateTo)       dateTo.value       = '';
+        this._populateRegionDropdown(container);
+        this._updateStoreDropdown(container);
+        this._toggleCustomDates(container);
+        localStorage.removeItem('national_wh_admin_dashboard_filters');
+        this._triggerRefresh(container);
       };
-      btnReset.addEventListener('click', handleReset);
-      lifecycle.onCleanup(() => btnReset.removeEventListener('click', handleReset));
+      resetBtn.addEventListener('click', handleReset);
+      lifecycle.onCleanup(() => resetBtn.removeEventListener('click', handleReset));
     }
 
     // Interactive actions
     this._bindActionShortcuts(container, lifecycle);
   }
 
-  _updateRegionOptions(container) {
+  _populateNationDropdown(container) {
+    const nationSelect = container.querySelector('#filter-nation');
+    if (!nationSelect) return;
+    nationSelect.replaceChildren();
+
+    const allOpt = document.createElement('option');
+    allOpt.value       = '';
+    allOpt.textContent = 'All Nations';
+    nationSelect.appendChild(allOpt);
+
+    this.regionsList
+      .filter(r => r.parentId === null || r.parentId === undefined)
+      .forEach(r => {
+        const opt = document.createElement('option');
+        opt.value       = r.id;
+        opt.textContent = r.name;
+        nationSelect.appendChild(opt);
+      });
+  }
+
+  _populateRegionDropdown(container) {
+    const nationSelect = container.querySelector('#filter-nation');
     const regionSelect = container.querySelector('#filter-region');
     if (!regionSelect) return;
     regionSelect.replaceChildren();
-    
-    const defaultOpt = document.createElement('option');
-    defaultOpt.value = 'ALL';
-    defaultOpt.textContent = 'All Regions';
-    regionSelect.appendChild(defaultOpt);
 
-    const selectedNation = this.regionsList.find(r => String(r.id) === String(this.filters.nation) || r.code === this.filters.nation);
-    const regions = this.regionsList.filter(r => r.parentId && r.parentId !== null && (!selectedNation || r.parentId === selectedNation.id));
-    
-    regions.forEach(reg => {
+    const selectedNationId = nationSelect?.value || '';
+    const allOpt = document.createElement('option');
+    allOpt.value       = '';
+    allOpt.textContent = 'All Regions';
+    regionSelect.appendChild(allOpt);
+
+    let filteredRegions = this.regionsList.filter(r => r.parentId !== null && r.parentId !== undefined);
+    if (selectedNationId) {
+      filteredRegions = filteredRegions.filter(r => String(r.parentId) === String(selectedNationId));
+    }
+
+    filteredRegions.forEach(r => {
       const opt = document.createElement('option');
-      opt.value = reg.id || reg.code;
-      opt.textContent = reg.name;
-      if (String(this.filters.region) === String(reg.id) || this.filters.region === reg.code) {
-        opt.selected = true;
-      }
+      opt.value       = r.id;
+      opt.textContent = r.name;
       regionSelect.appendChild(opt);
     });
+  }
+
+  _updateStoreDropdown(container) {
+    const nationSelect = container.querySelector('#filter-nation');
+    const regionSelect = container.querySelector('#filter-region');
+    const storeSelect  = container.querySelector('#filter-store');
+    if (!storeSelect) return;
+
+    const selectedNationId = nationSelect?.value || '';
+    const selectedRegionId = regionSelect?.value || '';
+    storeSelect.replaceChildren();
+
+    let filteredStores = this.stores;
+    let label = 'All Stores';
+
+    if (selectedRegionId) {
+      filteredStores = this.stores.filter(s => String(s.regionId) === String(selectedRegionId));
+      label = `All Stores (${filteredStores.length})`;
+    } else if (selectedNationId) {
+      const childRegionIds = this.regionsList
+        .filter(r => String(r.parentId) === String(selectedNationId))
+        .map(r => String(r.id));
+      filteredStores = this.stores.filter(s => childRegionIds.includes(String(s.regionId)));
+      label = `All Stores (${filteredStores.length})`;
+    }
+
+    const allOpt = document.createElement('option');
+    allOpt.value       = '';
+    allOpt.textContent = label;
+    storeSelect.appendChild(allOpt);
+
+    filteredStores.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value       = s.id;
+      opt.textContent = s.name;
+      storeSelect.appendChild(opt);
+    });
+  }
+
+  _restoreFilterValues(container) {
+    const rangeSelect  = container.querySelector('#filter-range-type');
+    const nationSelect = container.querySelector('#filter-nation');
+    const regionSelect = container.querySelector('#filter-region');
+    const storeSelect  = container.querySelector('#filter-store');
+    const dateFrom     = container.querySelector('#filter-date-from');
+    const dateTo       = container.querySelector('#filter-date-to');
+
+    if (rangeSelect)  rangeSelect.value  = this.filters.rangeType;
+    if (nationSelect) nationSelect.value = this.filters.nationId;
+
+    this._populateRegionDropdown(container);
+    if (regionSelect) regionSelect.value = this.filters.regionId;
+
+    this._updateStoreDropdown(container);
+    if (storeSelect)  storeSelect.value  = this.filters.storeId;
+
+    if (dateFrom)     dateFrom.value     = this.filters.from;
+    if (dateTo)       dateTo.value       = this.filters.to;
+  }
+
+  _toggleCustomDates(container) {
+    const rangeSelect   = container.querySelector('#filter-range-type');
+    const customInputs  = container.querySelector('#custom-date-inputs');
+    if (customInputs) {
+      customInputs.hidden = rangeSelect?.value !== 'custom';
+    }
+  }
+
+  _restoreFilters() {
+    try {
+      const saved = localStorage.getItem('national_wh_admin_dashboard_filters');
+      if (saved) this.filters = { ...this.filters, ...JSON.parse(saved) };
+    } catch (e) {
+      logger.warn('NationalWarehouseAdminDashboard', 'Failed to parse stored filters', e);
+    }
+  }
+
+  resolveDates() {
+    const today = new Date();
+    let fromDate = new Date();
+    let toDate   = new Date();
+
+    switch (this.filters.rangeType) {
+      case 'today':      break;
+      case 'yesterday':
+        fromDate.setDate(today.getDate() - 1);
+        toDate.setDate(today.getDate() - 1);
+        break;
+      case 'thisWeek': {
+        const dow = today.getDay();
+        fromDate.setDate(today.getDate() - dow);
+        break;
+      }
+      case 'lastWeek':
+        fromDate.setDate(today.getDate() - today.getDay() - 7);
+        toDate.setDate(today.getDate() - today.getDay() - 1);
+        break;
+      case 'thisMonth':
+        fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        break;
+      case 'lastMonth':
+        fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        toDate   = new Date(today.getFullYear(), today.getMonth(), 0);
+        break;
+      case 'quarter': {
+        const q = Math.floor(today.getMonth() / 3);
+        fromDate = new Date(today.getFullYear(), q * 3, 1);
+        break;
+      }
+      case 'year':
+        fromDate = new Date(today.getFullYear(), 0, 1);
+        break;
+      case 'custom':
+        return;
+    }
+
+    const fmt = (d) => {
+      const y   = d.getFullYear();
+      const m   = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    this.filters.from = fmt(fromDate);
+    this.filters.to = fmt(toDate);
   }
 
   async _triggerRefresh(container) {
