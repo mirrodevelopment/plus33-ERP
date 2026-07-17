@@ -142,6 +142,18 @@ class AuthStore {
    * Performs the fn operation in this module.
    * @memberof Store Module
    */
+  updateUser(newData) {
+    if (this.user) {
+      this.user = { ...this.user, ...newData };
+      storage.set('plus33-user', this.user);
+      eventBus.emit('auth:state-changed', { user: this.user, loggedIn: true });
+    }
+  }
+
+  /**
+   * Performs the fn operation in this module.
+   * @memberof Store Module
+   */
   getUser() {
     return this.user;
   }

@@ -8,8 +8,12 @@ public record AnnouncementResponse(
     String content,
     String priority,
     String publisher,
+    String publisherRole,
     String date,
     String createdAt,
     boolean read,
-    Map<String, Integer> reactions
+    Map<String, Integer> reactions,
+    String imageUrl,
+    Long targetRegionId,
+    Long targetStoreId
 ) {}

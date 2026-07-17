@@ -1257,4 +1257,191 @@
   color: var(--text-muted);
 }
 
+/* ===== FILTERS RIBBON — RESTYLE ===== */
+.filters-ribbon {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  margin-top: 16px;
+  margin-bottom: var(--spacing-lg);
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-top: 2px solid var(--accent-primary) !important;
+  border-radius: 12px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+}
+
+.filters-ribbon .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 120px;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.filters-ribbon .filter-group--date-range {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 6px;
+  flex: 1.6 1 200px;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.filters-ribbon .filter-group--date-range[hidden] {
+  display: none !important;
+}
+
+.filters-ribbon .filter-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding-left: 1px;
+  white-space: nowrap;
+}
+
+/* Dropdowns & inputs */
+.filters-ribbon .filter-select,
+.filters-ribbon .filter-input {
+  width: 100%;
+  padding: 0 28px 0 9px !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-bottom: 2px solid var(--accent-primary) !important;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  height: 32px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' viewBox='0 0 9 5'%3E%3Cpath d='M1 1l3.5 3L8 1' stroke='%232563eb' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 9px center !important;
+  background-size: 9px 5px !important;
+}
+
+.filters-ribbon .filter-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.filters-ribbon .filter-select:hover,
+.filters-ribbon .filter-input:hover {
+  border-color: var(--border-color-hover) !important;
+  border-bottom-color: var(--accent-primary) !important;
+  background: var(--bg-card-hover) !important;
+}
+
+.filters-ribbon .filter-select:focus,
+.filters-ribbon .filter-input:focus {
+  border-color: var(--border-color-hover) !important;
+  border-bottom-color: var(--accent-primary) !important;
+  background: var(--bg-card-hover) !important;
+  box-shadow: 0 2px 0 0 var(--accent-primary) !important;
+}
+
+/* Actions — bottom-align with the inputs */
+.filters-ribbon .filter-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+  padding-left: 10px;
+  margin-left: 4px;
+  border-left: 1px solid var(--border-color);
+  padding-bottom: 0;
+}
+
+/* Apply button */
+.filters-ribbon .filter-actions .btn-primary,
+.filters-ribbon .filter-actions #btn-apply-filters {
+  height: 32px !important;
+  padding: 0 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: linear-gradient(135deg, #b8913e 0%, #d4af37 45%, #e8c96a 100%) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  color: #0e0f14 !important;
+  font-size: 0.76rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow:
+    0 3px 12px rgba(201, 164, 106, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.filters-ribbon .filter-actions .btn-primary:hover,
+.filters-ribbon .filter-actions #btn-apply-filters:hover {
+  transform: translateY(-1px) !important;
+  box-shadow:
+    0 5px 18px rgba(201, 164, 106, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  background: linear-gradient(135deg, #c9a46a 0%, #e8c96a 50%, #f5d97a 100%) !important;
+}
+
+.filters-ribbon .filter-actions .btn-primary:active,
+.filters-ribbon .filter-actions #btn-apply-filters:active {
+  transform: translateY(0) scale(0.97) !important;
+  box-shadow: 0 2px 8px rgba(201, 164, 106, 0.3) !important;
+}
+
+/* Reset button */
+.filters-ribbon .filter-actions .btn-secondary,
+.filters-ribbon .filter-actions #btn-reset-filters {
+  height: 32px !important;
+  padding: 0 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+  color: var(--text-muted) !important;
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap;
+}
+
+.filters-ribbon .filter-actions .btn-secondary:hover,
+.filters-ribbon .filter-actions #btn-reset-filters:hover {
+  background: rgba(255, 80, 80, 0.08) !important;
+  border-color: rgba(255, 80, 80, 0.3) !important;
+  color: #ff6b6b !important;
+}
+
+.filters-ribbon .filter-actions .btn-secondary:active,
+.filters-ribbon .filter-actions #btn-reset-filters:active {
+  transform: scale(0.97) !important;
+}
+
+/* Icon sizing inside filter buttons */
+.filters-ribbon .filter-actions .btn svg,
+.filters-ribbon .filter-actions .btn i {
+  width: 12px !important;
+  height: 12px !important;
+  opacity: 0.85;
+}
+
 

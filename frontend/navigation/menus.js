@@ -45,6 +45,12 @@ export function getMenuItems() {
         ]
       },
       {
+        title: 'COMMUNICATION',
+        items: [
+          { name: 'Broadcast Announcement', icon: 'send', route: '#regional-announcements' }
+        ]
+      },
+      {
         title: 'WORKFORCE',
         items: [
           { name: 'Employee Overview', icon: 'users', route: '#workforce' },
@@ -113,6 +119,7 @@ export function getMenuItems() {
         title: 'SHIFT SUPERVISOR',
         items: [
           { name: 'Shift Dashboard', icon: 'bar-chart', route: '#supervisor-dashboard' },
+          { name: 'Shift Planner', icon: 'calendar', route: '#shift-planner' },
           { name: 'Broadcast Announcement', icon: 'send', route: '#supervisor-announcements' },
           { name: 'My Roster', icon: 'calendar', route: '#schedule' },
           { name: 'Team Checklist', icon: 'check-square', route: '#tasks' },
@@ -169,6 +176,8 @@ export function getMenuItems() {
         items: [
           { name: 'Broadcast Announcement', icon: 'send', route: '#store-announcements' },
           { name: 'Leave Management', icon: 'calendar', route: '#store-leave' },
+          { name: 'Workforce Overview', icon: 'users', route: '#store-workforce' },
+          { name: 'Store Settings', icon: 'settings', route: '#store-settings' },
           { name: 'My Profile', icon: 'user', route: '#profile' }
         ]
       }

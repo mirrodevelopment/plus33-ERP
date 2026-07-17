@@ -37,54 +37,76 @@
         User: <span id="header-user-profile" class="highlight-val">—</span>
       </span>
     </div>
-    <div class="header-actions">
-      <div id="dashboard-clock" class="dashboard-clock-panel" role="status" aria-live="off">
-        --:--:--
-      </div>
-      <div class="notifications-indicator" title="Unread notifications">
-        <i data-lucide="bell" aria-hidden="true"></i>
-        <span id="dashboard-notif-count" class="badge-count">0</span>
-      </div>
-    </div>
   </div>
 
-  <!-- ===== FILTER PANEL RIBBON ===== -->
-  <div class="card glass filters-card" role="search" aria-label="Dashboard filters">
+  <!-- ===== FILTERS RIBBON ===== -->
+  <div class="filters-ribbon card glass" id="dashboard-filters" role="search" aria-label="Dashboard filters">
+
+    <!-- Date Range Selector -->
     <div class="filter-group">
-      <label for="filter-timeframe" class="filter-label">Timeframe</label>
-      <select id="filter-timeframe" class="filter-select">
-        <option value="Today">Today</option>
-        <option value="Week">This Week</option>
-        <option value="Month">This Month</option>
+      <label for="filter-range-type" class="filter-label">Date Range</label>
+      <select id="filter-range-type" class="filter-select" aria-label="Select date range">
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="thisWeek">This Week</option>
+        <option value="lastWeek">Last Week</option>
+        <option value="thisMonth" selected>This Month</option>
+        <option value="lastMonth">Last Month</option>
+        <option value="quarter">This Quarter</option>
+        <option value="year">This Year</option>
+        <option value="custom">Custom Range...</option>
       </select>
     </div>
 
+    <!-- Custom Date Range Inputs (shown only when "custom" is selected) -->
+    <div id="custom-date-inputs" class="filter-group filter-group--date-range" hidden>
+      <div class="filter-group">
+        <label for="filter-date-from" class="filter-label">From</label>
+        <input type="date" id="filter-date-from" class="filter-input" aria-label="From date">
+      </div>
+      <div class="filter-group">
+        <label for="filter-date-to" class="filter-label">To</label>
+        <input type="date" id="filter-date-to" class="filter-input" aria-label="To date">
+      </div>
+    </div>
+
+    <!-- Nation Selector -->
     <div class="filter-group">
-      <label for="filter-store" class="filter-label">Store Location</label>
-      <select id="filter-store" class="filter-select">
-        <!-- populated dynamically -->
+      <label for="filter-nation" class="filter-label">Nation</label>
+      <select id="filter-nation" class="filter-select" aria-label="Filter by nation">
+        <option value="">All Nations</option>
       </select>
     </div>
 
+    <!-- Region Selector -->
     <div class="filter-group">
-      <label for="filter-warehouse" class="filter-label">Warehouse</label>
-      <select id="filter-warehouse" class="filter-select">
-        <!-- populated dynamically -->
+      <label for="filter-region" class="filter-label">Region</label>
+      <select id="filter-region" class="filter-select" aria-label="Filter by region">
+        <option value="">All Regions</option>
       </select>
     </div>
 
+    <!-- Store Selector -->
     <div class="filter-group">
-      <label for="filter-vendor" class="filter-label">Vendor</label>
-      <select id="filter-vendor" class="filter-select">
-        <!-- populated dynamically -->
+      <label for="filter-store" class="filter-label">Store</label>
+      <select id="filter-store" class="filter-select" aria-label="Filter by store">
+        <option value="">All Stores</option>
       </select>
     </div>
 
-    <button id="btn-apply-filters" class="btn btn-primary btn-refresh-dashboard" type="button" aria-label="Refresh dashboard data">
-      <i data-lucide="filter" aria-hidden="true"></i>
-      <span>Refresh Dashboard</span>
-    </button>
-  </div>
+    <!-- Filter Action Buttons -->
+    <div class="filter-actions">
+      <button id="btn-apply-filters" class="btn btn-primary btn-sm" type="button" aria-label="Apply filters">
+        <i data-lucide="filter" aria-hidden="true"></i>
+        <span>Apply</span>
+      </button>
+      <button id="btn-reset-filters" class="btn btn-secondary btn-sm" type="button" aria-label="Reset all filters">
+        <i data-lucide="x-circle" aria-hidden="true"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+
+  </div><!-- /filters-ribbon -->
 
   <!-- ===== KPI METRIC SUMMARY GRID (8 Cards) ===== -->
   <div class="kpi-grid-container" role="region" aria-label="Regional key performance indicators">

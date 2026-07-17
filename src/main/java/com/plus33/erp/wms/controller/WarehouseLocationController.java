@@ -167,11 +167,16 @@ public class WarehouseLocationController {
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getStockLedger() {
         String sql = "SELECT ls.id, p.name, pc.name AS category, ls.quantity AS qty, " +
                      "ls.reserved_quantity AS reserved, uom.code AS uom, ls.lot_number AS lot, " +
-                     "ls.expiry_date AS expiry " +
+                     "ls.expiry_date AS expiry, ls.receipt_date AS receiptDate, " +
+                     "ls.unit_cost AS unitCost, " +
+                     "COALESCE(s.name, 'Default Supplier') AS vendor " +
                      "FROM location_stock ls " +
                      "JOIN products p ON p.id = ls.product_id " +
                      "JOIN product_categories pc ON pc.id = p.category_id " +
                      "JOIN units_of_measure uom ON uom.id = p.unit_id " +
+                     "LEFT JOIN asn_lines al ON al.lot_number = ls.lot_number AND al.product_id = ls.product_id " +
+                     "LEFT JOIN advance_shipping_notices asn ON asn.id = al.asn_id " +
+                     "LEFT JOIN suppliers s ON s.id = asn.supplier_id " +
                      "ORDER BY ls.id ASC";
         
         List<Map<String, Object>> list = jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -184,9 +189,74 @@ public class WarehouseLocationController {
             map.put("uom", rs.getString("uom"));
             map.put("lot", rs.getString("lot"));
             map.put("expiry", rs.getDate("expiry") != null ? rs.getDate("expiry").toString() : "");
+            map.put("receiptDate", rs.getDate("receiptDate") != null ? rs.getDate("receiptDate").toString() : "");
+            map.put("vendor", rs.getString("vendor"));
+            map.put("unitCost", rs.getBigDecimal("unitCost") != null ? rs.getBigDecimal("unitCost") : java.math.BigDecimal.ZERO);
             return map;
         });
         
         return ResponseEntity.ok(ApiResponse.success("Stock ledger retrieved successfully", list));
+    }
+
+    @GetMapping("/wms/inventory-dashboard")
+    @PreAuthorize("hasAnyAuthority('WMS_VIEW', 'WMS_ADMIN', 'INVENTORY_VIEW')")
+    @Operation(summary = "Get Inventory Dashboard Metrics", description = "Retrieves live inventory metrics and charts database values")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getInventoryDashboard() {
+        Map<String, Object> metrics = new HashMap<>();
+        
+        // 1. Total Inventory Value (from location_stock)
+        Double totalVal = jdbcTemplate.queryForObject(
+            "SELECT COALESCE(SUM(quantity * COALESCE(unit_cost, 1.50)), 0) FROM location_stock", Double.class);
+        metrics.put("totalInventoryValue", totalVal);
+
+        // 2. Low Stock Items count
+        Long lowStockCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM location_stock WHERE quantity <= 100 AND quantity > 0", Long.class);
+        metrics.put("lowStockItems", lowStockCount);
+
+        // 3. Purchase Orders count
+        Long poCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM purchase_orders", Long.class);
+        metrics.put("purchaseOrders", poCount);
+
+        // 4. Today's Sales
+        Double todaySales = jdbcTemplate.queryForObject(
+            "SELECT COALESCE(SUM(total_amount), 0) FROM sales_orders WHERE order_date = CURRENT_DATE", Double.class);
+        metrics.put("todaySales", todaySales);
+
+        // 5. Gross Profit
+        Double grossProfit = jdbcTemplate.queryForObject(
+            "SELECT COALESCE(SUM(total_amount), 0) FROM customer_invoices WHERE invoice_date = CURRENT_DATE", Double.class);
+        metrics.put("grossProfit", grossProfit);
+
+        // 6. Footer Metrics
+        metrics.put("totalProducts", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products WHERE active = true", Long.class));
+        metrics.put("totalCategories", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product_categories WHERE active = true", Long.class));
+        metrics.put("totalWarehouses", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM warehouses WHERE active = true", Long.class));
+        metrics.put("totalStores", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM stores WHERE active = true", Long.class));
+        metrics.put("totalSuppliers", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM suppliers WHERE active = true", Long.class));
+        metrics.put("totalEmployees", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM employees WHERE active = true", Long.class));
+
+        // 7. Top 10 items by quantity sold
+        String topItemsSql = "SELECT p.name, COALESCE(SUM(soi.ordered_quantity), 0) AS qty_sold " +
+                             "FROM sales_order_items soi " +
+                             "JOIN products p ON p.id = soi.product_id " +
+                             "GROUP BY p.name " +
+                             "ORDER BY qty_sold DESC " +
+                             "LIMIT 10";
+        List<Map<String, Object>> topItems = jdbcTemplate.queryForList(topItemsSql);
+        metrics.put("topItems", topItems);
+
+        // 8. Category Distribution
+        String catDistSql = "SELECT pc.name AS category, COALESCE(SUM(ls.quantity), 0) AS total_qty " +
+                            "FROM location_stock ls " +
+                            "JOIN products p ON p.id = ls.product_id " +
+                            "JOIN product_categories pc ON pc.id = p.category_id " +
+                            "GROUP BY pc.name " +
+                            "ORDER BY total_qty DESC";
+        List<Map<String, Object>> catDist = jdbcTemplate.queryForList(catDistSql);
+        metrics.put("categoryDistribution", catDist);
+
+        return ResponseEntity.ok(ApiResponse.success("Dashboard metrics retrieved successfully", metrics));
     }
 }

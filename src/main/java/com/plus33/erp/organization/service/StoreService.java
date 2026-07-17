@@ -53,4 +53,7 @@ public interface StoreService {
     void deleteStore(Long id);
     StoreResponse activateStore(Long id);
     StoreResponse deactivateStore(Long id);
+    
+    com.plus33.erp.organization.dto.StoreSettingResponse getStoreSettings(Long storeId);
+    com.plus33.erp.organization.dto.StoreSettingResponse updateStoreSettings(Long storeId, com.plus33.erp.organization.dto.StoreSettingRequest request);
 }

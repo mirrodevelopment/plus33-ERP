@@ -95,6 +95,9 @@ public class LocationStock {
     @Column(name = "abc_class", length = 5)
     private String abcClass;
 
+    @Column(name = "supplier_id")
+    private Long supplierId;
+
     /**
      * Optimistic lock version for concurrent picking guard.
      * On a pick attempt, Hibernate uses @Version to detect conflicting updates
@@ -327,4 +330,7 @@ public class LocationStock {
      * @param updatedAt the updatedAt input value
      */
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Long getSupplierId() { return supplierId; }
+    public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
 }

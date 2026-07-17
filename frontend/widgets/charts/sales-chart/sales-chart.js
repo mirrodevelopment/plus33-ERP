@@ -26,6 +26,7 @@ import { logger } from '../../../core/logger.js';
 import { htmlLoader } from '../../../core/htmlLoader.js';
 import { dashboardService } from '../../../services/dashboard/DashboardService.js';
 import { apiClient } from '../../../api/client.js';
+import { authStore } from '../../../store/authStore.js';
 
 export class SalesChart {
   /**
@@ -219,9 +220,21 @@ export class SalesChart {
       if (targetEl) targetEl.textContent = 'Syncing...';
 
       try {
-        // 2. Fetch data from backend with active filters
         const queryParams = { from: dates.from, to: dates.to };
-        const storedFilters = localStorage.getItem('dashboard_filters');
+        // 2. Fetch data from backend with active filters
+        const username = authStore.getUser()?.username || 'default';
+        const hash = window.location.hash || '';
+        let key = `dashboard_filters_${username}`;
+        if (hash.includes('regional-warehouse')) {
+          key = `regional_warehouse_admin_dashboard_filters_${username}`;
+        } else if (hash.includes('national-warehouse')) {
+          key = `national_wh_admin_dashboard_filters_${username}`;
+        } else if (hash.includes('regional-dashboard')) {
+          key = `regional_admin_dashboard_filters_${username}`;
+        } else if (hash.includes('national-dashboard')) {
+          key = `national_admin_dashboard_filters_${username}`;
+        }
+        const storedFilters = localStorage.getItem(key);
         if (storedFilters) {
           try {
             const parsed = JSON.parse(storedFilters);
@@ -566,7 +579,19 @@ export class SalesChart {
     // Default dates initialization
     let defaultFrom = '';
     let defaultTo = '';
-    const storedFilters = localStorage.getItem('dashboard_filters');
+    const username = authStore.getUser()?.username || 'default';
+    const hash = window.location.hash || '';
+    let key = `dashboard_filters_${username}`;
+    if (hash.includes('regional-warehouse')) {
+      key = `regional_warehouse_admin_dashboard_filters_${username}`;
+    } else if (hash.includes('national-warehouse')) {
+      key = `national_wh_admin_dashboard_filters_${username}`;
+    } else if (hash.includes('regional-dashboard')) {
+      key = `regional_admin_dashboard_filters_${username}`;
+    } else if (hash.includes('national-dashboard')) {
+      key = `national_admin_dashboard_filters_${username}`;
+    }
+    const storedFilters = localStorage.getItem(key);
     if (storedFilters) {
       try {
         const parsed = JSON.parse(storedFilters);

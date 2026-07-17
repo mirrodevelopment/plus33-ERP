@@ -47,19 +47,31 @@
   <!-- ===== KPI SUMMARY ROW ===== -->
   <div class="stores-kpi-grid" role="region" aria-label="Stores summary metrics">
     <div class="kpi-card kpi-card--gold">
-      <span class="kpi-label">Total Franchise Stores</span>
+      <div class="kpi-card-header">
+        <i data-lucide="store" class="kpi-icon"></i>
+        <span class="kpi-label">Total Franchise Stores</span>
+      </div>
       <span class="kpi-value" id="kpi-total-stores">—</span>
     </div>
     <div class="kpi-card kpi-card--success">
-      <span class="kpi-label">Active Locations</span>
+      <div class="kpi-card-header">
+        <i data-lucide="check-circle" class="kpi-icon"></i>
+        <span class="kpi-label">Active Locations</span>
+      </div>
       <span class="kpi-value" id="kpi-active-stores">—</span>
     </div>
     <div class="kpi-card kpi-card--danger">
-      <span class="kpi-label">Inactive/Suspended</span>
+      <div class="kpi-card-header">
+        <i data-lucide="x-circle" class="kpi-icon"></i>
+        <span class="kpi-label">Inactive/Suspended</span>
+      </div>
       <span class="kpi-value" id="kpi-inactive-stores">—</span>
     </div>
     <div class="kpi-card kpi-card--secondary">
-      <span class="kpi-label">Represented Regions</span>
+      <div class="kpi-card-header">
+        <i data-lucide="globe" class="kpi-icon"></i>
+        <span class="kpi-label">Represented Regions</span>
+      </div>
       <span class="kpi-value" id="kpi-represented-regions">—</span>
     </div>
   </div>
@@ -86,6 +98,17 @@
       <select id="select-filter-region" class="filter-select" aria-label="Filter stores by territory region">
         <option value="all">All Regions</option>
         <!-- Dynamic options populated by JS -->
+      </select>
+    </div>
+
+    <!-- Store Type Dropdown Filter -->
+    <div class="filter-group">
+      <label for="select-filter-type" class="filter-label">Filter Type:</label>
+      <select id="select-filter-type" class="filter-select" aria-label="Filter stores by store type">
+        <option value="all">All Types</option>
+        <option value="KIOSK">KIOSK</option>
+        <option value="COMPACT_CAFE">COMPACT CAFÉ</option>
+        <option value="FLAGSHIP_CAFE">FLAGSHIP CAFÉ</option>
       </select>
     </div>
 
@@ -199,6 +222,15 @@
           >
         </div>
       </div>
+
+      <div class="form-group">
+        <label for="store-modal-type" class="form-label">Store Type</label>
+        <select id="store-modal-type" class="form-select" required aria-required="true">
+          <option value="KIOSK">KIOSK</option>
+          <option value="COMPACT_CAFE" selected>COMPACT CAFÉ</option>
+          <option value="FLAGSHIP_CAFE">FLAGSHIP CAFÉ</option>
+        </select>
+      </div>
       
       <button id="btn-store-submit" type="submit" class="btn btn-primary btn-modal-submit">
         Register Store
@@ -233,36 +265,71 @@
       </button>
     </div>
 
-    <!-- Top Identity Details -->
-    <div class="store-card-header">
-      <div class="store-code"></div>
-      <h3 class="store-name" title=""></h3>
-      <div class="store-region-badge">
-        <i data-lucide="map-pin" aria-hidden="true"></i>
-        <span class="region-code"></span>
-      </div>
+    <!-- Banner header decoration -->
+    <div class="store-card-banner">
+      <div class="store-avatar-badge">—</div>
     </div>
 
-    <!-- Contact Info Block -->
-    <div class="store-contact-info">
-      <div class="contact-row">
-        <i data-lucide="navigation" aria-hidden="true"></i>
-        <span class="contact-address" title=""></span>
+    <div class="store-card-content">
+      <!-- Top Identity Details -->
+      <div class="store-card-header">
+        <div class="store-code"></div>
+        <h3 class="store-name" title=""></h3>
+        <div class="store-badges-row" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+          <div class="store-type-badge">
+            <i data-lucide="coffee" aria-hidden="true" style="width: 10px; height: 10px;"></i>
+            <span class="type-code">COMPACT CAFÉ</span>
+          </div>
+          <div class="store-region-badge">
+            <i data-lucide="map-pin" aria-hidden="true"></i>
+            <span class="region-code"></span>
+          </div>
+        </div>
       </div>
-      <div class="contact-row">
-        <i data-lucide="phone" aria-hidden="true"></i>
-        <span class="contact-phone"></span>
-      </div>
-      <div class="contact-row">
-        <i data-lucide="mail" aria-hidden="true"></i>
-        <span class="contact-email" title=""></span>
-      </div>
-    </div>
 
-    <!-- Footer Meta Row -->
-    <div class="store-card-footer">
-      <div class="store-status-badge"></div>
-      <div class="store-opening-date"></div>
+      <!-- Stats Grid -->
+      <div class="store-stats-grid">
+        <div class="store-stat-item">
+          <i data-lucide="users" class="stat-icon"></i>
+          <div class="stat-content">
+            <span class="stat-value store-employee-count">0</span>
+            <span class="stat-label">Employees</span>
+          </div>
+        </div>
+        <div class="store-stat-item">
+          <i data-lucide="package" class="stat-icon"></i>
+          <div class="stat-content">
+            <span class="stat-value store-stock-value">€0.00</span>
+            <span class="stat-label">Stock Value</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Info Block -->
+      <div class="store-contact-info">
+        <div class="contact-row">
+          <i data-lucide="navigation" aria-hidden="true"></i>
+          <span class="contact-address" title=""></span>
+        </div>
+        <div class="contact-row">
+          <i data-lucide="phone" aria-hidden="true"></i>
+          <span class="contact-phone"></span>
+        </div>
+        <div class="contact-row">
+          <i data-lucide="mail" aria-hidden="true"></i>
+          <span class="contact-email" title=""></span>
+        </div>
+        <div class="contact-row warehouse-row">
+          <i data-lucide="database" aria-hidden="true"></i>
+          <span class="contact-warehouse" title="">Linked WH: —</span>
+        </div>
+      </div>
+
+      <!-- Footer Meta Row -->
+      <div class="store-card-footer">
+        <div class="store-status-badge"></div>
+        <div class="store-opening-date"></div>
+      </div>
     </div>
 
   </div>

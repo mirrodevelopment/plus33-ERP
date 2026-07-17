@@ -1,0 +1,279 @@
+<div class="workforce-page-container">
+  <!-- ===== HEADER ===== -->
+  <header class="workforce-header animate-slide-down">
+    <div class="header-left">
+      <h1 class="page-title">Workforce Overview</h1>
+      <p class="page-subtitle">Manage store baristas, supervisors, standard shift schedules, and monthly payroll snapshots.</p>
+    </div>
+  </header>
+
+  <!-- ===== KPI SUMMARY WIDGETS ===== -->
+  <!-- ===== KPI SUMMARY WIDGETS ===== -->
+  <div class="workforce-kpi-grid animate-slide-up">
+    <div class="kpi-mini-card card glass">
+      <div class="kpi-mini-header">
+        <div class="kpi-mini-icon">
+          <i data-lucide="users"></i>
+        </div>
+        <span class="kpi-mini-label">Total Workers</span>
+      </div>
+      <div class="kpi-mini-value" id="kpi-total-workers">-</div>
+      <div class="kpi-mini-trend trend-stable">
+        <i data-lucide="minus"></i>
+        <span>Stable vs Last Month</span>
+      </div>
+    </div>
+
+    <div class="kpi-mini-card card glass">
+      <div class="kpi-mini-header">
+        <div class="kpi-mini-icon">
+          <i data-lucide="user-check"></i>
+        </div>
+        <span class="kpi-mini-label">Present Today</span>
+      </div>
+      <div class="kpi-mini-value" id="kpi-present-today">-</div>
+      <div class="kpi-mini-trend trend-up">
+        <i data-lucide="arrow-up-right"></i>
+        <span>+0.0% vs Yesterday</span>
+      </div>
+    </div>
+
+    <div class="kpi-mini-card card glass">
+      <div class="kpi-mini-header">
+        <div class="kpi-mini-icon">
+          <i data-lucide="user-x"></i>
+        </div>
+        <span class="kpi-mini-label">Absent Today</span>
+      </div>
+      <div class="kpi-mini-value" id="kpi-absent-today">-</div>
+      <div class="kpi-mini-trend trend-down">
+        <i data-lucide="arrow-down-right"></i>
+        <span>-0.0% vs Yesterday</span>
+      </div>
+    </div>
+
+    <div class="kpi-mini-card card glass">
+      <div class="kpi-mini-header">
+        <div class="kpi-mini-icon">
+          <i data-lucide="calendar"></i>
+        </div>
+        <span class="kpi-mini-label">On Leave Today</span>
+      </div>
+      <div class="kpi-mini-value" id="kpi-leave-today">-</div>
+      <div class="kpi-mini-trend trend-stable">
+        <i data-lucide="minus"></i>
+        <span>Stable vs Last Week</span>
+      </div>
+    </div>
+
+    <div class="kpi-mini-card card glass">
+      <div class="kpi-mini-header">
+        <div class="kpi-mini-icon">
+          <i data-lucide="banknote"></i>
+        </div>
+        <span class="kpi-mini-label">Est. Payroll</span>
+      </div>
+      <div class="kpi-mini-value" id="kpi-total-payroll">-</div>
+      <div class="kpi-mini-trend trend-up">
+        <i data-lucide="arrow-up-right"></i>
+        <span>+0.0% vs Last Month</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FILTERS SECTION ===== -->
+  <section class="workforce-filters card glass animate-slide-up">
+    <div class="filters-search-wrapper">
+      <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
+      <input id="workforce-search" type="search" placeholder="Search by name, employee code or email..." class="filter-input filter-search">
+    </div>
+    
+    <div class="filters-dropdowns-wrapper">
+      <div class="filter-group">
+        <label for="filter-status" class="filter-label">Status</label>
+        <select id="filter-status" class="filter-select">
+          <option value="ALL">All Statuses</option>
+          <option value="ACTIVE" selected>Active Employees</option>
+          <option value="INACTIVE">Inactive Employees</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-designation" class="filter-label">Designation</label>
+        <select id="filter-designation" class="filter-select">
+          <option value="ALL">All Designations</option>
+          <option value="Store Manager">Store Manager</option>
+          <option value="Shift Supervisor">Shift Supervisor</option>
+          <option value="Barista">Barista</option>
+          <option value="Intern">Intern</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-employment" class="filter-label">Type</label>
+        <select id="filter-employment" class="filter-select">
+          <option value="ALL">All Types</option>
+          <option value="FULL_TIME">Full Time</option>
+          <option value="PART_TIME">Part Time</option>
+          <option value="CONTRACTOR">Contractor</option>
+          <option value="TEMPORARY">Temporary</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DATA TABLE SECTION ===== -->
+  <main class="workforce-table-container card glass animate-slide-up">
+    <div class="table-scroll-wrapper">
+      <table class="workforce-table">
+        <thead>
+          <tr>
+            <th scope="col">Employee Info</th>
+            <th scope="col">Designation / Dept</th>
+            <th scope="col">Joined Date</th>
+            <th scope="col">Tenure</th>
+            <th scope="col">Active Shift</th>
+            <th scope="col">Monthly Salary</th>
+            <th scope="col">Status</th>
+            <th scope="col" style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="workforce-table-body">
+          <tr>
+            <td colspan="8" class="loading-state">
+              <div class="spinner"></div>
+              <span>Retrieving store workforce roster...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="table-pagination">
+      <span id="pagination-summary" class="pagination-info">Showing - to - of - employees</span>
+      <div class="pagination-actions">
+        <button id="btn-page-prev" class="btn btn-secondary btn-pagination" disabled>
+          <i data-lucide="chevron-left" aria-hidden="true"></i> Previous
+        </button>
+        <div id="pagination-pages" class="pagination-numbers">
+          <!-- Page numbers rendered dynamically -->
+        </div>
+        <button id="btn-page-next" class="btn btn-secondary btn-pagination" disabled>
+          Next <i data-lucide="chevron-right" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== ESCALATED SHAP REQUESTS SECTION ===== -->
+  <section class="store-escalations-container card glass animate-slide-up" style="margin-top: var(--spacing-xl); padding: var(--spacing-lg); border: 1px solid var(--border-color); background: var(--bg-card); border-radius: var(--radius-lg);">
+    <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: var(--spacing-sm); margin-bottom: var(--spacing-md); display: flex; flex-direction: column; gap: 4px;">
+      <h3 style="font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-warning);"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+        Escalated Shift Swap Requests
+      </h3>
+      <p style="font-size: 0.68rem; color: var(--text-muted); margin: 0;">Review shift change requests escalated to Store Administration after supervisor rejection.</p>
+    </div>
+    
+    <div class="table-scroll-wrapper" style="overflow-x: auto;">
+      <table class="workforce-table" style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+        <thead>
+          <tr>
+            <th scope="col" style="text-align: left; padding: 10px 12px; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Employee</th>
+            <th scope="col" style="text-align: left; padding: 10px 12px; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Shift Date</th>
+            <th scope="col" style="text-align: left; padding: 10px 12px; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Current Shift</th>
+            <th scope="col" style="text-align: left; padding: 10px 12px; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Preferred Shift</th>
+            <th scope="col" style="text-align: left; padding: 10px 12px; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Preferred Date</th>
+            <th scope="col" style="text-align: left; padding: 10px 12px; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Rejection Reason</th>
+            <th scope="col" style="text-align: right; padding: 10px 12px; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color); width: 160px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="escalated-swaps-table-body">
+          <!-- Dynamically populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE-OUT DRAWER FOR EMPLOYEE DETAILS ===== -->
+  <div id="employee-details-drawer" class="details-drawer glass">
+    <div class="drawer-header">
+      <h3 class="drawer-title">Employee Details</h3>
+      <button id="btn-close-drawer" class="btn-close" aria-label="Close details drawer">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    
+    <div class="drawer-content">
+      <div class="drawer-profile-section">
+        <div id="drawer-avatar" class="drawer-avatar">EE</div>
+        <h2 id="drawer-full-name" class="drawer-name">-</h2>
+        <span id="drawer-code" class="drawer-code">-</span>
+      </div>
+
+      <div class="drawer-details-grid">
+        <div class="detail-item">
+          <span class="detail-label">Designation</span>
+          <span id="drawer-designation" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Department</span>
+          <span id="drawer-department" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Employment Type</span>
+          <span id="drawer-employment-type" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Status</span>
+          <span id="drawer-status" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Date Joined</span>
+          <span id="drawer-hire-date" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Service Tenure</span>
+          <span id="drawer-tenure" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Active Shift</span>
+          <span id="drawer-active-shift" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Monthly Salary</span>
+          <span id="drawer-salary" class="detail-value">-</span>
+        </div>
+        <div class="detail-item full-width">
+          <span class="detail-label">Email Address</span>
+          <span id="drawer-email" class="detail-value">-</span>
+        </div>
+        <div class="detail-item full-width">
+          <span class="detail-label">Username (Login Email)</span>
+          <span id="drawer-username" class="detail-value">-</span>
+        </div>
+        <div class="detail-item full-width">
+          <span class="detail-label">Phone Number</span>
+          <span id="drawer-phone" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Assigned Store</span>
+          <span id="drawer-store" class="detail-value">-</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Region</span>
+          <span id="drawer-region" class="detail-value">-</span>
+        </div>
+      </div>
+      
+      <!-- ===== VERIFICATION DOCUMENTS SECTION ===== -->
+      <div class="drawer-documents-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+        <h4 style="font-size: 0.9rem; font-weight: 600; color: var(--accent-primary); margin-bottom: 0.75rem;">Verification Documents</h4>
+        <div id="drawer-documents-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <!-- Dynamically loaded documents will be rendered here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

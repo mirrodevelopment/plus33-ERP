@@ -84,5 +84,8 @@ public record StoreRequest(
         Long warehouseId,
 
         @Schema(description = "Status of the store", example = "true")
-        Boolean active
+        Boolean active,
+
+        @Schema(description = "Store type", example = "COMPACT_CAFE")
+        String type
 ) {}

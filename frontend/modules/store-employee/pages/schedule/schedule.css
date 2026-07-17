@@ -76,26 +76,7 @@
   display: inline-block;
 }
 
-/* Capacity Warning Ribbon */
-.capacity-rule-ribbon {
-  background: rgba(201, 164, 106, 0.06);
-  border: 1px solid rgba(201, 164, 106, 0.15);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  font-size: 0.72rem;
-  color: var(--accent-primary);
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-align: left;
-}
 
-.capacity-info-icon {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-}
 
 /* Weekly Shift Calendar grid */
 .calendar-card {

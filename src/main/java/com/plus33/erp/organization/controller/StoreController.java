@@ -208,4 +208,20 @@ public class StoreController {
         StoreResponse response = storeService.deactivateStore(id);
         return ResponseEntity.ok(ApiResponse.success("Store deactivated successfully", response));
     }
+
+    @GetMapping("/{id}/settings")
+    @PreAuthorize("hasAuthority('STORE_VIEW')")
+    @Operation(summary = "Get store settings", description = "Retrieves configurations for the specified store location.")
+    public ResponseEntity<ApiResponse<com.plus33.erp.organization.dto.StoreSettingResponse>> getStoreSettings(@PathVariable Long id) {
+        com.plus33.erp.organization.dto.StoreSettingResponse response = storeService.getStoreSettings(id);
+        return ResponseEntity.ok(ApiResponse.success("Store settings retrieved successfully", response));
+    }
+
+    @PutMapping("/{id}/settings")
+    @PreAuthorize("hasAuthority('STORE_UPDATE')")
+    @Operation(summary = "Update store settings", description = "Updates operational configurations for the specified store location.")
+    public ResponseEntity<ApiResponse<com.plus33.erp.organization.dto.StoreSettingResponse>> updateStoreSettings(@PathVariable Long id, @Valid @RequestBody com.plus33.erp.organization.dto.StoreSettingRequest request) {
+        com.plus33.erp.organization.dto.StoreSettingResponse response = storeService.updateStoreSettings(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Store settings updated successfully", response));
+    }
 }

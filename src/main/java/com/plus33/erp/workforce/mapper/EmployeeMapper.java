@@ -56,6 +56,7 @@ public interface EmployeeMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "emergencyContactPhone", ignore = true)
     Employee toEntity(EmployeeRequest request);
 
     @Mapping(target = "companyId", source = "company.id")
@@ -69,6 +70,10 @@ public interface EmployeeMapper {
     @Mapping(target = "storeId", ignore = true)
     @Mapping(target = "storeName", ignore = true)
     @Mapping(target = "storeCode", ignore = true)
+    @Mapping(target = "salary", ignore = true)
+    @Mapping(target = "activeShift", ignore = true)
+    @Mapping(target = "todayStatus", ignore = true)
+    @Mapping(target = "avatarUrl", ignore = true)
     EmployeeResponse toResponse(Employee entity);
 
     @Mapping(target = "id", ignore = true)
@@ -77,5 +82,6 @@ public interface EmployeeMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "emergencyContactPhone", ignore = true)
     void updateEntity(EmployeeRequest request, @MappingTarget Employee entity);
 }

@@ -40,6 +40,7 @@ export default class NationalWarehouseAdminDashboard {
     this.stores = [];
     this.warehouses = [];
     this.suppliers = [];
+    localStorage.removeItem('national_wh_admin_dashboard_filters'); // clear legacy key
   }
 
   // ---------------------------------------------------------------------------
@@ -88,6 +89,42 @@ export default class NationalWarehouseAdminDashboard {
 
   async _loadData() {
     try {
+      // 1. Fetch user profile info dynamically if not loaded
+      if (!this.profile || !this.profile.country) {
+        const meRes = await apiClient.get('/api/v1/auth/me');
+        if (meRes?.success && meRes?.data) {
+          this.profile = { ...this.profile, ...meRes.data };
+        }
+      }
+
+      // 2. Fetch entities dynamically first
+      const [regionsRes, storesRes, warehousesRes, suppliersRes] = await Promise.all([
+        apiClient.get('/api/v1/regions', { size: 100 }),
+        apiClient.get('/api/v1/stores', { size: 100 }),
+        apiClient.get('/api/v1/warehouses', { size: 100 }),
+        apiClient.get('/api/v1/suppliers', { size: 100 })
+      ]);
+      
+      this.regionsList = (regionsRes?.success && regionsRes?.data?.content) ? regionsRes.data.content : [];
+      this.stores = (storesRes?.success && storesRes?.data?.content) ? storesRes.data.content : [];
+      this.warehouses = (warehousesRes?.success && warehousesRes?.data?.content) ? warehousesRes.data.content : [];
+      this.suppliers = (suppliersRes?.success && suppliersRes?.data?.content) ? suppliersRes.data.content : [];
+
+      // 3. Resolve locked nation and region based on profile
+      this._resolveUserScope();
+
+      // 4. Default filter values for first-load scoping
+      const userRole = this.user?.role || authStore.getUser()?.role;
+      if (userRole !== 'ultimateAdmin') {
+        if (this.loggedNationId && !this.filters.nationId) {
+          this.filters.nationId = this.loggedNationId;
+        }
+        if (this.loggedRegionId && !this.filters.regionId) {
+          this.filters.regionId = this.loggedRegionId;
+        }
+      }
+
+      // 5. Construct parameter queries
       const params = {
         from: this.filters.from,
         to: this.filters.to
@@ -102,21 +139,8 @@ export default class NationalWarehouseAdminDashboard {
         params.storeId = this.filters.storeId;
       }
 
-      // Fetch dynamic dashboard overview from the backend
+      // 6. Fetch scoped backend metrics overview
       this.data = await dashboardService.getDashboardOverview(params);
-      
-      // Fetch entities dynamically
-      const [regionsRes, storesRes, warehousesRes, suppliersRes] = await Promise.all([
-        apiClient.get('/api/v1/regions', { size: 100 }),
-        apiClient.get('/api/v1/stores', { size: 100 }),
-        apiClient.get('/api/v1/warehouses', { size: 100 }),
-        apiClient.get('/api/v1/suppliers', { size: 100 })
-      ]);
-      
-      this.regionsList = (regionsRes?.success && regionsRes?.data?.content) ? regionsRes.data.content : [];
-      this.stores = (storesRes?.success && storesRes?.data?.content) ? storesRes.data.content : [];
-      this.warehouses = (warehousesRes?.success && warehousesRes?.data?.content) ? warehousesRes.data.content : [];
-      this.suppliers = (suppliersRes?.success && suppliersRes?.data?.content) ? suppliersRes.data.content : [];
       
       logger.debug('NationalWarehouseAdminDashboard', 'Retrieved dynamic metrics and entities context');
     } catch (err) {
@@ -130,7 +154,7 @@ export default class NationalWarehouseAdminDashboard {
 
   async _render(container) {
     this.user = authStore.getUser();
-    this.profile = userStore.getProfile(this.user?.role);
+    this.profile = this.profile || userStore.getProfile(this.user?.role);
 
     // Currency Formatting Settings
     const systemCurrency = localStorage.getItem('system_currency') || 'INR';
@@ -615,7 +639,7 @@ export default class NationalWarehouseAdminDashboard {
       this.filters.nationId = nationSelect?.value || '';
       this.filters.regionId = regionSelect?.value || '';
       this.filters.storeId  = storeSelect?.value  || '';
-      localStorage.setItem('national_wh_admin_dashboard_filters', JSON.stringify(this.filters));
+      localStorage.setItem(this._getStorageKey(), JSON.stringify(this.filters));
       this._triggerRefresh(container);
     };
 
@@ -700,18 +724,27 @@ export default class NationalWarehouseAdminDashboard {
     // Reset filters
     if (resetBtn) {
       const handleReset = () => {
-        this.filters = { from: '', to: '', nationId: '', regionId: '', storeId: '', rangeType: 'thisMonth' };
+        const userRole = this.user?.role;
+        this.filters = { 
+          from: '', 
+          to: '', 
+          nationId: (userRole !== 'ultimateAdmin') ? this.loggedNationId : '', 
+          regionId: (userRole !== 'ultimateAdmin') ? this.loggedRegionId : '', 
+          storeId: '', 
+          rangeType: 'thisMonth' 
+        };
         this.resolveDates();
         if (rangeSelect)  rangeSelect.value  = this.filters.rangeType;
-        if (nationSelect) nationSelect.value = '';
-        if (regionSelect) regionSelect.value = '';
+        if (nationSelect) nationSelect.value = this.filters.nationId;
+        this._populateRegionDropdown(container);
+        if (regionSelect) regionSelect.value = this.filters.regionId;
+        this._updateStoreDropdown(container);
         if (storeSelect)  storeSelect.value  = '';
         if (dateFrom)     dateFrom.value     = '';
         if (dateTo)       dateTo.value       = '';
-        this._populateRegionDropdown(container);
-        this._updateStoreDropdown(container);
         this._toggleCustomDates(container);
-        localStorage.removeItem('national_wh_admin_dashboard_filters');
+        localStorage.removeItem(this._getStorageKey());
+        localStorage.removeItem('national_wh_admin_dashboard_filters'); // clear legacy key
         this._triggerRefresh(container);
       };
       resetBtn.addEventListener('click', handleReset);
@@ -726,6 +759,18 @@ export default class NationalWarehouseAdminDashboard {
     const nationSelect = container.querySelector('#filter-nation');
     if (!nationSelect) return;
     nationSelect.replaceChildren();
+
+    const userRole = this.user?.role;
+    if (userRole !== 'ultimateAdmin' && this.loggedNationId) {
+      const matchingNation = this.regionsList.find(r => String(r.id) === String(this.loggedNationId));
+      if (matchingNation) {
+        const opt = document.createElement('option');
+        opt.value       = matchingNation.id;
+        opt.textContent = matchingNation.name;
+        nationSelect.appendChild(opt);
+        return;
+      }
+    }
 
     const allOpt = document.createElement('option');
     allOpt.value       = '';
@@ -747,6 +792,18 @@ export default class NationalWarehouseAdminDashboard {
     const regionSelect = container.querySelector('#filter-region');
     if (!regionSelect) return;
     regionSelect.replaceChildren();
+
+    const userRole = this.user?.role;
+    if (userRole !== 'ultimateAdmin' && this.loggedRegionId) {
+      const matchingRegion = this.regionsList.find(r => String(r.id) === String(this.loggedRegionId));
+      if (matchingRegion) {
+        const opt = document.createElement('option');
+        opt.value       = matchingRegion.id;
+        opt.textContent = matchingRegion.name;
+        regionSelect.appendChild(opt);
+        return;
+      }
+    }
 
     const selectedNationId = nationSelect?.value || '';
     const allOpt = document.createElement('option');
@@ -799,7 +856,8 @@ export default class NationalWarehouseAdminDashboard {
     filteredStores.forEach(s => {
       const opt = document.createElement('option');
       opt.value       = s.id;
-      opt.textContent = s.name;
+      const typeStr = s.type === 'COMPACT_CAFE' ? 'COMPACT CAFÉ' : s.type === 'FLAGSHIP_CAFE' ? 'FLAGSHIP CAFÉ' : (s.type || '');
+      opt.textContent = s.name + (typeStr ? ` (${typeStr})` : '');
       storeSelect.appendChild(opt);
     });
   }
@@ -812,6 +870,22 @@ export default class NationalWarehouseAdminDashboard {
     const dateFrom     = container.querySelector('#filter-date-from');
     const dateTo       = container.querySelector('#filter-date-to');
 
+    const userRole = this.user?.role;
+    // For non-ultimate admins: lock nation and region to their assigned scope
+    // BUT preserve any storeId the user explicitly selected
+    if (userRole !== 'ultimateAdmin') {
+      if (this.loggedNationId) {
+        this.filters.nationId = this.loggedNationId;
+      }
+      // Only lock region if user has a specific sub-region assignment
+      // Don't override if user has explicitly selected a store (allow store to define context)
+      if (this.loggedRegionId && !this.filters.storeId) {
+        this.filters.regionId = this.loggedRegionId;
+      } else if (this.loggedRegionId && !this.filters.regionId) {
+        this.filters.regionId = this.loggedRegionId;
+      }
+    }
+
     if (rangeSelect)  rangeSelect.value  = this.filters.rangeType;
     if (nationSelect) nationSelect.value = this.filters.nationId;
 
@@ -819,7 +893,10 @@ export default class NationalWarehouseAdminDashboard {
     if (regionSelect) regionSelect.value = this.filters.regionId;
 
     this._updateStoreDropdown(container);
-    if (storeSelect)  storeSelect.value  = this.filters.storeId;
+    // Restore the user-selected storeId after dropdown is repopulated
+    if (storeSelect && this.filters.storeId) {
+      storeSelect.value = this.filters.storeId;
+    }
 
     if (dateFrom)     dateFrom.value     = this.filters.from;
     if (dateTo)       dateTo.value       = this.filters.to;
@@ -833,9 +910,38 @@ export default class NationalWarehouseAdminDashboard {
     }
   }
 
+  _resolveUserScope() {
+    this.user = this.user || authStore.getUser();
+    const userCountry = this.profile?.country || '';
+    const userRegion = this.profile?.storeRegion || '';
+
+    // Find country/nation region
+    const nation = this.regionsList.find(r => 
+      (r.parentId === null || r.parentId === undefined) && 
+      r.name.toLowerCase().includes(userCountry.toLowerCase())
+    );
+    this.loggedNationId = nation ? String(nation.id) : '';
+
+    // Find sub-region
+    const region = this.regionsList.find(r => 
+      r.name.toLowerCase().trim() === userRegion.toLowerCase().trim()
+    );
+    if (region && region.parentId !== null && region.parentId !== undefined) {
+      this.loggedRegionId = String(region.id);
+    } else {
+      this.loggedRegionId = '';
+    }
+  }
+
+  _getStorageKey() {
+    const username = this.user?.username || authStore.getUser()?.username || 'default';
+    return `national_wh_admin_dashboard_filters_${username}`;
+  }
+
   _restoreFilters() {
     try {
-      const saved = localStorage.getItem('national_wh_admin_dashboard_filters');
+      const key = this._getStorageKey();
+      const saved = localStorage.getItem(key);
       if (saved) this.filters = { ...this.filters, ...JSON.parse(saved) };
     } catch (e) {
       logger.warn('NationalWarehouseAdminDashboard', 'Failed to parse stored filters', e);
@@ -893,7 +999,7 @@ export default class NationalWarehouseAdminDashboard {
   }
 
   async _triggerRefresh(container) {
-    localStorage.setItem('national_wh_admin_dashboard_filters', JSON.stringify(this.filters));
+    localStorage.setItem(this._getStorageKey(), JSON.stringify(this.filters));
     await this._loadData();
     await this._render(container);
   }

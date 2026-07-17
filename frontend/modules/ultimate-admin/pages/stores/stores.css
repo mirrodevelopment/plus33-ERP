@@ -141,7 +141,7 @@
   justify-content: space-between;
   gap: var(--spacing-md);
   position: relative;
-  min-height: 180px;
+  min-height: 280px;
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
@@ -237,6 +237,40 @@
   font-size: 0.65rem;
   font-weight: 700;
   color: var(--text-secondary);
+}
+
+.store-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.store-type-badge i {
+  width: 10px;
+  height: 10px;
+}
+
+.store-type-badge--kiosk {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+}
+
+.store-type-badge--compact {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.store-type-badge--flagship {
+  background: rgba(201, 164, 106, 0.08);
+  border: 1px solid rgba(201, 164, 106, 0.35);
+  color: var(--accent-primary, #c9a46a);
 }
 
 .store-region-badge i {
@@ -414,4 +448,142 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+/* Card header/banner styling */
+.store-card-banner {
+  height: 60px;
+  background: linear-gradient(135deg, rgba(212, 163, 115, 0.4) 0%, rgba(111, 78, 55, 0.4) 100%);
+  position: relative;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  margin: -16px -16px 24px -16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.store-avatar-badge {
+  position: absolute;
+  bottom: -20px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  background: #1e1e1e;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--accent-primary);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.store-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+/* Stats grid */
+.store-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin: var(--spacing-xs) 0;
+}
+
+.store-stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.store-stat-item .stat-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--accent-secondary);
+}
+
+.store-stat-item .stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.store-stat-item .stat-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+.store-stat-item .stat-label {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* KPI Card improvements */
+.stores-kpi-grid .kpi-card {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+.stores-kpi-grid .kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.kpi-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.kpi-card-header .kpi-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--accent-primary);
+}
+
+.kpi-card--success .kpi-icon {
+  color: var(--status-success);
+}
+
+.kpi-card--danger .kpi-icon {
+  color: var(--status-danger);
+}
+
+.kpi-card--secondary .kpi-icon {
+  color: var(--accent-secondary);
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+  .stores-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stores-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stores-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .stores-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .stores-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .stores-filter-bar .filter-search-wrapper {
+    max-width: none;
+  }
 }

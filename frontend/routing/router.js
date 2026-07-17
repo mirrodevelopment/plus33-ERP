@@ -76,6 +76,16 @@ class Router {
         return;
       }
     }
+    if (hash === '#profile') {
+      if (authStore.isLoggedIn()) {
+        const role = authStore.getRole();
+        if (role === 'store') hash = '#store-profile';
+        else if (role === 'shiftSupervisor') hash = '#supervisor-profile';
+        else if (role === 'storeEmployee') hash = '#employee-profile';
+        window.location.hash = hash;
+        return;
+      }
+    }
     logger.debug('Router', `Routing to hash: ${hash}`);
     
     const matchedRoute = routes.find(r => r.path === hash);

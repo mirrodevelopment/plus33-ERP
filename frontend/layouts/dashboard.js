@@ -67,11 +67,15 @@ export const dashboardLayout = {
     const user = authStore.getUser();
     const profile = userStore.getProfile(user?.role);
 
+    const avatarUrl = profile?.avatarUrl
+      ? (profile.avatarUrl.includes('unsplash.com') ? profile.avatarUrl : `${profile.avatarUrl}?t=${Date.now()}`)
+      : 'imgs/male-avatar.png';
+
     const avatarEl = document.getElementById('user-avatar-sidebar');
     const nameEl = document.getElementById('user-name-sidebar');
     const roleEl = document.getElementById('user-role-sidebar');
 
-    if (avatarEl) avatarEl.src = profile?.avatarUrl || 'imgs/male-avatar.png';
+    if (avatarEl) avatarEl.src = avatarUrl;
     if (nameEl) nameEl.textContent = profile?.name || 'User';
     if (roleEl) roleEl.textContent = user?.role || '—';
 
@@ -80,7 +84,7 @@ export const dashboardLayout = {
     const nameHeader = document.getElementById('user-name-header');
     const roleHeader = document.getElementById('user-role-header');
 
-    if (avatarHeader) avatarHeader.src = profile?.avatarUrl || 'imgs/male-avatar.png';
+    if (avatarHeader) avatarHeader.src = avatarUrl;
     if (nameHeader) nameHeader.textContent = profile?.name || 'User';
     if (roleHeader) roleHeader.textContent = user?.role || '—';
   },
@@ -89,10 +93,19 @@ export const dashboardLayout = {
    * Show/hide role-specific elements (e.g. shift card for store role).
    */
   _applyRoleVisibility() {
+    // WHAT IT DOES: 
+    // Evaluates the current logged-in user's role and controls the visibility of the sidebar shift card.
+    // 
+    // DATA SOURCE (ORIGIN):
+    // authStore.getUser() returns the user profile metadata cached during authentication.
+    // 
+    // STORAGE/VISIBILITY:
+    // Visible only for storeEmployee (barista) and shiftSupervisor roles. Hidden for store (Store Admin) and administrative roles.
     const user = authStore.getUser();
     const shiftCard = document.getElementById('sidebar-shift-card');
     if (shiftCard) {
-      shiftCard.hidden = user?.role !== 'store';
+      const showCard = user?.role === 'storeEmployee' || user?.role === 'shiftSupervisor';
+      shiftCard.style.setProperty('display', showCard ? 'flex' : 'none', 'important');
     }
   },
 
@@ -257,6 +270,33 @@ export const dashboardLayout = {
       this._showToast(notification);
     });
 
+    // Bell notification panel toggle
+    const bellBtn = document.getElementById('btn-notifications');
+    const notifPanel = document.getElementById('notification-panel');
+    if (bellBtn && notifPanel) {
+      bellBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = notifPanel.hidden;
+        notifPanel.hidden = !isHidden;
+      });
+
+      // Close panel when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!document.getElementById('notification-wrapper')?.contains(e.target)) {
+          if (notifPanel) notifPanel.hidden = true;
+        }
+      });
+
+      // Clear all button
+      const clearBtn = document.getElementById('btn-clear-notifications');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          eventBus.emit('workforce:pending-docs', { count: 0 });
+          notifPanel.hidden = true;
+        });
+      }
+    }
+
     // Router navigation — re-render menu + breadcrumbs on each route change
     eventBus.on('router:navigated', () => {
       this._renderSidebarMenu();
@@ -268,10 +308,24 @@ export const dashboardLayout = {
       const user = authStore.getUser();
       if (user?.role === role) {
         const avatarEl = document.getElementById('user-avatar-sidebar');
+        const avatarHeader = document.getElementById('user-avatar-header');
         const nameEl = document.getElementById('user-name-sidebar');
-        if (avatarEl) avatarEl.src = profile.avatarUrl || 'imgs/male-avatar.png';
+        const nameHeader = document.getElementById('user-name-header');
+        
+        const avatarUrl = profile.avatarUrl
+          ? (profile.avatarUrl.includes('unsplash.com') ? profile.avatarUrl : `${profile.avatarUrl}?t=${Date.now()}`)
+          : 'imgs/male-avatar.png';
+
+        if (avatarEl) avatarEl.src = avatarUrl;
+        if (avatarHeader) avatarHeader.src = avatarUrl;
         if (nameEl) nameEl.textContent = profile.name;
+        if (nameHeader) nameHeader.textContent = profile.name;
       }
+    });
+
+    // Workforce pending documents badge — updates sidebar nav dot and bell count
+    eventBus.on('workforce:pending-docs', ({ count }) => {
+      this._updateWorkforcePendingBadge(count);
     });
   },
 
@@ -312,6 +366,139 @@ export const dashboardLayout = {
         toastEl.remove();
       }
     });
+  },
+
+  // ---------------------------------------------------------------------------
+  // PRIVATE: Workforce Pending Badge
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Shows or hides the pending-docs dot on the Workforce nav item
+   * and updates the global notification bell badge in the top header.
+   * @param {number} count - Number of pending document approvals
+   */
+  _updateWorkforcePendingBadge(count) {
+    // --- Inject dot styles once ---
+    if (!document.getElementById('workforce-dot-styles')) {
+      const style = document.createElement('style');
+      style.id = 'workforce-dot-styles';
+      style.textContent = `
+        .nav-item--has-badge { position: relative; }
+        .nav-item--has-badge .nav-pending-dot {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #f59e0b;
+          box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+          animation: navDotPulse 1.8s ease-in-out infinite;
+        }
+        @keyframes navDotPulse {
+          0%, 100% { box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35); }
+          50% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.0); }
+        }
+        .notif-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 0.65rem 1rem;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+        .notif-item:hover { background: rgba(255,255,255,0.05); }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item-icon {
+          width: 28px;
+          height: 28px;
+          border-radius: 8px;
+          background: rgba(245, 158, 11, 0.15);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          color: #f59e0b;
+        }
+        .notif-item-body { flex: 1; }
+        .notif-item-title { font-size: 0.82rem; font-weight: 600; color: #fff; margin-bottom: 2px; }
+        .notif-item-sub { font-size: 0.72rem; color: rgba(255,255,255,0.5); }
+        .notif-empty { padding: 1.5rem 1rem; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.82rem; }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // --- Find the Workforce nav item (route = #store-workforce) ---
+    const nav = document.getElementById('sidebar-nav-container');
+    if (nav) {
+      const workforceLink = nav.querySelector('a[href="#store-workforce"]');
+      if (workforceLink) {
+        // Remove any existing dot
+        workforceLink.querySelector('.nav-pending-dot')?.remove();
+        workforceLink.classList.remove('nav-item--has-badge');
+
+        if (count > 0) {
+          workforceLink.classList.add('nav-item--has-badge');
+          const dot = document.createElement('span');
+          dot.className = 'nav-pending-dot';
+          dot.setAttribute('title', `${count} pending document approval${count > 1 ? 's' : ''}`);
+          workforceLink.appendChild(dot);
+        }
+      }
+    }
+
+    // --- Update bell notification badge ---
+    const bellBadge = document.getElementById('notification-badge');
+    if (bellBadge) {
+      if (count > 0) {
+        bellBadge.hidden = false;
+        bellBadge.textContent = count;
+      } else {
+        bellBadge.hidden = true;
+        bellBadge.textContent = '0';
+      }
+    }
+
+    // --- Populate notification panel items ---
+    const itemsList = document.getElementById('notification-items-list');
+    if (itemsList) {
+      itemsList.replaceChildren();
+      if (count > 0) {
+        const item = document.createElement('div');
+        item.className = 'notif-item';
+        item.innerHTML = `
+          <div class="notif-item-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="notif-item-body">
+            <div class="notif-item-title">
+              ${count} Document${count > 1 ? 's' : ''} Pending Approval
+            </div>
+            <div class="notif-item-sub">Workforce → Verification Documents</div>
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          window.location.hash = '#store-workforce';
+          const panel = document.getElementById('notification-panel');
+          if (panel) panel.hidden = true;
+        });
+        itemsList.appendChild(item);
+      } else {
+        const empty = document.createElement('div');
+        empty.className = 'notif-empty';
+        empty.textContent = 'No pending notifications';
+        itemsList.appendChild(empty);
+      }
+    }
+
+    logger.debug('DashboardLayout', `Workforce pending badge updated: ${count}`);
   },
 
   // ---------------------------------------------------------------------------

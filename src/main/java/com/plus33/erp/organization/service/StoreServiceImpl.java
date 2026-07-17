@@ -36,6 +36,7 @@ import com.plus33.erp.organization.dto.StoreResponse;
 import com.plus33.erp.organization.dto.StoreSearchRequest;
 import com.plus33.erp.organization.entity.Region;
 import com.plus33.erp.organization.entity.Store;
+import com.plus33.erp.organization.entity.StoreType;
 import com.plus33.erp.organization.entity.Warehouse;
 import com.plus33.erp.organization.mapper.OrganizationMapper;
 import com.plus33.erp.organization.repository.RegionRepository;
@@ -83,15 +84,21 @@ public class StoreServiceImpl implements StoreService {
     private final RegionRepository regionRepository;
     private final WarehouseRepository warehouseRepository;
     private final OrganizationMapper organizationMapper;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+    private final com.plus33.erp.organization.repository.StoreSettingRepository storeSettingRepository;
 
     public StoreServiceImpl(StoreRepository storeRepository,
                             RegionRepository regionRepository,
                             WarehouseRepository warehouseRepository,
-                            OrganizationMapper organizationMapper) {
+                            OrganizationMapper organizationMapper,
+                            org.springframework.jdbc.core.JdbcTemplate jdbcTemplate,
+                            com.plus33.erp.organization.repository.StoreSettingRepository storeSettingRepository) {
         this.storeRepository = storeRepository;
         this.regionRepository = regionRepository;
         this.warehouseRepository = warehouseRepository;
         this.organizationMapper = organizationMapper;
+        this.jdbcTemplate = jdbcTemplate;
+        this.storeSettingRepository = storeSettingRepository;
     }
 
     /**
@@ -127,9 +134,18 @@ public class StoreServiceImpl implements StoreService {
         if (request.active() != null) {
             store.setActive(request.active());
         }
+        if (request.type() != null) {
+            try {
+                store.setType(StoreType.valueOf(request.type()));
+            } catch (IllegalArgumentException e) {
+                store.setType(StoreType.COMPACT_CAFE);
+            }
+        } else {
+            store.setType(StoreType.COMPACT_CAFE);
+        }
 
         Store saved = storeRepository.save(store);
-        return organizationMapper.toResponse(saved);
+        return enrichStoreResponse(organizationMapper.toResponse(saved), saved);
     }
 
     /**
@@ -150,7 +166,7 @@ public class StoreServiceImpl implements StoreService {
     public StoreResponse getStoreById(Long id) {
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + id));
-        return organizationMapper.toResponse(store);
+        return enrichStoreResponse(organizationMapper.toResponse(store), store);
     }
 
     /**
@@ -200,7 +216,7 @@ public class StoreServiceImpl implements StoreService {
 
         Page<Store> page = storeRepository.findAll(spec, pageable);
         List<StoreResponse> content = page.getContent().stream()
-                .map(organizationMapper::toResponse)
+                .map(s -> enrichStoreResponse(organizationMapper.toResponse(s), s))
                 .toList();
 
         return new PageResponse<>(
@@ -256,9 +272,16 @@ public class StoreServiceImpl implements StoreService {
         if (request.active() != null) {
             store.setActive(request.active());
         }
+        if (request.type() != null) {
+            try {
+                store.setType(StoreType.valueOf(request.type()));
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid updates
+            }
+        }
 
         Store saved = storeRepository.save(store);
-        return organizationMapper.toResponse(saved);
+        return enrichStoreResponse(organizationMapper.toResponse(saved), saved);
     }
 
     /**
@@ -290,7 +313,7 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + id));
         store.setActive(true);
         Store saved = storeRepository.save(store);
-        return organizationMapper.toResponse(saved);
+        return enrichStoreResponse(organizationMapper.toResponse(saved), saved);
     }
 
     /**
@@ -306,7 +329,7 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + id));
         store.setActive(false);
         Store saved = storeRepository.save(store);
-        return organizationMapper.toResponse(saved);
+        return enrichStoreResponse(organizationMapper.toResponse(saved), saved);
     }
 
     private void validateStoreWarehouseRelationship(Region region, Warehouse warehouse) {
@@ -316,5 +339,83 @@ public class StoreServiceImpl implements StoreService {
         if (!warehouse.getRegion().getId().equals(region.getId())) {
             throw new BusinessException("Cannot assign warehouse: warehouse region does not match store region");
         }
+    }
+
+    private StoreResponse enrichStoreResponse(StoreResponse response, Store store) {
+        if (response == null) return null;
+        
+        // 1. Calculate assigned employee count
+        Integer empCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(DISTINCT user_id) FROM user_stores WHERE store_id = ?",
+            Integer.class,
+            response.id()
+        );
+        
+        // 2. Calculate linked warehouse stock valuation
+        Double stockValue = 0.0;
+        if (response.warehouseId() != null) {
+            stockValue = jdbcTemplate.queryForObject(
+                "SELECT COALESCE(SUM(ls.quantity * COALESCE(ls.unit_cost, 1.50)), 0) " +
+                "FROM location_stock ls " +
+                "JOIN warehouse_locations wl ON wl.id = ls.location_id " +
+                "WHERE wl.warehouse_id = ?",
+                Double.class,
+                response.warehouseId()
+            );
+        }
+        
+        return new StoreResponse(
+            response.id(),
+            response.code(),
+            response.name(),
+            response.address(),
+            response.phone(),
+            response.email(),
+            response.timezone(),
+            response.openingDate(),
+            response.regionId(),
+            response.regionCode(),
+            response.warehouseId(),
+            response.warehouseCode(),
+            response.active(),
+            response.createdAt(),
+            response.updatedAt(),
+            empCount != null ? empCount : 0,
+            stockValue != null ? stockValue : 0.0,
+            response.type()
+        );
+    }
+
+    @Override
+    public com.plus33.erp.organization.dto.StoreSettingResponse getStoreSettings(Long storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + storeId));
+        
+        com.plus33.erp.organization.entity.StoreSetting setting = storeSettingRepository.findByStoreId(storeId)
+                .orElseGet(() -> {
+                    com.plus33.erp.organization.entity.StoreSetting newSetting = new com.plus33.erp.organization.entity.StoreSetting();
+                    newSetting.setStore(store);
+                    return storeSettingRepository.save(newSetting);
+                });
+        
+        return organizationMapper.toResponse(setting);
+    }
+
+    @Override
+    @Transactional
+    public com.plus33.erp.organization.dto.StoreSettingResponse updateStoreSettings(Long storeId, com.plus33.erp.organization.dto.StoreSettingRequest request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + storeId));
+        
+        com.plus33.erp.organization.entity.StoreSetting setting = storeSettingRepository.findByStoreId(storeId)
+                .orElseGet(() -> {
+                    com.plus33.erp.organization.entity.StoreSetting newSetting = new com.plus33.erp.organization.entity.StoreSetting();
+                    newSetting.setStore(store);
+                    return newSetting;
+                });
+        
+        organizationMapper.updateEntity(request, setting);
+        com.plus33.erp.organization.entity.StoreSetting saved = storeSettingRepository.save(setting);
+        return organizationMapper.toResponse(saved);
     }
 }

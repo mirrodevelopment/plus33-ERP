@@ -89,6 +89,10 @@ public class Employee {
     @Column(length = 30)
     private String phone;
 
+    @Column(name = "emergency_contact_phone", length = 30)
+    private String emergencyContactPhone;
+
+
     @Column(nullable = false, length = 100)
     private String designation;
 

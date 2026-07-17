@@ -29,22 +29,18 @@
         <span>Dashboard</span>
       </h2>
       <span class="header-metadata">
-        Active: <span id="header-store-name" class="highlight-val">—</span> &nbsp;·&nbsp;
+        Active: <span id="header-store-name" class="highlight-val">—</span> (<span id="header-store-type" class="highlight-val">—</span>) (ID: <span id="header-store-id" class="highlight-val">—</span>) &nbsp;·&nbsp;
         Role: <span class="highlight-val">Store Admin</span> &nbsp;·&nbsp;
         Welcome, <span id="header-user-name" class="highlight-val">—</span>
       </span>
     </div>
     
     <div class="header-actions">
-      <select id="select-store-view" class="filter-select">
-        <!-- store option(s) loaded dynamically -->
-      </select>
-      <div id="store-admin-clock" class="dashboard-clock-panel" role="status" aria-live="off">
-        --:--:--
-      </div>
-      <div class="notifications-indicator" title="Unread alerts">
-        <i data-lucide="bell" aria-hidden="true"></i>
-        <span class="badge-count" id="header-alert-count">3</span>
+      <div class="dashboard-clock-wrapper" style="display: flex; align-items: center; gap: 8px;">
+        <span id="store-admin-nation" class="badge-pill" style="border-color: rgba(201,164,106,0.35); color: var(--accent-primary); font-weight: 800; padding: 4px 10px; border-radius: 6px;">—</span>
+        <div id="store-admin-clock" class="dashboard-clock-panel" role="status" aria-live="off">
+          --:--:--
+        </div>
       </div>
     </div>
   </div>
@@ -376,22 +372,38 @@
       </div>
       
       <div class="approvals-rows">
-        <div class="approvals-row">
-          <span>Leave Requests:</span>
-          <strong id="val-pending-leaves">— Requests</strong>
+        <div class="approvals-row approvals-row--action">
+          <span class="approvals-row-label">Leave Requests:</span>
+          <strong id="val-pending-leaves" class="approvals-row-value">—</strong>
+          <a href="#store-leave" class="approvals-sub-btn" title="Go to Leave Management">
+            <i data-lucide="arrow-right" style="width:12px;height:12px;"></i> Review
+          </a>
         </div>
-        <div class="approvals-row">
-          <span>Shift Change Requests:</span>
-          <strong id="val-pending-shift-changes">— Requests</strong>
+        <div class="approvals-row approvals-row--action">
+          <span class="approvals-row-label">Shift Change Requests:</span>
+          <strong id="val-pending-shift-changes" class="approvals-row-value">—</strong>
+          <a href="#store-workforce" class="approvals-sub-btn" title="Go to Workforce Management">
+            <i data-lucide="arrow-right" style="width:12px;height:12px;"></i> Review
+          </a>
         </div>
-        <div class="approvals-row border-top-divider">
-          <span>Expenses Claims:</span>
-          <strong class="color-gold">2 Claims</strong>
+        <div class="approvals-row approvals-row--action">
+          <span class="approvals-row-label">Document Verifications:</span>
+          <strong id="val-pending-documents" class="approvals-row-value">—</strong>
+          <a href="#store-workforce" class="approvals-sub-btn approvals-sub-btn--alert" title="Go to Workforce → Documents">
+            <i data-lucide="arrow-right" style="width:12px;height:12px;"></i> Review
+          </a>
+        </div>
+        <div class="approvals-row approvals-row--action border-top-divider">
+          <span class="approvals-row-label">Expenses Claims:</span>
+          <strong id="val-pending-expenses" class="approvals-row-value color-gold">—</strong>
+          <a href="#store-workforce" class="approvals-sub-btn" title="Go to Expenses">
+            <i data-lucide="arrow-right" style="width:12px;height:12px;"></i> Review
+          </a>
         </div>
       </div>
 
       <div class="approvals-footer-actions border-top-divider">
-        <button class="btn btn-secondary btn-action w-100" id="sa-btn-approvals" type="button">Review Approvals</button>
+        <button class="btn btn-secondary btn-action w-100" id="sa-btn-approvals" type="button">Review All Approvals</button>
       </div>
     </div>
 

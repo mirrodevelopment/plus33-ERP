@@ -375,6 +375,51 @@ public class LeaveController {
     }
 
     // =========================================================================
+    // POST /api/v1/leaves/holidays — Create or replace a public holiday
+    // =========================================================================
+    @PostMapping("/holidays")
+    public ResponseEntity<ApiResponse<HolidayCalendar>> createHoliday(@RequestBody Map<String, Object> payload) {
+        String name = (String) payload.get("name");
+        String dateStr = (String) payload.get("date");
+        if (name == null || name.trim().isEmpty() || dateStr == null || dateStr.trim().isEmpty()) {
+            throw new BusinessException("Holiday name and date are required");
+        }
+        LocalDate date = LocalDate.parse(dateStr);
+        String countryCode = (String) payload.getOrDefault("countryCode", "FR");
+        boolean isRecurring = Boolean.TRUE.equals(payload.get("isRecurring"));
+        
+        // Remove existing unique conflict if any exists
+        holidayCalendarRepository.findByCountryCodeAndHolidayYear(countryCode, date.getYear()).stream()
+            .filter(item -> item.getHolidayDate().equals(date))
+            .forEach(item -> holidayCalendarRepository.delete(item));
+        
+        HolidayCalendar h = new HolidayCalendar();
+        h.setHolidayName(name);
+        h.setHolidayDate(date);
+        h.setHolidayYear(date.getYear());
+        h.setCountryCode(countryCode);
+        h.setIsRecurring(isRecurring);
+        h.setIsWorkingDay(false);
+        h.setRegion((String) payload.get("region"));
+        
+        holidayCalendarRepository.save(h);
+        return ResponseEntity.ok(ApiResponse.success(h));
+    }
+
+    // =========================================================================
+    // DELETE /api/v1/leaves/holidays/{id} — Delete holiday
+    // =========================================================================
+    @DeleteMapping("/holidays/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteHoliday(@PathVariable Long id) {
+        if (!holidayCalendarRepository.existsById(id)) {
+            throw new BusinessException("Holiday not found");
+        }
+        holidayCalendarRepository.deleteById(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+
+    // =========================================================================
     // GET /api/v1/leaves/blackout — Active blackout periods
     // =========================================================================
     @GetMapping("/blackout")

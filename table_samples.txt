@@ -2,7 +2,7 @@
   PLUS33 Coffee ERP - Visual Table Schemas & Live Sample Datasets
 ================================================================================
 Total Tables in Database: 754
-Total Live Records: 9933
+Total Live Records: 9953
 ================================================================================
 
 Database Table Summary, Counts, and Purposes:
@@ -205,7 +205,7 @@ Database Table Summary, Counts, and Purposes:
 | employee_salary_structure_items          | 0           | Holds standard module data records.                                            |
 | employee_salary_structures               | 0           | Holds standard module data records.                                            |
 | employee_shifts                          | 0           | Junction table tracking shift schedules assignments for employees on part...   |
-| employees                                | 379         | Comprehensive master profiles of all workforce members, storing names, em...   |
+| employees                                | 390         | Comprehensive master profiles of all workforce members, storing names, em...   |
 | engineering_change_lines                 | 0           | Holds standard module data records.                                            |
 | engineering_change_orders                | 0           | Holds standard module data records.                                            |
 | equipment_assets                         | 0           | Holds standard module data records.                                            |
@@ -260,7 +260,7 @@ Database Table Summary, Counts, and Purposes:
 | fixed_asset_utilization                  | 0           | Holds standard module data records.                                            |
 | fixed_asset_work_orders                  | 0           | Holds standard module data records.                                            |
 | fixed_assets                             | 0           | Holds standard module data records.                                            |
-| flyway_schema_history                    | 343         | Holds standard module data records.                                            |
+| flyway_schema_history                    | 349         | Holds standard module data records.                                            |
 | forecast_accuracy_logs                   | 0           | Holds standard module data records.                                            |
 | fx_deal_settlements                      | 0           | Holds standard module data records.                                            |
 | fx_deals                                 | 0           | Holds standard module data records.                                            |
@@ -373,7 +373,7 @@ Database Table Summary, Counts, and Purposes:
 | leave_blackout_dates                     | 0           | Holds standard module data records.                                            |
 | leave_documents                          | 0           | Holds standard module data records.                                            |
 | leave_types                              | 12          | Catalog of leave categories (e.g. Annual, Sick, Unpaid, Bereavement).          |
-| location_stock                           | 387         | Holds standard module data records.                                            |
+| location_stock                           | 231         | Holds standard module data records.                                            |
 | lot_genealogy                            | 0           | Holds standard module data records.                                            |
 | machines                                 | 0           | Holds standard module data records.                                            |
 | manufacturing_batch_genealogy            | 0           | Holds standard module data records.                                            |
@@ -624,7 +624,7 @@ Database Table Summary, Counts, and Purposes:
 | procurement_supplier_qualifications      | 0           | Holds standard module data records.                                            |
 | procurement_supplier_responses           | 0           | Holds standard module data records.                                            |
 | procurement_supplier_scorecards          | 0           | Holds standard module data records.                                            |
-| product_categories                       | 15          | Groups catalog items for tracking, reporting, and accounting purposes (e....   |
+| product_categories                       | 39          | Groups catalog items for tracking, reporting, and accounting purposes (e....   |
 | production_confirmations                 | 0           | Holds standard module data records.                                            |
 | production_costs                         | 0           | Holds standard module data records.                                            |
 | production_material_issues               | 0           | Holds standard module data records.                                            |
@@ -632,7 +632,7 @@ Database Table Summary, Counts, and Purposes:
 | production_orders                        | 0           | Holds standard module data records.                                            |
 | production_rework                        | 0           | Holds standard module data records.                                            |
 | production_scrap                         | 0           | Holds standard module data records.                                            |
-| products                                 | 129         | Master catalog metadata for inventory items, raw ingredients, and services.    |
+| products                                 | 231         | Master catalog metadata for inventory items, raw ingredients, and services.    |
 | project_analytics_snapshots              | 0           | Holds standard module data records.                                            |
 | project_billing_contracts                | 0           | Holds standard module data records.                                            |
 | project_billing_milestones               | 0           | Holds standard module data records.                                            |
@@ -741,11 +741,11 @@ Database Table Summary, Counts, and Purposes:
 | treasury_workflow_escalations            | 0           | Holds standard module data records.                                            |
 | truck_checkins                           | 0           | Holds standard module data records.                                            |
 | units_of_measure                         | 5           | Unit catalog containing units of measurement (e.g. PCS, KG, LTR, BOX).         |
-| user_regions                             | 381         | Holds standard module data records.                                            |
-| user_roles                               | 382         | A junction table that resolves the many-to-many assignment of security ro...   |
+| user_regions                             | 392         | Holds standard module data records.                                            |
+| user_roles                               | 393         | A junction table that resolves the many-to-many assignment of security ro...   |
 | user_stores                              | 363         | Holds standard module data records.                                            |
 | user_warehouses                          | 0           | Holds standard module data records.                                            |
-| users                                    | 382         | Stores system security user profiles. Each record represents an identity ...   |
+| users                                    | 393         | Stores system security user profiles. Each record represents an identity ...   |
 | warehouse_edges                          | 0           | Holds standard module data records.                                            |
 | warehouse_event_store                    | 0           | Holds standard module data records.                                            |
 | warehouse_labor_logs                     | 0           | Holds standard module data records.                                            |
@@ -778,11 +778,11 @@ Table: analytics_refresh_log
 +--------------------------------+-------------------------------+----------------------------+--------------------------+
 | view_name [varchar]            | last_refreshed_at [timestamp] | refresh_duration_ms [int8] | refresh_status [varchar] |
 +--------------------------------+-------------------------------+----------------------------+--------------------------+
-| mv_inventory_turnover          | 2026-07-13 16:52:00           | 57                         | SUCCESS                  |
-| mv_inventory_abc_xyz           | 2026-07-13 16:55:00           | 31                         | SUCCESS                  |
-| mv_inventory_traceability_me.. | 2026-07-13 16:57:00           | 172                        | SUCCESS                  |
-| mv_inventory_replenishment_m.. | 2026-07-13 16:59:00           | 75                         | SUCCESS                  |
-| mv_inventory_kpis              | 2026-07-13 17:00:00           | 298                        | SUCCESS                  |
+| mv_inventory_turnover          | 2026-07-14 14:52:00           | 259                        | SUCCESS                  |
+| mv_inventory_abc_xyz           | 2026-07-14 14:55:00           | 32                         | SUCCESS                  |
+| mv_inventory_aging_expiry      | 2026-07-14 15:05:00           | 514                        | SUCCESS                  |
+| mv_inventory_traceability_me.. | 2026-07-14 15:12:00           | 763                        | SUCCESS                  |
+| mv_inventory_replenishment_m.. | 2026-07-14 15:14:01           | 1348                       | SUCCESS                  |
 +--------------------------------+-------------------------------+----------------------------+--------------------------+
 
 
@@ -3722,11 +3722,11 @@ Table: location_stock
 +-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+
 | id [int8] | company_id [int8] | location_id [int8] | product_id [int8] | lot_number [varchar] | serial_number [varchar] | quantity [numeric] | reserved_quantity [numeric] | available_quantity [numeric] | expiry_date [date] | manufacture_date [date] | receipt_date [date] | unit_cost [numeric] | abc_class [varchar] | version [int8] | created_at [timestamp] | updated_at [timestamp] | owner_company_id [int8] |
 +-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+
-| 1         | 3                 | 1                  | 261               | LOT-2026-07          | NULL                    | 100.000000         | 0.000000                    | 100.000000                   | 2026-09-05         | NULL                    | NULL                | 2.500000            | A                   | 0              | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    | NULL                    |
-| 2         | 3                 | 1                  | 262               | LOT-2026-07          | NULL                    | 150.000000         | 0.000000                    | 150.000000                   | 2026-09-05         | NULL                    | NULL                | 4.750000            | B                   | 0              | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    | NULL                    |
-| 3         | 3                 | 1                  | 263               | LOT-2026-07          | NULL                    | 200.000000         | 0.000000                    | 200.000000                   | 2026-09-05         | NULL                    | NULL                | 7.000000            | C                   | 0              | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    | NULL                    |
-| 4         | 3                 | 1                  | 264               | LOT-2026-07          | NULL                    | 250.000000         | 0.000000                    | 250.000000                   | 2026-09-05         | NULL                    | NULL                | 9.250000            | A                   | 0              | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    | NULL                    |
-| 5         | 3                 | 1                  | 265               | LOT-2026-07          | NULL                    | 300.000000         | 0.000000                    | 300.000000                   | 2026-09-05         | NULL                    | NULL                | 11.500000           | B                   | 0              | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    | NULL                    |
+| 1         | 3                 | 1                  | 524               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
+| 2         | 3                 | 1                  | 525               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
+| 3         | 3                 | 1                  | 526               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
+| 4         | 3                 | 1                  | 527               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
+| 5         | 3                 | 1                  | 528               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
 +-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+
 
 
@@ -5735,15 +5735,15 @@ Table: procurement_supplier_scorecards
 
 
 Table: product_categories
-+-----------+----------------+---------------------+------------------+---------------+------------------------+------------------------+
-| id [int8] | code [varchar] | name [varchar]      | parent_id [int8] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+----------------+---------------------+------------------+---------------+------------------------+------------------------+
-| 22        | CAT_BEANS      | Coffee Beans        | NULL             | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 23        | CAT_DAIRY      | Dairy               | NULL             | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 24        | CAT_TEA        | Tea                 | NULL             | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 25        | CAT_SYRUPS     | Syrups & Flavours   | NULL             | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 26        | CAT_CHOCOLATE  | Chocolate & Powders | NULL             | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-+-----------+----------------+---------------------+------------------+---------------+------------------------+------------------------+
++-----------+-----------------+----------------+------------------+---------------+------------------------+------------------------+
+| id [int8] | code [varchar]  | name [varchar] | parent_id [int8] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
++-----------+-----------------+----------------+------------------+---------------+------------------------+------------------------+
+| 85        | CAT_BEVERAGES   | Beverages      | NULL             | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
+| 86        | CAT_FOOD        | Food           | NULL             | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
+| 87        | CAT_INGREDIENTS | Ingredients    | NULL             | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
+| 88        | CAT_RETAIL      | Retail         | NULL             | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
+| 89        | CAT_MERCHANDISE | Merchandise    | NULL             | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
++-----------+-----------------+----------------+------------------+---------------+------------------------+------------------------+
 
 
 Table: production_confirmations
@@ -5803,15 +5803,15 @@ Table: production_scrap
 
 
 Table: products
-+-----------+---------------+----------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
-| id [int8] | sku [varchar] | name [varchar] | category_id [int8] | unit_id [int8] | product_type [varchar] | reorder_level [numeric] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+---------------+----------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
-| 261       | PRD-BEANS-001 | Espresso Beans | 22                 | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 262       | PRD-BEANS-002 | Arabica Beans  | 22                 | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 263       | PRD-BEANS-003 | Robusta Beans  | 22                 | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 264       | PRD-BEANS-004 | House Blend    | 22                 | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 265       | PRD-BEANS-005 | Decaf Beans    | 22                 | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-+-----------+---------------+----------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
++-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
+| id [int8] | sku [varchar] | name [varchar]     | category_id [int8] | unit_id [int8] | product_type [varchar] | reorder_level [numeric] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
++-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
+| 524       | ING-BEA-ARA   | Arabica Beans      | 102                | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
+| 525       | ING-BEA-ROB   | Robusta Beans      | 102                | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
+| 526       | ING-BEA-ESP   | Espresso Blend     | 102                | 12             | RAW_MATERIAL           | 30.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
+| 527       | ING-BEA-HOU   | House Blend        | 102                | 12             | RAW_MATERIAL           | 25.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
+| 528       | ING-BEA-DEC   | Decaf Coffee Beans | 102                | 12             | RAW_MATERIAL           | 10.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
++-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
 
 
 Table: project_analytics_snapshots

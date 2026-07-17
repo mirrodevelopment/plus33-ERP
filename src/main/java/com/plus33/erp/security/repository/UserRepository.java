@@ -50,4 +50,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE " +
+        "LOWER(TRIM(CONCAT(COALESCE(u.firstName, ''), ' ', COALESCE(u.lastName, '')))) = LOWER(:fullName)")
+    java.util.List<User> findByFullName(@org.springframework.data.repository.query.Param("fullName") String fullName);
 }

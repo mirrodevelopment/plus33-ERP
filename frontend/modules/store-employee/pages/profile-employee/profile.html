@@ -1,0 +1,323 @@
+﻿<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Employee â€” Barista Roster Profile
+ * File              : profile.html
+ * Path              : frontend/modules/store-employee/pages/profile-employee/profile.html
+ * Purpose           : HTML template for the Employee Profile page (tabbed layout)
+ * Version           : 3.0.0
+ *
+ * Related JS        : profile.js
+ * Related CSS       : profile.css
+ *
+ * Tabs
+ * ---------------------------------------------------------------------------
+ *  Tab 1 â€” My Profile   : Avatar, info grid, edit form
+ *  Tab 2 â€” Documents    : 11 onboarding document category cards
+ *  Tab 3 â€” Payslips     : Recent payslip summary with link to full page
+ ******************************************************************************
+-->
+
+<div class="workspace-container animate-fade-in">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="profile-header-container">
+    <div>
+      <h2 class="profile-title">Barista Roster Profile</h2>
+      <span class="profile-subtitle">Manage your employee profile details, onboarding records and access password</span>
+    </div>
+    <span class="badge-status-container">
+      <span class="pulse-indicator"></span>
+      DB BACKED
+    </span>
+  </div>
+
+  <!-- ===== TAB NAVIGATION ===== -->
+  <div class="profile-tabs-nav">
+    <button class="profile-tab-btn active" data-tab="profile" id="tab-btn-profile">
+      <i data-lucide="user" aria-hidden="true"></i>
+      <span>My Profile</span>
+    </button>
+    <button class="profile-tab-btn" data-tab="documents" id="tab-btn-documents">
+      <i data-lucide="folder-open" aria-hidden="true"></i>
+      <span>Documents</span>
+    </button>
+    <button class="profile-tab-btn" data-tab="payslips" id="tab-btn-payslips">
+      <i data-lucide="banknote" aria-hidden="true"></i>
+      <span>Payslips</span>
+    </button>
+  </div>
+
+  <!-- ===== TAB 1: MY PROFILE ===== -->
+  <div id="tab-profile" class="profile-tab-pane active">
+    <div class="profile-grid">
+
+      <!-- Left Column: Profile Card & Information Grid -->
+      <div class="card glass profile-card">
+        <div class="avatar-wrapper">
+          <img id="profile-card-image" src="" alt="Avatar" />
+          <div class="avatar-status-dot"></div>
+        </div>
+        
+        <div class="profile-user-summary">
+          <h3 id="profile-display-name">Loading...</h3>
+          <div class="profile-store-row">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="profile-display-store">...</span>
+          </div>
+          <div class="profile-badges">
+            <span class="badge-role" id="profile-display-role">BARISTA</span>
+            <span class="badge-code" id="profile-display-code">ID: ...</span>
+          </div>
+        </div>
+
+        <!-- Info Details Grid -->
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Employee Name</span>
+            <span class="info-value" id="info-name">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Employee ID</span>
+            <span class="info-value" id="info-code">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Worker Type</span>
+            <span class="info-value" id="info-designation">Barista</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email Address</span>
+            <span class="info-value text-break" id="info-email">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Mobile Number</span>
+            <span class="info-value" id="info-phone">...</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="info-label">Contact Address</span>
+            <span class="info-value" id="info-address">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Department</span>
+            <span class="info-value" id="info-department">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Working Type</span>
+            <span class="info-value" id="info-working-type">Permanent</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Salary Per Hour</span>
+            <span class="info-value highlight-salary" id="info-salary">â‚¬0.00/hr</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Joined Date</span>
+            <span class="info-value" id="info-joined-date">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Assigned Store</span>
+            <span class="info-value" id="info-store">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Store Type</span>
+            <span class="info-value highlight-text" id="info-store-type">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Store Region</span>
+            <span class="info-value" id="info-region">...</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Country</span>
+            <span class="info-value" id="info-country">...</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="btn-toggle-edit-mode">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Edit Profile
+        </button>
+      </div>
+
+      <!-- Edit Profile Card (Hidden by default) -->
+      <div class="card glass edit-card" id="edit-profile-card" style="display: none;">
+        <h3 class="card-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Edit Barista Profile Details
+        </h3>
+        
+        <form id="form-edit-profile">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="input-profile-name">Full Name</label>
+              <input type="text" id="input-profile-name" required />
+            </div>
+            <div class="form-group">
+              <label for="input-profile-email">Email Address</label>
+              <input type="email" id="input-profile-email" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="input-profile-phone">Mobile Number</label>
+              <input type="text" id="input-profile-phone" placeholder="Enter mobile number" />
+            </div>
+            <div class="form-group">
+              <label for="select-profile-gender">Gender</label>
+              <select id="select-profile-gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="select-profile-avatar-type">Profile Picture Source</label>
+            <select id="select-profile-avatar-type">
+              <option value="imgs/male-avatar.png">Default Avatar (Male)</option>
+              <option value="imgs/female-avatar.png">Default Avatar (Female)</option>
+              <option value="custom">Upload Local Image File</option>
+            </select>
+          </div>
+
+          <div class="form-group file-upload-group" id="avatar-file-upload-container" style="display: none;">
+            <label>Upload Custom Photo</label>
+            <div class="file-uploader-box" id="avatar-drop-zone">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              <span class="file-info" id="avatar-file-name">Click or Drag image file here (Max 10MB)</span>
+              <input type="file" id="input-profile-file" accept="image/*" style="display: none;" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-save-profile">Save Profile Changes</button>
+        </form>
+      </div>
+
+      <!-- Security: Update Password Card -->
+      <div class="card glass security-card">
+        <h3 class="card-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Security &amp; Password Credentials
+        </h3>
+        <span class="card-subtitle">Keep your employee account keys updated periodically</span>
+
+        <form id="form-change-password">
+          <div class="form-group">
+            <label for="input-password-current">Current Password</label>
+            <input type="password" id="input-password-current" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="input-password-new">New Password</label>
+              <input type="password" id="input-password-new" required placeholder="Min 6 chars" />
+            </div>
+            <div class="form-group">
+              <label for="input-password-confirm">Confirm New Password</label>
+              <input type="password" id="input-password-confirm" required placeholder="Repeat new password" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="btn-submit-password">Update Security Password</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+  <!-- END TAB 1 -->
+
+  <!-- ===== TAB 2: DOCUMENTS ===== -->
+  <!-- Content is rendered dynamically by profile.js based on the employee's country -->
+  <div id="tab-documents" class="profile-tab-pane">
+    <div id="docs-dynamic-container">
+      <div class="docs-loading-state">
+        <div class="docs-loading-spinner"></div>
+        <p>Loading document requirements for your country...</p>
+      </div>
+    </div>
+  </div>
+  <!-- END TAB 2 -->
+  <!-- ===== TAB 3: PAYSLIPS ===== -->
+  <div id="tab-payslips" class="profile-tab-pane">
+
+    <!-- Payslip KPI Summary Row -->
+    <div class="payslip-kpi-row">
+      <div class="payslip-kpi-card">
+        <div class="payslip-kpi-icon payslip-kpi-icon--green">
+          <i data-lucide="banknote" aria-hidden="true"></i>
+        </div>
+        <div class="payslip-kpi-meta">
+          <div class="payslip-kpi-value" id="ps-kpi-net-salary">â€”</div>
+          <div class="payslip-kpi-label">Net Salary (Latest)</div>
+        </div>
+      </div>
+      <div class="payslip-kpi-card">
+        <div class="payslip-kpi-icon payslip-kpi-icon--normal">
+          <i data-lucide="wallet" aria-hidden="true"></i>
+        </div>
+        <div class="payslip-kpi-meta">
+          <div class="payslip-kpi-value" id="ps-kpi-gross">â€”</div>
+          <div class="payslip-kpi-label">Gross Earnings</div>
+        </div>
+      </div>
+      <div class="payslip-kpi-card">
+        <div class="payslip-kpi-icon payslip-kpi-icon--red">
+          <i data-lucide="minus-circle" aria-hidden="true"></i>
+        </div>
+        <div class="payslip-kpi-meta">
+          <div class="payslip-kpi-value" id="ps-kpi-deductions">â€”</div>
+          <div class="payslip-kpi-label">Deductions &amp; Taxes</div>
+        </div>
+      </div>
+      <div class="payslip-kpi-card">
+        <div class="payslip-kpi-icon payslip-kpi-icon--blue">
+          <i data-lucide="calendar-check" aria-hidden="true"></i>
+        </div>
+        <div class="payslip-kpi-meta">
+          <div class="payslip-kpi-value" id="ps-kpi-last-date">â€”</div>
+          <div class="payslip-kpi-label">Last Payment Date</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Payslips Table -->
+    <div class="card glass payslip-history-card">
+      <div class="card-header-row">
+        <div>
+          <h3 class="card-title">
+            <i data-lucide="receipt" aria-hidden="true" class="accent-icon"></i>
+            Recent Payslip History
+          </h3>
+          <span class="card-subtitle">Last 6 months of salary disbursements</span>
+        </div>
+        <button type="button" class="btn btn-secondary" id="btn-goto-payslips" style="font-size:0.72rem; padding: 8px 14px;">
+          <i data-lucide="external-link" aria-hidden="true"></i>
+          View All Payslips
+        </button>
+      </div>
+
+      <div class="payslip-table-wrap">
+        <table class="payslip-mini-table">
+          <thead>
+            <tr>
+              <th>Pay Period</th>
+              <th>Gross (â‚¬)</th>
+              <th>Deductions (â‚¬)</th>
+              <th>Net Pay (â‚¬)</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="payslip-mini-tbody">
+            <tr>
+              <td colspan="6" class="payslip-loading-row">
+                <span class="payslip-loading-text">Loading payslip data...</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+  <!-- END TAB 3 -->
+
+</div>

@@ -45,10 +45,23 @@ import com.plus33.erp.workforce.dto.EmployeeSearchRequest;
 import com.plus33.erp.workforce.entity.Employee;
 import com.plus33.erp.workforce.entity.UserRegion;
 import com.plus33.erp.workforce.entity.UserStore;
+import com.plus33.erp.workforce.entity.EmployeeSalaryStructure;
+import com.plus33.erp.workforce.entity.EmployeeSalaryStructureItem;
+import com.plus33.erp.workforce.entity.SalaryComponent;
+import com.plus33.erp.workforce.entity.EmployeeShift;
+import com.plus33.erp.workforce.entity.Shift;
+import com.plus33.erp.workforce.entity.Attendance;
+import com.plus33.erp.workforce.entity.EmployeeLeave;
 import com.plus33.erp.workforce.mapper.EmployeeMapper;
 import com.plus33.erp.workforce.repository.EmployeeRepository;
 import com.plus33.erp.workforce.repository.UserRegionRepository;
 import com.plus33.erp.workforce.repository.UserStoreRepository;
+import com.plus33.erp.workforce.repository.EmployeeSalaryStructureRepository;
+import com.plus33.erp.workforce.repository.EmployeeSalaryStructureItemRepository;
+import com.plus33.erp.workforce.repository.SalaryComponentRepository;
+import com.plus33.erp.workforce.repository.EmployeeShiftRepository;
+import com.plus33.erp.workforce.repository.AttendanceRepository;
+import com.plus33.erp.workforce.repository.EmployeeLeaveRepository;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.criteria.Root;
@@ -58,26 +71,18 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <b>PLUS33 Coffee ERP -- Workforce Module</b>
  *
  * <p><b>Class  :</b> {@code EmployeeServiceImpl}</p>
  * <p><b>Package:</b> {@code com.plus33.erp.workforce.service}</p>
- * <p><b>Layer  :</b> Business Service: core logic, validation, and @Transactional operations for Workforce Module.</p>
- *
- * <p><b>Service Flow:</b></p>
- * <pre>
- * EmployeeController
- *   --> EmployeeServiceImpl (this)
- *   --> Validate business rules
- *   --> EmployeeRepository (read/write 'employees')
- *   --> EmployeeMapper (Entity to DTO conversion)
- *   --> Publish domain event (analytics refresh)
- *   --> Return DTO response to Controller
- * </pre>
+ * <p><b>Layer  :</b> Service Implementation: business logic and transaction boundary for Workforce Module.</p>
  *
  * <p><b>Database Table   :</b> {@code employees}</p>
  * <p><b>Module Deps      :</b> Common, Organization, Security, Workforce</p>
@@ -97,6 +102,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final UserRegionRepository userRegionRepository;
     private final UserStoreRepository userStoreRepository;
     private final EmployeeMapper employeeMapper;
+    private final EmployeeSalaryStructureRepository employeeSalaryStructureRepository;
+    private final EmployeeSalaryStructureItemRepository employeeSalaryStructureItemRepository;
+    private final SalaryComponentRepository salaryComponentRepository;
+    private final EmployeeShiftRepository employeeShiftRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final EmployeeLeaveRepository employeeLeaveRepository;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                CompanyRepository companyRepository,
@@ -105,7 +116,13 @@ public class EmployeeServiceImpl implements EmployeeService {
                                UserRepository userRepository,
                                UserRegionRepository userRegionRepository,
                                UserStoreRepository userStoreRepository,
-                               EmployeeMapper employeeMapper) {
+                               EmployeeMapper employeeMapper,
+                               EmployeeSalaryStructureRepository employeeSalaryStructureRepository,
+                               EmployeeSalaryStructureItemRepository employeeSalaryStructureItemRepository,
+                               SalaryComponentRepository salaryComponentRepository,
+                               EmployeeShiftRepository employeeShiftRepository,
+                               AttendanceRepository attendanceRepository,
+                               EmployeeLeaveRepository employeeLeaveRepository) {
         this.employeeRepository = employeeRepository;
         this.companyRepository = companyRepository;
         this.regionRepository = regionRepository;
@@ -114,6 +131,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.userRegionRepository = userRegionRepository;
         this.userStoreRepository = userStoreRepository;
         this.employeeMapper = employeeMapper;
+        this.employeeSalaryStructureRepository = employeeSalaryStructureRepository;
+        this.employeeSalaryStructureItemRepository = employeeSalaryStructureItemRepository;
+        this.salaryComponentRepository = salaryComponentRepository;
+        this.employeeShiftRepository = employeeShiftRepository;
+        this.attendanceRepository = attendanceRepository;
+        this.employeeLeaveRepository = employeeLeaveRepository;
     }
 
     /**
@@ -165,10 +188,6 @@ public class EmployeeServiceImpl implements EmployeeService {
             }
             if (!store.getRegion().getCompany().getId().equals(request.companyId())) {
                 throw new BusinessException("Cannot assign employee: Store does not belong to the selected company");
-            }
-            long currentCount = userStoreRepository.countByStoreId(store.getId());
-            if (currentCount >= 30) {
-                throw new BusinessException("Store has reached its maximum capacity of 30 employees");
             }
         }
 
@@ -378,12 +397,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                 alreadyAssigned = userStoreRepository.findByIdUserId(targetUser.getId()).stream()
                         .anyMatch(us -> us.getId().getStoreId().equals(targetStoreId));
             }
-            if (!alreadyAssigned) {
-                long currentCount = userStoreRepository.countByStoreId(targetStoreId);
-                if (currentCount >= 30) {
-                    throw new BusinessException("Store has reached its maximum capacity of 30 employees");
-                }
-            }
         }
 
         // Clear assignments for previous user if mapping changed or removed
@@ -523,6 +536,73 @@ public class EmployeeServiceImpl implements EmployeeService {
             }
         }
 
+        BigDecimal salaryVal = BigDecimal.valueOf(2400.00);
+        try {
+            Optional<EmployeeSalaryStructure> structOpt = employeeSalaryStructureRepository
+                    .findByCompanyIdAndEmployeeIdAndStatus(employee.getCompany().getId(), employee.getId(), "ACTIVE");
+            if (structOpt.isPresent()) {
+                List<EmployeeSalaryStructureItem> items = employeeSalaryStructureItemRepository.findByStructureId(structOpt.get().getId());
+                for (EmployeeSalaryStructureItem item : items) {
+                    SalaryComponent comp = salaryComponentRepository.findById(item.getComponentId()).orElse(null);
+                    if (comp != null && "BASIC".equalsIgnoreCase(comp.getCode())) {
+                        salaryVal = item.getAmount();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // fallback
+        }
+
+        String activeShiftVal = "No Assigned Shift";
+        try {
+            Optional<EmployeeShift> empShiftOpt = employeeShiftRepository.findActiveShiftForEmployeeOnDate(employee.getId(), LocalDate.now());
+            if (empShiftOpt.isPresent()) {
+                Shift s = empShiftOpt.get().getShift();
+                if (s != null) {
+                    String start = s.getStartTime() != null ? s.getStartTime().toString().substring(0, 5) : "00:00";
+                    String end = s.getEndTime() != null ? s.getEndTime().toString().substring(0, 5) : "00:00";
+                    activeShiftVal = s.getName() + " (" + start + " - " + end + ")";
+                }
+            }
+        } catch (Exception e) {
+            // fallback
+        }
+
+        String todayStatusVal = "ABSENT";
+        try {
+            Optional<Attendance> attendanceOpt = attendanceRepository.findByEmployeeIdAndAttendanceDate(employee.getId(), LocalDate.now());
+            if (attendanceOpt.isPresent()) {
+                todayStatusVal = attendanceOpt.get().getStatus();
+            } else {
+                List<EmployeeLeave> leaves = employeeLeaveRepository.findOverlapping(employee.getId(), LocalDate.now(), LocalDate.now());
+                if (!leaves.isEmpty()) {
+                    todayStatusVal = "ON_LEAVE";
+                }
+            }
+        } catch (Exception e) {
+            // fallback
+        }
+
+        String avatarUrlVal = employee.getUser() != null ? employee.getUser().getAvatarUrl() : null;
+        if (avatarUrlVal == null || avatarUrlVal.isBlank()) {
+            try {
+                String code = employee.getEmployeeCode();
+                if (code != null) {
+                    String sanitizedCode = code.replaceAll("[^a-zA-Z0-9-]", "_");
+                    String[] extensions = {"png", "jpg", "jpeg", "webp", "gif"};
+                    for (String ext : extensions) {
+                        java.io.File file = new java.io.File("frontend/user_uploads/avatars/" + sanitizedCode + "_profile_img." + ext);
+                        if (file.exists()) {
+                            avatarUrlVal = "user_uploads/avatars/" + sanitizedCode + "_profile_img." + ext;
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // fallback
+            }
+        }
+
         return new EmployeeResponse(
                 response.id(),
                 response.employeeCode(),
@@ -547,6 +627,10 @@ public class EmployeeServiceImpl implements EmployeeService {
                 response.hireDate(),
                 response.status(),
                 response.active(),
+                salaryVal,
+                activeShiftVal,
+                todayStatusVal,
+                avatarUrlVal,
                 response.createdAt(),
                 response.updatedAt()
         );

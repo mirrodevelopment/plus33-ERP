@@ -98,6 +98,9 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "user_roles",

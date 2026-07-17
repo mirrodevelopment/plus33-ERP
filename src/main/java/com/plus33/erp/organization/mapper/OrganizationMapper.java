@@ -116,6 +116,8 @@ public interface OrganizationMapper {
     @Mapping(target = "regionCode", source = "region.code")
     @Mapping(target = "warehouseId", source = "warehouse.id")
     @Mapping(target = "warehouseCode", source = "warehouse.code")
+    @Mapping(target = "employeeCount", ignore = true)
+    @Mapping(target = "stockValue", ignore = true)
     StoreResponse toResponse(Store entity);
 
     @Mapping(target = "id", ignore = true)
@@ -124,4 +126,20 @@ public interface OrganizationMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntity(StoreRequest request, @MappingTarget Store entity);
+
+    // --- StoreSetting Mappings ---
+    @Mapping(target = "storeId", source = "store.id")
+    StoreSettingResponse toResponse(StoreSetting entity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "store", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    StoreSetting toEntity(StoreSettingRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "store", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(StoreSettingRequest request, @MappingTarget StoreSetting entity);
 }

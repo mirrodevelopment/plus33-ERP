@@ -333,7 +333,7 @@ export default class StoreEmployeePayslips {
 
             <div class="modal-action-btn-row">
               <button class="btn btn-secondary btn-doc-download" data-name="PLUS33_Payslip_Run_${p.runNumber}.pdf" type="button">
-                <i data-lucide="download" aria-hidden="true"></i> Download PDF Receipt
+                <i data-lucide="printer" aria-hidden="true"></i> Print / Save PDF Payslip
               </button>
             </div>
           </div>
@@ -347,10 +347,277 @@ export default class StoreEmployeePayslips {
         }
 
         // Bind inner download btn
+        // WHAT IT DOES: 
+        // Generates a complete, stylized, and print-ready invoice HTML page for the selected payslip.
+        // 
+        // DATA TARGET & DESTINATION: 
+        // Writes dynamically constructed markup containing active store and employee info
+        // directly into a clean, empty pop-up browser tab (`window.open`).
+        // 
+        // AUTOMATED ACTION: 
+        // Triggers the native browser print dialogue (`window.print()`) instantly on page load.
         const innerDl = modalContent.querySelector('.btn-doc-download');
         if (innerDl) {
           innerDl.addEventListener('click', () => {
-            notificationStore.success(`Initiated secure download of payslip PDF for Period #${p.runNumber}.`);
+            notificationStore.success(`Opening print dialog for Period #${p.runNumber} payslip...`);
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+              <html>
+                <head>
+                  <title>Payslip - Period #${p.runNumber}</title>
+                  <style>
+                    body {
+                      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                      color: #1a1a1a;
+                      padding: 40px;
+                      line-height: 1.5;
+                    }
+                    .payslip-container {
+                      max-width: 800px;
+                      margin: 0 auto;
+                      border: 1px solid #e2e8f0;
+                      padding: 30px;
+                      border-radius: 8px;
+                      position: relative;
+                    }
+                    .header {
+                      display: flex;
+                      justify-content: space-between;
+                      border-bottom: 2px solid #e2e8f0;
+                      padding-bottom: 20px;
+                      margin-bottom: 20px;
+                    }
+                    .company-title {
+                      font-size: 24px;
+                      font-weight: 800;
+                      color: #3b82f6;
+                    }
+                    .store-info {
+                      font-size: 13px;
+                      color: #4b5563;
+                      text-align: right;
+                    }
+                    .employee-section {
+                      display: flex;
+                      align-items: center;
+                      gap: 20px;
+                      background: #f8fafc;
+                      padding: 15px;
+                      border-radius: 6px;
+                      margin-bottom: 25px;
+                    }
+                    .avatar {
+                      width: 70px;
+                      height: 70px;
+                      border-radius: 50%;
+                      object-fit: cover;
+                      border: 2px solid #3b82f6;
+                    }
+                    .emp-details {
+                      flex-grow: 1;
+                    }
+                    .emp-name {
+                      font-size: 18px;
+                      font-weight: 700;
+                      margin: 0;
+                    }
+                    .emp-meta {
+                      font-size: 13px;
+                      color: #4b5563;
+                    }
+                    .tables-grid {
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 20px;
+                      margin-bottom: 25px;
+                    }
+                    table {
+                      width: 100%;
+                      border-collapse: collapse;
+                    }
+                    th {
+                      text-align: left;
+                      background: #f1f5f9;
+                      padding: 8px 12px;
+                      font-size: 13px;
+                      font-weight: 700;
+                      border-bottom: 2px solid #cbd5e1;
+                    }
+                    td {
+                      padding: 8px 12px;
+                      font-size: 13px;
+                      border-bottom: 1px solid #e2e8f0;
+                    }
+                    .amount {
+                      text-align: right;
+                      font-family: monospace;
+                    }
+                    .total-row {
+                      font-weight: 700;
+                      background: #f8fafc;
+                    }
+                    .net-salary-banner {
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      background: #eff6ff;
+                      border: 1px solid #bfdbfe;
+                      padding: 15px;
+                      border-radius: 6px;
+                      font-size: 16px;
+                      font-weight: 700;
+                      color: #1e3a8a;
+                      margin-bottom: 20px;
+                    }
+                    .paid-stamp {
+                      position: absolute;
+                      top: 120px;
+                      right: 40px;
+                      border: 4px solid #10b981;
+                      color: #10b981;
+                      font-size: 24px;
+                      font-weight: 900;
+                      padding: 5px 15px;
+                      border-radius: 4px;
+                      transform: rotate(-15deg);
+                      opacity: 0.8;
+                      text-transform: uppercase;
+                    }
+                  </style>
+                </head>
+                <body>
+                  <div class="payslip-container">
+                    <div class="paid-stamp">Paid</div>
+                    <div class="header">
+                      <div>
+                        <div class="company-title">PLUS33 COFFEE</div>
+                        <div style="font-size: 12px; color: #6b7280; font-weight: 600;">ENTERPRISE PAYROLL SYSTEM</div>
+                      </div>
+                      <div class="store-info">
+                        <strong>${this.profile.store || 'Montmartre Bar'}</strong><br>
+                        ${this.profile.storeRegion || 'Paris'}<br>
+                        ${this.profile.address || ''}
+                      </div>
+                    </div>
+                    
+                    <div class="employee-section">
+                      <img class="avatar" src="${window.location.origin}/${this.profile.avatarUrl || 'imgs/male-avatar.png'}" alt="Avatar">
+                      <div class="emp-details">
+                        <div class="emp-name">${this.profile.name || 'Neha Sharma'}</div>
+                        <div class="emp-meta">
+                          Code: ${p.employeeCode || 'N/A'} | Designation: ${sal.employmentType || 'Barista'}<br>
+                          Email: ${this.user?.username || ''}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="tables-grid">
+                      <div>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Earnings</th>
+                              <th class="amount">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Regular Base Pay</td>
+                              <td class="amount">${sym}${(ot.regularPay || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Overtime Pay</td>
+                              <td class="amount">${sym}${(ot.overtimePay || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Night Shift Allowances</td>
+                              <td class="amount">${sym}${(ot.nightPay || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Holiday Work Pay</td>
+                              <td class="amount">${sym}${(ot.holidayPay || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Weekend Work Pay</td>
+                              <td class="amount">${sym}${(ot.weekendPay || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Performance / Attendance Bonus</td>
+                              <td class="amount">${sym}${(ot.performanceBonus + ot.attendanceBonus || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Meal / Travel Allowances</td>
+                              <td class="amount">${sym}${(ot.allowances || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr class="total-row">
+                              <td>Gross Earnings</td>
+                              <td class="amount">${sym}${(p.grossPay || 0).toFixed(2)}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      
+                      <div>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Deductions & Penalties</th>
+                              <th class="amount">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Income Tax</td>
+                              <td class="amount">${sym}${(benefits.incomeTax || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Provident Fund (PF)</td>
+                              <td class="amount">${sym}${(benefits.pfDeduction || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>ESI Deduction</td>
+                              <td class="amount">${sym}${(benefits.esiDeduction || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Late Clock Penalty</td>
+                              <td class="amount">${sym}${(benefits.latePenalty || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Absent Penalty</td>
+                              <td class="amount">${sym}${(benefits.absentDeduction || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td>Unpaid Leave (LWP)</td>
+                              <td class="amount">${sym}${(benefits.leaveWithoutPay || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr class="total-row">
+                              <td>Total Deductions</td>
+                              <td class="amount">${sym}${(p.deductions || 0).toFixed(2)}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    
+                    <div class="net-salary-banner">
+                      <span>Net Take-Home Salary (Auto-Calculated)</span>
+                      <span>${sym}${(p.netPay || 0).toFixed(2)}</span>
+                    </div>
+                    
+                    <div style="font-size: 11px; color: #9ca3af; text-align: center; margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                      This is an electronically generated document. Processed by: ${audit.generatedBy || 'SYSTEM'} on ${audit.generatedAt || 'N/A'}.
+                    </div>
+                  </div>
+                  <script>
+                    window.onload = function() {
+                      window.print();
+                    }
+                  </script>
+                </body>
+              </html>
+            `);
+            printWindow.document.close();
           });
         }
       };

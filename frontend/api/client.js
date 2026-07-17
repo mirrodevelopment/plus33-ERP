@@ -228,6 +228,18 @@ class ApiClient {
   delete(endpoint) {
     return this.request(endpoint, { method: 'DELETE' });
   }
+
+  /**
+   * Performs a PATCH request to the specified endpoint.
+   * @memberof Api Module
+   */
+  patch(endpoint, body = null) {
+    const options = { method: 'PATCH' };
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+    return this.request(endpoint, options);
+  }
 }
 
 export const apiClient = new ApiClient();

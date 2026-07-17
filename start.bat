@@ -10,24 +10,14 @@ taskkill /IM javaw.exe /F >nul 2>&1
 echo   Waiting for ports to clear...
 ping 127.0.0.1 -n 4 >nul
 
-echo [1/4] Compiling Backend (clean build)...
-call "%~dp0mvnw.cmd" clean compile "-Dmaven.test.skip=true" -q
-if errorlevel 1 (
-    echo [ERROR] Backend compilation failed!
-    pause
-    exit /b 1
-)
+echo [1/4] Skipping clean compile (classes already generated)...
+REM call "%~dp0mvnw.cmd" clean compile "-Dmaven.test.skip=true" -q
 
-echo [2/4] Copying runtime dependencies...
-call "%~dp0mvnw.cmd" dependency:copy-dependencies "-DoutputDirectory=target/dependency" "-DincludeScope=runtime" -q
-if errorlevel 1 (
-    echo [ERROR] Failed to copy dependencies!
-    pause
-    exit /b 1
-)
+echo [2/4] Skipping copying dependencies (already copied)...
+REM call "%~dp0mvnw.cmd" dependency:copy-dependencies "-DoutputDirectory=target/dependency" "-DincludeScope=runtime" -q
 
 echo [3/4] Starting Spring Boot Backend (Port 8080)...
-start "PLUS33 Java Backend (Port 8080)" /D "%~dp0" cmd /k "java -Dspring.config.location=classpath:/application.properties -cp target/classes;target/dependency/* com.plus33.erp.Plus33ErpApplication"
+start "PLUS33 Java Backend (Port 8080)" /D "%~dp0" cmd /k "java -Dspring.config.location=file:target/classes/application.properties -cp target/classes;target/dependency/* com.plus33.erp.Plus33ErpApplication"
 
 echo.
 echo Waiting for Java backend to start on Port 8080 (this may take up to 60 seconds)...
@@ -52,4 +42,4 @@ echo  Backend is ready! Web Server is running on Port 3000!
 echo  Open your browser at: http://localhost:3000
 echo ---------------------------------------------------
 echo.
-pause
+REM pause

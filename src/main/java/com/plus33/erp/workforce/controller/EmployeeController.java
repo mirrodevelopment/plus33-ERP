@@ -33,6 +33,11 @@ import com.plus33.erp.workforce.dto.EmployeeRequest;
 import com.plus33.erp.workforce.dto.EmployeeResponse;
 import com.plus33.erp.workforce.dto.EmployeeSearchRequest;
 import com.plus33.erp.workforce.service.EmployeeService;
+import com.plus33.erp.workforce.entity.EmployeeUploadDocument;
+import com.plus33.erp.workforce.repository.EmployeeUploadDocumentRepository;
+import java.util.List;
+import java.util.Optional;
+import com.plus33.erp.common.exception.BusinessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -75,9 +80,11 @@ import org.springframework.web.bind.annotation.*;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final EmployeeUploadDocumentRepository employeeUploadDocumentRepository;
 
-    public EmployeeController(EmployeeService employeeService) {
+    public EmployeeController(EmployeeService employeeService, EmployeeUploadDocumentRepository employeeUploadDocumentRepository) {
         this.employeeService = employeeService;
+        this.employeeUploadDocumentRepository = employeeUploadDocumentRepository;
     }
 
     /**
@@ -210,5 +217,52 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeResponse>> deactivateEmployee(@PathVariable Long id) {
         EmployeeResponse response = employeeService.deactivateEmployee(id);
         return ResponseEntity.ok(ApiResponse.success("Employee deactivated successfully", response));
+    }
+
+    /**
+     * GET /api/v1/employees/{id}/documents
+     * 
+     * WHAT IT DOES: 
+     * Retrieves the list of verification documents uploaded by a specific employee (identified by employee ID).
+     * 
+     * SENDS DATA: 
+     * Returns JSON list of document records (EmployeeUploadDocument) back to the store admin's workforce overview.
+     * 
+     * STORAGE LOCATION: 
+     * Queries records from the "employee_upload_documents" table in the PostgreSQL database.
+     */
+    @GetMapping("/{id}/documents")
+    @PreAuthorize("hasAuthority('EMPLOYEE_VIEW')")
+    @Operation(summary = "Get employee documents by ID", description = "Retrieves the verification documents uploaded by the specified employee.")
+    public ResponseEntity<ApiResponse<List<EmployeeUploadDocument>>> getEmployeeDocuments(@PathVariable Long id) {
+        List<EmployeeUploadDocument> docs = employeeUploadDocumentRepository.findByEmployeeId(id);
+        return ResponseEntity.ok(ApiResponse.success("Employee documents retrieved successfully", docs));
+    }
+
+    /**
+     * POST /api/v1/employees/documents/{documentId}/approve
+     * 
+     * WHAT IT DOES: 
+     * Marks an employee's uploaded document as approved.
+     * 
+     * STORAGE LOCATION: 
+     * Updates the 'approved' flag in the "employee_upload_documents" table in the PostgreSQL database.
+     * 
+     * FLOW:
+     * Called by the Store Admin inside workforce.js details drawer.
+     */
+    @PostMapping("/documents/{documentId}/approve")
+    @PreAuthorize("hasAuthority('EMPLOYEE_UPDATE')")
+    @Operation(summary = "Approve employee document", description = "Marks a specific verification document as approved by the admin.")
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<ApiResponse<EmployeeUploadDocument>> approveDocument(@PathVariable Long documentId) {
+        Optional<EmployeeUploadDocument> docOpt = employeeUploadDocumentRepository.findById(documentId);
+        if (docOpt.isEmpty()) {
+            throw new BusinessException("Document record not found.");
+        }
+        EmployeeUploadDocument doc = docOpt.get();
+        doc.setApproved(true);
+        EmployeeUploadDocument saved = employeeUploadDocumentRepository.save(doc);
+        return ResponseEntity.ok(ApiResponse.success("Document approved successfully", saved));
     }
 }

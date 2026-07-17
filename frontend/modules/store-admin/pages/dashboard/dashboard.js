@@ -30,6 +30,7 @@ import { logger } from '../../../../core/logger.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
 import { apiClient } from '../../../../api/client.js';
 import { dashboardService } from '../../../../services/dashboard/DashboardService.js';
+import { eventBus } from '../../../../core/eventBus.js';
 
 /** Path to the dashboard HTML template */
 const TEMPLATE_URL = 'modules/store-admin/pages/dashboard/dashboard.html';
@@ -48,6 +49,9 @@ export default class StoreAdminDashboard {
     };
     this.data = null;
     this._clockInterval = null;
+    this.storeId = null;
+    this.employees = [];
+    this.storeDetails = null;
     
     // Downtown schedule telemetry presets
     this.scheduleRoster = [
@@ -83,6 +87,11 @@ export default class StoreAdminDashboard {
     // 3. Render data details
     this._render(container);
 
+    // 3b. After render, broadcast pending document count so layout updates sidebar dot + bell
+    const workforceOverview = this.data?.workforceOverview || {};
+    const pendingDocs = Number(workforceOverview.pendingDocuments || 0);
+    eventBus.emit('workforce:pending-docs', { count: pendingDocs });
+
     // 4. Bind listeners
     this._bindEvents(container, lifecycle);
 
@@ -108,6 +117,23 @@ export default class StoreAdminDashboard {
       const meRes = await apiClient.get('/api/v1/auth/me');
       if (meRes?.success) {
         this.profile = { ...this.profile, ...meRes.data };
+        this.storeId = meRes.data.storeId || null;
+      }
+
+      // Fetch store details to get timezone
+      if (this.storeId) {
+        const storeRes = await apiClient.get(`/api/v1/stores/${this.storeId}`);
+        this.storeDetails = storeRes?.success ? storeRes.data : null;
+      } else {
+        this.storeDetails = null;
+      }
+
+      // Fetch store employees for the worker roster
+      if (this.storeId) {
+        const empRes = await apiClient.get(`/api/v1/employees?storeId=${this.storeId}&size=50&status=ACTIVE`);
+        this.employees = empRes?.success ? (empRes.data.content || []) : [];
+      } else {
+        this.employees = [];
       }
     } catch (err) {
       logger.error('StoreAdminDashboard', 'Failed to fetch backend metrics overview', err);
@@ -172,13 +198,22 @@ export default class StoreAdminDashboard {
 
     // Populate header details
     const storeNameEl = container.querySelector('#header-store-name');
+    const storeTypeEl = container.querySelector('#header-store-type');
+    const storeIdEl = container.querySelector('#header-store-id');
     const userNameEl = container.querySelector('#header-user-name');
     const storeViewSelect = container.querySelector('#select-store-view');
     const alertCountEl = container.querySelector('#header-alert-count');
 
     const activeStoreText = this.profile.store || 'Coffee House - Downtown';
     if (storeNameEl) storeNameEl.textContent = activeStoreText;
+    if (storeIdEl) storeIdEl.textContent = this.storeId || '—';
     if (userNameEl) userNameEl.textContent = this.profile.name || 'Store Admin User';
+
+    if (storeTypeEl) {
+      const typeVal = this.storeDetails?.type;
+      const friendlyType = typeVal === 'COMPACT_CAFE' ? 'COMPACT CAFÉ' : typeVal === 'FLAGSHIP_CAFE' ? 'FLAGSHIP CAFÉ' : (typeVal || 'COMPACT CAFÉ');
+      storeTypeEl.textContent = friendlyType;
+    }
     if (alertCountEl) alertCountEl.textContent = valOrNa(openTasks > 0 ? Math.round(openTasks * 0.3) : 0);
 
     if (storeViewSelect) {
@@ -295,9 +330,13 @@ export default class StoreAdminDashboard {
     // Populate Widget 5: Pending Approvals
     const approvalsLeavesEl = container.querySelector('#val-pending-leaves');
     const approvalsShiftChangesEl = container.querySelector('#val-pending-shift-changes');
+    const approvalsDocumentsEl = container.querySelector('#val-pending-documents');
+    const approvalsExpensesEl = container.querySelector('#val-pending-expenses');
 
-    if (approvalsLeavesEl) approvalsLeavesEl.textContent = `${Number(workforceOverview.pendingLeaves || 3)} Requests`;
-    if (approvalsShiftChangesEl) approvalsShiftChangesEl.textContent = `${Number(workforceOverview.pendingShiftChanges || 2)} Requests`;
+    if (approvalsLeavesEl) approvalsLeavesEl.textContent = Number(workforceOverview.pendingLeaves !== undefined ? workforceOverview.pendingLeaves : 0);
+    if (approvalsShiftChangesEl) approvalsShiftChangesEl.textContent = Number(workforceOverview.pendingShiftChanges !== undefined ? workforceOverview.pendingShiftChanges : 0);
+    if (approvalsDocumentsEl) approvalsDocumentsEl.textContent = Number(workforceOverview.pendingDocuments !== undefined ? workforceOverview.pendingDocuments : 0);
+    if (approvalsExpensesEl) approvalsExpensesEl.textContent = Number(workforceOverview.pendingExpenses !== undefined ? workforceOverview.pendingExpenses : 0);
 
     // Populate Widget 6: Live alerts
     const alertsRowsList = container.querySelector('#alerts-rows-list');
@@ -311,16 +350,36 @@ export default class StoreAdminDashboard {
         alertsRowsList.appendChild(row);
       };
 
+      let hasAlerts = false;
+
+      // Render database-driven alerts
+      if (this.data?.alerts && Array.isArray(this.data.alerts)) {
+        this.data.alerts.forEach(alert => {
+          let sev = 'warning';
+          const type = String(alert.type || '').toUpperCase();
+          if (type === 'DANGER' || type === 'CRITICAL' || type === 'ERROR') {
+            sev = 'danger';
+          } else if (type === 'SUCCESS') {
+            sev = 'success';
+          }
+          addAlert(alert.message, sev);
+          hasAlerts = true;
+        });
+      }
+
       if (lowStockCount > 0) {
         addAlert(`WMS Alert: ${lowStockCount} items are low on inventory.`, 'warning');
+        hasAlerts = true;
       }
       if (outOfStockCount > 0) {
         addAlert(`WMS Critical: ${outOfStockCount} items are out of stock.`, 'danger');
+        hasAlerts = true;
       }
       if (openTasks > 10) {
         addAlert(`Shift Tasks Checklist compliance is below threshold limits.`, 'warning');
+        hasAlerts = true;
       }
-      if (lowStockCount === 0 && outOfStockCount === 0 && openTasks <= 10) {
+      if (!hasAlerts) {
         addAlert(`Compliance standard operating procedures fully met.`, 'success');
       }
     }
@@ -403,6 +462,89 @@ export default class StoreAdminDashboard {
     }
 
     if (window.lucide) window.lucide.createIcons();
+
+    // Render worker roster list
+    this._renderWorkerRoster(container);
+  }
+
+  // ---------------------------------------------------------------------------
+  // PRIVATE: Worker Roster Render
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Renders the mini worker list inside the Workforce Overview card.
+   * Shows avatar, full name, designation, and today's attendance status.
+   */
+  _renderWorkerRoster(container) {
+    const listEl = container.querySelector('#wf-worker-list');
+    if (!listEl) return;
+
+    listEl.replaceChildren();
+
+    const employees = this.employees || [];
+
+    if (employees.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'wf-worker-empty';
+      empty.textContent = 'No active workers found for this store.';
+      listEl.appendChild(empty);
+      return;
+    }
+
+    employees.slice(0, 5).forEach(emp => {
+      const fullName = `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || 'Unknown';
+      const initials = `${emp.firstName ? emp.firstName[0] : ''}${emp.lastName ? emp.lastName[0] : ''}`.toUpperCase() || 'EE';
+      const designation = emp.designation || emp.workerType || 'Staff';
+
+      // Determine status
+      const rawStatus = (emp.todayStatus || '').toUpperCase();
+      let statusLabel = 'Unknown';
+      let statusClass = 'wf-status--unknown';
+      if (rawStatus.startsWith('PRESENT') || rawStatus === 'LATE' || rawStatus === 'PRESENT_HALF') {
+        statusLabel = 'On Shift';
+        statusClass = 'wf-status--present';
+      } else if (rawStatus === 'ON_LEAVE') {
+        statusLabel = 'On Leave';
+        statusClass = 'wf-status--leave';
+      } else if (rawStatus === 'ABSENT' || rawStatus === '') {
+        statusLabel = 'Absent';
+        statusClass = 'wf-status--absent';
+      }
+
+      const row = document.createElement('div');
+      row.className = 'wf-worker-row';
+
+      // Avatar
+      const avatarEl = document.createElement('div');
+      avatarEl.className = 'wf-worker-avatar';
+      if (emp.avatarUrl) {
+        const img = document.createElement('img');
+        img.src = emp.avatarUrl;
+        img.alt = fullName;
+        img.onerror = () => { avatarEl.textContent = initials; };
+        avatarEl.appendChild(img);
+      } else {
+        avatarEl.textContent = initials;
+      }
+
+      // Info
+      const infoEl = document.createElement('div');
+      infoEl.className = 'wf-worker-info';
+      infoEl.innerHTML = `
+        <span class="wf-worker-name">${fullName}</span>
+        <span class="wf-worker-role">${designation}</span>
+      `;
+
+      // Status badge
+      const statusEl = document.createElement('span');
+      statusEl.className = `wf-worker-status ${statusClass}`;
+      statusEl.textContent = statusLabel;
+
+      row.appendChild(avatarEl);
+      row.appendChild(infoEl);
+      row.appendChild(statusEl);
+      listEl.appendChild(row);
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -476,14 +618,61 @@ export default class StoreAdminDashboard {
 
   startClock(container) {
     const clockEl = container.querySelector('#store-admin-clock');
+    const nationEl = container.querySelector('#store-admin-nation');
     if (!clockEl) return;
 
+    // Timezone mapping to 3-letter nation code
+    const TIMEZONE_TO_NATION = {
+      'Europe/Paris': 'FRA',
+      'Asia/Kolkata': 'IND',
+      'America/New_York': 'USA',
+      'America/Chicago': 'USA',
+      'America/Denver': 'USA',
+      'America/Los_Angeles': 'USA',
+      'Asia/Dubai': 'UAE',
+      'Asia/Singapore': 'SGP',
+      'Europe/London': 'GBR',
+      'UTC': 'UTC',
+      'GMT': 'GMT'
+    };
+
+    // Determine target timezone and nation abbreviation
+    let timezone = this.storeDetails?.timezone || 'Europe/Paris';
+    let nationCode = TIMEZONE_TO_NATION[timezone] || 'FRA';
+
+    // If timezone is not standard, try to guess or use name
+    if (nationEl) {
+      nationEl.textContent = nationCode;
+      nationEl.title = `Timezone: ${timezone}`;
+    }
+
     const update = () => {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString(undefined, { hour12: false });
-      const dateStr = now.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
-      if (clockEl) {
-        clockEl.textContent = `${dateStr} · ${timeStr}`;
+      try {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString(undefined, { 
+          timeZone: timezone,
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        const dateStr = now.toLocaleDateString(undefined, { 
+          timeZone: timezone,
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+        if (clockEl) {
+          clockEl.textContent = `${dateStr} · ${timeStr}`;
+        }
+      } catch (e) {
+        // Fallback if timezone string is invalid
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString(undefined, { hour12: false });
+        const dateStr = now.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+        if (clockEl) {
+          clockEl.textContent = `${dateStr} · ${timeStr}`;
+        }
       }
     };
     

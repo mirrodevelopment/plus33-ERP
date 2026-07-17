@@ -37,6 +37,7 @@ export default class ProfilePage {
   constructor() {
     this.user = authStore.getUser();
     this.profile = userStore.getProfile(this.user?.role);
+    this.docs = { panCard: null, aadhaarCard: null, workPermit: null };
     this.selectedFile = null;
     this.isEditing = false;
   }
@@ -57,6 +58,32 @@ export default class ProfilePage {
     } catch (e) {
       logger.error('ProfilePage', 'Error loading database profile:', e);
     }
+    // WHAT IT DOES: 
+    // Fetches the active onboarding/verification documents list of the logged-in employee on page load.
+    // 
+    // DATA SOURCE (DATA ORIGIN):
+    // GET REST API endpoint '/api/v2/employee-self-service/documents' (EmployeeSelfServiceController.java).
+    // 
+    // STATE STORAGE: 
+    // Populates the "this.docs" state object in memory for real-time rendering.
+    try {
+      const docResponse = await apiClient.get('/api/v2/employee-self-service/documents');
+      if (docResponse && docResponse.success && Array.isArray(docResponse.data)) {
+        const docs = { panCard: null, aadhaarCard: null, workPermit: null };
+        docResponse.data.forEach(d => {
+          docs[d.documentType] = {
+            id: d.id,
+            name: d.documentName,
+            url: d.filePath,
+            approved: d.approved,
+            uploadedAt: d.uploadedAt ? new Date(d.uploadedAt).toLocaleString('en-US', {hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit'}) : ''
+          };
+        });
+        this.docs = docs;
+      }
+    } catch (e) {
+      logger.error('ProfilePage', 'Error loading database documents:', e);
+    }
     this.render(container);
     this.bindEvents(container);
   }
@@ -71,6 +98,10 @@ export default class ProfilePage {
       this.profile = userStore.getProfile(this.user?.role);
     }
     
+    const avatarUrlWithBuster = this.profile.avatarUrl
+      ? (this.profile.avatarUrl.includes('unsplash.com') ? this.profile.avatarUrl : `${this.profile.avatarUrl}?t=${Date.now()}`)
+      : 'imgs/male-avatar.png';
+
     // Check if current avatar is custom
     const isPreset = this.profile.avatarUrl.includes('unsplash.com') || 
                      this.profile.avatarUrl === 'imgs/male-avatar.png' || 
@@ -78,20 +109,11 @@ export default class ProfilePage {
                      this.profile.avatarUrl === '';
 
     const isEmployee = true; // Enabled for all profiles
+    const isWorker = this.user?.role === 'storeEmployee' || this.user?.role === 'shiftSupervisor';
     
     let verificationDocsHtml = '';
     if (isEmployee) {
-      // Load verification documents state from localStorage
-      const docsKey = `plus33_user_verification_docs_${this.user?.username || 'user'}`;
-      let docs = { panCard: null, aadhaarCard: null, workPermit: null };
-      try {
-        const cachedDocs = localStorage.getItem(docsKey);
-        if (cachedDocs) {
-          docs = JSON.parse(cachedDocs);
-        }
-      } catch (e) {
-        logger.error('ProfilePage', 'Error reading verification documents state', e);
-      }
+      const docs = this.docs || { panCard: null, aadhaarCard: null, workPermit: null };
       
       const renderDocRow = (type, title, desc, iconSvg) => {
         const docData = docs[type];
@@ -99,8 +121,13 @@ export default class ProfilePage {
         let badgeText = 'Not Uploaded';
         let badgeStyle = 'background: rgba(235, 94, 85, 0.1); border: 1px solid rgba(235, 94, 85, 0.2); color: #ff6b6b;';
         if (docData) {
-          badgeText = 'Pending Verification';
-          badgeStyle = 'background: rgba(201, 164, 106, 0.15); border: 1px solid rgba(201, 164, 106, 0.3); color: var(--accent-primary);';
+          if (docData.approved) {
+            badgeText = 'Approved';
+            badgeStyle = 'background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); color: #22c55e;';
+          } else {
+            badgeText = 'Pending Verification';
+            badgeStyle = 'background: rgba(201, 164, 106, 0.15); border: 1px solid rgba(201, 164, 106, 0.3); color: var(--accent-primary);';
+          }
         }
         
         return `
@@ -136,9 +163,16 @@ export default class ProfilePage {
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                       View Doc
                     </a>
-                    <button type="button" class="btn btn-delete-doc" data-type="${type}" style="background: rgba(235, 94, 85, 0.1); border: 1px solid rgba(235, 94, 85, 0.2); color: #ff6b6b; font-size: 0.72rem; padding: 6px 10px; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition-fast);" onmouseover="this.style.background='rgba(235, 94, 85, 0.2)';" onmouseout="this.style.background='rgba(235, 94, 85, 0.1)';">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
+                    ${!docData.approved ? `
+                      <button type="button" class="btn btn-delete-doc" data-type="${type}" style="background: rgba(235, 94, 85, 0.1); border: 1px solid rgba(235, 94, 85, 0.2); color: #ff6b6b; font-size: 0.72rem; padding: 6px 10px; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition-fast);" onmouseover="this.style.background='rgba(235, 94, 85, 0.2)';" onmouseout="this.style.background='rgba(235, 94, 85, 0.1)';">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </button>
+                    ` : `
+                      <span style="font-size: 0.65rem; color: #22c55e; display: inline-flex; align-items: center; gap: 4px; padding: 6px; font-weight: 700; text-transform: uppercase;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Locked
+                      </span>
+                    `}
                   ` : ''}
                 </div>
               </div>
@@ -157,7 +191,7 @@ export default class ProfilePage {
 
             <!-- Uploaded File info metadata -->
             ${docData ? `
-              <div style="background: rgba(0,0,0,0.15); border-radius: var(--radius-md); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; border-left: 2px solid var(--accent-primary);">
+              <div style="background: rgba(0,0,0,0.15); border-radius: var(--radius-md); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; border-left: 2px solid ${docData.approved ? '#22c55e' : 'var(--accent-primary)'};">
                 <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); flex-shrink: 0;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                   <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis;">${docData.name}</span>
@@ -217,7 +251,7 @@ export default class ProfilePage {
           <!-- Profile Card -->
           <div class="card glass flex flex-col align-center text-center" style="padding: var(--spacing-xl); border: 1px solid var(--border-color); background: var(--bg-card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-md); border-radius: var(--radius-lg);">
             <div style="position: relative;">
-              <img id="profile-card-image" src="${this.profile.avatarUrl || 'imgs/male-avatar.png'}" alt="${this.profile.name}" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 2.5px solid var(--accent-primary); box-shadow: var(--shadow-lg);">
+              <img id="profile-card-image" src="${avatarUrlWithBuster}" alt="${this.profile.name}" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 2.5px solid var(--accent-primary); box-shadow: var(--shadow-lg);">
               <div style="position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--status-success); border: 2px solid var(--bg-card);"></div>
             </div>
             
@@ -229,31 +263,64 @@ export default class ProfilePage {
                   ${this.profile.store}
                 </div>
               ` : ''}
-              <span style="font-size: 0.72rem; font-weight: 700; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.5px; background: rgba(201,164,106,0.1); padding: 4px 10px; border-radius: 12px;">${this.user?.role || 'Guest'}</span>
+              <div style="display: flex; gap: var(--spacing-xs); justify-content: center; align-items: center; margin-top: 4px;">
+                <span style="font-size: 0.72rem; font-weight: 700; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 0.5px; background: rgba(201,164,106,0.1); padding: 4px 10px; border-radius: 12px;">${this.user?.role || 'Guest'}</span>
+                ${this.profile.employeeCode ? `<span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 12px;">ID: ${this.profile.employeeCode}</span>` : ''}
+              </div>
             </div>
 
             <!-- Profile Info Grid -->
             <div style="width: 100%; border-top: 1px solid rgba(255,255,255,0.05); margin-top: var(--spacing-sm); padding-top: var(--spacing-md); display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); text-align: left;">
               <div>
-                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Department</span>
-                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.department}</span>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Employee Name</span>
+                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.name || 'Not set'}</span>
               </div>
               <div>
-                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Joined Date</span>
-                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.joinedDate}</span>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Employee ID</span>
+                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.employeeCode || 'N/A'}</span>
+              </div>
+              <div>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Worker Type (Designation)</span>
+                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.designation || 'Barista'}</span>
+              </div>
+              <div>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Email Address</span>
+                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600; word-break: break-all;">${this.profile.email || 'Not set'}</span>
               </div>
               <div>
                 <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Mobile Number</span>
                 <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.phone || 'Not set'}</span>
               </div>
+              <div style="grid-column: span 2;">
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Contact Address</span>
+                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.address || 'Not set'}</span>
+              </div>
               <div>
-                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Gender</span>
-                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.gender || 'Not set'}</span>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Department</span>
+                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.department || 'N/A'}</span>
+              </div>
+              <div>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Working Type</span>
+                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.employmentType || 'Permanent'}</span>
+              </div>
+              <div>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Salary Per Hour</span>
+                <span style="font-size: 0.85rem; color: var(--accent-primary); font-weight: 700;">€${parseFloat(this.profile.hourlyRate || 15.00).toFixed(2)}/hr</span>
+              </div>
+              <div>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Joined Date</span>
+                <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.joinedDate || 'N/A'}</span>
               </div>
               ${this.profile.store ? `
               <div>
                 <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Assigned Store</span>
                 <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.store}</span>
+              </div>
+              ` : ''}
+              ${this.profile.storeType ? `
+              <div>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Store Type</span>
+                <span style="font-size: 0.85rem; color: var(--accent-primary); font-weight: 700;">${this.profile.storeType.replace('_', ' ')}</span>
               </div>
               ` : ''}
               ${this.profile.storeRegion ? `
@@ -264,7 +331,7 @@ export default class ProfilePage {
               ` : ''}
               ${this.profile.country ? `
               <div>
-                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Country</span>
+                <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Country (Nation)</span>
                 <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600;">${this.profile.country}</span>
               </div>
               ` : ''}
@@ -307,6 +374,20 @@ export default class ProfilePage {
                 </select>
               </div>
 
+              <div class="form-group flex flex-col gap-xs" style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Worker Type (Designation)</label>
+                <select id="select-profile-designation" ${isWorker ? 'disabled' : ''} style="padding: 10px 12px; border-radius: var(--radius-md); background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.82rem; outline: none; cursor: pointer; transition: var(--transition-fast); ${isWorker ? 'opacity: 0.6; cursor: not-allowed; border-color: rgba(255,255,255,0.05);' : ''}" onfocus="this.style.borderColor='var(--accent-primary)';" onblur="this.style.borderColor='var(--border-color)';">
+                  <option value="Barista" ${this.profile.designation === 'Barista' ? 'selected' : ''}>Barista</option>
+                  <option value="Server" ${this.profile.designation === 'Server' ? 'selected' : ''}>Server</option>
+                  <option value="Cashier" ${this.profile.designation === 'Cashier' ? 'selected' : ''}>Cashier</option>
+                  <option value="Helper" ${this.profile.designation === 'Helper' ? 'selected' : ''}>Helper</option>
+                  <option value="Cleaner" ${this.profile.designation === 'Cleaner' ? 'selected' : ''}>Cleaner</option>
+                  <option value="Cook" ${this.profile.designation === 'Cook' ? 'selected' : ''}>Cook</option>
+                  <option value="Shift Supervisor" ${this.profile.designation === 'Shift Supervisor' ? 'selected' : ''}>Shift Supervisor</option>
+                  <option value="Store Manager" ${this.profile.designation === 'Store Manager' ? 'selected' : ''}>Store Manager</option>
+                </select>
+              </div>
+
               <!-- Avatar Dropdown Selector -->
               <div class="form-group flex flex-col gap-xs" style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Select Profile Avatar</label>
@@ -328,7 +409,7 @@ export default class ProfilePage {
                       Select Image File
                     </button>
                     <span id="label-file-name" style="font-size: 0.72rem; color: var(--text-muted); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                      ${this.profile.avatarUrl.startsWith('imgs/avatars/') ? this.profile.avatarUrl.split('/').pop() : 'No file chosen'}
+                      ${this.profile.avatarUrl.includes('avatars/') ? this.profile.avatarUrl.split('/').pop() : 'No file chosen'}
                     </span>
                   </div>
                 </div>
@@ -336,7 +417,7 @@ export default class ProfilePage {
                 <!-- Display manual text input fallback if needed -->
                 <div style="margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: var(--spacing-sm);">
                   <label style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px;">Or Enter Custom Image URL</label>
-                  <input type="url" id="input-profile-avatar-custom-url" value="${(!isPreset) ? this.profile.avatarUrl : ''}" placeholder="http://example.com/avatar.png" style="padding: 8px 10px; width: 100%; border-radius: var(--radius-md); background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.78rem; outline: none; transition: var(--transition-fast);" onfocus="this.style.borderColor='var(--accent-primary)';" onblur="this.style.borderColor='var(--border-color)';">
+                  <input type="text" id="input-profile-avatar-custom-url" value="${(!isPreset) ? this.profile.avatarUrl : ''}" placeholder="http://example.com/avatar.png" style="padding: 8px 10px; width: 100%; border-radius: var(--radius-md); background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.78rem; outline: none; transition: var(--transition-fast);" onfocus="this.style.borderColor='var(--accent-primary)';" onblur="this.style.borderColor='var(--border-color)';">
                 </div>
               </div>
 
@@ -448,6 +529,7 @@ export default class ProfilePage {
         const email = container.querySelector('#input-profile-email').value.trim();
         const phone = container.querySelector('#input-profile-phone').value.trim();
         const gender = container.querySelector('#select-profile-gender').value;
+        const designation = container.querySelector('#select-profile-designation').value;
         const avatarType = dropdown.value;
         let avatarUrl = '';
 
@@ -471,7 +553,8 @@ export default class ProfilePage {
                 headers: {
                   'Content-Type': this.selectedFile.type,
                   'X-Username': name,
-                  'X-Role': this.user.role
+                  'X-Role': this.user.role,
+                  'X-Worker-Id': this.profile.employeeCode || String(this.profile.id || 'ADMIN')
                 },
                 body: this.selectedFile
               });
@@ -492,10 +575,18 @@ export default class ProfilePage {
           }
 
           // Update user details in database
-          const updateResponse = await apiClient.put('/api/v1/auth/me', { name, email, avatarUrl, phone, gender });
+          const updateResponse = await apiClient.put('/api/v1/auth/me', { name, email, avatarUrl, phone, gender, designation });
           if (updateResponse && updateResponse.success && updateResponse.data) {
             this.profile = updateResponse.data;
             userStore.updateProfile(this.user.role, updateResponse.data);
+            
+            // Sync with authStore to update sidebar / headers dynamically
+             authStore.updateUser({
+               name: updateResponse.data.name,
+               username: updateResponse.data.email,
+               avatarUrl: updateResponse.data.avatarUrl
+             });
+
             notificationStore.success('Profile changes saved successfully to database!');
           } else {
             throw new Error(updateResponse?.message || 'Database update failed.');
@@ -614,13 +705,21 @@ export default class ProfilePage {
           }, 100);
           
           try {
-            // Perform actual API upload using existing upload endpoint
-            const response = await fetch('/api/upload-avatar', {
+            // WHAT IT DOES: 
+            // Uploads the selected file to the WebServer local storage first.
+            // 
+            // DATA DESTINATION: 
+            // POST request to '/api/upload-document' containing file stream and custom headers.
+            // 
+            // STORAGE LOCATION: 
+            // Triggers backend saving to: 'frontend/user_uploads/documents/<category>/...' folder.
+            const response = await fetch('/api/upload-document', {
               method: 'POST',
               headers: {
                 'Content-Type': file.type,
-                'X-Username': this.profile.name,
-                'X-Role': this.user.role
+                'X-Worker-Id': this.profile.employeeCode || String(this.profile.id || 'ADMIN'),
+                'X-Document-Type': type,
+                'X-File-Name': file.name
               },
               body: file
             });
@@ -633,24 +732,33 @@ export default class ProfilePage {
             
             const data = await response.json();
             if (data.success && data.url) {
-              // Update local storage verification status
-              const docsKey = `plus33_user_verification_docs_${this.user?.username || 'user'}`;
-              const cachedDocs = localStorage.getItem(docsKey);
-              let currentDocs = { panCard: null, aadhaarCard: null, workPermit: null };
-              if (cachedDocs) {
-                try { currentDocs = JSON.parse(cachedDocs); } catch(e) {}
+              // WHAT IT DOES: 
+              // Once the file is physically stored, saves its reference url metadata to the database.
+              // 
+              // DATA DESTINATION: 
+              // POST REST request to '/api/v2/employee-self-service/documents'.
+              // 
+              // STORAGE LOCATION: 
+              // Writes metadata records into the "employee_upload_documents" table in PostgreSQL database.
+              const saveResponse = await apiClient.post('/api/v2/employee-self-service/documents', {
+                documentType: type,
+                documentName: file.name,
+                filePath: data.url
+              });
+              
+              if (saveResponse && saveResponse.success) {
+                // Stores states in current active memory object for immediate UI updates
+                this.docs[type] = {
+                  name: file.name,
+                  url: data.url,
+                  uploadedAt: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                notificationStore.success(`${file.name} uploaded and saved to database successfully!`);
+              } else {
+                throw new Error(saveResponse?.message || 'Failed to save document metadata in database.');
               }
               
-              currentDocs[type] = {
-                name: file.name,
-                url: data.url,
-                uploadedAt: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              };
-              
-              localStorage.setItem(docsKey, JSON.stringify(currentDocs));
-              notificationStore.success(`${file.name} uploaded successfully!`);
-              
-              // Re-render and re-bind
+              // Re-render and re-bind UI layout
               this.render(container);
               this.bindEvents(container);
             } else {
@@ -667,20 +775,32 @@ export default class ProfilePage {
     });
     
     // Delete document handler
+    // WHAT IT DOES:
+    // Deletes verification document records matching type and logged-in employee ID.
+    // 
+    // DATA DESTINATION:
+    // DELETE REST request to '/api/v2/employee-self-service/documents/{type}'.
+    // 
+    // STORAGE/CLEANUP TARGETS:
+    // - Deletes physical file in target subdirectory.
+    // - Deletes database record in "employee_upload_documents" table.
     const deleteDocButtons = container.querySelectorAll('.btn-delete-doc');
     deleteDocButtons.forEach(btn => {
       const type = btn.getAttribute('data-type');
-      btn.addEventListener('click', () => {
-        const docsKey = `plus33_user_verification_docs_${this.user?.username || 'user'}`;
-        const cachedDocs = localStorage.getItem(docsKey);
-        let currentDocs = { panCard: null, aadhaarCard: null, workPermit: null };
-        if (cachedDocs) {
-          try { currentDocs = JSON.parse(cachedDocs); } catch(e) {}
+      btn.addEventListener('click', async () => {
+        try {
+          const deleteResponse = await apiClient.delete(`/api/v2/employee-self-service/documents/${type}`);
+          if (deleteResponse && deleteResponse.success) {
+            // Nullify memory state
+            this.docs[type] = null;
+            notificationStore.success('Document deleted from database successfully.');
+          } else {
+            throw new Error(deleteResponse?.message || 'Database deletion failed.');
+          }
+        } catch (err) {
+          logger.error('ProfilePage', 'Failed to delete verification document:', err);
+          notificationStore.danger(`Delete failed: ${err.message}`);
         }
-        
-        currentDocs[type] = null;
-        localStorage.setItem(docsKey, JSON.stringify(currentDocs));
-        notificationStore.success('Document deleted successfully.');
         
         this.render(container);
         this.bindEvents(container);

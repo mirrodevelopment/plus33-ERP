@@ -40,6 +40,34 @@ export default class SupervisorAnnouncements {
     this.announcements = [];
   }
 
+  renderAttachment(url) {
+    if (!url) return '';
+    const lower = url.toLowerCase();
+    if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.ogg') || lower.endsWith('.mov')) {
+      return `
+        <div style="margin: 8px 0; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); max-height: 250px; background: #000;">
+          <video src="${url}" controls style="width: 100%; height: auto; max-height: 250px;"></video>
+        </div>
+      `;
+    } else if (lower.endsWith('.pdf')) {
+      return `
+        <div style="margin: 8px 0; padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+            <span style="font-size: 0.78rem; color: var(--text-primary); font-weight: 600;">PDF Document Attachment</span>
+          </div>
+          <a href="${url}" target="_blank" class="btn" style="padding: 4px 10px; font-size: 0.7rem; border-radius: var(--radius-xs); border: 1px solid var(--accent-primary); background: transparent; color: var(--accent-primary); font-weight: 700; text-decoration: none;">Open PDF</a>
+        </div>
+      `;
+    } else {
+      return `
+        <div style="margin: 8px 0; max-height: 180px; overflow: hidden; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <img src="${url}" alt="Attachment" style="width: 100%; height: auto; object-fit: cover; max-height: 180px;">
+        </div>
+      `;
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // LIFECYCLE: mount
   // ---------------------------------------------------------------------------
@@ -129,6 +157,7 @@ export default class SupervisorAnnouncements {
         const titleInput = container.querySelector('#input-ann-title');
         const prioritySelect = container.querySelector('#select-ann-priority');
         const contentInput = container.querySelector('#input-ann-content');
+        const fileInput = container.querySelector('#input-ann-image');
         
         const title = titleInput.value.trim();
         const priority = prioritySelect.value;
@@ -139,8 +168,35 @@ export default class SupervisorAnnouncements {
           return;
         }
 
+        let imageUrl = '';
+        const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+
+        if (file) {
+          try {
+            notificationStore.info('Uploading attachment file to server...');
+            const response = await fetch('/api/upload-announcement-attachment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': file.type,
+                'X-File-Name': file.name
+              },
+              body: file
+            });
+            const data = await response.json();
+            if (data && data.success && data.url) {
+              imageUrl = data.url;
+            } else {
+              throw new Error(data.message || 'File server upload failed.');
+            }
+          } catch (uploadErr) {
+            logger.error('SupervisorAnnouncements', 'Attachment upload failed:', uploadErr);
+            notificationStore.danger(`File upload failed: ${uploadErr.message}`);
+            return;
+          }
+        }
+
         try {
-          const payload = { title, content, priority };
+          const payload = { title, content, priority, imageUrl };
           const response = await apiClient.post('/api/v1/announcements', payload);
 
           if (response?.success) {
@@ -161,24 +217,124 @@ export default class SupervisorAnnouncements {
 
     // 2. Delete announcement button handler
     deleteButtons.forEach(btn => {
-      const handleDelete = async () => {
+      const handleDelete = () => {
         const id = btn.getAttribute('data-id');
-        try {
-          const response = await apiClient.delete(`/api/v1/announcements/${id}`);
-          if (response?.success) {
-            notificationStore.success('Announcement removed from database.');
-            await this.loadAndRender(container, lifecycle);
-          } else {
-            throw new Error(response.message || 'Database delete failed.');
+        this.showDeleteConfirmation(async () => {
+          try {
+            const response = await apiClient.delete(`/api/v1/announcements/${id}`);
+            if (response?.success) {
+              notificationStore.success('Announcement removed from database.');
+              await this.loadAndRender(container, lifecycle);
+            } else {
+              throw new Error(response.message || 'Database delete failed.');
+            }
+          } catch (err) {
+            logger.error('SupervisorAnnouncements', 'Failed to delete announcement:', err);
+            notificationStore.danger('Failed to delete announcement from database.');
           }
-        } catch (err) {
-          logger.error('SupervisorAnnouncements', 'Failed to delete announcement:', err);
-          notificationStore.danger('Failed to delete announcement from database.');
-        }
+        });
       };
       btn.addEventListener('click', handleDelete);
       lifecycle.onCleanup(() => btn.removeEventListener('click', handleDelete));
     });
+  }
+
+  showDeleteConfirmation(onConfirm) {
+    const backdrop = document.createElement('div');
+    backdrop.style.position = 'fixed';
+    backdrop.style.top = '0';
+    backdrop.style.left = '0';
+    backdrop.style.width = '100vw';
+    backdrop.style.height = '100vh';
+    backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    backdrop.style.backdropFilter = 'blur(8px)';
+    backdrop.style.display = 'flex';
+    backdrop.style.alignItems = 'center';
+    backdrop.style.justifyContent = 'center';
+    backdrop.style.zIndex = '9999';
+    backdrop.style.animation = 'fadeIn 0.2s ease-out';
+
+    const box = document.createElement('div');
+    box.style.backgroundColor = '#1e1e1e';
+    box.style.border = '1px solid #333';
+    box.style.borderRadius = '12px';
+    box.style.padding = '24px';
+    box.style.maxWidth = '400px';
+    box.style.width = '90%';
+    box.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+    box.style.color = '#fff';
+    box.style.textAlign = 'center';
+    box.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+    box.style.animation = 'scaleUp 0.2s ease-out';
+
+    box.innerHTML = `
+      <div style="margin-bottom: 16px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h3 style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; color: #ff6b6b;">Delete Announcement</h3>
+      <p style="margin: 0 0 24px 0; font-size: 0.9rem; color: #aaa; line-height: 1.5;">Are you sure you want to permanently delete this broadcast announcement? This action cannot be undone and will delete all database records and attachments.</p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button id="confirm-cancel-btn" style="padding: 10px 18px; border-radius: 6px; border: 1px solid #444; background: transparent; color: #ccc; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;">Cancel</button>
+        <button id="confirm-delete-btn" style="padding: 10px 18px; border-radius: 6px; border: none; background: #ff6b6b; color: #fff; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;">Delete Now</button>
+      </div>
+    `;
+
+    backdrop.appendChild(box);
+    document.body.appendChild(backdrop);
+
+    const cancelBtn = box.querySelector('#confirm-cancel-btn');
+    const deleteBtn = box.querySelector('#confirm-delete-btn');
+
+    cancelBtn.onmouseenter = () => {
+      cancelBtn.style.backgroundColor = 'rgba(255,255,255,0.05)';
+      cancelBtn.style.color = '#fff';
+    };
+    cancelBtn.onmouseleave = () => {
+      cancelBtn.style.backgroundColor = 'transparent';
+      cancelBtn.style.color = '#ccc';
+    };
+
+    deleteBtn.onmouseenter = () => {
+      deleteBtn.style.backgroundColor = '#ff5252';
+    };
+    deleteBtn.onmouseleave = () => {
+      deleteBtn.style.backgroundColor = '#ff6b6b';
+    };
+
+    if (!document.getElementById('confirm-modal-animations')) {
+      const style = document.createElement('style');
+      style.id = 'confirm-modal-animations';
+      style.innerHTML = `
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const close = () => {
+      backdrop.style.animation = 'fadeIn 0.15s ease-in reverse';
+      box.style.animation = 'scaleUp 0.15s ease-in reverse';
+      setTimeout(() => {
+        if (backdrop.parentNode) {
+          document.body.removeChild(backdrop);
+        }
+      }, 140);
+    };
+
+    cancelBtn.onclick = () => {
+      close();
+    };
+
+    deleteBtn.onclick = () => {
+      close();
+      onConfirm();
+    };
+
+    backdrop.onclick = (e) => {
+      if (e.target === backdrop) {
+        close();
+      }
+    };
   }
 
   // ---------------------------------------------------------------------------
@@ -231,7 +387,13 @@ export default class SupervisorAnnouncements {
       if (titleEl) titleEl.textContent = ann.title;
       if (deleteBtn) deleteBtn.setAttribute('data-id', String(ann.id));
       if (contentEl) contentEl.textContent = ann.content;
-      if (publisherEl) publisherEl.textContent = ann.publisher;
+
+      const attachContainer = clone.querySelector('.ann-attachment-container');
+      if (attachContainer) {
+        attachContainer.innerHTML = this.renderAttachment(ann.imageUrl);
+      }
+
+      if (publisherEl) publisherEl.textContent = ann.publisher + (ann.publisherRole ? ` (${ann.publisherRole})` : '');
       if (dateEl) dateEl.textContent = ann.date;
 
       feedContainer.appendChild(clone);

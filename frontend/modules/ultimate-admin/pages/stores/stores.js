@@ -47,6 +47,7 @@ export default class StoresPage {
     this.stores = [];
     this.regions = [];
     this.selectedRegionFilter = 'all';
+    this.selectedTypeFilter = 'all';
     this.searchQuery = '';
     this.container = null;
     this.lifecycle = null;
@@ -163,8 +164,10 @@ export default class StoresPage {
     const formAddStore = container.querySelector('#form-add-store');
 
     // Restore filter values in UI fields
+    const typeFilter = container.querySelector('#select-filter-type');
     if (searchInput) searchInput.value = this.searchQuery;
     if (regionFilter) regionFilter.value = this.selectedRegionFilter;
+    if (typeFilter) typeFilter.value = this.selectedTypeFilter;
 
     // 1. Text Search Input
     if (searchInput) {
@@ -184,6 +187,16 @@ export default class StoresPage {
       };
       regionFilter.addEventListener('change', handleRegionFilter);
       lifecycle.onCleanup(() => regionFilter.removeEventListener('change', handleRegionFilter));
+    }
+
+    // 2b. Store Type Dropdown Filter
+    if (typeFilter) {
+      const handleTypeFilter = (e) => {
+        this.selectedTypeFilter = e.target.value;
+        this._renderStoreCardsList(container, lifecycle);
+      };
+      typeFilter.addEventListener('change', handleTypeFilter);
+      lifecycle.onCleanup(() => typeFilter.removeEventListener('change', handleTypeFilter));
     }
 
     // 3. Open Add Store Modal
@@ -229,6 +242,7 @@ export default class StoresPage {
         const email = container.querySelector('#store-modal-email').value.trim();
         const timezone = container.querySelector('#store-modal-timezone').value.trim();
         const openingDate = container.querySelector('#store-modal-date').value;
+        const type = container.querySelector('#store-modal-type').value;
 
         if (submitBtn) {
           submitBtn.disabled = true;
@@ -249,7 +263,8 @@ export default class StoresPage {
             openingDate: openingDate,
             regionId: regionId,
             warehouseId: 1, // mapping default central warehouse
-            active: true
+            active: true,
+            type: type
           });
 
           if (response && response.success) {
@@ -396,6 +411,11 @@ export default class StoresPage {
       filtered = filtered.filter(s => s.regionId === Number(this.selectedRegionFilter));
     }
 
+    // 2b. Store Type selection filter
+    if (this.selectedTypeFilter !== 'all') {
+      filtered = filtered.filter(s => (s.type || 'COMPACT_CAFE') === this.selectedTypeFilter);
+    }
+
     cardsGrid.replaceChildren();
 
     if (filtered.length === 0) {
@@ -425,6 +445,12 @@ export default class StoresPage {
       const deleteBtn = clone.querySelector('.btn-delete-store');
       const toggleBtn = clone.querySelector('.btn-toggle-store-state');
 
+      const storeAvatar = clone.querySelector('.store-avatar-badge');
+      const employeeCountEl = clone.querySelector('.store-employee-count');
+      const stockValueEl = clone.querySelector('.store-stock-value');
+      const contactWarehouse = clone.querySelector('.contact-warehouse');
+      const typeBadge = clone.querySelector('.store-type-badge');
+
       const activeState = s.active;
       const statusText = activeState ? 'ACTIVE' : 'INACTIVE';
       const cleanName = this.sanitizeText(s.name);
@@ -436,6 +462,25 @@ export default class StoresPage {
         storeName.setAttribute('title', cleanName);
       }
       if (regionCode) regionCode.textContent = this.sanitizeText(s.regionCode || 'IDF');
+      if (typeBadge) {
+        const typeVal = s.type || 'COMPACT_CAFE';
+        let displayType = 'COMPACT CAFÉ';
+        let modifierClass = 'store-type-badge--compact';
+        
+        if (typeVal === 'KIOSK') {
+          displayType = 'KIOSK';
+          modifierClass = 'store-type-badge--kiosk';
+        } else if (typeVal === 'FLAGSHIP_CAFE') {
+          displayType = 'FLAGSHIP CAFÉ';
+          modifierClass = 'store-type-badge--flagship';
+        }
+        
+        const typeLabel = typeBadge.querySelector('.type-code') || typeBadge.querySelector('span');
+        if (typeLabel) {
+          typeLabel.textContent = displayType;
+        }
+        typeBadge.className = `store-type-badge ${modifierClass}`;
+      }
       if (contactAddress) {
         contactAddress.textContent = cleanAddress;
         contactAddress.setAttribute('title', cleanAddress);
@@ -446,6 +491,22 @@ export default class StoresPage {
         contactEmail.setAttribute('title', s.email || '');
       }
       if (openingDate) openingDate.textContent = `Opened: ${s.openingDate || 'Unknown'}`;
+
+      if (storeAvatar) {
+        const initials = s.name ? s.name.split(' ').filter(word => word.length > 0).map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'ST';
+        storeAvatar.textContent = initials;
+      }
+      if (employeeCountEl) {
+        employeeCountEl.textContent = s.employeeCount !== undefined ? s.employeeCount : 0;
+      }
+      if (stockValueEl) {
+        const val = s.stockValue !== undefined ? s.stockValue : 0.0;
+        stockValueEl.textContent = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(val);
+      }
+      if (contactWarehouse) {
+        contactWarehouse.textContent = `Linked WH: ${s.warehouseCode || 'None'}`;
+        contactWarehouse.setAttribute('title', s.warehouseCode || 'None');
+      }
 
       if (statusBadge) {
         statusBadge.textContent = statusText;

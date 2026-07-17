@@ -80,6 +80,14 @@ class InventoryService {
   createRecall(recallDto) {
     return apiClient.post('/api/v1/inventory-recalls', recallDto);
   }
+
+  /**
+   * Retrieves dynamically calculated inventory overview metrics from the backend.
+   * @memberof Services Module
+   */
+  getInventoryDashboard() {
+    return apiClient.get('/api/v1/wms/locations/wms/inventory-dashboard');
+  }
 }
 
 export const inventoryService = new InventoryService();

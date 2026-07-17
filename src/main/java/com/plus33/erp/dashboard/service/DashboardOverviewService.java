@@ -82,7 +82,6 @@ public class DashboardOverviewService {
      * @param storeId the storeId input value
      * @return the DashboardOverviewDTO result
      */
-    @Cacheable(value = "dashboardCache", key = "{#from, #to, #regionId, #storeId, T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()}")
     public DashboardOverviewDTO getDashboardOverview(LocalDate from, LocalDate to, Long regionId, Long storeId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         String userRole = "ULTIMATE_ADMIN";
@@ -115,55 +114,117 @@ public class DashboardOverviewService {
             
             Long assignedRegionId = null;
             try {
-                assignedRegionId = ((Number) entityManager.createNativeQuery(
-                        "SELECT region_id FROM user_regions ur JOIN users u ON ur.user_id = u.id WHERE LOWER(u.email) = LOWER(:email)")
+                @SuppressWarnings("unchecked")
+                java.util.List<Object> regionIds = entityManager.createNativeQuery(
+                        "SELECT region_id FROM user_regions ur JOIN users u ON ur.user_id = u.id WHERE LOWER(u.email) = LOWER(:email) ORDER BY ur.assigned_at DESC LIMIT 1")
                         .setParameter("email", username)
-                        .getSingleResult()).longValue();
+                        .getResultList();
+                if (!regionIds.isEmpty() && regionIds.get(0) != null) {
+                    assignedRegionId = ((Number) regionIds.get(0)).longValue();
+                }
             } catch (Exception e) {
+                // ignore
+            }
+            // If still null, try resolving from their store assignment's region
+            if (assignedRegionId == null) {
                 try {
-                    assignedRegionId = ((Number) entityManager.createNativeQuery("SELECT id FROM regions LIMIT 1").getSingleResult()).longValue();
-                } catch (Exception ex) {
-                    assignedRegionId = 1L;
+                    @SuppressWarnings("unchecked")
+                    java.util.List<Object> storeRegionIds = entityManager.createNativeQuery(
+                            "SELECT s.region_id FROM user_stores us JOIN users u ON us.user_id = u.id JOIN stores s ON us.store_id = s.id WHERE LOWER(u.email) = LOWER(:email) LIMIT 1")
+                            .setParameter("email", username)
+                            .getResultList();
+                    if (!storeRegionIds.isEmpty() && storeRegionIds.get(0) != null) {
+                        assignedRegionId = ((Number) storeRegionIds.get(0)).longValue();
+                    }
+                } catch (Exception e) {
+                    // ignore
                 }
             }
+            // Last resort: lock to the region from the passed regionId parameter itself
+            if (assignedRegionId == null && regionId != null) {
+                assignedRegionId = regionId;
+            }
+            // Absolute fallback — no valid region resolved
+            if (assignedRegionId == null) {
+                assignedRegionId = -1L; // invalid ID — will return no data rather than wrong data
+            }
+
             
-            // Lock down dashboard queries strictly to the user's assigned country/region
-            resolvedRegionId = assignedRegionId;
+            // Lock down dashboard queries strictly to the user's assigned country/region or its children (multi-level hierarchy check)
+            if (regionId != null) {
+                boolean isValidRegion = false;
+                if (regionId.equals(assignedRegionId)) {
+                    isValidRegion = true;
+                } else {
+                    // Walk up the hierarchy: check if regionId is a descendant of assignedRegionId
+                    Long checkId = regionId;
+                    int maxDepth = 5;
+                    while (checkId != null && maxDepth-- > 0) {
+                        try {
+                            Number parentId = (Number) entityManager.createNativeQuery(
+                                    "SELECT parent_id FROM regions WHERE id = :rId")
+                                    .setParameter("rId", checkId)
+                                    .getSingleResult();
+                            if (parentId != null && parentId.longValue() == assignedRegionId.longValue()) {
+                                isValidRegion = true;
+                                break;
+                            }
+                            checkId = parentId != null ? parentId.longValue() : null;
+                        } catch (Exception ex) {
+                            break;
+                        }
+                    }
+                }
+                if (isValidRegion) {
+                    resolvedRegionId = regionId;
+                } else {
+                    resolvedRegionId = assignedRegionId;
+                }
+            } else {
+                resolvedRegionId = assignedRegionId;
+            }
+
             
-            // Validate that storeId belongs to their region tree
+            // Validate that storeId belongs to their region tree (multi-level hierarchy check)
             if (resolvedStoreId != null) {
                 try {
-                    Number storeRegionId = (Number) entityManager.createNativeQuery(
+                    // Get the store's direct region ID
+                    Number storeDirectRegId = (Number) entityManager.createNativeQuery(
                             "SELECT region_id FROM stores WHERE id = :storeId")
                             .setParameter("storeId", resolvedStoreId)
                             .getSingleResult();
-                    
-                    if (storeRegionId != null) {
-                        long srId = storeRegionId.longValue();
-                        boolean isChild = false;
-                        if (srId == assignedRegionId.longValue()) {
-                            isChild = true;
-                        } else {
+
+                    boolean isChild = false;
+                    if (storeDirectRegId != null) {
+                        Long currentRegionId = storeDirectRegId.longValue();
+                        // Walk up the hierarchy until we find assignedRegionId or reach root
+                        int maxDepth = 5; // prevent infinite loop
+                        while (currentRegionId != null && maxDepth-- > 0) {
+                            if (currentRegionId.equals(assignedRegionId)) {
+                                isChild = true;
+                                break;
+                            }
+                            // Move to parent region
                             try {
                                 Number parentId = (Number) entityManager.createNativeQuery(
                                         "SELECT parent_id FROM regions WHERE id = :rId")
-                                        .setParameter("rId", srId)
+                                        .setParameter("rId", currentRegionId)
                                         .getSingleResult();
-                                if (parentId != null && parentId.longValue() == assignedRegionId.longValue()) {
-                                    isChild = true;
-                                }
+                                currentRegionId = parentId != null ? parentId.longValue() : null;
                             } catch (Exception ex) {
-                                // ignore
+                                break;
                             }
                         }
-                        if (!isChild) {
-                            resolvedStoreId = null;
-                        }
+                    }
+
+                    if (!isChild) {
+                        resolvedStoreId = null;
                     }
                 } catch (Exception e) {
                     resolvedStoreId = null;
                 }
             }
+
         } else if (userRole.equalsIgnoreCase("storeManager") || userRole.equalsIgnoreCase("ROLE_STORE_ADMIN") || userRole.equalsIgnoreCase("ROLE_STORE_MANAGER") ||
                    userRole.equalsIgnoreCase("STORE_ADMIN") || userRole.equalsIgnoreCase("STORE_MANAGER")) {
             Long assignedStoreId = null;

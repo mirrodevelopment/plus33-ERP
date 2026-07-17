@@ -1,37 +1,559 @@
 <!--
- ******************************************************************************
+ * ******************************************************************************
  * Project           : PLUS33 Coffee ERP
- * Module            : Warehouse Admin — Inventory Stock Ledger
+ * Module            : Warehouse Admin — Inventory Stock Ledger & Dashboard
  * File              : stock-list.html
  * Path              : frontend/modules/inventory/pages/stock-list.html
- * Purpose           : HTML template for Inventory Stock Ledger layout context
- * Version           : 2.0.0
- *
- * Related JS        : stock-list.js
- * Related CSS       : stock-list.css
- *
- * Description
- * ---------------------------------------------------------------------------
- * Structural layout of stock balances and lot recall triggers.
- * No inline styles, no inline javascript event handlers.
- ******************************************************************************
+ * Purpose           : HTML template for Inventory Stock Ledger layout and graphs
+ * Version           : 3.0.0
+ * ******************************************************************************
 -->
 
 <div class="inventory-ledger-workspace animate-fade-in">
 
-  <!-- ===== PAGE HEADER ===== -->
-  <div class="page-title-banner">
-    <div class="page-title-left">
-      <h2 class="page-title">WMS Inventory Stock Ledger</h2>
-      <p class="page-subtitle">Real-time stock balances and lot expirations</p>
+  <!-- ===== 1. WELCOME HEADER BANNER ===== -->
+  <div class="dashboard-welcome-banner">
+    <div class="welcome-text">
+      <h2>Good Morning, Siva Surya! 👋</h2>
+      <p>Here's what's happening with your business today.</p>
     </div>
+    <div class="welcome-date-card">
+      <span class="calendar-icon">📅</span>
+      <div class="date-card-content">
+        <span class="current-date-str" id="dashboard-current-date">14 July 2026, Tuesday</span>
+        <span class="fiscal-year">Financial Year 2026-27</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 2. QUICK ACTIONS GRID ===== -->
+  <div class="quick-actions-grid">
+    <div class="action-card action-transfer" id="action-btn-transfer">
+      <div class="action-icon-box">📦</div>
+      <div class="action-info">
+        <h4>Inventory Transfer</h4>
+        <p>Move stock between locations</p>
+      </div>
+    </div>
+    <div class="action-card action-adjust" id="action-btn-adjust">
+      <div class="action-icon-box">🎛️</div>
+      <div class="action-info">
+        <h4>Inventory Adjustment</h4>
+        <p>Adjust stock quantities</p>
+      </div>
+    </div>
+    <div class="action-card action-pos" id="action-btn-pos">
+      <div class="action-icon-box">🖩</div>
+      <div class="action-info">
+        <h4>Open POS</h4>
+        <p>Start a new sale</p>
+      </div>
+    </div>
+    <div class="action-card action-po" id="action-btn-po">
+      <div class="action-icon-box">🛒</div>
+      <div class="action-info">
+        <h4>Purchase Order</h4>
+        <p>Create new purchase order</p>
+      </div>
+    </div>
+    <div class="action-card action-count" id="action-btn-count">
+      <div class="action-icon-box">📋</div>
+      <div class="action-info">
+        <h4>Stock Count</h4>
+        <p>Perform stock counting</p>
+      </div>
+    </div>
+    <div class="action-card action-reports" id="action-btn-reports">
+      <div class="action-icon-box">📊</div>
+      <div class="action-info">
+        <h4>Reports</h4>
+        <p>View reports & analytics</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 3. KPI CARDS ROW ===== -->
+  <div class="kpi-cards-grid">
+    <!-- Total Inventory Value -->
+    <div class="kpi-metric-card">
+      <div class="kpi-card-header">
+        <div class="kpi-card-icon">🏛️</div>
+        <div class="kpi-card-meta">
+          <span class="kpi-label">Total Inventory Value</span>
+          <h3 class="kpi-val" id="kpi-val-inventory">₹ 6.4M</h3>
+        </div>
+      </div>
+      <div class="kpi-card-footer">
+        <span class="kpi-trend trend-up">↑ 11.85%</span>
+        <span class="kpi-trend-label">vs Last Month</span>
+        <div class="kpi-sparkline">
+          <svg class="spark-svg" viewBox="0 0 50 15">
+            <path d="M0 12 Q 10 5, 20 8 T 40 4 T 50 2" fill="none" stroke="#2e7d32" stroke-width="1.5"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Low Stock Items -->
+    <div class="kpi-metric-card">
+      <div class="kpi-card-header">
+        <div class="kpi-card-icon">📦</div>
+        <div class="kpi-card-meta">
+          <span class="kpi-label">Low Stock Items</span>
+          <h3 class="kpi-val" id="kpi-val-lowstock">142</h3>
+        </div>
+      </div>
+      <div class="kpi-card-footer">
+        <span class="kpi-trend trend-up-warn">↑ 6.24%</span>
+        <span class="kpi-trend-label">vs Last Month</span>
+        <div class="kpi-sparkline">
+          <svg class="spark-svg" viewBox="0 0 50 15">
+            <path d="M0 10 Q 15 12, 30 6 T 50 4" fill="none" stroke="#c62828" stroke-width="1.5"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Orders -->
+    <div class="kpi-metric-card">
+      <div class="kpi-card-header">
+        <div class="kpi-card-icon">🛍️</div>
+        <div class="kpi-card-meta">
+          <span class="kpi-label">Purchase Orders</span>
+          <h3 class="kpi-val" id="kpi-val-orders">22</h3>
+        </div>
+      </div>
+      <div class="kpi-card-footer">
+        <span class="kpi-trend trend-up">↑ 5.40%</span>
+        <span class="kpi-trend-label">vs Last Month</span>
+        <div class="kpi-sparkline">
+          <svg class="spark-svg" viewBox="0 0 50 15">
+            <path d="M0 13 Q 12 10, 25 11 T 50 3" fill="none" stroke="#2e7d32" stroke-width="1.5"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Sales -->
+    <div class="kpi-metric-card">
+      <div class="kpi-card-header">
+        <div class="kpi-card-icon">💳</div>
+        <div class="kpi-card-meta">
+          <span class="kpi-label">Today's Sales</span>
+          <h3 class="kpi-val" id="kpi-val-sales">₹ 1.28M</h3>
+        </div>
+      </div>
+      <div class="kpi-card-footer">
+        <span class="kpi-trend trend-up">↑ 12.60%</span>
+        <span class="kpi-trend-label">vs Last Month</span>
+        <div class="kpi-sparkline">
+          <svg class="spark-svg" viewBox="0 0 50 15">
+            <path d="M0 14 Q 10 12, 20 8 T 40 4 T 50 1" fill="none" stroke="#2e7d32" stroke-width="1.5"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gross Profit -->
+    <div class="kpi-metric-card">
+      <div class="kpi-card-header">
+        <div class="kpi-card-icon">🪙</div>
+        <div class="kpi-card-meta">
+          <span class="kpi-label">Gross Profit</span>
+          <h3 class="kpi-val" id="kpi-val-profit">₹ 458K</h3>
+        </div>
+      </div>
+      <div class="kpi-card-footer">
+        <span class="kpi-trend trend-up">↑ 15.32%</span>
+        <span class="kpi-trend-label">vs Last Month</span>
+        <div class="kpi-sparkline">
+          <svg class="spark-svg" viewBox="0 0 50 15">
+            <path d="M0 11 Q 12 8, 25 9 T 50 2" fill="none" stroke="#2e7d32" stroke-width="1.5"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4. CORE DASHBOARD SPLIT GRID ===== -->
+  <div class="dashboard-split-grid">
     
-    <button id="btn-trigger-recall" class="btn btn-danger btn-recall animate-pulse" type="button">
+    <!-- LEFT SIDE: KPIs & TREND GRAPH -->
+    <div class="split-left-column">
+      
+      <!-- Key Performance Indicators Table -->
+      <div class="dashboard-card main-kpis-card">
+        <div class="dashboard-card-header">
+          <h3>Key Performance Indicators</h3>
+        </div>
+        <div class="dashboard-kpi-table-wrapper">
+          <table class="dashboard-kpi-table">
+            <thead>
+              <tr>
+                <th>Indicator</th>
+                <th>This Month</th>
+                <th>Last Month</th>
+                <th class="text-right">Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-semibold">Orders</td>
+                <td>856</td>
+                <td>745</td>
+                <td class="text-right text-success font-semibold">↑ 14.90%</td>
+              </tr>
+              <tr>
+                <td class="font-semibold">Inventory Value</td>
+                <td>₹ 6,441,455</td>
+                <td>₹ 5,934,012</td>
+                <td class="text-right text-success font-semibold">↑ 8.56%</td>
+              </tr>
+              <tr>
+                <td class="font-semibold">Open Purchase Orders</td>
+                <td>22</td>
+                <td>18</td>
+                <td class="text-right text-success font-semibold">↑ 22.22%</td>
+              </tr>
+              <tr>
+                <td class="font-semibold">Value of Open POs</td>
+                <td>₹ 718,106</td>
+                <td>₹ 604,334</td>
+                <td class="text-right text-success font-semibold">↑ 18.81%</td>
+              </tr>
+              <tr>
+                <td class="font-semibold">Stock Turnover (YTD)</td>
+                <td>4.62</td>
+                <td>3.98</td>
+                <td class="text-right text-success font-semibold">↑ 16.08%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Monthly Inventory Trend Section -->
+      <div class="dashboard-card trend-chart-card">
+        <div class="dashboard-card-header">
+          <div class="card-header-left">
+            <h3>Monthly Inventory Trend</h3>
+            <span class="subtitle-badge">This Year</span>
+          </div>
+          <div class="card-header-right">
+            <span class="legend-dot-item"><span class="legend-color-box val-bar-color"></span> Inventory Value (₹)</span>
+            <span class="legend-dot-item"><span class="legend-color-box item-line-color"></span> Inventory Items</span>
+          </div>
+        </div>
+        
+        <!-- Interactive Graph Container -->
+        <div class="trend-graph-container">
+          <div class="trend-graph-y-axis">
+            <span>₹ 6M</span>
+            <span>₹ 4M</span>
+            <span>₹ 2M</span>
+            <span>₹ 0</span>
+          </div>
+          
+          <div class="trend-graph-bars-wrapper">
+            <div class="trend-graph-bars-grid">
+              <!-- Jan - Dec Columns -->
+              <div class="trend-col"><div class="trend-bar" style="height: 35%;"></div><span class="trend-month">Jan</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 40%;"></div><span class="trend-month">Feb</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 48%;"></div><span class="trend-month">Mar</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 52%;"></div><span class="trend-month">Apr</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 60%;"></div><span class="trend-month">May</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 62%;"></div><span class="trend-month">Jun</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 68%;"></div><span class="trend-month">Jul</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 72%;"></div><span class="trend-month">Aug</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 75%;"></div><span class="trend-month">Sep</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 80%;"></div><span class="trend-month">Oct</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 88%;"></div><span class="trend-month">Nov</span></div>
+              <div class="trend-col"><div class="trend-bar" style="height: 95%;"></div><span class="trend-month">Dec</span></div>
+            </div>
+            
+            <!-- SVG overlay path for Items Line -->
+            <svg class="trend-line-svg" viewBox="0 0 600 150" preserveAspectRatio="none">
+              <path d="M25 110 Q 75 105, 125 98 T 225 85 T 325 78 T 425 65 T 525 50 T 575 42" fill="none" stroke="#5c3a21" stroke-width="3" stroke-linecap="round"></path>
+              <!-- Data Points -->
+              <circle cx="25" cy="110" r="4" fill="#5c3a21"></circle>
+              <circle cx="75" cy="105" r="4" fill="#5c3a21"></circle>
+              <circle cx="125" cy="98" r="4" fill="#5c3a21"></circle>
+              <circle cx="175" cy="92" r="4" fill="#5c3a21"></circle>
+              <circle cx="225" cy="85" r="4" fill="#5c3a21"></circle>
+              <circle cx="275" cy="81" r="4" fill="#5c3a21"></circle>
+              <circle cx="325" cy="78" r="4" fill="#5c3a21"></circle>
+              <circle cx="375" cy="72" r="4" fill="#5c3a21"></circle>
+              <circle cx="425" cy="65" r="4" fill="#5c3a21"></circle>
+              <circle cx="475" cy="58" r="4" fill="#5c3a21"></circle>
+              <circle cx="525" cy="50" r="4" fill="#5c3a21"></circle>
+              <circle cx="575" cy="42" r="4" fill="#5c3a21"></circle>
+            </svg>
+          </div>
+          
+          <div class="trend-graph-right-y-axis">
+            <span>1,200</span>
+            <span>800</span>
+            <span>400</span>
+            <span>0</span>
+          </div>
+        </div>
+
+        <!-- Footer Statistics Strip -->
+        <div class="trend-footer-strip">
+          <div class="footer-stat-unit">
+            <span class="f-stat-val">1,248</span>
+            <span class="f-stat-label">Total Products</span>
+          </div>
+          <div class="footer-stat-unit">
+            <span class="f-stat-val">28</span>
+            <span class="f-stat-label">Total Categories</span>
+          </div>
+          <div class="footer-stat-unit">
+            <span class="f-stat-val">5</span>
+            <span class="f-stat-label">Warehouses</span>
+          </div>
+          <div class="footer-stat-unit">
+            <span class="f-stat-val">42</span>
+            <span class="f-stat-label">Stores</span>
+          </div>
+          <div class="footer-stat-unit">
+            <span class="f-stat-val">156</span>
+            <span class="f-stat-label">Suppliers</span>
+          </div>
+          <div class="footer-stat-unit">
+            <span class="f-stat-val">328</span>
+            <span class="f-stat-label">Employees</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDE: GAUGE & TOP 10 ITEMS & DONUT -->
+    <div class="split-right-column">
+      
+      <!-- Inventory Overview Semicircle Gauge -->
+      <div class="dashboard-card gauge-card">
+        <div class="dashboard-card-header">
+          <h3>Inventory Overview</h3>
+          <span class="card-header-badge">This Month</span>
+        </div>
+        
+        <div class="gauge-chart-wrapper">
+          <svg class="gauge-svg" width="160" height="90" viewBox="0 0 100 50">
+            <!-- Background Arc -->
+            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#eae3db" stroke-width="10" stroke-linecap="round"></path>
+            <!-- Foreground Filled Arc (64%) -->
+            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#599047" stroke-width="10" stroke-linecap="round"
+                  stroke-dasharray="125.6" stroke-dashoffset="45.22"></path>
+          </svg>
+          <div class="gauge-center-content">
+            <h3 class="gauge-main-val">₹ 6.4M</h3>
+            <span class="gauge-sub-label">Inventory Value</span>
+          </div>
+          <div class="gauge-scale-limits">
+            <span>0</span>
+            <span>64%</span>
+            <span>₹ 10M</span>
+          </div>
+        </div>
+        
+        <div class="gauge-footer-trend">
+          <span class="text-success font-semibold">↑ 11.85%</span>
+          <span class="text-muted">vs Last Month</span>
+        </div>
+      </div>
+
+      <!-- Top 10 Items By Qty Sold -->
+      <div class="dashboard-card top-items-card">
+        <div class="dashboard-card-header">
+          <h3>Top 10 Items By Qty Sold</h3>
+          <span class="card-header-badge">This Month</span>
+        </div>
+        
+        <div class="top-items-list-wrapper">
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">1.</span>
+              <span class="item-name">Espresso</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 100%;"></div>
+            </div>
+            <span class="item-qty">2,450</span>
+          </div>
+          
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">2.</span>
+              <span class="item-name">Cappuccino</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 86%;"></div>
+            </div>
+            <span class="item-qty">2,120</span>
+          </div>
+
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">3.</span>
+              <span class="item-name">Latte</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 80%;"></div>
+            </div>
+            <span class="item-qty">1,980</span>
+          </div>
+
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">4.</span>
+              <span class="item-name">Americano</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 71%;"></div>
+            </div>
+            <span class="item-qty">1,750</span>
+          </div>
+
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">5.</span>
+              <span class="item-name">Croissant</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 53%;"></div>
+            </div>
+            <span class="item-qty">1,320</span>
+          </div>
+
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">6.</span>
+              <span class="item-name">Cold Brew</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 49%;"></div>
+            </div>
+            <span class="item-qty">1,210</span>
+          </div>
+
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">7.</span>
+              <span class="item-name">Chocolate Muffin</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 47%;"></div>
+            </div>
+            <span class="item-qty">1,150</span>
+          </div>
+
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">8.</span>
+              <span class="item-name">Iced Latte</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 42%;"></div>
+            </div>
+            <span class="item-qty">1,050</span>
+          </div>
+
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">9.</span>
+              <span class="item-name">Mocha</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 40%;"></div>
+            </div>
+            <span class="item-qty">980</span>
+          </div>
+
+          <div class="top-item-row">
+            <div class="top-item-meta">
+              <span class="item-rank">10.</span>
+              <span class="item-name">Brownie</span>
+            </div>
+            <div class="item-bar-container">
+              <div class="item-progress-bar" style="width: 35%;"></div>
+            </div>
+            <span class="item-qty">870</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Distribution Donut Chart -->
+      <div class="dashboard-card donut-dist-card">
+        <div class="dashboard-card-header">
+          <h3>Category Distribution</h3>
+        </div>
+        
+        <div class="donut-dist-body">
+          <div class="donut-dist-chart-wrapper">
+            <svg class="donut-svg" width="120" height="120" viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#eae3db" stroke-width="4"></circle>
+              <!-- Beverages (35.6%) -->
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#8d6e63" stroke-width="4.5" stroke-dasharray="35.6 64.4" stroke-dashoffset="25"></circle>
+              <!-- Food (22.4%) -->
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#a1887f" stroke-width="4.5" stroke-dasharray="22.4 77.6" stroke-dashoffset="89.4"></circle>
+              <!-- Ingredients (16.2%) -->
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#d7ccc8" stroke-width="4.5" stroke-dasharray="16.2 83.8" stroke-dashoffset="67"></circle>
+              <!-- Retail (7.8%) -->
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#b0bec5" stroke-width="4.5" stroke-dasharray="7.8 92.2" stroke-dashoffset="50.8"></circle>
+              <!-- Packaging (5.4%) -->
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#78909c" stroke-width="4.5" stroke-dasharray="5.4 94.6" stroke-dashoffset="43"></circle>
+              <!-- Merchandise (4.6%) -->
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#cfd8dc" stroke-width="4.5" stroke-dasharray="4.6 95.4" stroke-dashoffset="37.6"></circle>
+              <!-- Others (8.0%) -->
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#eceff1" stroke-width="4.5" stroke-dasharray="8.0 92.0" stroke-dashoffset="33"></circle>
+              <g class="donut-text">
+                <text x="50%" y="50%" class="donut-number">100%</text>
+              </g>
+            </svg>
+          </div>
+          
+          <div class="donut-dist-legends">
+            <div class="legend-item"><span class="color-dot" style="background-color: #8d6e63;"></span> <span class="lbl">Beverages</span> <span class="val">35.6%</span></div>
+            <div class="legend-item"><span class="color-dot" style="background-color: #a1887f;"></span> <span class="lbl">Food</span> <span class="val">22.4%</span></div>
+            <div class="legend-item"><span class="color-dot" style="background-color: #d7ccc8;"></span> <span class="lbl">Ingredients</span> <span class="val">16.2%</span></div>
+            <div class="legend-item"><span class="color-dot" style="background-color: #b0bec5;"></span> <span class="lbl">Retail</span> <span class="val">7.8%</span></div>
+            <div class="legend-item"><span class="color-dot" style="background-color: #78909c;"></span> <span class="lbl">Packaging</span> <span class="val">5.4%</span></div>
+            <div class="legend-item"><span class="color-dot" style="background-color: #cfd8dc;"></span> <span class="lbl">Merchandise</span> <span class="val">4.6%</span></div>
+            <div class="legend-item"><span class="color-dot" style="background-color: #eceff1;"></span> <span class="lbl">Others</span> <span class="val">8.0%</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===== 5. FILTERS RIBBON ===== -->
+  <div class="search-filters-bar glass">
+    <div class="search-input-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="inventory-search" placeholder="Search by product name, lot, or supplier..." autocomplete="off" />
+    </div>
+    <div class="filter-select-wrapper">
+      <select id="inventory-category-filter">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+    <div class="filter-select-wrapper">
+      <select id="inventory-status-filter">
+        <option value="">All Stock Levels</option>
+        <option value="healthy">In Stock (> 100)</option>
+        <option value="warning">Low Stock (≤ 100)</option>
+      </select>
+    </div>
+    <button id="btn-trigger-recall" class="btn btn-danger btn-recall animate-pulse" type="button" style="margin-left: auto;">
       ⚠️ Trigger Lot Recall
     </button>
   </div>
 
-  <!-- ===== STOCK LEDGER TABLE ===== -->
+  <!-- ===== 6. STOCK LEDGER TABLE ===== -->
   <div id="stock-ledger-table-container" class="card glass table-card">
     <div class="spinner-container">
       <div class="spinner"></div>

@@ -35,11 +35,7 @@
     </div>
   </div>
 
-  <!-- ===== CAPACITY RULE WARNING BANNER ===== -->
-  <div class="capacity-rule-ribbon" role="alert">
-    <i data-lucide="info" class="capacity-info-icon" aria-hidden="true"></i>
-    <span>Shift Capacity Rules: Maximum store capacity of 30 employees. Maximum 10 employees allowed per active shift.</span>
-  </div>
+
 
   <!-- ===== WEEKLY CALENDAR GRID CONTAINER ===== -->
   <div class="card glass calendar-card">
@@ -66,23 +62,29 @@
 
         <div class="swap-form-body">
           <div class="form-group">
-            <label for="swap-my-shift" class="form-label">Select My Shift</label>
+            <label for="swap-my-shift" class="form-label">Select My Shift <span style="font-size:0.65rem; color:var(--text-muted); font-weight:400;">(next 7 days only)</span></label>
             <select id="swap-my-shift" class="form-select">
               <option value="">-- Choose one of your shifts --</option>
               <!-- Populated dynamically by JS -->
             </select>
           </div>
 
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label for="swap-peer-name" class="form-label">Peer Barista Name</label>
-              <input type="text" id="swap-peer-name" class="form-input" placeholder="e.g. Rohan Sharma">
-            </div>
-            
-            <div class="form-group">
-              <label for="swap-peer-shift" class="form-label">Peer Shift Details</label>
-              <input type="text" id="swap-peer-shift" class="form-input" placeholder="e.g. Tue (Morning Shift)">
-            </div>
+          <div class="form-group" id="preferred-shift-group" style="display:none;">
+            <label for="swap-peer-shift" class="form-label">Preferred Shift Type</label>
+            <select id="swap-peer-shift" class="form-select">
+              <option value="">-- Choose preferred shift --</option>
+              <!-- Populated dynamically based on selected shift -->
+            </select>
+            <span id="preferred-shift-hint" style="font-size:0.65rem; color:var(--text-muted); display:block; margin-top:4px;"></span>
+          </div>
+
+          <div class="form-group" id="preferred-date-group" style="display:none;">
+            <label for="swap-preferred-date" class="form-label">
+              Preferred Date to Work New Shift
+              <span style="font-size:0.65rem; color:var(--text-muted); font-weight:400;">(within next 7 days)</span>
+            </label>
+            <input type="date" id="swap-preferred-date" class="form-input">
+            <span id="preferred-date-hint" style="font-size:0.65rem; color:var(--text-muted); display:block; margin-top:4px;">Select the date you would like to work your new shift.</span>
           </div>
 
           <button class="btn btn-primary btn-submit-swap" id="btn-submit-swap" type="button">
@@ -97,9 +99,9 @@
             <table class="swap-requests-table">
               <thead>
                 <tr class="table-header-row">
-                  <th scope="col">My Shift</th>
-                  <th scope="col">Peer Barista</th>
-                  <th scope="col">Peer Target</th>
+                  <th scope="col">My Shift Date</th>
+                  <th scope="col">Preferred Shift</th>
+                  <th scope="col">Preferred Date</th>
                   <th scope="col">Status</th>
                 </tr>
               </thead>
@@ -112,47 +114,7 @@
       </div>
     </div>
 
-    <!-- Right Column: Preferences Availability Form -->
-    <div class="layout-column-right">
-      <div class="card glass preferences-card">
-        <div class="card-header-split">
-          <h3 class="card-split-title">Shift Preferences</h3>
-          <i data-lucide="settings" class="card-split-icon" aria-hidden="true"></i>
-        </div>
 
-        <div class="preferences-form-body">
-          <!-- Preferred Shift -->
-          <div class="form-group">
-            <label class="form-label">Preferred Shift Slot</label>
-            <div class="preference-pills-row" id="pref-slots-row">
-              <!-- Loaded dynamically by JS -->
-            </div>
-          </div>
-
-          <!-- Weekend Availability checkbox -->
-          <div class="form-group">
-            <label class="form-label">Weekend Availability</label>
-            <label class="custom-checkbox-wrapper" id="pref-weekend-lbl">
-              <input type="checkbox" id="pref-weekend" class="native-checkbox">
-              <span id="pref-weekend-box" class="custom-checkbox-span" role="checkbox" aria-checked="false" tabindex="0">
-                <!-- Checkmark SVG added by JS when checked -->
-              </span>
-              <span class="checkbox-label-text">I am available to work weekend holiday shifts</span>
-            </label>
-          </div>
-
-          <!-- Target working hours -->
-          <div class="form-group">
-            <label for="pref-hours" class="form-label">Target Hours Per Week</label>
-            <input type="number" id="pref-hours" class="form-input" min="10" max="60" value="40">
-          </div>
-
-          <button class="btn btn-secondary btn-save-pref" id="btn-save-preferences" type="button">
-            Update Schedule Preferences
-          </button>
-        </div>
-      </div>
-    </div>
 
   </div>
 
@@ -169,7 +131,7 @@
 <!-- ===== EMPTY TRADES ROW TEMPLATE ===== -->
 <template id="swap-empty-row-tpl">
   <tr>
-    <td colspan="4" class="empty-swaps-cell">No trade requests filed in cache.</td>
+    <td colspan="4" class="empty-swaps-cell">No swap requests submitted yet.</td>
   </tr>
 </template>
 
@@ -178,8 +140,8 @@
 <template id="swap-row-tpl">
   <tr class="swap-row">
     <td class="swap-my-cell font-bold"></td>
-    <td class="swap-peer-cell"></td>
     <td class="swap-target-cell"></td>
+    <td class="swap-preferred-date-cell"></td>
     <td class="swap-status-cell font-bold"></td>
   </tr>
 </template>

@@ -28,6 +28,7 @@
 package com.plus33.erp.workforce.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -113,6 +114,18 @@ public record EmployeeResponse(
 
         @Schema(description = "Active status of the employee", example = "true")
         Boolean active,
+
+        @Schema(description = "Monthly basic salary amount", example = "2400.00")
+        BigDecimal salary,
+
+        @Schema(description = "Currently active shift name and timing", example = "Morning Shift (06:00 - 14:00)")
+        String activeShift,
+
+        @Schema(description = "Attendance status today (e.g. PRESENT, ABSENT, ON_LEAVE)", example = "PRESENT")
+        String todayStatus,
+
+        @Schema(description = "Dynamic profile image URL of the employee", example = "imgs/avatars/EMP_001_profile_img.png")
+        String avatarUrl,
 
         @Schema(description = "Creation date time", example = "2026-06-20T12:00:00")
         LocalDateTime createdAt,

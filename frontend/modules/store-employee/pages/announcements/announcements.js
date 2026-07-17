@@ -41,6 +41,34 @@ export default class StoreEmployeeAnnouncements {
     this.filterStatus = 'all'; // 'all', 'unread', 'critical'
   }
 
+  renderAttachment(url) {
+    if (!url) return '';
+    const lower = url.toLowerCase();
+    if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.ogg') || lower.endsWith('.mov')) {
+      return `
+        <div style="margin: 8px 0; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); max-height: 250px; background: #000;">
+          <video src="${url}" controls style="width: 100%; height: auto; max-height: 250px;"></video>
+        </div>
+      `;
+    } else if (lower.endsWith('.pdf')) {
+      return `
+        <div style="margin: 8px 0; padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+            <span style="font-size: 0.78rem; color: var(--text-primary); font-weight: 600;">PDF Document Attachment</span>
+          </div>
+          <a href="${url}" target="_blank" class="btn" style="padding: 4px 10px; font-size: 0.7rem; border-radius: var(--radius-xs); border: 1px solid var(--accent-primary); background: transparent; color: var(--accent-primary); font-weight: 700; text-decoration: none;">Open PDF</a>
+        </div>
+      `;
+    } else {
+      return `
+        <div style="margin: 8px 0; max-height: 180px; overflow: hidden; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <img src="${url}" alt="Attachment" style="width: 100%; height: auto; object-fit: cover; max-height: 180px;">
+        </div>
+      `;
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // LIFECYCLE: mount
   // ---------------------------------------------------------------------------
@@ -209,8 +237,10 @@ export default class StoreEmployeeAnnouncements {
             <h4 class="modal-ann-title">${ann.title}</h4>
             <p class="modal-content-paragraph">${ann.content}</p>
             
+            ${this.renderAttachment(ann.imageUrl)}
+
             <div class="modal-publisher-row">
-              <span>Publisher: <strong>${ann.publisher}</strong></span>
+              <span>Publisher: <strong>${ann.publisher}${ann.publisherRole ? ` (${ann.publisherRole})` : ''}</strong></span>
               <span>Status: <strong style="color:var(--status-success);">Read</strong></span>
             </div>
             
@@ -392,7 +422,13 @@ export default class StoreEmployeeAnnouncements {
       if (titleText) titleText.textContent = ann.title;
       if (unreadDot && ann.read) unreadDot.style.display = 'none';
       if (contentParagraph) contentParagraph.textContent = ann.content;
-      if (publisherLabel) publisherLabel.textContent = `Publisher: ${ann.publisher}`;
+
+      const attachContainer = clone.querySelector('.ann-attachment-container');
+      if (attachContainer) {
+        attachContainer.innerHTML = this.renderAttachment(ann.imageUrl);
+      }
+
+      if (publisherLabel) publisherLabel.textContent = `Publisher: ${ann.publisher}` + (ann.publisherRole ? ` (${ann.publisherRole})` : '');
 
       // Status buttons
       if (ann.read) {

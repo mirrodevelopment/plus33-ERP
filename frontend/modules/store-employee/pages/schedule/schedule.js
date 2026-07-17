@@ -21,6 +21,7 @@ import { userStore } from '../../../../store/userStore.js';
 import { notificationStore } from '../../../../store/notificationStore.js';
 import { logger } from '../../../../core/logger.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
+import { apiClient } from '../../../../api/client.js';
 
 /** Path to the schedule HTML template */
 const TEMPLATE_URL = 'modules/store-employee/pages/schedule/schedule.html';
@@ -56,8 +57,8 @@ export default class StoreEmployeeSchedule {
     // 1. Inject HTML layout template
     await this._loadTemplate(container);
 
-    // 2. Read state details
-    this.loadState();
+    // 2. Load dynamic dates and shifts from backend
+    await this.loadScheduleData();
 
     // 3. Render layout elements
     this.render(container);
@@ -88,22 +89,93 @@ export default class StoreEmployeeSchedule {
     }
   }
 
+  formatDateYMD(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  async loadScheduleData() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = this.formatDateYMD(today);
+      
+      const res = await apiClient.get(`/api/v1/shift-assignments/my-schedule?startDate=${todayStr}`);
+      const assignments = (res && res.success) ? res.data : [];
+
+      const shiftsRes = await apiClient.get('/api/v1/shifts');
+      this.systemShifts = (shiftsRes && shiftsRes.success) ? shiftsRes.data : [];
+
+      const swapsRes = await apiClient.get('/api/v1/shift-swaps/my-requests');
+      const swaps = (swapsRes && swapsRes.success) ? swapsRes.data : [];
+
+      const shifts = [];
+      const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() + i);
+        const dStr = this.formatDateYMD(d);
+
+        const dateLbl = `${weekdays[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]}`;
+
+        const assign = assignments.find(a => {
+          const from = a.date;
+          const to = a.effectiveTo || from;
+          return dStr >= from && dStr <= to;
+        });
+
+        if (assign) {
+          shifts.push({
+            id: assign.id || (200 + i),
+            date: dateLbl,
+            dateYMD: dStr,
+            type: assign.type,
+            time: assign.time,
+            role: assign.role || 'Operations',
+            coworkers: [],
+            notes: ''
+          });
+        } else {
+          shifts.push({
+            id: 200 + i,
+            date: dateLbl,
+            dateYMD: dStr,
+            type: 'Day Off',
+            time: 'Rest Day',
+            role: '--',
+            coworkers: [],
+            notes: 'Weekly holiday.'
+          });
+        }
+      }
+
+      this.state = {
+        selectedShiftId: null,
+        shifts: shifts,
+        swaps: swaps,
+        preferences: {
+          preferredShift: 'Morning',
+          availableWeekends: false,
+          maxHoursPerWeek: 40
+        }
+      };
+      
+      this.saveState();
+    } catch (e) {
+      logger.error('StoreEmployeeSchedule', 'Error loading schedule data:', e);
+      this.initDefaultState();
+    }
+  }
+
   initDefaultState() {
     this.state = {
       selectedShiftId: null,
-      shifts: [
-        { id: 101, date: 'Mon, 06 July', type: 'Morning Shift', time: '08:00 AM - 04:00 PM', role: 'Espresso Bar Lead', coworkers: ['Rohan D.', 'Simran K.'], notes: 'Log grinder temp checklist.' },
-        { id: 102, date: 'Tue, 07 July', type: 'Morning Shift', time: '08:00 AM - 04:00 PM', role: 'Espresso Bar Lead', coworkers: ['Amit S.', 'Siddharth M.'], notes: 'Milk stock delivery expected at 09:30 AM.' },
-        { id: 103, date: 'Wed, 08 July', type: 'Mid-Day Shift', time: '11:00 AM - 07:00 PM', role: 'Customer Service & Till', coworkers: ['Rohan D.', 'Simran K.'], notes: 'Till closing audit check.' },
-        { id: 104, date: 'Thu, 09 July', type: 'Morning Shift', time: '08:00 AM - 04:00 PM', role: 'Espresso Bar Lead', coworkers: ['Amit S.', 'Rohan D.'], notes: 'Calibrate pressure gauge in grinder #2.' },
-        { id: 105, date: 'Fri, 10 July', type: 'Evening Shift', time: '02:00 PM - 10:00 PM', role: 'Closing Supervisor', coworkers: ['Siddharth M.', 'Rohan D.'], notes: 'Store cleanup list checklist.' },
-        { id: 106, date: 'Sat, 11 July', type: 'Day Off', time: 'Rest Day', role: '--', coworkers: [], notes: 'Weekly holiday.' },
-        { id: 107, date: 'Sun, 12 July', type: 'Day Off', time: 'Rest Day', role: '--', coworkers: [], notes: 'Weekly holiday.' }
-      ],
-      swaps: [
-        { id: 1, myShiftDate: 'Fri, 10 July', myShiftType: 'Evening Shift', peerName: 'Rohan Sharma', peerShiftDate: 'Fri, 10 July (Morning Shift)', status: 'Approved' },
-        { id: 2, myShiftDate: 'Wed, 08 July', myShiftType: 'Mid-Day Shift', peerName: 'Simran Kaur', peerShiftDate: 'Wed, 08 July (Morning Shift)', status: 'Pending' }
-      ],
+      shifts: [],
+      swaps: [],
       preferences: {
         preferredShift: 'Morning',
         availableWeekends: false,
@@ -117,6 +189,19 @@ export default class StoreEmployeeSchedule {
     localStorage.setItem(`emp_schedule_state_${this.user?.username || 'neha'}`, JSON.stringify(this.state));
   }
 
+  getWeekRangeLabel(startDate) {
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+    
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    const formatDay = (d) => {
+      return d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
+    };
+
+    return `${formatDay(startDate)} ${monthNames[startDate.getMonth()]} - ${formatDay(endDate)} ${monthNames[endDate.getMonth()]} ${endDate.getFullYear()}`;
+  }
+
   // ---------------------------------------------------------------------------
   // LIFECYCLE: render
   // ---------------------------------------------------------------------------
@@ -125,6 +210,15 @@ export default class StoreEmployeeSchedule {
     // 1. Sync header text
     const nameEl = container.querySelector('#lbl-employee-name');
     if (nameEl) nameEl.textContent = this.profile.name || 'Neha Sharma';
+
+    const storeEl = container.querySelector('#lbl-store-name');
+    if (storeEl) storeEl.textContent = this.profile.store || 'Green Park Café, City Center';
+
+    const weekRangeEl = container.querySelector('#lbl-week-range');
+    if (weekRangeEl) {
+      const today = new Date();
+      weekRangeEl.textContent = this.getWeekRangeLabel(today);
+    }
 
     // 2. Render weekly Day cards grid
     this._renderCalendarGrid(container);
@@ -138,19 +232,59 @@ export default class StoreEmployeeSchedule {
       defaultOpt.textContent = '-- Choose one of your shifts --';
       myShiftsSelect.appendChild(defaultOpt);
 
-      this.state.shifts.filter(s => s.type !== 'Day Off').forEach(s => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = this.formatDateYMD(today);
+      const maxDate = new Date(today);
+      maxDate.setDate(maxDate.getDate() + 7);
+      const maxDateStr = this.formatDateYMD(maxDate);
+
+      this.state.shifts.filter(s => s.type !== 'Day Off' && s.dateYMD > todayStr && s.dateYMD <= maxDateStr).forEach(s => {
         const opt = document.createElement('option');
-        opt.value = String(s.id);
-        opt.textContent = `${s.date} - ${s.type}`;
+        opt.value = `${s.dateYMD}_${s.id}`;
+        opt.textContent = `${s.date} — ${s.type} (${s.time})`;
+        opt.setAttribute('data-shift-type', s.type);
+        opt.setAttribute('data-date-ymd', s.dateYMD);
         myShiftsSelect.appendChild(opt);
       });
+    }
+
+    // 3.5 Preferred shift group: hide until a shift is selected
+    const preferredShiftGroup = container.querySelector('#preferred-shift-group');
+    const preferredShiftSelect = container.querySelector('#swap-peer-shift');
+    const preferredShiftHint = container.querySelector('#preferred-shift-hint');
+    const preferredDateGroup = container.querySelector('#preferred-date-group');
+    const preferredDateInput = container.querySelector('#swap-preferred-date');
+    if (preferredShiftGroup) {
+      preferredShiftGroup.style.display = 'none';
+    }
+    if (preferredDateGroup) {
+      preferredDateGroup.style.display = 'none';
+    }
+    if (preferredShiftSelect) {
+      preferredShiftSelect.replaceChildren();
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = '-- Choose preferred shift --';
+      preferredShiftSelect.appendChild(defaultOpt);
+    }
+    // Set preferred date min/max to next 7 days
+    if (preferredDateInput) {
+      const todayD = new Date();
+      todayD.setHours(0, 0, 0, 0);
+      const minDate = new Date(todayD);
+      minDate.setDate(minDate.getDate() + 1);
+      const maxDate7 = new Date(todayD);
+      maxDate7.setDate(maxDate7.getDate() + 7);
+      preferredDateInput.min = this.formatDateYMD(minDate);
+      preferredDateInput.max = this.formatDateYMD(maxDate7);
+      preferredDateInput.value = '';
     }
 
     // 4. Render trades swap log table rows
     this._renderSwapLogs(container);
 
-    // 5. Render Shift preferences form settings
-    this._renderPreferences(container);
+
   }
 
   // ---------------------------------------------------------------------------
@@ -244,110 +378,163 @@ export default class StoreEmployeeSchedule {
     // 2. Submit Swap request click
     const submitSwapBtn = container.querySelector('#btn-submit-swap');
     if (submitSwapBtn) {
-      const handleSwap = () => {
+      const handleSwap = async () => {
         const swapMySelect = container.querySelector('#swap-my-shift');
-        const swapPeerInput = container.querySelector('#swap-peer-name');
-        const swapPeerShiftInput = container.querySelector('#swap-peer-shift');
+        const swapPeerShiftSelect = container.querySelector('#swap-peer-shift');
+        const swapPreferredDateInput = container.querySelector('#swap-preferred-date');
 
-        const myShiftId = parseInt(swapMySelect.value);
-        const peerName = swapPeerInput.value.trim();
-        const peerShift = swapPeerShiftInput.value.trim();
+        const swapMyValue = swapMySelect.value;
+        if (!swapMyValue) {
+          notificationStore.danger('Please select which of your shifts to trade.');
+          return;
+        }
+        const [selectedDate, selectedShiftIdStr] = swapMyValue.split('_');
+        const myShiftId = parseInt(selectedShiftIdStr);
+        const preferredShiftId = parseInt(swapPeerShiftSelect.value);
+        const preferredDate = swapPreferredDateInput ? swapPreferredDateInput.value : '';
 
         if (isNaN(myShiftId)) {
           notificationStore.danger('Please select which of your shifts to trade.');
           return;
         }
-
-        if (!peerName || !peerShift) {
-          notificationStore.danger('Please fill out all peer trade shift details.');
+        if (isNaN(preferredShiftId)) {
+          notificationStore.danger('Please select your preferred shift type.');
+          return;
+        }
+        if (!preferredDate) {
+          notificationStore.danger('Please select your preferred date for the new shift.');
           return;
         }
 
-        const myShift = this.state.shifts.find(s => s.id === myShiftId);
+        const myShift = this.state.shifts.find(s => s.dateYMD === selectedDate && s.id === myShiftId);
         if (!myShift) return;
 
-        // Enforce Shift Capacity Constraint (Max 10 workers allowed to work at a shift)
-        if (myShift.coworkers && (myShift.coworkers.length + 1) >= 10) {
-          notificationStore.danger('Cannot request swap: Shift has already reached the maximum limit of 10 workers.');
-          return;
-        }
-
-        const newSwap = {
-          id: this.state.swaps.length ? Math.max(...this.state.swaps.map(s => s.id)) + 1 : 1,
-          myShiftDate: myShift.date,
-          myShiftType: myShift.type,
-          peerName,
-          peerShiftDate: peerShift,
-          status: 'Pending'
+        const payload = {
+          shiftDate: myShift.dateYMD,
+          currentShiftId: myShiftId,
+          preferredShiftId: preferredShiftId,
+          preferredDate: preferredDate
         };
 
-        this.state.swaps.unshift(newSwap);
-        notificationStore.success('Roster swap request submitted for supervisor approval.');
-
-        // Clear forms
-        swapMySelect.value = '';
-        swapPeerInput.value = '';
-        swapPeerShiftInput.value = '';
-
-        this.saveState();
-        this.render(container);
-        this.bindEvents(container, lifecycle);
+        try {
+          const res = await apiClient.post('/api/v1/shift-swaps', payload);
+          if (res && res.success) {
+            notificationStore.success('Roster swap request submitted for supervisor approval.');
+            swapMySelect.value = '';
+            swapPeerShiftSelect.value = '';
+            if (swapPreferredDateInput) swapPreferredDateInput.value = '';
+            const preferredShiftGroup = container.querySelector('#preferred-shift-group');
+            const preferredDateGroup = container.querySelector('#preferred-date-group');
+            if (preferredShiftGroup) preferredShiftGroup.style.display = 'none';
+            if (preferredDateGroup) preferredDateGroup.style.display = 'none';
+            await this.loadScheduleData();
+            this.render(container);
+            this.bindEvents(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to submit swap request.');
+          }
+        } catch (err) {
+          logger.error('StoreEmployeeSchedule', 'Error submitting swap request:', err);
+          notificationStore.danger(err.message || 'Error submitting swap request.');
+        }
       };
       submitSwapBtn.addEventListener('click', handleSwap);
       lifecycle.onCleanup(() => submitSwapBtn.removeEventListener('click', handleSwap));
     }
 
-    // 3. Shift Preference Slot buttons listener
-    const preferenceBtns = container.querySelectorAll('.btn-preference-slot');
-    preferenceBtns.forEach(btn => {
-      const handlePref = () => {
-        const val = btn.getAttribute('data-val');
-        this.state.preferences.preferredShift = val;
-        
-        this.saveState();
-        this.render(container);
-        this.bindEvents(container, lifecycle);
-      };
-      btn.addEventListener('click', handlePref);
-      lifecycle.onCleanup(() => btn.removeEventListener('click', handlePref));
-    });
+    // 2.5 My shift selection change → update preferred shift options
+    const swapMyShiftSelect = container.querySelector('#swap-my-shift');
+    const preferredShiftGroup = container.querySelector('#preferred-shift-group');
+    const preferredShiftSelect = container.querySelector('#swap-peer-shift');
+    const preferredShiftHint = container.querySelector('#preferred-shift-hint');
+    const preferredDateGroup = container.querySelector('#preferred-date-group');
+    const preferredDateInput = container.querySelector('#swap-preferred-date');
 
-    // 4. Weekend Availability toggle click
-    const weekendBox = container.querySelector('#pref-weekend-box');
-    if (weekendBox) {
-      const handleWeekendToggle = () => {
-        const nextVal = !this.state.preferences.availableWeekends;
-        this.state.preferences.availableWeekends = nextVal;
-        
-        this.saveState();
-        this.render(container);
-        this.bindEvents(container, lifecycle);
-      };
-      weekendBox.addEventListener('click', handleWeekendToggle);
-      lifecycle.onCleanup(() => weekendBox.removeEventListener('click', handleWeekendToggle));
-    }
+    if (swapMyShiftSelect) {
+      const handleMyShiftChange = () => {
+        const swapMyValue = swapMyShiftSelect.value;
+        if (!swapMyValue || !preferredShiftGroup || !preferredShiftSelect) return;
+        const [selectedDate, selectedShiftIdStr] = swapMyValue.split('_');
+        const myShiftId = parseInt(selectedShiftIdStr);
 
-    // 5. Update preferences button listener
-    const savePrefBtn = container.querySelector('#btn-save-preferences');
-    const prefHoursInput = container.querySelector('#pref-hours');
-    if (savePrefBtn && prefHoursInput) {
-      const handleSavePref = () => {
-        const hours = parseInt(prefHoursInput.value);
-        if (isNaN(hours) || hours < 10 || hours > 60) {
-          notificationStore.danger('Please specify preferred hours between 10 and 60 per week.');
+        const myShift = this.state.shifts.find(s => s.dateYMD === selectedDate && s.id === myShiftId);
+        if (!myShift) {
+          preferredShiftGroup.style.display = 'none';
+          if (preferredDateGroup) preferredDateGroup.style.display = 'none';
           return;
         }
 
-        this.state.preferences.maxHoursPerWeek = hours;
-        notificationStore.success('Shift availability preferences updated.');
-        
-        this.saveState();
-        this.render(container);
-        this.bindEvents(container, lifecycle);
+        // Populate preferred shifts (all active shifts except current shift type)
+        preferredShiftSelect.replaceChildren();
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = '-- Choose preferred shift --';
+        preferredShiftSelect.appendChild(defaultOpt);
+
+        (this.systemShifts || []).filter(sh => sh.name !== myShift.type).forEach(sh => {
+          const opt = document.createElement('option');
+          opt.value = String(sh.id);
+          opt.textContent = `${sh.name} (${sh.startTime} – ${sh.endTime})`;
+          preferredShiftSelect.appendChild(opt);
+        });
+
+        // Show hint for preferred shift
+        if (preferredShiftHint) {
+          preferredShiftHint.textContent = `Requesting a shift change for ${myShift.date} (${myShift.type})`;
+        }
+
+        // Reset and hide preferred date until shift is chosen
+        if (preferredDateGroup) preferredDateGroup.style.display = 'none';
+        if (preferredDateInput) preferredDateInput.value = '';
+
+        preferredShiftGroup.style.display = 'block';
       };
-      savePrefBtn.addEventListener('click', handleSavePref);
-      lifecycle.onCleanup(() => savePrefBtn.removeEventListener('click', handleSavePref));
+      swapMyShiftSelect.addEventListener('change', handleMyShiftChange);
+      lifecycle.onCleanup(() => swapMyShiftSelect.removeEventListener('change', handleMyShiftChange));
     }
+
+    // 2.6 When preferred shift is selected → reveal preferred date picker
+    const preferredShiftSelectEl = container.querySelector('#swap-peer-shift');
+    const preferredDateGroupEl = container.querySelector('#preferred-date-group');
+    const preferredDateInputEl = container.querySelector('#swap-preferred-date');
+    if (preferredShiftSelectEl) {
+      const handleShiftSelect = () => {
+        if (preferredShiftSelectEl.value && preferredDateGroupEl) {
+          preferredDateGroupEl.style.display = 'block';
+        } else if (preferredDateGroupEl) {
+          preferredDateGroupEl.style.display = 'none';
+          if (preferredDateInputEl) preferredDateInputEl.value = '';
+        }
+      };
+      preferredShiftSelectEl.addEventListener('change', handleShiftSelect);
+      lifecycle.onCleanup(() => preferredShiftSelectEl.removeEventListener('change', handleShiftSelect));
+    }
+
+
+
+    // 6. Escalated Swap click listeners
+    const escalateBtns = container.querySelectorAll('.btn-escalate-swap');
+    escalateBtns.forEach(btn => {
+      const handleEscalate = async () => {
+        const id = btn.getAttribute('data-id');
+        try {
+          const res = await apiClient.post(`/api/v1/shift-swaps/${id}/escalate`);
+          if (res && res.success) {
+            notificationStore.success('Roster swap request escalated successfully!');
+            await this.loadScheduleData();
+            this.render(container);
+            this.bindEvents(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to escalate request.');
+          }
+        } catch (err) {
+          logger.error('StoreEmployeeSchedule', 'Error escalating request:', err);
+          notificationStore.danger('Error escalating request.');
+        }
+      };
+      btn.addEventListener('click', handleEscalate);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handleEscalate));
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -412,17 +599,39 @@ export default class StoreEmployeeSchedule {
       const clone = rowTpl.content.cloneNode(true);
 
       const myEl = clone.querySelector('.swap-my-cell');
-      const peerEl = clone.querySelector('.swap-peer-cell');
       const targetEl = clone.querySelector('.swap-target-cell');
       const statusEl = clone.querySelector('.swap-status-cell');
 
-      if (myEl) myEl.textContent = sw.myShiftDate;
-      if (peerEl) peerEl.textContent = sw.peerName;
-      if (targetEl) targetEl.textContent = sw.peerShiftDate;
+      if (myEl) myEl.textContent = `${sw.myShiftDate} (${sw.myShiftType || sw.currentShiftName || ''})`;
+      if (targetEl) targetEl.textContent = sw.preferredShiftName || sw.peerShiftDate || '—';
       if (statusEl) {
-        statusEl.textContent = sw.status;
-        if (sw.status === 'Approved') {
+        statusEl.replaceChildren();
+        if (sw.status === 'Approved' || sw.status === 'APPROVED') {
           statusEl.className = 'swap-status-cell swap-status-cell--approved font-bold';
+          statusEl.textContent = '✓ Approved';
+        } else if (sw.status === 'REJECTED') {
+          statusEl.className = 'swap-status-cell font-bold';
+          statusEl.style.color = '#ff6b6b';
+          statusEl.innerHTML = `
+            <span>✗ Rejected: ${sw.rejectionReason || 'No reason'}</span>
+            <button type="button" class="btn btn-warning btn-escalate-swap" data-id="${sw.id}" style="margin-left: 8px; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; background: var(--accent-warning); color: #000; border: none;">Escalate to Admin</button>
+          `;
+        } else if (sw.status === 'REJECTED_BY_ADMIN') {
+          statusEl.className = 'swap-status-cell font-bold';
+          statusEl.style.color = '#ff6b6b';
+          statusEl.textContent = `✗ Admin Rejected: ${sw.adminRejectionReason || 'No reason'}`;
+        } else if (sw.status === 'ESCALATED') {
+          statusEl.className = 'swap-status-cell font-bold';
+          statusEl.style.color = '#ff9800';
+          statusEl.textContent = '⬆ Escalated to Admin';
+        } else if (sw.status === 'PENDING') {
+          statusEl.className = 'swap-status-cell font-bold';
+          statusEl.style.color = '#ffc107';
+          statusEl.textContent = '⏳ Pending Supervisor Review';
+        } else {
+          statusEl.className = 'swap-status-cell font-bold';
+          statusEl.style.color = '#ffc107';
+          statusEl.textContent = sw.status || 'Pending';
         }
       }
 
@@ -430,51 +639,7 @@ export default class StoreEmployeeSchedule {
     });
   }
 
-  _renderPreferences(container) {
-    // 1. Slots Pills Row
-    const prefSlotsRow = container.querySelector('#pref-slots-row');
-    if (prefSlotsRow) {
-      prefSlotsRow.replaceChildren();
-      ['Morning', 'Mid-Day', 'Evening'].forEach(slot => {
-        const isSel = this.state.preferences.preferredShift === slot;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `btn-preference-slot ${isSel ? 'active' : ''}`;
-        btn.setAttribute('data-val', slot);
-        btn.textContent = slot;
-        prefSlotsRow.appendChild(btn);
-      });
-    }
 
-    // 2. Weekend Checkbox
-    const nativeCheckbox = container.querySelector('#pref-weekend');
-    const customBox = container.querySelector('#pref-weekend-box');
-
-    if (nativeCheckbox) {
-      nativeCheckbox.checked = this.state.preferences.availableWeekends;
-    }
-
-    if (customBox) {
-      if (this.state.preferences.availableWeekends) {
-        customBox.className = 'custom-checkbox-span checked';
-        customBox.setAttribute('aria-checked', 'true');
-        customBox.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>`;
-      } else {
-        customBox.className = 'custom-checkbox-span';
-        customBox.setAttribute('aria-checked', 'false');
-        customBox.replaceChildren();
-      }
-    }
-
-    // 3. Target Hours Per Week Input
-    const hoursInput = container.querySelector('#pref-hours');
-    if (hoursInput) {
-      hoursInput.value = String(this.state.preferences.maxHoursPerWeek);
-    }
-  }
 
   _loadCss() {
     const cssId = 'store-employee-schedule-page-css';

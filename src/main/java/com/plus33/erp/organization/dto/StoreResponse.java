@@ -88,5 +88,14 @@ public record StoreResponse(
         LocalDateTime createdAt,
 
         @Schema(description = "Last modification date time", example = "2026-06-20T12:30:00")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @Schema(description = "Total employees assigned to this store", example = "12")
+        Integer employeeCount,
+
+        @Schema(description = "Total stock valuation linked to this store", example = "25000.00")
+        Double stockValue,
+
+        @Schema(description = "Store type", example = "COMPACT_CAFE")
+        String type
 ) {}

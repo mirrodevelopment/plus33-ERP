@@ -175,8 +175,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         double attendanceRate = presentDays + absentDays > 0 ? ((double) presentDays / (presentDays + absentDays)) * 100.0 : 100.0;
         double averageHours = presentDays > 0 ? workedHoursSum / presentDays : 0.0;
 
-        Shift activeShift = getActiveShift(employee, today);
-
+        Optional<EmployeeShift> realShiftOpt = employeeShiftRepository.findActiveShiftForEmployeeOnDate(employee.getId(), today);
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("presentDays", presentDays);
         stats.put("absentDays", absentDays);
@@ -190,7 +189,9 @@ public class AttendanceServiceImpl implements AttendanceService {
         stats.put("overtime", Math.round(overtimeHoursSum * 10) / 10.0);
         stats.put("nightOvertime", Math.round(overtimeHoursSum * 0.4 * 10) / 10.0); // night shift proportion fallback
         stats.put("holidayOvertime", 0.0);
-        stats.put("currentShift", activeShift != null ? activeShift.getName() + " (" + activeShift.getStartTime() + " - " + activeShift.getEndTime() + ")" : "Morning Shift");
+        stats.put("currentShift", realShiftOpt.isPresent() ? 
+                realShiftOpt.get().getShift().getName() + " (" + realShiftOpt.get().getShift().getStartTime() + " - " + realShiftOpt.get().getShift().getEndTime() + ")" : 
+                "No Shift Assigned");
         stats.put("currentStatus", presentDays > 0 ? "Active" : "Inactive");
         stats.put("averageHours", Math.round(averageHours * 10) / 10.0);
         stats.put("lateCount", lateCount);

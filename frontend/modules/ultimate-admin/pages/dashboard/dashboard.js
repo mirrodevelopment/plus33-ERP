@@ -61,6 +61,7 @@ export default class UltimateAdminDashboard {
     this.stores  = [];
     /** @type {number|null} setInterval ID for live clock */
     this._clockInterval = null;
+    localStorage.removeItem('dashboard_filters'); // clear legacy key
   }
 
   // ---------------------------------------------------------------------------
@@ -182,7 +183,7 @@ export default class UltimateAdminDashboard {
       this.filters.nationId = nationSelect?.value || '';
       this.filters.regionId = regionSelect?.value || '';
       this.filters.storeId  = storeSelect?.value  || '';
-      localStorage.setItem('dashboard_filters', JSON.stringify(this.filters));
+      localStorage.setItem(this._getStorageKey(), JSON.stringify(this.filters));
       this._refreshDashboard(container);
     };
 
@@ -264,7 +265,8 @@ export default class UltimateAdminDashboard {
         this._populateRegionDropdown(container);
         this._updateStoreDropdown(container);
         this._toggleCustomDates(container);
-        localStorage.removeItem('dashboard_filters');
+        localStorage.removeItem(this._getStorageKey());
+        localStorage.removeItem('dashboard_filters'); // clear legacy key
         this._refreshDashboard(container);
       });
     }
@@ -462,7 +464,8 @@ export default class UltimateAdminDashboard {
     filteredStores.forEach(s => {
       const opt = document.createElement('option');
       opt.value       = s.id;
-      opt.textContent = s.name;
+      const typeStr = s.type === 'COMPACT_CAFE' ? 'COMPACT CAFÉ' : s.type === 'FLAGSHIP_CAFE' ? 'FLAGSHIP CAFÉ' : (s.type || '');
+      opt.textContent = s.name + (typeStr ? ` (${typeStr})` : '');
       storeSelect.appendChild(opt);
     });
   }
@@ -598,9 +601,15 @@ export default class UltimateAdminDashboard {
   /**
    * Load persisted filters from localStorage.
    */
+  _getStorageKey() {
+    const username = this.user?.username || authStore.getUser()?.username || 'default';
+    return `dashboard_filters_${username}`;
+  }
+
   _restoreFilters() {
     try {
-      const saved = localStorage.getItem('dashboard_filters');
+      const key = this._getStorageKey();
+      const saved = localStorage.getItem(key);
       if (saved) this.filters = { ...this.filters, ...JSON.parse(saved) };
     } catch (e) {
       logger.warn('UltimateAdminDashboard', 'Failed to parse stored filters', e);

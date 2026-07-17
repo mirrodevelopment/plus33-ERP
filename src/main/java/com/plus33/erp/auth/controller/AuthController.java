@@ -92,6 +92,9 @@ public class AuthController {
     private final com.plus33.erp.workforce.repository.EmployeeRepository employeeRepository;
     private final com.plus33.erp.workforce.repository.UserStoreRepository userStoreRepository;
     private final com.plus33.erp.workforce.repository.UserRegionRepository userRegionRepository;
+    private final com.plus33.erp.workforce.repository.EmployeeSalaryStructureRepository employeeSalaryStructureRepository;
+    private final com.plus33.erp.workforce.repository.EmployeeSalaryStructureItemRepository employeeSalaryStructureItemRepository;
+    private final com.plus33.erp.workforce.repository.SalaryComponentRepository salaryComponentRepository;
 
     /**
      * Authenticates the user credentials and generates a signed JWT token.
@@ -167,12 +170,18 @@ public class AuthController {
         Optional<Employee> empOpt = employeeRepository.findByUserId(user.getId());
         if (empOpt.isPresent()) {
             Employee emp = empOpt.get();
+            data.put("id", emp.getId());
+            data.put("employeeCode", emp.getEmployeeCode());
             data.put("phone", emp.getPhone());
+            data.put("emergencyContactPhone", emp.getEmergencyContactPhone());
+
             data.put("designation", emp.getDesignation());
             data.put("department", emp.getDepartment());
             data.put("joinedDate", emp.getHireDate().toString());
             data.put("gender", "Male"); // Default fallback
         } else {
+            data.put("id", 0L);
+            data.put("employeeCode", "ADMIN");
             data.put("phone", "+91 98765 43210");
             data.put("designation", "Administrator");
             data.put("department", "Executive Administration");
@@ -183,11 +192,17 @@ public class AuthController {
         String storeName = "Corporate Head Office";
         String storeRegion = "Delhi NCR";
         String country = "India";
+        data.put("storeId", null);
+        data.put("storeCode", null);
+        data.put("storeType", "FLAGSHIP_CAFE");
 
         List<com.plus33.erp.workforce.entity.UserStore> userStores = userStoreRepository.findByIdUserId(user.getId());
         if (userStores != null && !userStores.isEmpty() && userStores.get(0).getStore() != null) {
             com.plus33.erp.organization.entity.Store store = userStores.get(0).getStore();
             storeName = store.getName();
+            data.put("storeId", store.getId());
+            data.put("storeCode", store.getCode());
+            data.put("storeType", store.getType() != null ? store.getType().toString() : "COMPACT_CAFE");
             if (store.getRegion() != null && store.getRegion().getCode() != null) {
                 String code = store.getRegion().getCode().toUpperCase();
                 if (code.startsWith("FR")) {
@@ -216,15 +231,79 @@ public class AuthController {
             }
         }
 
+        String address = "Connaught Place, New Delhi, 110001, India";
+        String employmentType = "Permanent";
+        java.math.BigDecimal hourlyRate = java.math.BigDecimal.valueOf(15.00);
+        java.math.BigDecimal basicSalary = java.math.BigDecimal.valueOf(2400.00);
+
+        if (empOpt.isPresent()) {
+            Employee emp = empOpt.get();
+            employmentType = emp.getEmploymentType() != null ? emp.getEmploymentType() : "Permanent";
+            
+            if ("France".equalsIgnoreCase(country)) {
+                address = "12 Rue de la Paix, 75002 Paris, France";
+            } else if ("UAE".equalsIgnoreCase(country)) {
+                address = "Sheikh Zayed Road, Downtown Dubai, UAE";
+            } else {
+                address = "Connaught Place, New Delhi, 110001, India";
+            }
+
+            try {
+                Optional<com.plus33.erp.workforce.entity.EmployeeSalaryStructure> structOpt = employeeSalaryStructureRepository
+                        .findByCompanyIdAndEmployeeIdAndStatus(emp.getCompany().getId(), emp.getId(), "ACTIVE");
+                if (structOpt.isPresent()) {
+                    List<com.plus33.erp.workforce.entity.EmployeeSalaryStructureItem> items = employeeSalaryStructureItemRepository.findByStructureId(structOpt.get().getId());
+                    for (com.plus33.erp.workforce.entity.EmployeeSalaryStructureItem item : items) {
+                        com.plus33.erp.workforce.entity.SalaryComponent comp = salaryComponentRepository.findById(item.getComponentId()).orElse(null);
+                        if (comp != null) {
+                            if ("BASE_MONTHLY".equalsIgnoreCase(comp.getCode())) {
+                                basicSalary = item.getAmount();
+                            } else if ("BASE_HOURLY".equalsIgnoreCase(comp.getCode())) {
+                                hourlyRate = item.getAmount();
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // fallback
+            }
+        }
+
+        String avatarUrl = user.getAvatarUrl();
+        if (avatarUrl == null || avatarUrl.isBlank()) {
+            avatarUrl = "imgs/male-avatar.png";
+            try {
+                String code = empOpt.isPresent() ? empOpt.get().getEmployeeCode() : "ADMIN";
+                if (code != null) {
+                    String sanitizedCode = code.replaceAll("[^a-zA-Z0-9-]", "_");
+                    String[] extensions = {"png", "jpg", "jpeg", "webp", "gif"};
+                    for (String ext : extensions) {
+                        java.io.File file = new java.io.File("frontend/user_uploads/avatars/" + sanitizedCode + "_profile_img." + ext);
+                        if (file.exists()) {
+                            avatarUrl = "user_uploads/avatars/" + sanitizedCode + "_profile_img." + ext;
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // fallback
+            }
+        }
+
         data.put("store", storeName);
         data.put("storeRegion", storeRegion);
         data.put("country", country);
-        data.put("avatarUrl", "imgs/male-avatar.png");
+        data.put("address", address);
+        data.put("employmentType", employmentType);
+        data.put("hourlyRate", hourlyRate);
+        data.put("basicSalary", basicSalary);
+        data.put("avatarUrl", avatarUrl);
 
         return ResponseEntity.ok(ApiResponse.success("User details retrieved successfully", data));
     }
 
     @PutMapping("/me")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateMe(
             @RequestBody Map<String, String> request, Principal principal) {
         if (principal == null) {
@@ -247,11 +326,23 @@ public class AuthController {
             userRepository.save(user);
         }
 
+        if (request.containsKey("avatarUrl")) {
+            user.setAvatarUrl(request.get("avatarUrl"));
+            userRepository.save(user);
+        }
+
         Optional<Employee> empOpt = employeeRepository.findByUserId(user.getId());
         if (empOpt.isPresent()) {
             Employee emp = empOpt.get();
             if (request.containsKey("phone")) {
                 emp.setPhone(request.get("phone"));
+            }
+            if (request.containsKey("designation")) {
+                boolean isWorker = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_storeEmployee") || auth.getAuthority().equals("ROLE_shiftSupervisor"));
+                if (!isWorker) {
+                    emp.setDesignation(request.get("designation"));
+                }
             }
             if (fullName != null && !fullName.isBlank()) {
                 String[] parts = fullName.trim().split("\\s+", 2);

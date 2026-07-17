@@ -30,4 +30,13 @@ public class Announcement {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "image_url", length = 512)
+    private String imageUrl;
+
+    @Column(name = "target_region_id")
+    private Long targetRegionId;
+
+    @Column(name = "target_store_id")
+    private Long targetStoreId;
 }

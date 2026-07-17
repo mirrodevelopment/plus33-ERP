@@ -1,0 +1,318 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Admin — Settings Configuration
+ * File              : settings.html
+ * Path              : frontend/modules/store-admin/pages/settings/settings.html
+ * Purpose           : HTML template for the Store Settings page with tabs
+ * Version           : 2.2.0
+ ******************************************************************************
+-->
+
+<div class="store-settings-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header store-settings-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="settings" aria-hidden="true"></i>
+        <span>Administration</span>
+      </div>
+      <h1 class="page-title">Store Settings</h1>
+      <p class="page-subtitle">Configure operational hours, WiFi credentials, alert thresholds, shift timings, holiday calendars, and workspace skins.</p>
+    </div>
+  </div>
+
+  <!-- ===== TAB NAVIGATION ===== -->
+  <div class="settings-tabs-nav">
+    <button class="settings-tab-btn active" data-tab="operations">
+      <i data-lucide="sliders" aria-hidden="true"></i>
+      <span>Store Operations</span>
+    </button>
+    <button class="settings-tab-btn" data-tab="shifts">
+      <i data-lucide="clock" aria-hidden="true"></i>
+      <span>Shift Timings</span>
+    </button>
+    <button class="settings-tab-btn" data-tab="holidays">
+      <i data-lucide="calendar" aria-hidden="true"></i>
+      <span>Holiday Calendar</span>
+    </button>
+    <button class="settings-tab-btn" data-tab="preferences">
+      <i data-lucide="palette" aria-hidden="true"></i>
+      <span>Theme & Preferences</span>
+    </button>
+  </div>
+
+  <!-- ===== SETTINGS CONTENT ===== -->
+  <div class="store-settings-container card glass animate-slide-up">
+    
+    <!-- === TAB 1: OPERATIONS === -->
+    <div id="tab-operations" class="settings-tab-pane active">
+      <form id="form-store-settings" class="settings-form" novalidate>
+
+        <!-- Store Info Summary -->
+        <div class="settings-section-header">
+          <h3 class="section-title">Franchise Metadata</h3>
+          <p class="section-desc">Unique identifier and official name registered in the central system.</p>
+        </div>
+        
+        <div class="form-grid-2col">
+          <div class="form-group">
+            <label for="settings-store-name" class="form-label">Store Name</label>
+            <input id="settings-store-name" type="text" class="form-input" disabled>
+          </div>
+          <div class="form-group">
+            <label for="settings-store-code" class="form-label">Store Code</label>
+            <input id="settings-store-code" type="text" class="form-input" disabled>
+          </div>
+        </div>
+
+        <hr class="settings-divider">
+
+        <!-- Operations Settings -->
+        <div class="settings-section-header">
+          <h3 class="section-title">Operational Thresholds</h3>
+          <p class="section-desc">Configure business goals, alert triggers, and open/close timings.</p>
+        </div>
+
+        <div class="form-grid-3col">
+          <div class="form-group">
+            <label for="settings-operating-hours" class="form-label">Operating Hours</label>
+            <input id="settings-operating-hours" type="text" class="form-input" placeholder="e.g. 08:00 - 22:00" required>
+          </div>
+          <div class="form-group">
+            <label for="settings-low-stock" class="form-label">Low Stock Threshold (Units)</label>
+            <input id="settings-low-stock" type="number" class="form-input" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="settings-sales-target" class="form-label">Daily Sales Target (€)</label>
+            <input id="settings-sales-target" type="number" step="0.01" class="form-input" min="0" required>
+          </div>
+        </div>
+
+        <hr class="settings-divider">
+
+        <!-- Guest Amenities -->
+        <div class="settings-section-header">
+          <h3 class="section-title">Guest WiFi Credentials</h3>
+          <p class="section-desc">Local router access points automatically broadcasted/available at the POS terminal.</p>
+        </div>
+
+        <div class="form-grid-2col">
+          <div class="form-group">
+            <label for="settings-wifi-ssid" class="form-label">WiFi SSID (Network Name)</label>
+            <input id="settings-wifi-ssid" type="text" class="form-input" placeholder="SSID Name" required>
+          </div>
+          <div class="form-group">
+            <label for="settings-wifi-password" class="form-label">WiFi Passphrase</label>
+            <input id="settings-wifi-password" type="text" class="form-input" placeholder="Passphrase" required>
+          </div>
+        </div>
+
+        <hr class="settings-divider">
+
+        <!-- POS Preferences -->
+        <div class="settings-section-header">
+          <h3 class="section-title">POS Receipt Configurations</h3>
+          <p class="section-desc">Custom header or footer phrases appended onto invoices for guests.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="settings-receipt-footer" class="form-label">Receipt Footer Message</label>
+          <textarea id="settings-receipt-footer" class="form-textarea" rows="3" placeholder="Thank you for visiting PLUS33 Coffee!" required></textarea>
+        </div>
+
+        <!-- Action Button -->
+        <div class="settings-actions">
+          <button id="btn-save-settings" type="submit" class="btn btn-primary">
+            <i data-lucide="save" aria-hidden="true"></i>
+            <span>Save Changes</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- === TAB 2: SHIFT TIMINGS === -->
+    <div id="tab-shifts" class="settings-tab-pane">
+      <div class="settings-section-header">
+        <h3 class="section-title">Franchise Shift Schedules</h3>
+        <p class="section-desc">Define standard operating start/end times and break minutes for employee shifts.</p>
+      </div>
+
+      <div id="shifts-config-container" class="shifts-config-grid">
+        <!-- Dynamic shift rows loaded from API -->
+      </div>
+    </div>
+
+    <!-- === TAB 3: HOLIDAY CALENDAR === -->
+    <div id="tab-holidays" class="settings-tab-pane">
+      <div class="holiday-split-layout">
+        
+        <!-- Left Side: Add Holiday Form -->
+        <div class="holiday-form-panel">
+          <form id="form-add-holiday" class="settings-form" novalidate>
+            <div class="settings-section-header">
+              <h3 class="section-title">Add Official Holiday</h3>
+              <p class="section-desc">Create a new holiday entry for the country store calendar.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="holiday-name-input" class="form-label">Holiday Name</label>
+              <input id="holiday-name-input" type="text" class="form-input" placeholder="e.g. Bastille Day" required>
+            </div>
+
+            <div class="form-group">
+              <label for="holiday-date-input" class="form-label">Date</label>
+              <input id="holiday-date-input" type="date" class="form-input" required>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input id="holiday-recurring-input" type="checkbox">
+                <span>Recurring Holiday (Repeats Yearly)</span>
+              </label>
+            </div>
+
+            <button id="btn-add-holiday-submit" type="submit" class="btn btn-primary">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              <span>Add to Calendar</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Right Side: Holiday List Grid -->
+        <div class="holiday-list-panel">
+          <div class="settings-section-header">
+            <h3 class="section-title">Official Holiday Calendar</h3>
+            <p class="section-desc">Registered country holidays for the platform calendar.</p>
+          </div>
+          
+          <div class="holidays-filter-bar">
+            <label for="holiday-year-select" class="form-label">Filter Year: </label>
+            <select id="holiday-year-select" class="form-input year-filter-select">
+              <option value="2026" selected>2026</option>
+              <option value="2027">2027</option>
+            </select>
+          </div>
+
+          <div id="holidays-list-container" class="holidays-list">
+            <!-- Dynamic list loaded from API -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- === TAB 4: PREFERENCES (THEME, ETC) === -->
+    <div id="tab-preferences" class="settings-tab-pane">
+      <form id="form-personal-preferences" class="settings-form" novalidate>
+        
+        <!-- Locale Preferences -->
+        <div class="settings-section-header">
+          <h3 class="section-title">Localization Options</h3>
+          <p class="section-desc">Set default display currency and preferred language locale.</p>
+        </div>
+
+        <div class="form-grid-2col">
+          <div class="form-group">
+            <label for="pref-currency" class="form-label">System Currency</label>
+            <select id="pref-currency" class="form-input">
+              <option value="EUR">EUR (€)</option>
+              <option value="AED">AED (AED)</option>
+              <option value="USD">USD ($)</option>
+              <option value="INR">INR (₹)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pref-language" class="form-label">Display Language</label>
+            <select id="pref-language" class="form-input">
+              <option value="en">English (US)</option>
+              <option value="fr">Français (FR)</option>
+              <option value="ar">العربية (AE)</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="settings-divider">
+
+        <!-- Theme Selection Grid -->
+        <div class="settings-section-header">
+          <h3 class="section-title">User Interface Theme</h3>
+          <p class="section-desc">Select a theme profile for the user interface layout skin.</p>
+        </div>
+
+        <div class="theme-grid">
+          <div class="theme-card-option" role="radio" data-theme-val="coffee-dark">
+            <div class="theme-card-header">
+              <span class="theme-card-name">Coffee Dark</span>
+              <span class="theme-accent-indicator" style="background-color: #c9a46a;"></span>
+            </div>
+            <span class="theme-card-desc">Warm coffee & gold tones</span>
+          </div>
+
+          <div class="theme-card-option" role="radio" data-theme-val="light">
+            <div class="theme-card-header">
+              <span class="theme-card-name">Light Minimal</span>
+              <span class="theme-accent-indicator" style="background-color: #2563eb;"></span>
+            </div>
+            <span class="theme-card-desc">Clean white palette</span>
+          </div>
+
+          <div class="theme-card-option" role="radio" data-theme-val="charcoal">
+            <div class="theme-card-header">
+              <span class="theme-card-name">Charcoal Noir</span>
+              <span class="theme-accent-indicator" style="background-color: #e5e5e5;"></span>
+            </div>
+            <span class="theme-card-desc">Sleek dark with gold</span>
+          </div>
+
+          <div class="theme-card-option" role="radio" data-theme-val="cyber-dark">
+            <div class="theme-card-header">
+              <span class="theme-card-name">Cyber Dark</span>
+              <span class="theme-accent-indicator" style="background-color: #d400e8;"></span>
+            </div>
+            <span class="theme-card-desc">Vibrant neon on deep black</span>
+          </div>
+
+          <div class="theme-card-option" role="radio" data-theme-val="nation">
+            <div class="theme-card-header">
+              <span class="theme-card-name">Nation</span>
+              <span class="theme-accent-indicator" style="background-color: #e1000f;"></span>
+            </div>
+            <span class="theme-card-desc">French flag color theme</span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="settings-actions">
+          <button id="btn-save-preferences" type="submit" class="btn btn-primary">
+            <i data-lucide="check" aria-hidden="true"></i>
+            <span>Apply Preferences</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+
+  <!-- ===== THEME PREVIEW MODAL ===== -->
+  <div id="theme-preview-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
+    <div class="modal-content glass theme-modal-content">
+      <div class="modal-header">
+        <h2 id="theme-modal-title" class="modal-title">Theme Preview</h2>
+        <button id="btn-close-theme-modal" class="btn-close-circle" aria-label="Close Preview">&times;</button>
+      </div>
+      <div class="modal-body theme-modal-body">
+        <img id="theme-preview-img" src="" alt="Theme Preview Screenshot" class="theme-preview-large-img">
+        <p id="theme-modal-desc" class="theme-modal-desc-text"></p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancel-theme" class="btn btn-secondary">Close</button>
+        <button id="btn-apply-theme-modal" class="btn btn-primary">Apply Theme</button>
+      </div>
+    </div>
+  </div>
+
+</div>

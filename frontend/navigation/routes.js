@@ -90,6 +90,13 @@ export const routes = [
     requiresAuth: true
   },
   {
+    path: '#shift-planner',
+    page: 'modules/store-employee/pages/shift-dashboard/shift-dashboard.js',
+    layout: 'dashboard',
+    title: 'Shift Planner',
+    requiresAuth: true
+  },
+  {
     path: '#inventory',
     page: 'modules/inventory/pages/stock-list/stock-list.js',
     layout: 'dashboard',
@@ -143,10 +150,16 @@ export const routes = [
   { path: '#announcements', page: 'modules/store-employee/pages/announcements/announcements.js', layout: 'dashboard', title: 'Announcements Board', requiresAuth: true },
   { path: '#supervisor-announcements', page: 'modules/store-employee/pages/supervisor-announcements/announcements.js', layout: 'dashboard', title: 'Broadcast Announcements', requiresAuth: true },
   { path: '#store-announcements', page: 'modules/store-admin/pages/announcements/announcements.js', layout: 'dashboard', title: 'Broadcast Announcements', requiresAuth: true },
+  { path: '#regional-announcements', page: 'modules/regional-admin/pages/announcements/announcements.js', layout: 'dashboard', title: 'Broadcast Announcements', requiresAuth: true },
   { path: '#store-leave', page: 'modules/store-admin/pages/leave/leave.js', layout: 'dashboard', title: 'Leave Management', requiresAuth: true },
+  { path: '#store-workforce', page: 'modules/store-admin/pages/workforce/workforce.js', layout: 'dashboard', title: 'Store Workforce Overview', requiresAuth: true },
+  { path: '#store-settings', page: 'modules/store-admin/pages/settings/settings.js', layout: 'dashboard', title: 'Store Settings', requiresAuth: true },
   { path: '#documents', page: 'modules/store-employee/pages/documents/documents.js', layout: 'dashboard', title: 'Documents Center', requiresAuth: true },
   { path: '#payslips', page: 'modules/store-employee/pages/payslips/payslips.js', layout: 'dashboard', title: 'Earnings & Payslips', requiresAuth: true },
-  { path: '#profile', page: 'shared/profile/profile.js', layout: 'dashboard', title: 'User Profile', requiresAuth: true }
+  { path: '#profile', page: 'shared/profile/profile.js', layout: 'dashboard', title: 'User Profile', requiresAuth: true },
+  { path: '#store-profile', page: 'modules/store-admin/pages/profile/profile.js', layout: 'dashboard', title: 'Store Admin Profile', requiresAuth: true },
+  { path: '#supervisor-profile', page: 'modules/store-employee/pages/profile-supervisor/profile.js', layout: 'dashboard', title: 'Supervisor Profile', requiresAuth: true },
+  { path: '#employee-profile', page: 'modules/store-employee/pages/profile-employee/profile.js', layout: 'dashboard', title: 'Employee Profile', requiresAuth: true }
 ];
 
 export const defaultRoute = '#dashboard';
