@@ -59,6 +59,18 @@ class NotificationStore {
   }
 
   /**
+   * Alias for addNotification compatibility
+   */
+  addNotification(opt) {
+    if (typeof opt === 'string') {
+      return this.push(opt, 'info');
+    }
+    const msg = opt?.message || opt?.title || 'Notification';
+    const type = opt?.type || 'info';
+    return this.push(msg, type);
+  }
+
+  /**
    * Performs the fn operation in this module.
    * @memberof Store Module
    */

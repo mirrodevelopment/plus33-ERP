@@ -5,25 +5,41 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.config
  * File              : SecurityConfig.java
- * Purpose           : Spring Configuration bean for Security Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: SecurityConfigController
- * Related Service   : SecurityConfigService, SecurityConfigServiceImpl
- * Related Repository: SecurityConfigRepository
- * Related Entity    : SecurityConfig
- * Related DTO       : anyRequest, HttpServletResponse
- * Related Mapper    : SecurityConfigMapper
- * Related DB Table  : security_configs
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Security Module components
+ * Path              : src/main/java/com/plus33/erp/security/config/SecurityConfig.java
+ * Purpose           : Configures the Spring Security filter chain, HTTP authorization
+ *                     rules, stateless session policy, JWT filter integration, and
+ *                     authentication provider beans for the entire ERP platform.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Security Module within the PLUS33 Coffee ERP platform.
+ * Central Spring Security configuration class for PLUS33 Coffee ERP. Annotated
+ * with @EnableWebSecurity and @EnableMethodSecurity to activate filter chain
+ * and method-level @PreAuthorize enforcement.
+ *
+ * Security Filter Chain (securityFilterChain):
+ *   - Disables CSRF (stateless JWT API — no browser sessions).
+ *   - Disables HTTP Basic and form-based login.
+ *   - Enforces STATELESS session management — no server-side sessions.
+ *   - Permits unauthenticated access to:
+ *       /api/v1/auth/login, /actuator/health, /swagger-ui/**, /v3/api-docs/**
+ *   - All other requests require a valid Bearer JWT.
+ *   - Custom 401 JSON response body for unauthorized requests.
+ *   - Inserts JwtAuthFilter before UsernamePasswordAuthenticationFilter.
+ *
+ * Authentication Provider (authenticationProvider):
+ *   - Uses DaoAuthenticationProvider backed by UserDetailsServiceImpl.
+ *   - Verifies BCrypt-encoded passwords via the shared PasswordEncoder bean.
+ *
+ * Authentication Manager (authenticationManager):
+ *   - Exposes the Spring AuthenticationManager as a bean, injected into
+ *     AuthController to authenticate login requests.
+ *
+ * Dependencies:
+ *   - JwtDecoder (security.config.JwtConfig) — for JwtAuthFilter construction
+ *   - UserDetailsService (security.service.UserDetailsServiceImpl) — user lookup
+ *   - PasswordEncoder (security.config.SecurityBeansConfig) — BCrypt matching
  ******************************************************************************/
 package com.plus33.erp.security.config;
 

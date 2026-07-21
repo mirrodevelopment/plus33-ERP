@@ -4,23 +4,22 @@
  * Developed For     : PLUS33 Coffee
  * Developer         : Sivasurya
  *
- * Module            : Pages Module
- * File              : page.js
- * Path              : frontend/pages/profile/page.js
- * Purpose           : Frontend page component for User Profile settings page
- * Version           : 0.0.2-SNAPSHOT
- *
- * Related API       : POST /api/upload-avatar
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : store/authStore, store/userStore, store/notificationStore, core/logger
- * Depends On        : store/authStore, store/userStore, store/notificationStore, core/logger
+ * Module            : Shared Module
+ * File              : profile.js
+ * Path              : frontend/shared/profile/profile.js
+ * Purpose           : Base/shared user profile workspace page component; provides real-time self-profile fetching from GET /api/v1/auth/me, profile editing via PUT /api/v1/auth/me, avatar uploading/selection, password updating via PUT /api/v1/auth/change-password, verification document management, and integration with DocumentHubComponent.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * User profile dashboard workspace. Part of the PLUS33 Coffee ERP vanilla JS SPA.
- * Allows viewing and editing user credentials, displaying avatars, selecting from
- * presets, or uploading local system images reactively.
+ * Standard user profile settings and workspace view component.
+ * Capabilities:
+ *   - Mounts and renders user credentials, avatar hero banner, employee metadata, and regional document verification panels.
+ *   - Fetches live profile data from backend GET /api/v1/auth/me and employee documents from GET /api/v2/employee-self-service/documents.
+ *   - Handles real-time inline profile edits (name, email, phone, gender, designation, avatar preset or custom uploaded image) and posts updates to backend PUT /api/v1/auth/me.
+ *   - Supports custom file avatar uploads to POST /api/v2/employee-self-service/avatar.
+ *   - Handles account password updates via PUT /api/v1/auth/change-password.
+ *   - Integrates DocumentHubComponent for regional identity/tax document management (PAN, Aadhaar, Siret, IBAN, UAE Civil ID, etc.).
  ******************************************************************************/
 
 import { authStore } from '../../store/authStore.js';
@@ -28,6 +27,7 @@ import { userStore } from '../../store/userStore.js';
 import { notificationStore } from '../../store/notificationStore.js';
 import { logger } from '../../core/logger.js';
 import { apiClient } from '../../api/client.js';
+import { DocumentHubComponent } from './DocumentHubComponent.js';
 
 export default class ProfilePage {
   /**
@@ -98,12 +98,13 @@ export default class ProfilePage {
       this.profile = userStore.getProfile(this.user?.role);
     }
     
-    const avatarUrlWithBuster = this.profile.avatarUrl
+    const avatarUrlWithBuster = this.profile?.avatarUrl
       ? (this.profile.avatarUrl.includes('unsplash.com') ? this.profile.avatarUrl : `${this.profile.avatarUrl}?t=${Date.now()}`)
       : 'imgs/male-avatar.png';
 
     // Check if current avatar is custom
-    const isPreset = this.profile.avatarUrl.includes('unsplash.com') || 
+    const isPreset = !this.profile?.avatarUrl || 
+                     this.profile.avatarUrl.includes('unsplash.com') || 
                      this.profile.avatarUrl === 'imgs/male-avatar.png' || 
                      this.profile.avatarUrl === 'imgs/female-avatar.jpg' || 
                      this.profile.avatarUrl === '';
@@ -237,13 +238,84 @@ export default class ProfilePage {
       `;
     }
     
+    const getRoleColor = (role) => {
+      const r = String(role || '').toLowerCase();
+      if (r.includes('ultimate')) return '#d946ef';
+      if (r.includes('national')) return '#3b82f6';
+      if (r.includes('regional')) return '#06b6d4';
+      if (r.includes('store') && !r.includes('employee')) return '#c9a46a';
+      if (r.includes('supervisor')) return '#f97316';
+      return '#10b981';
+    };
+
+    const roleColor = getRoleColor(this.user?.role);
+    const roleBadgeText = (this.user?.role || 'NATIONAL ADMIN')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace('_', ' ')
+      .toUpperCase();
+
     container.innerHTML = `
-      <div class="workspace-container animate-fade-in" style="max-width: 800px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-lg);">
+      <div class="workspace-container animate-fade-in" style="max-width: 1200px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-lg);">
         
-        <!-- Header -->
-        <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: var(--spacing-md); margin-bottom: var(--spacing-xl); text-align: left;">
-          <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; color: var(--text-primary); margin: 0;">My Profile</h2>
-          <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Manage your enterprise user credentials and configuration</span>
+        <!-- Hero Banner Card -->
+        <div style="position: relative; border-radius: 16px; background: rgba(18, 18, 20, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); padding: 28px; margin-bottom: 24px; overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,0.4);">
+          <div style="position: absolute; top:0; left:0; right:0; height:100%; background: radial-gradient(circle at 80% 20%, ${roleColor}22 0%, transparent 60%); pointer-events: none;"></div>
+          
+          <div style="position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 24px;">
+            <div style="position: relative; flex-shrink: 0;">
+              <img id="profile-card-image" src="${avatarUrlWithBuster}" alt="${this.profile.name}" style="width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid ${roleColor}66; box-shadow: 0 0 20px ${roleColor}40;">
+              <span style="position: absolute; bottom: 4px; right: 4px; width: 16px; height: 16px; border-radius: 50%; background: #10b981; border: 3px solid #121214;"></span>
+            </div>
+
+            <div style="flex: 1; min-width: 280px;">
+              <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 4px;">
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #ffffff; margin: 0;">${this.profile.name || 'Enterprise User'}</h2>
+                <span style="font-size: 0.62rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: ${roleColor}22; color: ${roleColor}; border: 1px solid ${roleColor}66; letter-spacing: 0.5px;">${roleBadgeText}</span>
+                ${this.profile.storeRegion ? `<span style="font-size: 0.62rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #e4e4e7; border: 1px solid rgba(255,255,255,0.15);">${this.profile.storeRegion}</span>` : ''}
+              </div>
+              <p style="font-size: 0.85rem; color: #a1a1aa; margin: 0 0 12px 0;">${this.profile.email || 'user@plus33coffee.com'}</p>
+              
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <span style="font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.4); color: #60a5fa; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                  ${((p = {}) => {
+                    const country = String(p.country || '').toLowerCase();
+                    const phone = String(p.phone || p.phoneNumber || '');
+                    if (country.includes('france') || phone.startsWith('+33')) return '🇫🇷 FR (+33)';
+                    if (country.includes('uae') || country.includes('emirates') || phone.startsWith('+971')) return '🇦🇪 AE (+971)';
+                    if (country.includes('singapore') || phone.startsWith('+65')) return '🇸🇬 SG (+65)';
+                    if (country.includes('usa') || country.includes('united states') || phone.startsWith('+1')) return '🇺🇸 US (+1)';
+                    return '🇮🇳 IN (+91)';
+                  })(this.profile)}
+                </span>
+                <span style="font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #d4d4d8;">
+                  Designation: ${this.profile.designation || 'Staff Administrator'}
+                </span>
+                ${(() => {
+                  const docs = this.docs || {};
+                  const pan = docs.panCard && docs.panCard.approved === true;
+                  const aadhaar = docs.aadhaarCard && docs.aadhaarCard.approved === true;
+                  const permit = docs.workPermit && docs.workPermit.approved === true;
+                  if (pan && aadhaar && permit) {
+                    return `<span style="font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #10b981; font-weight: 700;">✓ Onboarding Documents Verified</span>`;
+                  } else {
+                    return `<span style="font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.35); color: #f59e0b; font-weight: 700;">⏳ Onboarding Documents Pending</span>`;
+                  }
+                })()}
+              </div>
+            </div>
+
+            <!-- Quick Metrics Summary Stats -->
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 18px; min-width: 100px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+                <span style="font-size: 1.25rem; font-weight: 800; color: #ffffff;">Active</span>
+                <span style="font-size: 0.65rem; font-weight: 600; color: #a1a1aa; text-transform: uppercase; margin-top: 2px;">Account Status</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 18px; min-width: 100px; border-radius: 12px; background: ${roleColor}15; border: 1px solid ${roleColor}44;">
+                <span style="font-size: 1.25rem; font-weight: 800; color: ${roleColor};">100%</span>
+                <span style="font-size: 0.65rem; font-weight: 600; color: #a1a1aa; text-transform: uppercase; margin-top: 2px;">Audit Score</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr; gap: var(--spacing-xl);">
@@ -427,7 +499,8 @@ export default class ProfilePage {
             </form>
           </div>
 
-          ${verificationDocsHtml}
+          <!-- Dynamic Multi-Region Document Hub Component -->
+          <div id="shared-doc-hub-container" class="card glass" style="padding: var(--spacing-xl); border: 1px solid var(--border-color); background: var(--bg-card); border-radius: var(--radius-lg); text-align: left;"></div>
 
           <!-- Change Password Card -->
           <div class="card glass" style="padding: var(--spacing-xl); border: 1px solid var(--border-color); background: var(--bg-card); border-radius: var(--radius-lg); text-align: left;">
@@ -461,6 +534,18 @@ export default class ProfilePage {
         </div>
       </div>
     `;
+
+    const docHubBox = container.querySelector('#shared-doc-hub-container');
+    if (docHubBox) {
+      const roleType = (this.user?.role === 'ultimateAdmin' || this.user?.role === 'nationalAdmin') ? 'nationalAdmin' : (this.user?.role === 'regionalAdmin' ? 'regionalAdmin' : (this.user?.role === 'storeAdmin' ? 'storeAdmin' : 'storeEmployee'));
+      this.docHub = new DocumentHubComponent({
+        roleType: roleType,
+        user: this.user,
+        profile: this.profile,
+        initialDocs: this.docs
+      });
+      this.docHub.render(docHubBox);
+    }
   }
 
   /**
@@ -529,8 +614,13 @@ export default class ProfilePage {
         const email = container.querySelector('#input-profile-email').value.trim();
         const phone = container.querySelector('#input-profile-phone').value.trim();
         const gender = container.querySelector('#select-profile-gender').value;
-        const designation = container.querySelector('#select-profile-designation').value;
-        const avatarType = dropdown.value;
+        const designation = container.querySelector('#select-profile-designation')?.value || this.profile.designation || '';
+        const bankName = container.querySelector('#input-profile-bankname')?.value || this.profile.bankName || '';
+        const bankAccount = container.querySelector('#input-profile-bankacc')?.value || this.profile.bankAccount || '';
+        const ifscCode = container.querySelector('#input-profile-ifsc')?.value || this.profile.ifscCode || '';
+        const branchName = container.querySelector('#input-profile-branch')?.value || this.profile.branchName || '';
+
+        const avatarType = dropdown ? dropdown.value : 'custom';
         let avatarUrl = '';
 
         if (!name || !email) {
@@ -567,15 +657,23 @@ export default class ProfilePage {
               }
             } else {
               // Fallback to manual text input value
-              avatarUrl = container.querySelector('#input-profile-avatar-custom-url').value.trim();
-              if (!avatarUrl) {
-                avatarUrl = this.profile.avatarUrl; // Keep original
-              }
+              avatarUrl = container.querySelector('#input-profile-avatar-custom-url')?.value.trim() || this.profile.avatarUrl;
             }
           }
 
-          // Update user details in database
-          const updateResponse = await apiClient.put('/api/v1/auth/me', { name, email, avatarUrl, phone, gender, designation });
+          // Update user details in PostgreSQL database via REST API
+          const updateResponse = await apiClient.put('/api/v1/auth/me', {
+            name,
+            email,
+            avatarUrl,
+            phone,
+            gender,
+            designation,
+            bankName,
+            bankAccount,
+            ifscCode,
+            branchName
+          });
           if (updateResponse && updateResponse.success && updateResponse.data) {
             this.profile = updateResponse.data;
             userStore.updateProfile(this.user.role, updateResponse.data);

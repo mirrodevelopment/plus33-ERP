@@ -1,83 +1,62 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Admin Module
+ * File              : profile.js
+ * Path              : frontend/modules/store-admin/pages/profile/profile.js
+ * Purpose           : Store Manager user profile workspace component; handles self-profile data loading from GET /api/v1/auth/me, onboarding document status, profile updating via PUT /api/v1/auth/me, custom avatar uploading, and DocumentHubComponent integration.
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Specialized profile page controller for Store Managers.
+ * Capabilities:
+ *   - Injects HTML template modules/store-admin/pages/profile/profile.html and stylesheet profile.css.
+ *   - Loads live profile fields and onboarding document status.
+ *   - Toggles interactive editing for personal and banking fields (first name, last name, phone, gender, bank name, account, IFSC, branch).
+ *   - Locks system-governed administrative fields (email, employee ID, designation, joined date, salary).
+ *   - Supports custom file avatar uploads to /api/upload-avatar or selecting gender default presets.
+ *   - Renders DocumentHubComponent configured specifically for storeAdmin role type.
+ ******************************************************************************/
 import { authStore } from '../../../../store/authStore.js';
 import { userStore } from '../../../../store/userStore.js';
 import { notificationStore } from '../../../../store/notificationStore.js';
 import { logger } from '../../../../core/logger.js';
 import { apiClient } from '../../../../api/client.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
+import { DocumentHubComponent } from '../../../../shared/profile/DocumentHubComponent.js';
 
 const TEMPLATE_URL = 'modules/store-admin/pages/profile/profile.html';
 
-export default class ProfilePage {
+export default class StoreAdminProfilePage {
   constructor() {
     this.user = authStore.getUser();
     this.profile = userStore.getProfile(this.user?.role) || {};
-    this.docs = {
-      franchise: null,
-      legal: null,
-      foodSafety: null,
-      property: null,
-      employees: null,
-      finance: null,
-      suppliers: null,
-      equipment: null,
-      compliance: null,
-      insurance: null,
-      operations: null
-    };
-    this.selectedFile = null;
+    this.docs = {};
     this.isEditing = false;
+    this.docHub = null;
   }
 
   async mount(container, lifecycle) {
     logger.info('StoreAdminProfile', 'Mounting store admin profile page...');
-    
-    // Load CSS
     this._loadCss();
-
-    // 1. Inject HTML template layout
     await htmlLoader.inject(TEMPLATE_URL, container);
-
-    // 2. Load profile data and documents from server
     await this.loadProfileData();
     await this.loadDocumentData();
-
-    // 3. Populate data and bind events
     this.render(container);
     this.bindEvents(container, lifecycle);
   }
 
-  async loadDocumentData() {
-    try {
-      const docResponse = await apiClient.get('/api/v2/employee-self-service/documents');
-      if (docResponse && docResponse.success && Array.isArray(docResponse.data)) {
-        const docs = {
-          franchise: null,
-          legal: null,
-          foodSafety: null,
-          property: null,
-          employees: null,
-          finance: null,
-          suppliers: null,
-          equipment: null,
-          compliance: null,
-          insurance: null,
-          operations: null
-        };
-        docResponse.data.forEach(d => {
-          if (docs.hasOwnProperty(d.documentType)) {
-            docs[d.documentType] = {
-              id: d.id,
-              name: d.documentName,
-              url: d.filePath,
-              approved: d.approved,
-              uploadedAt: d.uploadedAt ? new Date(d.uploadedAt).toLocaleString('en-US', {hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit'}) : ''
-            };
-          }
-        });
-        this.docs = docs;
-      }
-    } catch (e) {
-      logger.error('StoreAdminProfile', 'Error loading database documents:', e);
+  _loadCss() {
+    const cssId = 'css-store-admin-profile';
+    if (!document.getElementById(cssId)) {
+      const link = document.createElement('link');
+      link.id = cssId; link.rel = 'stylesheet';
+      link.href = 'modules/store-admin/pages/profile/profile.css';
+      document.head.appendChild(link);
     }
   }
 
@@ -89,434 +68,196 @@ export default class ProfilePage {
         this.profile = response.data;
         userStore.updateProfile(this.user?.role, response.data);
       }
-    } catch (e) {
-      logger.error('StoreAdminProfile', 'Error loading database profile:', e);
-    }
+    } catch (e) { logger.error('StoreAdminProfile', 'Error loading profile:', e); }
+  }
+
+  async loadDocumentData() {
+    try {
+      const docResponse = await apiClient.get('/api/v2/employee-self-service/documents');
+      if (docResponse && docResponse.success && Array.isArray(docResponse.data)) {
+        const docs = {};
+        docResponse.data.forEach(d => {
+          docs[d.documentType] = { id: d.id, name: d.documentName, url: d.filePath, approved: d.approved, uploadedAt: d.uploadedAt ? new Date(d.uploadedAt).toLocaleString() : '' };
+        });
+        this.docs = docs;
+      }
+    } catch (e) { logger.error('StoreAdminProfile', 'Error loading documents:', e); }
   }
 
   render(container) {
-    if (!this.profile) return;
+    this.user = authStore.getUser();
+    const p = this.profile || {};
+    const fullName = (p.firstName || p.lastName) ? `${p.firstName || ''} ${p.lastName || ''}`.trim() : (p.fullName || p.name || this.user?.name || '');
+    const email = p.email || this.user?.email || '';
+    const storeName = p.storeName || p.store || '';
 
-    // Profile Card Header fields
-    const avatarImg = container.querySelector('#profile-card-image');
-    if (avatarImg) {
-      const avatarBuster = this.profile.avatarUrl ? `${this.profile.avatarUrl}?v=${Date.now()}` : 'imgs/male-avatar.png';
-      avatarImg.src = avatarBuster;
-      avatarImg.alt = this.profile.name || 'Store Admin';
+    const nameEl = container.querySelector('#store-user-fullname');
+    const emailEl = container.querySelector('#store-user-email');
+    const scopeBadgeEl = container.querySelector('#store-scope-badge');
+    const avatarImg = container.querySelector('#store-avatar-img');
+    const countryBadge = container.querySelector('#store-country-code-badge');
+
+    if (nameEl) nameEl.textContent = fullName || 'Store Manager Profile';
+    if (emailEl) emailEl.textContent = email || 'No Email Registered';
+    if (scopeBadgeEl) scopeBadgeEl.textContent = storeName ? `☕ ${storeName}` : '☕ Store Location';
+
+    if (countryBadge) {
+      const cs = String(p.country || '').toLowerCase(), ph = String(p.phone || p.phoneNumber || '');
+      if (cs.includes('france') || ph.startsWith('+33')) countryBadge.textContent = '🇫🇷 FR (+33)';
+      else if (cs.includes('uae') || cs.includes('emirates') || ph.startsWith('+971')) countryBadge.textContent = '🇦🇪 AE (+971)';
+      else if (cs.includes('singapore') || ph.startsWith('+65')) countryBadge.textContent = '🇸🇬 SG (+65)';
+      else if (cs.includes('usa') || cs.includes('united states') || ph.startsWith('+1')) countryBadge.textContent = '🇺🇸 US (+1)';
+      else countryBadge.textContent = '🇮🇳 IN (+91)';
     }
 
-    const displayName = container.querySelector('#profile-display-name');
-    if (displayName) displayName.textContent = this.profile.name || 'Not set';
-
-    const displayStore = container.querySelector('#profile-display-store');
-    if (displayStore) displayStore.textContent = this.profile.store || 'Corporate Head Office';
-
-    const displayRole = container.querySelector('#profile-display-role');
-    if (displayRole) displayRole.textContent = (this.user?.role || 'Store Admin').replace(/([A-Z])/g, ' $1').toUpperCase();
-
-    const displayCode = container.querySelector('#profile-display-code');
-    if (displayCode) displayCode.textContent = this.profile.employeeCode ? `ID: ${this.profile.employeeCode}` : 'ID: N/A';
-
-    // Info Details Grid
-    const nameVal = container.querySelector('#info-name');
-    if (nameVal) nameVal.textContent = this.profile.name || 'Not set';
-
-    const codeVal = container.querySelector('#info-code');
-    if (codeVal) codeVal.textContent = this.profile.employeeCode || 'N/A';
-
-    const emailVal = container.querySelector('#info-email');
-    if (emailVal) emailVal.textContent = this.profile.email || 'Not set';
-
-    const phoneVal = container.querySelector('#info-phone');
-    if (phoneVal) phoneVal.textContent = this.profile.phone || 'Not set';
-
-    const designationVal = container.querySelector('#info-designation');
-    if (designationVal) designationVal.textContent = this.profile.designation || 'Store Manager';
-
-    const departmentVal = container.querySelector('#info-department');
-    if (departmentVal) departmentVal.textContent = this.profile.department || 'Store Operations';
-
-    const storeVal = container.querySelector('#info-store');
-    if (storeVal) storeVal.textContent = this.profile.store || 'Corporate Head Office';
-
-    // STORE TYPE
-    const storeTypeVal = container.querySelector('#info-store-type');
-    if (storeTypeVal) storeTypeVal.textContent = this.profile.storeType ? this.profile.storeType.replace('_', ' ') : 'FLAGSHIP CAFE';
-
-    const regionVal = container.querySelector('#info-region');
-    if (regionVal) regionVal.textContent = this.profile.storeRegion || 'N/A';
-
-    const countryVal = container.querySelector('#info-country');
-    if (countryVal) countryVal.textContent = this.profile.country || 'N/A';
-
-    const addressVal = container.querySelector('#info-address');
-    if (addressVal) addressVal.textContent = this.profile.address || 'Not set';
-
-    // Edit form fields prepopulation
-    const editCard = container.querySelector('#edit-profile-card');
-    if (editCard) {
-      editCard.style.display = this.isEditing ? 'block' : 'none';
+    const docsBadge = container.querySelector('#store-docs-verified-badge');
+    if (docsBadge) {
+      const docs = this.docs || {};
+      const allVerified = docs.panCard?.approved && docs.aadhaarCard?.approved && docs.workPermit?.approved;
+      if (allVerified) { docsBadge.style.background = 'rgba(16,185,129,0.1)'; docsBadge.style.borderColor = 'rgba(16,185,129,0.3)'; docsBadge.style.color = '#10b981'; docsBadge.textContent = '✓ Onboarding Documents Verified'; }
+      else { docsBadge.style.background = 'rgba(245,158,11,0.12)'; docsBadge.style.borderColor = 'rgba(245,158,11,0.35)'; docsBadge.style.color = '#f59e0b'; docsBadge.textContent = '⏳ Onboarding Documents Pending'; }
     }
 
-    const editName = container.querySelector('#input-profile-name');
-    if (editName) editName.value = this.profile.name || '';
+    if (avatarImg && (p.avatarUrl || this.user?.avatarUrl)) avatarImg.src = p.avatarUrl || this.user?.avatarUrl;
 
-    const editEmail = container.querySelector('#input-profile-email');
-    if (editEmail) editEmail.value = this.profile.email || '';
+    const fields = {
+      '#input-store-firstname': p.firstName || '', '#input-store-lastname': p.lastName || '',
+      '#input-store-email': email, '#input-store-phone': p.phone || p.phoneNumber || '',
+      '#input-store-empid': p.employeeId || p.employeeCode || '', '#input-store-designation': p.designation || p.role || '',
+      '#input-store-joined': p.joinedDate || p.hireDate || '', '#input-store-salary': p.baseSalary || p.basicSalary || '',
+      '#input-store-bankname': p.bankName || '', '#input-store-bankacc': p.bankAccount || p.bankAccountNumber || '',
+      '#input-store-ifsc': p.ifscCode || p.ifscNumber || '', '#input-store-branch': p.branchName || p.branchLocation || '',
+    };
+    Object.entries(fields).forEach(([sel, val]) => { const el = container.querySelector(sel); if (el) el.value = val; });
+    const genderSelect = container.querySelector('#input-store-gender');
+    if (genderSelect) genderSelect.value = p.gender || 'Female';
 
-    const editPhone = container.querySelector('#input-profile-phone');
-    if (editPhone) editPhone.value = this.profile.phone || '';
+    // Feature card data
+    const fcName = container.querySelector('#fc-store-name'); if (fcName) fcName.textContent = storeName || '—';
+    const fcSalary = container.querySelector('#fc-store-salary'); if (fcSalary) fcSalary.textContent = p.baseSalary || '—';
 
-    const editGender = container.querySelector('#select-profile-gender');
-    if (editGender) editGender.value = this.profile.gender || 'Male';
-
-    const editAvatarType = container.querySelector('#select-profile-avatar-type');
-    if (editAvatarType) {
-      const isPreset = ['imgs/male-avatar.png', 'imgs/female-avatar.png'].includes(this.profile.avatarUrl);
-      editAvatarType.value = isPreset ? this.profile.avatarUrl : 'custom';
+    const docHubBox = container.querySelector('#store-doc-hub-container');
+    if (docHubBox && !this.docHub) {
+      this.docHub = new DocumentHubComponent({ roleType: 'storeAdmin', user: this.user, profile: this.profile, initialDocs: this.docs });
+      this.docHub.render(docHubBox);
     }
-
-    // Render operational document rows status & actions
-    [
-      'franchise', 'legal', 'foodSafety', 'property',
-      'employees', 'finance', 'suppliers', 'equipment',
-      'compliance', 'insurance', 'operations'
-    ].forEach(type => {
-      const doc = this.docs[type];
-      const statusContainer = container.querySelector(`#status-${type}`);
-      const actionsContainer = container.querySelector(`#actions-${type}`);
-
-      if (statusContainer && actionsContainer) {
-        statusContainer.innerHTML = '';
-        actionsContainer.innerHTML = '';
-
-        if (doc) {
-          statusContainer.innerHTML = `
-            <span class="status-badge ${doc.approved ? 'verified' : 'pending'}" style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; ${doc.approved ? 'background: rgba(46, 213, 115, 0.12); color: #2ed573;' : 'background: rgba(255, 71, 87, 0.12); color: #ff4757;'}">
-              ${doc.approved ? 'APPROVED' : 'PENDING REVIEW'}
-            </span>
-            <span class="doc-uploaded-at" style="font-size: 0.62rem; color: var(--text-muted); display: block; margin-top: 4px;">Uploaded: <strong>${doc.uploadedAt || 'N/A'}</strong></span>
-          `;
-          actionsContainer.innerHTML = `
-            <a href="${doc.url}" target="_blank" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.68rem; width: auto; margin: 0; display: inline-flex;">View File</a>
-            <button type="button" class="btn-delete btn" data-type="${type}" style="padding: 6px 12px; font-size: 0.68rem; background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.2); cursor: pointer; border-radius: var(--radius-xs); transition: all 0.2s;">Delete</button>
-          `;
-        } else {
-          statusContainer.innerHTML = `
-            <span class="status-badge pending" style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; background: rgba(255, 165, 0, 0.1); color: orange;">NOT UPLOADED</span>
-          `;
-          actionsContainer.innerHTML = `
-            <button type="button" class="btn-upload btn btn-primary" data-type="${type}" style="padding: 6px 12px; font-size: 0.68rem; border-radius: var(--radius-xs);">Upload File</button>
-          `;
-        }
-      }
-    });
   }
 
   bindEvents(container, lifecycle) {
-    const toggleEditBtn = container.querySelector('#btn-toggle-edit-mode');
-    if (toggleEditBtn) {
-      const handleToggle = () => {
-        this.isEditing = !this.isEditing;
-        this.render(container);
-        if (this.isEditing) {
-          const editCard = container.querySelector('#edit-profile-card');
-          if (editCard) editCard.scrollIntoView({ behavior: 'smooth' });
-        }
-      };
-      toggleEditBtn.addEventListener('click', handleToggle);
-      lifecycle.onCleanup(() => toggleEditBtn.removeEventListener('click', handleToggle));
-    }
+    const btnEdit = container.querySelector('#btn-toggle-edit-personal');
+    const btnCancel = container.querySelector('#btn-cancel-personal');
+    const actionsBox = container.querySelector('#store-personal-actions');
+    const fnameInput = container.querySelector('#input-store-firstname');
+    const lnameInput = container.querySelector('#input-store-lastname');
+    const phoneInput = container.querySelector('#input-store-phone');
+    const genderSelect = container.querySelector('#input-store-gender');
+    const bankNameInput = container.querySelector('#input-store-bankname');
+    const bankAccInput = container.querySelector('#input-store-bankacc');
+    const ifscInput = container.querySelector('#input-store-ifsc');
+    const branchInput = container.querySelector('#input-store-branch');
+    const editableInputs = [fnameInput, lnameInput, phoneInput, genderSelect, bankNameInput, bankAccInput, ifscInput, branchInput];
+    const lockedInputs = [
+      container.querySelector('#input-store-email'), container.querySelector('#input-store-empid'),
+      container.querySelector('#input-store-designation'), container.querySelector('#input-store-joined'), container.querySelector('#input-store-salary')
+    ];
 
-    const editAvatarType = container.querySelector('#select-profile-avatar-type');
-    const uploadContainer = container.querySelector('#avatar-file-upload-container');
-    const fileInput = container.querySelector('#input-profile-file');
-    const dropZone = container.querySelector('#avatar-drop-zone');
-    const fileNameLabel = container.querySelector('#avatar-file-name');
-
-    if (editAvatarType && uploadContainer) {
-      const handleAvatarTypeChange = () => {
-        uploadContainer.style.display = editAvatarType.value === 'custom' ? 'block' : 'none';
-      };
-      editAvatarType.addEventListener('change', handleAvatarTypeChange);
-      lifecycle.onCleanup(() => editAvatarType.removeEventListener('change', handleAvatarTypeChange));
-      
-      // Initial trigger
-      handleAvatarTypeChange();
-    }
-
-    if (dropZone && fileInput) {
-      const triggerFile = () => fileInput.click();
-      dropZone.addEventListener('click', triggerFile);
-      lifecycle.onCleanup(() => dropZone.removeEventListener('click', triggerFile));
-
-      const handleFileChange = () => {
-        const file = fileInput.files[0];
-        if (file) {
-          this.selectedFile = file;
-          if (fileNameLabel) fileNameLabel.textContent = file.name;
-
-          // Local file preview logic
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const previewImg = container.querySelector('#profile-card-image');
-            if (previewImg) previewImg.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-      fileInput.addEventListener('change', handleFileChange);
-      lifecycle.onCleanup(() => fileInput.removeEventListener('change', handleFileChange));
-    }
-
-    // Save profile form submission
-    const profileForm = container.querySelector('#form-edit-profile');
-    if (profileForm) {
-      const handleProfileSubmit = async (e) => {
-        e.preventDefault();
-        const saveButton = container.querySelector('#btn-save-profile');
-        if (saveButton) {
-          saveButton.disabled = true;
-          saveButton.textContent = 'Saving Changes...';
-        }
-
-        const name = container.querySelector('#input-profile-name').value.trim();
-        const email = container.querySelector('#input-profile-email').value.trim();
-        const phone = container.querySelector('#input-profile-phone').value.trim();
-        const gender = container.querySelector('#select-profile-gender').value;
-        const avatarType = editAvatarType.value;
-        let avatarUrl = '';
-
-        try {
-          if (avatarType !== 'custom') {
-            avatarUrl = avatarType;
-          } else {
-            if (this.selectedFile) {
-              const response = await fetch('/api/upload-avatar', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': this.selectedFile.type,
-                  'X-Username': name,
-                  'X-Role': this.user.role,
-                  'X-Worker-Id': this.profile.employeeCode || String(this.profile.id || 'ADMIN')
-                },
-                body: this.selectedFile
-              });
-              const data = await response.json();
-              if (data.success && data.url) {
-                avatarUrl = data.url;
-              } else {
-                throw new Error(data.message || 'File upload failed on server.');
-              }
-            } else {
-              avatarUrl = this.profile.avatarUrl || 'imgs/male-avatar.png';
-            }
-          }
-
-          const updateResponse = await apiClient.put('/api/v1/auth/me', {
-            name,
-            email,
-            avatarUrl,
-            phone,
-            gender,
-            designation: this.profile.designation || 'Store Manager'
-          });
-
-          if (updateResponse && updateResponse.success && updateResponse.data) {
-            this.profile = updateResponse.data;
-            userStore.updateProfile(this.user.role, updateResponse.data);
-
-            authStore.updateUser({
-              name: updateResponse.data.name,
-              username: updateResponse.data.email,
-              avatarUrl: updateResponse.data.avatarUrl
-            });
-            notificationStore.success('Profile changes saved successfully to database!');
-          } else {
-            throw new Error(updateResponse?.message || 'Database update failed.');
-          }
-
-          this.selectedFile = null;
-          this.isEditing = false;
-          this.render(container);
-        } catch (err) {
-          logger.error('StoreAdminProfile', 'Failed to update user profile:', err);
-          notificationStore.danger(`Failed to save profile: ${err.message}`);
-        } finally {
-          if (saveButton) {
-            saveButton.disabled = false;
-            saveButton.textContent = 'Save Profile Changes';
-          }
-        }
-      };
-      profileForm.addEventListener('submit', handleProfileSubmit);
-      lifecycle.onCleanup(() => profileForm.removeEventListener('submit', handleProfileSubmit));
-    }
-
-    // Password change form submission
-    const passwordForm = container.querySelector('#form-change-password');
-    if (passwordForm) {
-      const handlePasswordSubmit = async (e) => {
-        e.preventDefault();
-        const currentPassword = container.querySelector('#input-password-current').value;
-        const newPassword = container.querySelector('#input-password-new').value;
-        const confirmPassword = container.querySelector('#input-password-confirm').value;
-        const submitBtn = container.querySelector('#btn-submit-password');
-
-        if (newPassword.length < 6) {
-          notificationStore.danger('New password must be at least 6 characters long.');
-          return;
-        }
-        if (newPassword !== confirmPassword) {
-          notificationStore.danger('New password and confirmation password do not match.');
-          return;
-        }
-
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Updating Password...';
-        }
-
-        try {
-          const response = await apiClient.put('/api/v1/auth/change-password', {
-            currentPassword,
-            newPassword
-          });
-          if (response && response.success) {
-            notificationStore.success('Account password updated successfully!');
-            passwordForm.reset();
-          } else {
-            throw new Error(response.message || 'Incorrect current password or invalid request');
-          }
-        } catch (err) {
-          logger.error('StoreAdminProfile', 'Failed to update password:', err);
-          notificationStore.danger(`Password change failed: ${err.message}`);
-        } finally {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Update Security Password';
-          }
-        }
-      };
-      passwordForm.addEventListener('submit', handlePasswordSubmit);
-      lifecycle.onCleanup(() => passwordForm.removeEventListener('submit', handlePasswordSubmit));
-    }
-
-    // Document uploads event handling
-    const handleDocUpload = (btn) => {
-      const type = btn.getAttribute('data-type');
-      const docInput = container.querySelector(`#input-doc-${type}`);
-      if (docInput) {
-        const triggerDocFile = () => docInput.click();
-        btn.addEventListener('click', triggerDocFile);
-        
-        const handleDocFileChange = async () => {
-          const file = docInput.files[0];
-          if (!file) return;
-
-          const progContainer = container.querySelector(`#progress-container-${type}`);
-          const progBar = container.querySelector(`#progress-bar-${type}`);
-          const progText = container.querySelector(`#progress-text-${type}`);
-          const progPct = container.querySelector(`#progress-pct-${type}`);
-
-          if (progContainer) progContainer.style.display = 'block';
-          if (progText) progText.textContent = 'Uploading...';
-
-          let pct = 0;
-          const interval = setInterval(() => {
-            pct += 10;
-            if (pct > 90) clearInterval(interval);
-            if (progBar) progBar.style.width = `${pct}%`;
-            if (progPct) progPct.textContent = `${pct}%`;
-          }, 100);
-
-          try {
-            const response = await fetch('/api/upload-document', {
-              method: 'POST',
-              headers: {
-                'Content-Type': file.type,
-                'X-Worker-Id': this.profile.employeeCode || String(this.profile.id || 'ADMIN'),
-                'X-Document-Type': type,
-                'X-File-Name': file.name
-              },
-              body: file
-            });
-
-            clearInterval(interval);
-            if (progBar) progBar.style.width = '100%';
-            if (progPct) progPct.textContent = '100%';
-            if (progText) progText.textContent = 'Completing...';
-
-            const data = await response.json();
-            if (data.success && data.url) {
-              const saveResponse = await apiClient.post('/api/v2/employee-self-service/documents', {
-                documentType: type,
-                documentName: file.name,
-                filePath: data.url
-              });
-              if (saveResponse && saveResponse.success) {
-                this.docs[type] = {
-                  name: file.name,
-                  url: data.url,
-                  uploadedAt: new Date().toLocaleString()
-                };
-                notificationStore.success(`${file.name} uploaded successfully!`);
-              } else {
-                throw new Error(saveResponse?.message || 'Database link failed.');
-              }
-            } else {
-              throw new Error(data.message || 'Server upload failed.');
-            }
-            await this.loadDocumentData();
-            this.render(container);
-            this.bindEvents(container, lifecycle);
-          } catch (err) {
-            clearInterval(interval);
-            if (progContainer) progContainer.style.display = 'none';
-            logger.error('StoreAdminProfile', 'Document upload failed:', err);
-            notificationStore.danger(`Upload failed: ${err.message}`);
-          }
-        };
-        docInput.addEventListener('change', handleDocFileChange);
-      }
+    const toggleEdit = (editing) => {
+      this.isEditing = editing;
+      editableInputs.forEach(input => {
+        if (!input) return;
+        input.disabled = !editing;
+        const w = input.closest('.store-form-input-wrap') || input.parentElement;
+        if (w) { w.style.background = editing ? 'rgba(201,164,106,0.08)' : 'rgba(24,24,27,0.8)'; w.style.borderColor = editing ? 'rgba(201,164,106,0.4)' : 'rgba(255,255,255,0.1)'; w.style.boxShadow = editing ? '0 0 10px rgba(201,164,106,0.15)' : 'none'; }
+      });
+      lockedInputs.forEach(input => {
+        if (!input) return;
+        const w = input.closest('.store-form-input-wrap') || input.parentElement;
+        if (w) { w.style.background = editing ? 'rgba(0,0,0,0.55)' : 'rgba(24,24,27,0.8)'; w.style.borderColor = editing ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.1)'; w.style.opacity = editing ? '0.35' : '1'; w.style.filter = editing ? 'grayscale(1)' : 'none'; w.style.cursor = editing ? 'not-allowed' : 'default'; w.title = editing ? '🔒 Read-only field' : ''; }
+      });
+      if (actionsBox) actionsBox.style.display = editing ? 'flex' : 'none';
+      if (btnEdit) btnEdit.textContent = editing ? '⏳ Editing...' : '✏️ Edit Details';
     };
 
-    container.querySelectorAll('.btn-upload').forEach(handleDocUpload);
-
-    // Document deletion event handling
-    const handleDocDelete = (btn) => {
-      const type = btn.getAttribute('data-type');
-      const triggerDocDelete = async () => {
-        try {
-          const deleteResponse = await apiClient.delete(`/api/v2/employee-self-service/documents/${type}`);
-          if (deleteResponse && deleteResponse.success) {
-            this.docs[type] = null;
-            notificationStore.success('Document deleted successfully.');
-          } else {
-            throw new Error(deleteResponse?.message || 'Deletion failed.');
-          }
-          await this.loadDocumentData();
-          this.render(container);
-          this.bindEvents(container, lifecycle);
-        } catch (err) {
-          logger.error('StoreAdminProfile', 'Failed to delete document:', err);
-          notificationStore.danger(`Delete failed: ${err.message}`);
-        }
+    if (genderSelect) {
+      const h = (e) => {
+        const val = e.target.value, da = val === 'Female' ? 'imgs/female-avatar.jpg' : 'imgs/male-avatar.png';
+        const ai = container.querySelector('#store-avatar-img'); if (ai) ai.src = da;
+        const ha = document.getElementById('user-avatar-header'); if (ha) ha.src = da;
+        this.profile.gender = val; this.profile.avatarUrl = da;
+        userStore.updateProfile(this.user?.role, { gender: val, avatarUrl: da }); authStore.updateUser({ avatarUrl: da });
       };
-      btn.addEventListener('click', triggerDocDelete);
+      genderSelect.addEventListener('change', h); lifecycle.onCleanup(() => genderSelect.removeEventListener('change', h));
+    }
+    if (btnEdit) { const h = () => toggleEdit(!this.isEditing); btnEdit.addEventListener('click', h); lifecycle.onCleanup(() => btnEdit.removeEventListener('click', h)); }
+    if (btnCancel) { const h = () => toggleEdit(false); btnCancel.addEventListener('click', h); lifecycle.onCleanup(() => btnCancel.removeEventListener('click', h)); }
+
+    const personalForm = container.querySelector('#form-store-personal-info');
+    if (personalForm) {
+      const onSubmit = async (e) => {
+        e.preventDefault();
+        try {
+          const selectedGender = genderSelect?.value || 'Female';
+          let avatarUrl = this.profile?.avatarUrl;
+          if (!avatarUrl || avatarUrl === 'imgs/male-avatar.png' || avatarUrl === 'imgs/female-avatar.jpg') avatarUrl = selectedGender === 'Female' ? 'imgs/female-avatar.jpg' : 'imgs/male-avatar.png';
+          this.profile.avatarUrl = avatarUrl;
+          const payload = { firstName: fnameInput?.value || '', lastName: lnameInput?.value || '', phone: phoneInput?.value || '', gender: selectedGender, bankName: bankNameInput?.value || '', bankAccount: bankAccInput?.value || '', ifscCode: ifscInput?.value || '', branchName: branchInput?.value || '', avatarUrl };
+          try { const r = await apiClient.put('/api/v1/auth/me', payload); this.profile = r?.success && r.data ? { ...this.profile, ...r.data } : { ...this.profile, ...payload }; }
+          catch (err) { logger.warn('StoreAdminProfile', 'Backend offline:', err); this.profile = { ...this.profile, ...payload }; }
+          const updatedFullName = `${this.profile.firstName || ''} ${this.profile.lastName || ''}`.trim() || 'Store Manager Profile';
+          this.profile.name = updatedFullName;
+          userStore.updateProfile(this.user?.role, this.profile); authStore.updateUser({ name: updatedFullName, avatarUrl: this.profile.avatarUrl });
+          const heroNameEl = container.querySelector('#store-user-fullname'); if (heroNameEl) heroNameEl.textContent = updatedFullName;
+          const headerNameEl = document.getElementById('user-name-header'); if (headerNameEl) headerNameEl.textContent = updatedFullName;
+          const sidebarNameEl = document.getElementById('user-name-sidebar'); if (sidebarNameEl) sidebarNameEl.textContent = updatedFullName;
+          this.render(container); toggleEdit(false);
+          notificationStore.success('Store manager profile and banking details saved successfully.');
+        } catch (err) { logger.error('StoreAdminProfile', 'Failed to update profile:', err); }
+      };
+      personalForm.addEventListener('submit', onSubmit); lifecycle.onCleanup(() => personalForm.removeEventListener('submit', onSubmit));
+    }
+
+    // Avatar modal
+    const avatarFileInput = container.querySelector('#input-store-avatar-file');
+    const avatarImg = container.querySelector('#store-avatar-img');
+    const avatarBox = container.querySelector('#avatar-container-box') || avatarImg?.parentElement;
+    const updateAvatarUrl = (url) => {
+      if (avatarImg) avatarImg.src = url;
+      const ha = document.getElementById('user-avatar-header'); if (ha) ha.src = url;
+      this.profile.avatarUrl = url; userStore.updateProfile(this.user?.role, { avatarUrl: url }); authStore.updateUser({ avatarUrl: url });
+      notificationStore.success('Profile avatar updated successfully.');
     };
-
-    container.querySelectorAll('.btn-delete').forEach(handleDocDelete);
-  }
-
-  _loadCss() {
-    const cssId = 'store-admin-profile-css';
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement('link');
-      link.id = cssId;
-      link.rel = 'stylesheet';
-      link.href = 'modules/store-admin/pages/profile/profile.css';
-      document.head.appendChild(link);
+    const openAvatarModal = () => {
+      const old = document.getElementById('modal-avatar-choice'); if (old) old.remove();
+      const overlay = document.createElement('div'); overlay.id = 'modal-avatar-choice';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;';
+      overlay.innerHTML = `<div style="background:#18181b;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:24px;max-width:440px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.6);color:#fff;display:flex;flex-direction:column;gap:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;"><div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">🖼️</span><h3 style="margin:0;font-size:1.05rem;font-weight:800;">Change Profile Avatar</h3></div><button id="btn-close-avatar-modal" style="background:transparent;border:none;color:#a1a1aa;font-size:1.2rem;cursor:pointer;">✕</button></div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <button id="btn-option-custom-avatar" style="padding:14px 16px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;display:flex;align-items:center;justify-content:space-between;cursor:pointer;"><div style="display:flex;align-items:center;gap:12px;"><span style="font-size:1.4rem;">📁</span><div style="text-align:left;"><strong style="font-size:0.88rem;display:block;">Upload Custom Image</strong><span style="font-size:0.72rem;color:#a1a1aa;">From your device</span></div></div><span style="color:#c9a46a;font-weight:800;">→</span></button>
+          <div style="border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);padding:14px;display:flex;flex-direction:column;gap:10px;"><span style="font-size:0.72rem;font-weight:800;color:#a1a1aa;text-transform:uppercase;">System Default:</span><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"><button id="btn-default-male" style="padding:10px;border-radius:10px;background:rgba(24,24,27,0.8);border:1px solid rgba(255,255,255,0.1);color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;"><img src="imgs/male-avatar.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;"><span style="font-size:0.78rem;font-weight:700;">👨 Male</span></button><button id="btn-default-female" style="padding:10px;border-radius:10px;background:rgba(24,24,27,0.8);border:1px solid rgba(255,255,255,0.1);color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;"><img src="imgs/female-avatar.jpg" style="width:32px;height:32px;border-radius:50%;object-fit:cover;"><span style="font-size:0.78rem;font-weight:700;">👩 Female</span></button></div></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;"><button id="btn-cancel-avatar-modal" style="padding:8px 16px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#a1a1aa;font-size:0.8rem;cursor:pointer;">Cancel</button></div>
+      </div>`;
+      document.body.appendChild(overlay);
+      const close = () => overlay.remove();
+      overlay.querySelector('#btn-close-avatar-modal').addEventListener('click', close);
+      overlay.querySelector('#btn-cancel-avatar-modal').addEventListener('click', close);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+      overlay.querySelector('#btn-option-custom-avatar').addEventListener('click', () => { close(); if (avatarFileInput) avatarFileInput.click(); });
+      overlay.querySelector('#btn-default-male').addEventListener('click', () => { close(); updateAvatarUrl('imgs/male-avatar.png'); });
+      overlay.querySelector('#btn-default-female').addEventListener('click', () => { close(); updateAvatarUrl('imgs/female-avatar.jpg'); });
+    };
+    if (avatarBox) { const h = () => openAvatarModal(); avatarBox.addEventListener('click', h); lifecycle.onCleanup(() => avatarBox.removeEventListener('click', h)); }
+    const pencilBtn = container.querySelector('#btn-edit-avatar-pencil');
+    if (pencilBtn) { pencilBtn.addEventListener('click', (e) => { e.stopPropagation(); openAvatarModal(); }); }
+    if (avatarFileInput) {
+      const onFileChange = async (e) => {
+        const file = e.target.files?.[0]; if (!file) return;
+        const reader = new FileReader(); reader.onload = (evt) => updateAvatarUrl(evt.target.result); reader.readAsDataURL(file);
+        try { const res = await fetch('/api/upload-avatar', { method: 'POST', headers: { 'Content-Type': file.type || 'image/png', 'X-Role': this.user?.role || 'storeAdmin' }, body: file }); const data = await res.json(); if (data.success && data.url) updateAvatarUrl(data.url); }
+        catch (err) { logger.error('StoreAdminProfile', 'Avatar upload error:', err); }
+      };
+      avatarFileInput.addEventListener('change', onFileChange); lifecycle.onCleanup(() => avatarFileInput.removeEventListener('change', onFileChange));
     }
   }
 }

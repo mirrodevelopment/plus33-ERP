@@ -1,0 +1,371 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Admin Module
+ * File              : usage.css
+ * Path              : frontend/modules/store-admin/pages/usage/usage.css
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Store Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+/* ===== DAILY INVENTORY USAGE STYLES ===== */
+
+.usage-header {
+  margin-bottom: 1.5rem;
+}
+
+.usage-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #ffffff);
+}
+
+.usage-header .section-desc {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted, rgba(255, 255, 255, 0.45));
+}
+
+/* Two-column layout */
+.usage-layout-row {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.quick-log-card {
+  flex: 1;
+  min-width: 320px;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.03) 0%,
+    rgba(201,164,106,0.04) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.usage-history-card {
+  flex: 2;
+  min-width: 500px;
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+/* Card headers */
+.quick-log-card .card-header,
+.usage-history-card .card-header {
+  margin-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.quick-log-card .card-header h3,
+.usage-history-card .card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary, #ffffff);
+}
+
+.quick-log-card .card-header .section-desc {
+  margin: 0.15rem 0 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted, rgba(255, 255, 255, 0.45));
+}
+
+/* Form inputs & structure */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted, rgba(255, 255, 255, 0.55));
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+  color: #ffffff;
+  outline: none;
+  width: 100%;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--accent-primary, #c9a46a);
+}
+
+.form-group-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.flex-fill-group {
+  flex: 1;
+}
+
+.image-preview-box {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 164, 106, 0.25);
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+.image-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Primary block buttons */
+.btn-primary-block {
+  width: 100%;
+  background: var(--accent-primary, #c9a46a);
+  color: #0f0f1a;
+  border: none;
+  border-radius: 6px;
+  padding: 0.65rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 1rem;
+}
+
+.btn-primary-block:hover {
+  background: #ffdca8;
+}
+
+.btn-primary-block:active {
+  transform: scale(0.98);
+}
+
+/* Collapsible inputs animation */
+#usage-fields-container {
+  animation: fadeSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Autocomplete searchable select */
+.searchable-select {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-select input {
+  padding-right: 2rem !important;
+}
+
+.searchable-select .dropdown-chevron {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.searchable-select.open .dropdown-chevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.searchable-options-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #0f0f1a;
+  border: 1px solid rgba(201, 164, 106, 0.25);
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.searchable-option-item {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+
+.searchable-option-item:last-child {
+  border-bottom: none;
+}
+
+.searchable-option-item:hover {
+  background: rgba(201, 164, 106, 0.12);
+  color: var(--accent-primary, #c9a46a);
+}
+
+.searchable-no-results {
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-muted, rgba(255, 255, 255, 0.45));
+  text-align: center;
+}
+
+/* History log data table */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.usage-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.usage-data-table th,
+.usage-data-table td {
+  padding: 0.85rem 1rem;
+  font-size: 0.825rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.usage-data-table th {
+  font-weight: 600;
+  color: var(--text-muted, rgba(255, 255, 255, 0.55));
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+}
+
+.usage-data-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.usage-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  display: block;
+}
+
+/* Search bar styling */
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper input {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 0.45rem 1rem 0.45rem 2.25rem;
+  font-size: 0.8rem;
+  color: #ffffff;
+  outline: none;
+  width: 240px;
+  transition: width 0.2s ease, border-color 0.2s ease;
+}
+
+.search-input-wrapper input:focus {
+  width: 280px;
+  border-color: var(--accent-primary, #c9a46a);
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.85rem;
+  font-size: 0.8rem;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.loading-placeholder {
+  text-align: center;
+  color: var(--text-muted, rgba(255, 255, 255, 0.45));
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--accent-primary, #c9a46a);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .quick-log-card,
+  .usage-history-card {
+    flex: 1 1 100%;
+    min-width: unset;
+  }
+}
+

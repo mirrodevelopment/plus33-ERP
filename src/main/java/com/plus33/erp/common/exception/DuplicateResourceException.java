@@ -5,25 +5,31 @@
  * Developer         : Sivasurya
  *
  * Module            : Common Module
- * Package           : com.plus33.erp.common.exception
  * File              : DuplicateResourceException.java
- * Purpose           : Custom exception for domain error handling in Common Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: DuplicateResourceExceptionController
- * Related Service   : DuplicateResourceExceptionService, DuplicateResourceExceptionServiceImpl
- * Related Repository: DuplicateResourceExceptionRepository
- * Related Entity    : DuplicateResourceException
- * Related DTO       : N/A
- * Related Mapper    : DuplicateResourceExceptionMapper
- * Related DB Table  : duplicate_resource_exceptions
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Common Module components
+ * Path              : src/main/java/com/plus33/erp/common/exception/DuplicateResourceException.java
+ * Purpose           : Custom unchecked exception thrown when a create or update operation
+ *                     would produce a duplicate record, causing a 409 Conflict HTTP
+ *                     response via GlobalExceptionHandler across all ERP modules.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Common Module within the PLUS33 Coffee ERP platform.
+ * RuntimeException subclass representing an HTTP 409 Conflict condition caused
+ * by uniqueness constraint violations at the business logic layer — distinct from
+ * DataIntegrityViolationException which is thrown at the database level.
+ *
+ * Common throw sites (examples):
+ *   - EmployeeService: "Employee code {code} already exists"
+ *   - StoreService: "Store code {code} is already registered"
+ *   - ProductService: "SKU {sku} is already in use"
+ *   - UserService: "Email {email} is already registered"
+ *
+ * Intercepted by GlobalExceptionHandler.handleDuplicateResource() which
+ * builds an ErrorResponse with HTTP 409 and the exception message, returning
+ * it as structured JSON to the frontend for display in form validation errors.
+ *
+ * Prefer throwing this before the database insert to give a meaningful message
+ * rather than relying on DataIntegrityViolationException from the DB layer.
  ******************************************************************************/
 package com.plus33.erp.common.exception;
 

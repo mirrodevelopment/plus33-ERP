@@ -5,25 +5,39 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.filter
  * File              : JwtAuthFilter.java
- * Purpose           : Spring Security filter for JWT authentication and authorization
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: JwtAuthFilterController
- * Related Service   : JwtAuthFilterService, JwtAuthFilterServiceImpl
- * Related Repository: JwtAuthFilterRepository
- * Related Entity    : JwtAuthFilter
- * Related DTO       : HttpServletRequest, HttpServletResponse
- * Related Mapper    : JwtAuthFilterMapper
- * Related DB Table  : jwt_auth_filters
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Security Module components
+ * Path              : src/main/java/com/plus33/erp/security/filter/JwtAuthFilter.java
+ * Purpose           : Intercepts every HTTP request, validates the Bearer JWT token,
+ *                     extracts user identity and authorities, and populates the
+ *                     Spring SecurityContext for downstream @PreAuthorize enforcement.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Security Module within the PLUS33 Coffee ERP platform.
+ * OncePerRequestFilter that forms the backbone of stateless JWT authentication
+ * for the PLUS33 Coffee ERP API. Registered in SecurityConfig before
+ * UsernamePasswordAuthenticationFilter in the Spring Security filter chain.
+ *
+ * doFilterInternal flow:
+ *   1. Short-circuits for public paths: /api/v1/auth/login, /swagger-ui/**,
+ *      /v3/api-docs/**, /api-docs/**. Passes directly to filter chain.
+ *   2. Reads Authorization header. If absent or not "Bearer " prefixed,
+ *      passes through without authentication (SecurityConfig will reject
+ *      protected paths with 401).
+ *   3. Strips "Bearer " prefix and decodes the JWT using the injected
+ *      JwtDecoder (HMAC-SHA256 symmetric key).
+ *   4. If SecurityContext has no existing authentication, extracts the
+ *      "authorities" claim as List<String>, converts to SimpleGrantedAuthority
+ *      list, builds UsernamePasswordAuthenticationToken from the JWT subject
+ *      (email) and authority list, and sets it in SecurityContextHolder.
+ *   5. Invalid/expired/tampered tokens throw JwtException which is caught and
+ *      logged at WARN level. The request continues without authentication,
+ *      causing 401 from SecurityConfig authenticationEntryPoint.
+ *   6. Always invokes filterChain.doFilter() to allow the request to proceed.
+ *
+ * Dependencies:
+ *   - JwtDecoder (security.config.JwtConfig) — decodes and verifies JWT
+ *   - SecurityContextHolder — sets authenticated principal per request
  ******************************************************************************/
 package com.plus33.erp.security.filter;
 

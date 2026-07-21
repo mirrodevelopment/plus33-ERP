@@ -1,0 +1,192 @@
+﻿<!--
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Ultimate Admin Module
+ * File              : profile.html
+ * Path              : frontend/modules/ultimate-admin/pages/profile/profile.html
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Ultimate Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+-->
+<!-- ============================================================
+     PLUS33 Coffee ERP | Ultimate Admin Profile Page
+     Module  : Ultimate Admin — My Profile
+     File    : profile.html
+     Path    : frontend/modules/ultimate-admin/pages/profile/profile.html
+     Purpose : Glassmorphic 4-row profile page — Purple ultimate-admin theme
+     ============================================================ -->
+<div class="ult-profile-page animate-fade-in">
+
+  <!-- Hero Header Banner Card -->
+  <div class="ult-profile-hero">
+    <div class="ult-profile-hero__bg"></div>
+    <div class="ult-profile-hero__content">
+
+      <!-- Avatar -->
+      <div class="ult-profile-avatar-wrapper" id="avatar-container-box" title="Change Profile Avatar">
+        <div class="ult-profile-avatar">
+          <img id="ult-avatar-img" src="imgs/male-avatar.png" alt="Ultimate Admin Avatar" class="ult-profile-avatar__img">
+          <div class="ult-profile-avatar__overlay"><span>📷</span><span>Change</span></div>
+        </div>
+        <button type="button" id="btn-edit-avatar-pencil" class="ult-profile-avatar__pencil" title="Change Profile Picture">✏️</button>
+        <span class="ult-profile-status-dot"></span>
+        <input type="file" id="input-ult-avatar-file" accept="image/*" style="display:none;">
+      </div>
+
+      <!-- Info -->
+      <div class="ult-profile-hero__meta">
+        <div class="ult-profile-hero__title-row">
+          <h2 id="ult-user-fullname" class="ult-profile-hero__name">Ultimate Administrator</h2>
+          <span class="ult-role-badge">ULTIMATE ADMIN</span>
+          <span class="ult-enterprise-badge">⚡ Super User</span>
+        </div>
+        <p id="ult-user-email" class="ult-profile-hero__email">ultimate.admin@plus33.coffee</p>
+        <div class="ult-profile-hero__tags">
+          <span id="ult-country-code-badge" class="ult-tag-pill">🌐 Global Enterprise</span>
+          <span id="ult-scope-badge" class="ult-tag-pill">🏢 All Nations</span>
+          <span id="ult-docs-verified-badge" class="ult-tag-pill">⏳ Onboarding Documents Pending</span>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="ult-profile-hero__stats">
+        <div class="ult-stat-card"><span class="ult-stat-card__val" id="stat-ult-nations">—</span><span class="ult-stat-card__lbl">Nations</span></div>
+        <div class="ult-stat-card"><span class="ult-stat-card__val" id="stat-ult-regions">—</span><span class="ult-stat-card__lbl">Total Regions</span></div>
+        <div class="ult-stat-card ult-stat-card--accent"><span class="ult-stat-card__val" id="stat-ult-stores">—</span><span class="ult-stat-card__lbl">Total Stores</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: Info Form + Security -->
+  <div class="ult-profile-row-1">
+
+    <!-- Personal + Banking Info Card -->
+    <div class="ult-profile-card">
+      <div class="ult-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="ult-profile-card__icon">👤</div>
+          <div>
+            <h3 class="ult-profile-card__title">Ultimate Admin Information</h3>
+            <span class="ult-profile-card__sub">Personal, Compensation &amp; Banking Details</span>
+          </div>
+        </div>
+        <button type="button" id="btn-toggle-edit-personal" class="ult-profile-btn-sec">✏️ Edit Details</button>
+      </div>
+      <form id="form-ult-personal-info" class="ult-profile-form">
+        <div class="ult-form-row">
+          <div class="ult-form-group"><label class="ult-form-label">First Name</label><div class="ult-form-input-wrap"><span class="ult-form-icon">👤</span><input type="text" id="input-ult-firstname" placeholder="First Name" disabled class="ult-form-input"></div></div>
+          <div class="ult-form-group"><label class="ult-form-label">Last Name</label><div class="ult-form-input-wrap"><span class="ult-form-icon">👤</span><input type="text" id="input-ult-lastname" placeholder="Last Name" disabled class="ult-form-input"></div></div>
+        </div>
+        <div class="ult-form-row">
+          <div class="ult-form-group"><label class="ult-form-label">Email Address</label><div class="ult-form-input-wrap"><span class="ult-form-icon">✉️</span><input type="email" id="input-ult-email" placeholder="Email Address" disabled class="ult-form-input"></div></div>
+          <div class="ult-form-group"><label class="ult-form-label">Contact Phone</label><div class="ult-form-input-wrap"><span class="ult-form-icon">📞</span><input type="tel" id="input-ult-phone" placeholder="Phone Number" disabled class="ult-form-input"></div></div>
+        </div>
+        <div class="ult-form-row">
+          <div class="ult-form-group"><label class="ult-form-label">Admin ID</label><div class="ult-form-input-wrap"><span class="ult-form-icon">🪪</span><input type="text" id="input-ult-empid" placeholder="Admin ID" disabled readonly class="ult-form-input"></div></div>
+          <div class="ult-form-group"><label class="ult-form-label">Role Title</label><div class="ult-form-input-wrap"><span class="ult-form-icon">👔</span><input type="text" id="input-ult-designation" placeholder="Designation / Role" disabled class="ult-form-input"></div></div>
+        </div>
+        <div class="ult-form-row ult-form-row--3">
+          <div class="ult-form-group"><label class="ult-form-label">Joined Date</label><div class="ult-form-input-wrap"><span class="ult-form-icon">📅</span><input type="text" id="input-ult-joined" placeholder="Joined Date" disabled class="ult-form-input"></div></div>
+          <div class="ult-form-group"><label class="ult-form-label">Base Salary Rate</label><div class="ult-form-input-wrap"><span class="ult-form-icon">💵</span><input type="text" id="input-ult-salary" placeholder="Base Salary" disabled class="ult-form-input"></div></div>
+          <div class="ult-form-group"><label class="ult-form-label">Gender Avatar</label><div class="ult-form-input-wrap"><span class="ult-form-icon">🚻</span><select id="input-ult-gender" disabled class="ult-form-input"><option value="Male">Male (👨 Default)</option><option value="Female">Female (👩 Default)</option><option value="Other">Other</option></select></div></div>
+        </div>
+        <div class="ult-banking-header">
+          <span>🏦 Country Direct Deposit Bank Details</span>
+          <span id="lbl-ult-bank-country" class="ult-banking-country">🌐 Global Standard</span>
+        </div>
+        <div class="ult-form-row">
+          <div class="ult-form-group"><label class="ult-form-label">Bank Name</label><div class="ult-form-input-wrap"><span class="ult-form-icon">🏛️</span><input type="text" id="input-ult-bankname" placeholder="Bank Name" disabled class="ult-form-input"></div></div>
+          <div class="ult-form-group"><label class="ult-form-label" id="lbl-bank-acc-num">Account Number / IBAN</label><div class="ult-form-input-wrap"><span class="ult-form-icon">💳</span><input type="text" id="input-ult-bankacc" placeholder="Account Number / IBAN" disabled class="ult-form-input"></div></div>
+        </div>
+        <div class="ult-form-row">
+          <div class="ult-form-group"><label class="ult-form-label" id="lbl-bank-ifsc-code">IFSC / BIC / SWIFT Code</label><div class="ult-form-input-wrap"><span class="ult-form-icon">🔍</span><input type="text" id="input-ult-ifsc" placeholder="IFSC / BIC / SWIFT" disabled class="ult-form-input"></div></div>
+          <div class="ult-form-group"><label class="ult-form-label" id="lbl-bank-branch-wps">Branch / WPS Routing ID</label><div class="ult-form-input-wrap"><span class="ult-form-icon">📍</span><input type="text" id="input-ult-branch" placeholder="Branch / WPS ID" disabled class="ult-form-input"></div></div>
+        </div>
+        <div id="ult-personal-actions" class="ult-form-actions" style="display:none;">
+          <button type="button" id="btn-cancel-personal" class="ult-btn-ghost">Cancel</button>
+          <button type="submit" id="btn-save-personal" class="ult-btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Security Card -->
+    <div class="ult-profile-card">
+      <div class="ult-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="ult-profile-card__icon">🛡️</div>
+          <div>
+            <h3 class="ult-profile-card__title">Security &amp; Account</h3>
+            <span class="ult-profile-card__sub">Manage your login credentials</span>
+          </div>
+        </div>
+      </div>
+      <form id="form-ult-change-password" class="ult-profile-form">
+        <div class="ult-form-group"><label class="ult-form-label">Current Password</label><input type="password" id="input-ult-curr-password" placeholder="••••••••••••" required class="ult-form-input"></div>
+        <div class="ult-form-row">
+          <div class="ult-form-group"><label class="ult-form-label">New Password</label><input type="password" id="input-ult-new-password" placeholder="Minimum 8 chars" required class="ult-form-input"></div>
+          <div class="ult-form-group"><label class="ult-form-label">Confirm Password</label><input type="password" id="input-ult-confirm-password" placeholder="Repeat new password" required class="ult-form-input"></div>
+        </div>
+        <button type="submit" id="btn-ult-update-password" class="ult-btn-primary full-width">🔒 Update Security Credentials</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ROW 2: 4 Feature Cards -->
+  <div class="ult-profile-row-2">
+    <div class="ult-feature-card ult-feature-card--purple">
+      <div class="ult-feature-card__header"><span class="ult-feature-card__icon">🌐</span><div><h4 class="ult-feature-card__title">Enterprise Control</h4><span class="ult-feature-card__sub" style="color:#d946ef;">Global Overview</span></div></div>
+      <div class="ult-feature-card__body">
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">Nations Under Control</span><strong id="fc-ult-nations" class="ult-feature-card__val">—</strong></div>
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">Total Stores Globally</span><strong id="fc-ult-stores" class="ult-feature-card__val">—</strong></div>
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">Status</span><strong style="color:#d946ef;">Super Administrator</strong></div>
+      </div>
+    </div>
+    <div class="ult-feature-card ult-feature-card--amber">
+      <div class="ult-feature-card__header"><span class="ult-feature-card__icon">🛡️</span><div><h4 class="ult-feature-card__title">Security &amp; Compliance</h4><span class="ult-feature-card__sub" style="color:#f59e0b;">System Governance</span></div></div>
+      <div class="ult-feature-card__body">
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">Security Level</span><strong class="ult-feature-card__val">Maximum Access</strong></div>
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">Verification Status</span><strong id="fc-ult-doc-status" style="color:#f59e0b;">Pending Review</strong></div>
+      </div>
+      <button type="button" onclick="document.querySelector('.doc-hub-grid-wrapper')?.scrollIntoView({behavior:'smooth'});" class="ult-feature-card__btn ult-feature-card__btn--amber">Go to Verification Hub</button>
+    </div>
+    <div class="ult-feature-card ult-feature-card--cyan">
+      <div class="ult-feature-card__header"><span class="ult-feature-card__icon">👥</span><div><h4 class="ult-feature-card__title">Users &amp; Roles</h4><span class="ult-feature-card__sub" style="color:#06b6d4;">Access Management</span></div></div>
+      <div class="ult-feature-card__body">
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">Total Registered Users</span><strong class="ult-feature-card__val">—</strong></div>
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">Active Roles Defined</span><strong style="color:#06b6d4;">—</strong></div>
+      </div>
+      <button type="button" onclick="window.location.hash='#users'" class="ult-feature-card__btn ult-feature-card__btn--cyan">Manage Users &amp; Roles</button>
+    </div>
+    <div class="ult-feature-card ult-feature-card--indigo">
+      <div class="ult-feature-card__header"><span class="ult-feature-card__icon">⚙️</span><div><h4 class="ult-feature-card__title">System Settings</h4><span class="ult-feature-card__sub" style="color:#6366f1;">Platform Config</span></div></div>
+      <div class="ult-feature-card__body">
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">Platform Version</span><strong class="ult-feature-card__val">PLUS33 ERP v2</strong></div>
+        <div class="ult-feature-card__row"><span class="ult-feature-card__lbl">System Status</span><strong style="color:#10b981;">Operational ✓</strong></div>
+      </div>
+      <button type="button" onclick="window.location.hash='#settings'" class="ult-feature-card__btn ult-feature-card__btn--indigo">Open System Settings</button>
+    </div>
+  </div>
+
+  <!-- ROW 3: Document Hub -->
+  <div class="ult-profile-doc-hub">
+    <div id="ult-doc-hub-container"></div>
+  </div>
+
+  <!-- ROW 4: Quick Utility Footer -->
+  <div class="ult-profile-row-4">
+    <div class="ult-utility-tile" onclick="window.location.hash='#users'"><span class="ult-utility-tile__icon">👥</span><div><strong class="ult-utility-tile__title">Users &amp; Roles</strong><span class="ult-utility-tile__sub">Manage all system users</span></div></div>
+    <div class="ult-utility-tile" onclick="window.location.hash='#permissions'"><span class="ult-utility-tile__icon">🔐</span><div><strong class="ult-utility-tile__title">Roles &amp; Permissions</strong><span class="ult-utility-tile__sub">Configure access control</span></div></div>
+    <div class="ult-utility-tile" onclick="window.location.hash='#ultimate-announcements'"><span class="ult-utility-tile__icon">📣</span><div><strong class="ult-utility-tile__title">Announcements</strong><span class="ult-utility-tile__sub">Broadcast to entire network</span></div></div>
+    <div class="ult-utility-tile" onclick="window.location.hash='#settings'"><span class="ult-utility-tile__icon">⚙️</span><div><strong class="ult-utility-tile__title">System Settings</strong><span class="ult-utility-tile__sub">Configure platform settings</span></div></div>
+  </div>
+
+</div>
+

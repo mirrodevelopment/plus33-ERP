@@ -7,19 +7,18 @@
  * Module            : Store Module
  * File              : authStore.js
  * Path              : frontend/store/authStore.js
- * Purpose           : Frontend state store managing Store Module UI state
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related API       : POST /api/v1/auth/login
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : core/eventBus, core/storage, core/logger
- * Depends On        : core/eventBus, core/storage, core/logger
+ * Purpose           : Central client-side authentication state store; manages JWT token persistence in LocalStorage, credentials verification against POST /api/v1/auth/login, role management, and session logout.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Frontend state store managing Store Module UI state. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Core frontend authentication store for PLUS33 Coffee ERP.
+ * Responsibilities:
+ *   - Manages plus33-user and plus33-token items in client LocalStorage via storage utility.
+ *   - Authenticates user credentials via apiClient.post('/api/v1/auth/login') and decodes JWT payloads to extract authorities/permissions.
+ *   - Purges non-JWT or expired legacy tokens to ensure active backend verification.
+ *   - Publishes auth:state-changed and auth:login-failed events on eventBus.
+ *   - Provides state getters (getUser(), getRole(), isLoggedIn()) used across router and layout components.
  ******************************************************************************/
 
 import { eventBus } from '../core/eventBus.js';

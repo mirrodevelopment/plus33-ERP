@@ -5,17 +5,27 @@
  * Developer         : Sivasurya
  *
  * Module            : Auth Module
- * Package           : com.plus33.erp.auth.dto
  * File              : ChangePasswordRequest.java
- * Purpose           : Data Transfer Object for changing user password
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: AuthController
- * Related DTO       : ChangePasswordRequest
+ * Path              : src/main/java/com/plus33/erp/auth/dto/ChangePasswordRequest.java
+ * Purpose           : Carries the authenticated user's current password and desired
+ *                     new password for the secure password change endpoint.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * DTO for change password request payload.
+ * Immutable Java record representing the HTTP request body consumed by
+ * AuthController.changePassword() at PUT /api/v1/auth/change-password.
+ * Contains two validated fields:
+ *
+ *   currentPassword — required, non-blank. Verified against the stored
+ *                     BCrypt hash using PasswordEncoder.matches() before
+ *                     any update is performed. Returns 400 if it does not match.
+ *   newPassword     — required, minimum 6 characters (@Size). Encoded with
+ *                     BCrypt and persisted to the User entity via UserRepository.
+ *
+ * Does not expose role-specific logic. Does not interact with the Employee
+ * entity. Validation failures produce 400 Bad Request before the controller
+ * method body executes. Does not persist to any database table.
  ******************************************************************************/
 package com.plus33.erp.auth.dto;
 

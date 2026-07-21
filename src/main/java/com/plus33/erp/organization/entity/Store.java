@@ -93,6 +93,21 @@ public class Store {
     @Column(nullable = false, length = 30)
     private StoreType type = StoreType.COMPACT_CAFE;
 
+    /** GPS latitude – set once by Store Admin from their device; persists until next explicit update. */
+    @Column(name = "latitude", precision = 10, scale = 8)
+    private java.math.BigDecimal latitude;
+
+    /** GPS longitude – set once by Store Admin from their device; persists until next explicit update. */
+    @Column(name = "longitude", precision = 11, scale = 8)
+    private java.math.BigDecimal longitude;
+
+    /**
+     * Geofence radius in metres.
+     * Clock-in requires employee within 30 m; auto clock-out triggers beyond this value (200 m default).
+     */
+    @Column(name = "geofence_radius_meters")
+    private Integer geofenceRadiusMeters = 200;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -403,3 +403,89 @@
   border-radius: 2px;
   transition: width 0.1s;
 }
+
+/* Document Select Dropdown */
+.document-select-group {
+  margin-bottom: var(--spacing-md);
+  text-align: left;
+}
+
+.doc-input-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.doc-select-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.doc-select-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.doc-select-input option {
+  background: #1e1e24;
+  color: var(--text-primary);
+}
+
+/* Document Item Layout Additions */
+.doc-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.doc-status-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.doc-status-badge.badge-approved {
+  background: rgba(130, 163, 125, 0.12);
+  border: 1px solid rgba(130, 163, 125, 0.3);
+  color: #82a37d;
+}
+
+.doc-status-badge.badge-pending {
+  background: rgba(220, 180, 100, 0.12);
+  border: 1px solid rgba(220, 180, 100, 0.3);
+  color: #dcb464;
+}
+
+.doc-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-doc-delete {
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-doc-delete i {
+  width: 12px;
+  height: 12px;
+}

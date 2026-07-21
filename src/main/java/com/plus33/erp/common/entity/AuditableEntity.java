@@ -5,25 +5,37 @@
  * Developer         : Sivasurya
  *
  * Module            : Common Module
- * Package           : com.plus33.erp.common.entity
  * File              : AuditableEntity.java
- * Purpose           : Component of Common Module within the PLUS33 Coffee ERP platform
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: AuditableController
- * Related Service   : AuditableService, AuditableServiceImpl
- * Related Repository: AuditableRepository
- * Related Entity    : Auditable
- * Related DTO       : N/A
- * Related Mapper    : AuditableMapper
- * Related DB Table  : auditables
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Common Module components
+ * Path              : src/main/java/com/plus33/erp/common/entity/AuditableEntity.java
+ * Purpose           : Abstract JPA @MappedSuperclass providing automatic audit trail
+ *                     columns (createdAt, updatedAt, createdBy, updatedBy) inherited
+ *                     by all auditable domain entities across the ERP platform.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Common Module within the PLUS33 Coffee ERP platform.
+ * Base class for JPA entities that require full audit trail tracking.
+ * Annotated with @MappedSuperclass so JPA includes its columns in every
+ * subclass table. Uses Spring Data JPA's AuditingEntityListener for
+ * automatic population without explicit setter calls.
+ *
+ * Audit columns:
+ *   created_at  — timestamped automatically on first persist via @CreatedDate.
+ *                 marked updatable = false to prevent modification after insert.
+ *   updated_at  — refreshed automatically on every update via @LastModifiedDate.
+ *   created_by  — Long user ID populated via @CreatedBy from
+ *                 SecurityAuditorAware. Non-updatable after first insert.
+ *   updated_by  — Long user ID populated via @LastModifiedBy from
+ *                 SecurityAuditorAware on every save.
+ *
+ * SecurityAuditorAware (common.audit package) resolves the currently
+ * authenticated user's ID from the Spring SecurityContextHolder to
+ * populate createdBy/updatedBy automatically.
+ *
+ * JPA auditing must be enabled via @EnableJpaAuditing (JpaAuditingConfig).
+ *
+ * Extended by: Employee, Store, Region, Nation, SalaryComponent, PurchaseOrder,
+ *              and most other domain entities across all ERP modules.
  ******************************************************************************/
 package com.plus33.erp.common.entity;
 

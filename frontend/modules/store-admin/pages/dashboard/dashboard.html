@@ -260,32 +260,62 @@
       </div>
     </div>
 
-    <!-- Inventory Overview Widget -->
+    <!-- Supply Chain & Inventory Redesigned Widget -->
     <div class="card glass inventory-card">
       <div class="card-header-split">
         <h3 class="card-split-title">
-          <i data-lucide="package" class="card-split-icon" aria-hidden="true"></i>
-          <span>Inventory Overview</span>
+          <span>Supply Chain & Inventory</span>
         </h3>
-        <span class="badge-pill badge-pill--danger">Critical Stock</span>
+        <a href="#inventory" class="view-all-link" style="font-size: 0.72rem; color: var(--accent-primary); font-weight: 700; text-decoration: none;">View All</a>
       </div>
 
-      <div class="inventory-status-rows">
-        <div class="inventory-status-row">
-          <span>Low-Stock Items:</span>
-          <strong class="color-danger" id="val-low-stock">— Items</strong>
+      <!-- Top Stats Card (Dark overlay) -->
+      <div class="inventory-stats-box" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: var(--radius-md, 8px); padding: var(--spacing-md, 12px); display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm, 8px);">
+        <div class="inv-stat-group" style="grid-column: span 1; display: flex; flex-direction: column;">
+          <span class="inv-stat-label" style="font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Stock Items</span>
+          <strong class="inv-stat-val font-bold" id="val-total-stock-items" style="font-size: 1.1rem; color: var(--text-primary); margin-top: 2px;">—</strong>
         </div>
-        <div class="inventory-status-row">
-          <span>Out-of-Stock Items:</span>
-          <strong class="color-red" id="val-out-stock">— Items</strong>
+        <div class="inv-stat-group" style="grid-column: span 1; display: flex; flex-direction: column;">
+          <span class="inv-stat-label" style="font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Low Stock</span>
+          <strong class="inv-stat-val color-gold" id="val-low-stock-items" style="font-size: 1.1rem; color: var(--accent-warning, #f59e0b); margin-top: 2px;">—</strong>
         </div>
-        <div class="inventory-status-row">
-          <span>Expiring Items (7 Days):</span>
-          <strong class="color-warning" id="val-expiring-stock">— Items</strong>
+        <div class="inv-stat-group" style="grid-column: span 2; display: flex; flex-direction: column; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 6px; margin-top: 2px;">
+          <span class="inv-stat-label" style="font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Out of Stock</span>
+          <strong class="inv-stat-val color-danger" id="val-out-stock-items" style="font-size: 1.1rem; color: var(--status-danger, #ef4444); margin-top: 2px;">—</strong>
         </div>
-        <div class="inventory-status-row">
-          <span>Pending Supply Requests:</span>
-          <strong id="val-pending-requests">— Requests</strong>
+      </div>
+
+      <!-- Bottom split layout: Donut and Expiring Items -->
+      <div class="inventory-details-row" style="display: flex; gap: var(--spacing-md, 12px); align-items: center; justify-content: space-between; margin-top: 4px;">
+        <!-- SVG Donut Chart -->
+        <div class="inventory-radial-container" style="position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="100" height="100" viewBox="0 0 100 100" class="inventory-donut-svg">
+            <circle cx="50" cy="50" r="38" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="none" />
+            <circle id="donut-segment-normal" cx="50" cy="50" r="38" stroke="var(--status-success, #22c55e)" stroke-width="8" fill="none" stroke-dasharray="238.76" stroke-dashoffset="0" transform="rotate(-90 50 50)" stroke-linecap="round" />
+            <circle id="donut-segment-low" cx="50" cy="50" r="38" stroke="var(--accent-warning, #f59e0b)" stroke-width="8" fill="none" stroke-dasharray="238.76" stroke-dashoffset="0" transform="rotate(-90 50 50)" stroke-linecap="round" />
+            <circle id="donut-segment-out" cx="50" cy="50" r="38" stroke="var(--status-danger, #ef4444)" stroke-width="8" fill="none" stroke-dasharray="238.76" stroke-dashoffset="0" transform="rotate(-90 50 50)" stroke-linecap="round" />
+          </svg>
+          <div class="donut-center-text" style="position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <span id="donut-total-count" class="donut-total-val" style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary);">—</span>
+            <span class="donut-total-lbl" style="font-size: 0.45rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-top: 1px; letter-spacing: 0.2px;">TOTAL ITEMS</span>
+          </div>
+        </div>
+
+        <!-- Expiring Items Sidebar List -->
+        <div class="expiring-items-list-box" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+          <h4 class="expiring-list-title" style="margin: 0 0 2px 0; font-size: 0.72rem; font-weight: 700; color: var(--text-primary);">Expiring Items</h4>
+          <div class="expiring-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.68rem; border-bottom: 1px dashed rgba(255,255,255,0.03); padding-bottom: 4px;">
+            <span class="exp-label" style="color: var(--text-muted);">Within 30 Days</span>
+            <strong class="exp-val color-danger" id="exp-30-days" style="color: var(--status-danger, #ef4444); font-weight: 700;">—</strong>
+          </div>
+          <div class="expiring-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.68rem; border-bottom: 1px dashed rgba(255,255,255,0.03); padding-bottom: 4px;">
+            <span class="exp-label" style="color: var(--text-muted);">Within 60 Days</span>
+            <strong class="exp-val color-gold" id="exp-60-days" style="color: var(--accent-warning, #f59e0b); font-weight: 700;">—</strong>
+          </div>
+          <div class="expiring-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.68rem;">
+            <span class="exp-label" style="color: var(--text-muted);">Within 90 Days</span>
+            <strong class="exp-val color-success" id="exp-90-days" style="color: var(--status-success, #22c55e); font-weight: 700;">—</strong>
+          </div>
         </div>
       </div>
 
@@ -424,6 +454,52 @@
 
   </div>
 
+  <!-- ===== ROW 2.5: LEAVE & AWAY PASS APPROVALS HUB ===== -->
+  <div class="card glass approvals-hub-card" id="approvals-hub-card">
+    <div class="card-header-split">
+      <h3 class="card-split-title">
+        <i data-lucide="shield-check" class="card-split-icon" aria-hidden="true"></i>
+        <span>Workforce Approvals Hub</span>
+      </h3>
+      <span class="badge-pill">Store Admin Review</span>
+    </div>
+    
+    <div class="approvals-hub-grid">
+      <!-- Leave Applications Column -->
+      <div class="approvals-hub-column">
+        <h4 class="column-header">
+          <i data-lucide="calendar-days" class="column-icon" style="color: var(--accent-primary);"></i>
+          <span>Pending Leave Applications</span>
+        </h4>
+        <div class="approvals-hub-list" id="sa-pending-leaves-list">
+          <!-- Loaded dynamically by JS -->
+        </div>
+      </div>
+      
+      <!-- Away Pass Requests Column -->
+      <div class="approvals-hub-column">
+        <h4 class="column-header">
+          <i data-lucide="map-pin" class="column-icon" style="color: var(--accent-warning, #f59e0b);"></i>
+          <span>Geofence Away Pass Requests</span>
+        </h4>
+        <div class="approvals-hub-list" id="sa-pending-away-list">
+          <!-- Loaded dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Ongoing Active Away Passes Column -->
+      <div class="approvals-hub-column">
+        <h4 class="column-header">
+          <i data-lucide="door-open" class="column-icon" style="color: var(--status-success, #4caf50);"></i>
+          <span>Ongoing Active Away Passes</span>
+        </h4>
+        <div class="approvals-hub-list" id="sa-ongoing-away-list">
+          <!-- Loaded dynamically by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== ROW 3: STAFF ROSTER SCHEDULE LIST ===== -->
   <div class="card glass staff-roster-card">
     <div class="card-header-split">
@@ -450,6 +526,45 @@
           <!-- Populated by JS -->
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ===== REJECT LEAVE MODAL ===== -->
+  <div id="sa-reject-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 9999;">
+    <div class="modal-content card glass" style="background: var(--bg-card, #1e1e2e); border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; width: 360px; max-width: 95vw; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--text-primary);">✕ Reject Leave Request</h3>
+        <button id="sa-reject-modal-close" type="button" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;">✕</button>
+      </div>
+      <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;">Please provide a reason for rejecting this time-off request.</p>
+      <div class="form-group">
+        <label for="sa-reject-reason-input" class="form-label">Rejection Reason</label>
+        <textarea id="sa-reject-reason-input" class="form-textarea" rows="3" placeholder="Explain why the leave was denied..." style="resize: none; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); padding: var(--spacing-sm); outline: none; width: 100%; box-sizing: border-box;"></textarea>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button id="sa-reject-modal-submit" type="button" class="btn btn-danger" style="flex: 1; padding: 9px;">Submit Rejection</button>
+        <button id="sa-reject-modal-cancel" type="button" class="btn btn-secondary" style="flex: 1; padding: 9px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== APPROVE AWAY PASS MODAL ===== -->
+  <div id="sa-away-approve-overlay" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 9999;">
+    <div class="modal-content card glass" style="background: var(--bg-card, #1e1e2e); border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; width: 360px; max-width: 95vw; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--text-primary);">⏱ Approve Away Pass</h3>
+        <button id="sa-away-close" type="button" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;">✕</button>
+      </div>
+      <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;">Set how many minutes the employee is allowed away. A <strong>10-minute grace buffer</strong> is added automatically.</p>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label for="sa-away-duration" class="form-label" style="font-weight: 600;">Duration (minutes)</label>
+        <input id="sa-away-duration" type="number" min="5" max="240" value="30" class="form-input" style="box-sizing: border-box; width: 100%;">
+        <span id="sa-away-hint" style="font-size: 0.68rem; color: var(--text-muted);">Employee will have 30 min + 10 min grace = 40 min total.</span>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button id="sa-away-confirm" type="button" class="btn btn-primary" style="flex: 1; padding: 9px;">✓ Confirm</button>
+        <button id="sa-away-cancel" type="button" class="btn btn-secondary" style="flex: 1; padding: 9px;">Cancel</button>
+      </div>
     </div>
   </div>
 

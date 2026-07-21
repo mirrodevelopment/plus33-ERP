@@ -110,6 +110,9 @@ public interface OrganizationMapper {
     @Mapping(target = "warehouse", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "latitude", ignore = true)
+    @Mapping(target = "longitude", ignore = true)
+    @Mapping(target = "geofenceRadiusMeters", ignore = true)
     Store toEntity(StoreRequest request);
 
     @Mapping(target = "regionId", source = "region.id")
@@ -125,6 +128,9 @@ public interface OrganizationMapper {
     @Mapping(target = "warehouse", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "latitude", ignore = true)
+    @Mapping(target = "longitude", ignore = true)
+    @Mapping(target = "geofenceRadiusMeters", ignore = true)
     void updateEntity(StoreRequest request, @MappingTarget Store entity);
 
     // --- StoreSetting Mappings ---

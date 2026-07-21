@@ -5,25 +5,23 @@
  * Developer         : Sivasurya
  *
  * Module            : Common Module
- * Package           : com.plus33.erp.common.dto
  * File              : PageResponse.java
- * Purpose           : Data Transfer Object for request/response in Common Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: PageController
- * Related Service   : PageService, PageServiceImpl
- * Related Repository: PageRepository
- * Related Entity    : Page
- * Related DTO       : PageResponse
- * Related Mapper    : PageMapper
- * Related DB Table  : pages
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : PageController, PageService, PageServiceImpl
+ * Path              : src/main/java/com/plus33/erp/common/dto/PageResponse.java
+ * Purpose           : Generic paginated response wrapper for returning lists of entities
+ *                     along with pagination metadata (current page, size, total elements, total pages).
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * DTO for Common Module HTTP serialization. Annotated with Jakarta Bean Validation constraints.
+ * Generic record representing a paginated result set returned by REST endpoints
+ * across the ERP (e.g. employee lists, inventory items, transactions).
+ *
+ * Fields:
+ *   content       — List<T> containing the records for the current page.
+ *   page          — 0-indexed current page number.
+ *   size          — Number of items per page.
+ *   totalElements — Total count of items matching the query across all pages.
+ *   totalPages    — Calculated total number of pages available.
  ******************************************************************************/
 package com.plus33.erp.common.dto;
 

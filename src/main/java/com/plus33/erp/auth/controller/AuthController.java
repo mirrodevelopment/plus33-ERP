@@ -5,25 +5,66 @@
  * Developer         : Sivasurya
  *
  * Module            : Auth Module
- * Package           : com.plus33.erp.auth.controller
  * File              : AuthController.java
- * Purpose           : REST Controller exposing HTTP endpoints for Auth Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: AuthController
- * Related Service   : AuthControllerService, AuthControllerServiceImpl
- * Related Repository: AuthControllerRepository
- * Related Entity    : AuthController
- * Related DTO       : ApiResponse, LoginRequest, TokenResponse
- * Related Mapper    : AuthControllerMapper
- * Related DB Table  : auth_controllers
- * Related REST APIs : POST /api/v1/auth/login
- * Depends On        : Common Module, Security Module
- * Used By           : Auth Module components
+ * Path              : src/main/java/com/plus33/erp/auth/controller/AuthController.java
+ * Purpose           : Exposes authentication REST endpoints including credential-based login,
+ *                     JWT token generation, authenticated user profile retrieval,
+ *                     self-profile update, and secure password change for all ERP roles.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * REST Controller for Auth Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: POST /api/v1/auth/login
+ * Central authentication controller for the PLUS33 Coffee ERP platform. Maps
+ * to the base path /api/v1/auth and exposes four REST endpoints consumed by
+ * the frontend SPA login flow and profile pages.
+ *
+ * POST /api/v1/auth/login
+ *   Receives email + password via LoginRequest DTO. Delegates to Spring
+ *   AuthenticationManager which internally calls UserDetailsService. On
+ *   successful authentication, JwtService generates a signed Bearer token
+ *   returned inside TokenResponse wrapped in ApiResponse.
+ *
+ * PUT /api/v1/auth/change-password
+ *   Validates the authenticated user's current password via BCrypt match,
+ *   then encodes and persists the new password to the User entity.
+ *   Rejects requests with 401 if Principal is null or 400 if current
+ *   password is wrong. Requires an active JWT.
+ *
+ * GET /api/v1/auth/me
+ *   Returns a comprehensive profile map for the currently authenticated user.
+ *   Resolves the User entity from UserRepository by email extracted from the
+ *   JWT Principal. Joins EmployeeRepository to retrieve employee-specific
+ *   fields (employeeCode, designation, department, hireDate, banking info).
+ *   Resolves UserStore and UserRegion associations to derive storeName,
+ *   storeRegion and country. Country code is inferred from Region.code
+ *   prefix (FR → France, AE/UAE → UAE, IN → India). Resolves active
+ *   EmployeeSalaryStructure and its items to extract BASE_MONTHLY and
+ *   BASE_HOURLY salary component amounts. Locates the user's avatar file
+ *   from the filesystem at frontend/user_uploads/avatars/{code}_profile_img.*
+ *   falling back to default gender avatar if not found. Returns all fields
+ *   as a Map<String, Object> wrapped in ApiResponse. Admin users without
+ *   Employee records receive hardcoded fallback values.
+ *
+ * PUT /api/v1/auth/me
+ *   Self-profile update for any authenticated user. Accepts firstName,
+ *   lastName, name, phone, bankName, bankAccount/bankAccountNumber,
+ *   ifscCode/ifscNumber, designation, and avatarUrl. Persists changes to
+ *   both User and Employee entities atomically via @Transactional.
+ *   Designation updates are blocked for ROLE_storeEmployee and
+ *   ROLE_shiftSupervisor roles. Calls getMe() internally to return
+ *   the updated profile in the same response shape.
+ *
+ * Dependencies:
+ *   - JwtService (security.jwt) — token generation and expiry resolution
+ *   - UserRepository (security.repository) — user lookup and password save
+ *   - EmployeeRepository (workforce.repository) — employee profile data
+ *   - UserStoreRepository (workforce.repository) — store assignment lookup
+ *   - UserRegionRepository (workforce.repository) — region assignment lookup
+ *   - EmployeeSalaryStructureRepository — active salary structure resolution
+ *   - EmployeeSalaryStructureItemRepository — salary component breakdown
+ *   - SalaryComponentRepository — salary component code resolution
+ *   - PasswordEncoder (Spring Security) — BCrypt verification and encoding
+ *   - AuthenticationManager (Spring Security) — credential authentication
  ******************************************************************************/
 package com.plus33.erp.auth.controller;
 
@@ -165,20 +206,29 @@ public class AuthController {
         Map<String, Object> data = new HashMap<>();
         data.put("username", user.getEmail());
         data.put("email", user.getEmail());
-        data.put("name", user.getFirstName() + " " + user.getLastName());
+        data.put("firstName", user.getFirstName() != null ? user.getFirstName() : "");
+        data.put("lastName", user.getLastName() != null ? user.getLastName() : "");
+        data.put("name", ((user.getFirstName() != null ? user.getFirstName() : "") + " " + (user.getLastName() != null ? user.getLastName() : "")).trim());
 
         Optional<Employee> empOpt = employeeRepository.findByUserId(user.getId());
         if (empOpt.isPresent()) {
             Employee emp = empOpt.get();
             data.put("id", emp.getId());
             data.put("employeeCode", emp.getEmployeeCode());
+            data.put("firstName", emp.getFirstName() != null ? emp.getFirstName() : (user.getFirstName() != null ? user.getFirstName() : ""));
+            data.put("lastName", emp.getLastName() != null ? emp.getLastName() : (user.getLastName() != null ? user.getLastName() : ""));
             data.put("phone", emp.getPhone());
             data.put("emergencyContactPhone", emp.getEmergencyContactPhone());
 
             data.put("designation", emp.getDesignation());
             data.put("department", emp.getDepartment());
-            data.put("joinedDate", emp.getHireDate().toString());
-            data.put("gender", "Male"); // Default fallback
+            data.put("joinedDate", emp.getHireDate() != null ? emp.getHireDate().toString() : "");
+            data.put("gender", "Male");
+            data.put("bankName", emp.getBankName() != null ? emp.getBankName() : "");
+            data.put("bankAccount", emp.getBankAccountNumber() != null ? emp.getBankAccountNumber() : "");
+            data.put("bankAccountNumber", emp.getBankAccountNumber() != null ? emp.getBankAccountNumber() : "");
+            data.put("ifscCode", emp.getIfscNumber() != null ? emp.getIfscNumber() : "");
+            data.put("ifscNumber", emp.getIfscNumber() != null ? emp.getIfscNumber() : "");
         } else {
             data.put("id", 0L);
             data.put("employeeCode", "ADMIN");
@@ -187,6 +237,11 @@ public class AuthController {
             data.put("department", "Executive Administration");
             data.put("joinedDate", "2024-01-15");
             data.put("gender", "Male");
+            data.put("bankName", "PLUS33 Bank");
+            data.put("bankAccount", "•••• •••• •••• 9876");
+            data.put("bankAccountNumber", "•••• •••• •••• 9876");
+            data.put("ifscCode", "PL330001");
+            data.put("ifscNumber", "PL330001");
         }
 
         String storeName = "Corporate Head Office";
@@ -314,46 +369,60 @@ public class AuthController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found: " + email));
 
+        String firstName = request.get("firstName");
+        String lastName = request.get("lastName");
         String fullName = request.get("name");
-        if (fullName != null && !fullName.isBlank()) {
+
+        if (firstName != null && !firstName.isBlank()) {
+            user.setFirstName(firstName.trim());
+            if (lastName != null) user.setLastName(lastName.trim());
+        } else if (fullName != null && !fullName.isBlank()) {
             String[] parts = fullName.trim().split("\\s+", 2);
             user.setFirstName(parts[0]);
-            if (parts.length > 1) {
-                user.setLastName(parts[1]);
-            } else {
-                user.setLastName("");
-            }
-            userRepository.save(user);
+            user.setLastName(parts.length > 1 ? parts[1] : "");
         }
 
-        if (request.containsKey("avatarUrl")) {
+        if (request.containsKey("avatarUrl") && request.get("avatarUrl") != null) {
             user.setAvatarUrl(request.get("avatarUrl"));
-            userRepository.save(user);
         }
+
+        userRepository.save(user);
 
         Optional<Employee> empOpt = employeeRepository.findByUserId(user.getId());
         if (empOpt.isPresent()) {
             Employee emp = empOpt.get();
-            if (request.containsKey("phone")) {
+            
+            if (firstName != null && !firstName.isBlank()) {
+                emp.setFirstName(firstName.trim());
+                if (lastName != null) emp.setLastName(lastName.trim());
+            } else if (fullName != null && !fullName.isBlank()) {
+                String[] parts = fullName.trim().split("\\s+", 2);
+                emp.setFirstName(parts[0]);
+                emp.setLastName(parts.length > 1 ? parts[1] : "");
+            }
+
+            if (request.containsKey("phone") && request.get("phone") != null) {
                 emp.setPhone(request.get("phone"));
             }
-            if (request.containsKey("designation")) {
+
+            String bName = request.containsKey("bankName") ? request.get("bankName") : null;
+            if (bName != null) emp.setBankName(bName);
+
+            String bAcc = request.containsKey("bankAccount") ? request.get("bankAccount") : request.get("bankAccountNumber");
+            if (bAcc != null) emp.setBankAccountNumber(bAcc);
+
+            String ifsc = request.containsKey("ifscCode") ? request.get("ifscCode") : request.get("ifscNumber");
+            if (ifsc != null) emp.setIfscNumber(ifsc);
+
+            if (request.containsKey("designation") && request.get("designation") != null) {
                 boolean isWorker = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                         .anyMatch(auth -> auth.getAuthority().equals("ROLE_storeEmployee") || auth.getAuthority().equals("ROLE_shiftSupervisor"));
                 if (!isWorker) {
                     emp.setDesignation(request.get("designation"));
                 }
             }
-            if (fullName != null && !fullName.isBlank()) {
-                String[] parts = fullName.trim().split("\\s+", 2);
-                emp.setFirstName(parts[0]);
-                if (parts.length > 1) {
-                    emp.setLastName(parts[1]);
-                } else {
-                    emp.setLastName("");
-                }
-            }
-            employeeRepository.save(emp);
+
+            employeeRepository.saveAndFlush(emp);
         }
 
         return getMe(principal);

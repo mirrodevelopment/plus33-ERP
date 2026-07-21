@@ -8,19 +8,14 @@
  *
  * Related HTML      : frontend/modules/store-employee/documents/documents.html
  * Related CSS       : frontend/modules/store-employee/documents/documents.css
- * Related APIs      : None (uses LocalStorage states caching)
- *
- * Description
- * ---------------------------------------------------------------------------
- * Refactored to HTML + CSS + JS mixed architecture.
- * HTML structure lives in documents.html — this file is a controller only.
+ * Related APIs      : GET/POST/DELETE /api/v2/employee-self-service/documents
  ******************************************************************************/
 
 import { authStore } from '../../../../store/authStore.js';
-import { userStore } from '../../../../store/userStore.js';
 import { notificationStore } from '../../../../store/notificationStore.js';
 import { logger } from '../../../../core/logger.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
+import { apiClient } from '../../../../api/client.js';
 
 /** Path to the documents HTML template */
 const TEMPLATE_URL = 'modules/store-employee/pages/documents/documents.html';
@@ -33,13 +28,12 @@ export default class StoreEmployeeDocuments {
 
   constructor() {
     this.user = authStore.getUser();
-    this.profile = userStore.getProfile(this.user?.role) || {};
-    this.stateKey = `emp_dashboard_state_${this.user?.username || 'neha'}`;
+    this.profile = {};
+    this.requirements = [];
+    this.uploadedDocs = [];
     
     this.filterCategory = 'all'; // 'all', 'sop', 'hr', 'compliance'
     this.searchQuery = '';
-    
-    this.loadState();
   }
 
   // ---------------------------------------------------------------------------
@@ -60,8 +54,8 @@ export default class StoreEmployeeDocuments {
     // 1. Inject HTML layout template
     await this._loadTemplate(container);
 
-    // 2. Read state details
-    this.loadState();
+    // 2. Fetch data from backend APIs
+    await this.loadData();
 
     // 3. Render layout elements
     this.render(container);
@@ -75,57 +69,42 @@ export default class StoreEmployeeDocuments {
   }
 
   // ---------------------------------------------------------------------------
-  // STATE MANAGEMENT
+  // DATA SERVICES / API BINDINGS
   // ---------------------------------------------------------------------------
 
-  loadState() {
-    const cachedState = localStorage.getItem(this.stateKey);
-    if (cachedState) {
-      try {
-        this.state = JSON.parse(cachedState);
-        if (!this.state.documentsList) {
-          this.state.documentsList = [
-            { id: 1, name: 'Grinder Calibration & Beverage SOP', category: 'sop', size: '2.4 MB', type: 'PDF', date: '01 Jun 2026' },
-            { id: 2, name: 'Barista Compensation Agreement', category: 'hr', size: '1.8 MB', type: 'PDF', date: '12 May 2026' },
-            { id: 3, name: 'FSSAI Hygiene License - Green Park Café', category: 'compliance', size: '4.1 MB', type: 'PDF', date: '10 Jan 2026' },
-            { id: 4, name: 'Monsoon Drink Recipe Brew Sheet', category: 'sop', size: '1.2 MB', type: 'PDF', date: '01 Jul 2026' }
-          ];
-        }
-      } catch (err) {
-        logger.error('StoreEmployeeDocuments', 'Error parsing cached state', err);
-        this.initDefaultState();
+  async loadData() {
+    this.loading = true;
+    try {
+      // 1. Fetch current profile details to resolve store name & country
+      const meRes = await apiClient.get('/auth/me');
+      if (meRes?.success && meRes.data) {
+        this.profile = meRes.data;
       }
-    } else {
-      this.initDefaultState();
+
+      // 2. Determine country code for document requirements
+      const country = this.profile.country || 'France';
+      
+      // 3. Fetch country document requirements from backend
+      const reqRes = await apiClient.get('/api/v2/employee-self-service/document-requirements', { country });
+      if (reqRes?.success && reqRes.data) {
+        this.requirements = reqRes.data;
+      } else {
+        this.requirements = [];
+      }
+
+      // 4. Fetch actual uploaded employee documents from backend
+      const docsRes = await apiClient.get('/api/v2/employee-self-service/documents');
+      if (docsRes?.success && docsRes.data) {
+        this.uploadedDocs = docsRes.data;
+      } else {
+        this.uploadedDocs = [];
+      }
+    } catch (err) {
+      logger.error('StoreEmployeeDocuments', 'Failed to load documents data', err);
+      notificationStore.danger('Error loading documents.');
+    } finally {
+      this.loading = false;
     }
-  }
-
-  initDefaultState() {
-    this.state = {
-      name: this.profile.name || 'Neha Sharma',
-      id: 'EMP10245',
-      level: 'Senior Barista',
-      store: 'Green Park Café, City Center',
-      clockedIn: true,
-      clockInTime: '08:02 AM',
-      trainingProgress: 72,
-      performanceScore: 4.6,
-      tasks: [],
-      leave: { available: 12.5, pending: 1, approved: 3 },
-      attendanceLogs: [],
-      activities: [],
-      documentsList: [
-        { id: 1, name: 'Grinder Calibration & Beverage SOP', category: 'sop', size: '2.4 MB', type: 'PDF', date: '01 Jun 2026' },
-        { id: 2, name: 'Barista Compensation Agreement', category: 'hr', size: '1.8 MB', type: 'PDF', date: '12 May 2026' },
-        { id: 3, name: 'FSSAI Hygiene License - Green Park Café', category: 'compliance', size: '4.1 MB', type: 'PDF', date: '10 Jan 2026' },
-        { id: 4, name: 'Monsoon Drink Recipe Brew Sheet', category: 'sop', size: '1.2 MB', type: 'PDF', date: '01 Jul 2026' }
-      ]
-    };
-    this.saveState();
-  }
-
-  saveState() {
-    localStorage.setItem(this.stateKey, JSON.stringify(this.state));
   }
 
   // ---------------------------------------------------------------------------
@@ -135,7 +114,9 @@ export default class StoreEmployeeDocuments {
   render(container) {
     // 1. Sync header text
     const storeEl = container.querySelector('#lbl-repository-name');
-    if (storeEl) storeEl.textContent = this.state.store || 'Green Park Café';
+    if (storeEl) {
+      storeEl.textContent = this.profile.storeName || this.profile.store?.name || 'Green Park Café';
+    }
 
     // 2. Sync search input value
     const searchInput = container.querySelector('#doc-search');
@@ -152,7 +133,33 @@ export default class StoreEmployeeDocuments {
     if (btnHr) btnHr.className = `category-filter-btn ${this.filterCategory === 'hr' ? 'active' : ''}`;
     if (btnCompliance) btnCompliance.className = `category-filter-btn ${this.filterCategory === 'compliance' ? 'active' : ''}`;
 
-    // 4. Render Repository list rows
+    // 4. Populate dynamic upload document type selector dropdown
+    const typeSelector = container.querySelector('#doc-type-selector');
+    if (typeSelector) {
+      // Preserve current selected value if any
+      const currentSelected = typeSelector.value;
+      typeSelector.innerHTML = '<option value="" disabled selected>Choose a category...</option>';
+      if (this.requirements) {
+        this.requirements.forEach(cat => {
+          const groupOpt = document.createElement('optgroup');
+          groupOpt.label = cat.categoryLabel;
+          if (cat.docs) {
+            cat.docs.forEach(d => {
+              const opt = document.createElement('option');
+              opt.value = d.docKey;
+              opt.textContent = `${d.docTitle}${d.required ? ' *' : ''}`;
+              groupOpt.appendChild(opt);
+            });
+          }
+          typeSelector.appendChild(groupOpt);
+        });
+      }
+      if (currentSelected) {
+        typeSelector.value = currentSelected;
+      }
+    }
+
+    // 5. Render Repository list rows
     this._renderDocsList(container);
   }
 
@@ -164,7 +171,10 @@ export default class StoreEmployeeDocuments {
     const searchInput = container.querySelector('#doc-search');
     const filterBtns = container.querySelectorAll('[data-cat]');
     const downloadBtns = container.querySelectorAll('.btn-doc-download');
+    const deleteBtns = container.querySelectorAll('.btn-doc-delete');
     const dropzone = container.querySelector('#doc-upload-dropzone');
+    const fileInput = container.querySelector('#doc-file-input');
+    const typeSelector = container.querySelector('#doc-type-selector');
     const progressContainer = container.querySelector('#doc-upload-progress');
     const progressBar = container.querySelector('#doc-upload-bar');
     const progressFilename = container.querySelector('#doc-upload-filename');
@@ -202,58 +212,163 @@ export default class StoreEmployeeDocuments {
     // Download button click handler
     downloadBtns.forEach(btn => {
       const handleDownload = () => {
+        const path = btn.getAttribute('data-path');
         const name = btn.getAttribute('data-name');
-        notificationStore.success(`Initiated secure download of: ${name}`);
+        if (path) {
+          window.open(path.startsWith('/') ? path : '/' + path, '_blank');
+        } else {
+          notificationStore.success(`Initiated secure download of: ${name}`);
+        }
       };
       btn.addEventListener('click', handleDownload);
       lifecycle.onCleanup(() => btn.removeEventListener('click', handleDownload));
     });
 
-    // Drag & Drop mock selector click handler
-    if (dropzone) {
-      const handleMockUpload = () => {
-        const mockFilename = 'Barista_Certification_SAFE101.pdf';
-        
-        dropzone.style.display = 'none';
-        if (progressFilename) progressFilename.textContent = mockFilename;
-        if (progressContainer) progressContainer.style.display = 'block';
-        
-        let percentage = 0;
-        const interval = setInterval(() => {
-          percentage += 20;
-          if (progressBar) progressBar.style.width = `${percentage}%`;
-          
-          if (percentage >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              const newId = this.state.documentsList.length ? Math.max(...this.state.documentsList.map(d => d.id)) + 1 : 1;
-              this.state.documentsList.push({
-                id: newId,
-                name: mockFilename,
-                category: 'compliance',
-                size: '1.5 MB',
-                type: 'PDF',
-                date: 'Today, Just now'
-              });
-              
-              notificationStore.success(`Successfully uploaded: ${mockFilename}`);
-              this.state.activities.unshift({ text: `Uploaded certificate "${mockFilename}"`, time: 'Just now' });
-              
-              this.saveState();
+    // Delete button click handler
+    deleteBtns.forEach(btn => {
+      const handleDelete = async () => {
+        const type = btn.getAttribute('data-type');
+        const name = btn.getAttribute('data-name');
+        if (confirm(`Are you sure you want to delete your uploaded document: ${name}?`)) {
+          try {
+            const delRes = await apiClient.delete(`/api/v2/employee-self-service/documents/${type}`);
+            if (delRes?.success) {
+              notificationStore.success(`Successfully deleted: ${name}`);
+              await this.loadData();
               this.render(container);
               this.bindEvents(container, lifecycle);
-            }, 300);
+            } else {
+              throw new Error(delRes?.message || 'Failed to delete document from backend.');
+            }
+          } catch (err) {
+            logger.error('StoreEmployeeDocuments', 'Failed to delete document', err);
+            notificationStore.danger(`Deletion failed: ${err.message}`);
           }
-        }, 150);
+        }
       };
-      dropzone.addEventListener('click', handleMockUpload);
-      lifecycle.onCleanup(() => dropzone.removeEventListener('click', handleMockUpload));
+      btn.addEventListener('click', handleDelete);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handleDelete));
+    });
+
+    // File selection trigger
+    const triggerUpload = async (file) => {
+      const docType = typeSelector ? typeSelector.value : '';
+      if (!docType) {
+        notificationStore.warning('Please select a Document Type before uploading.');
+        return;
+      }
+
+      if (progressFilename) progressFilename.textContent = file.name;
+      if (progressContainer) progressContainer.style.display = 'block';
+      if (progressBar) progressBar.style.width = '10%';
+      if (dropzone) dropzone.style.display = 'none';
+
+      // Mock progress simulation for smooth UX
+      let pct = 10;
+      const interval = setInterval(() => {
+        pct += 15;
+        if (pct > 80) clearInterval(interval);
+        if (progressBar) progressBar.style.width = `${pct}%`;
+      }, 100);
+
+      try {
+        // 1. Post file stream to upload-document on WebServer local storage
+        const response = await fetch('/api/upload-document', {
+          method: 'POST',
+          headers: {
+            'Content-Type': file.type,
+            'X-Worker-Id': this.profile.employeeCode || String(this.profile.id || 'ADMIN'),
+            'X-Document-Type': docType,
+            'X-File-Name': file.name
+          },
+          body: file
+        });
+
+        clearInterval(interval);
+        if (progressBar) progressBar.style.width = '90%';
+
+        const data = await response.json();
+        if (data.success && data.url) {
+          // 2. Commit document reference metadata to PostgreSQL
+          const saveRes = await apiClient.post('/api/v2/employee-self-service/documents', {
+            documentType: docType,
+            documentName: file.name,
+            filePath: data.url
+          });
+
+          if (progressBar) progressBar.style.width = '100%';
+
+          if (saveRes?.success) {
+            notificationStore.success(`Successfully uploaded and saved: ${file.name}`);
+            await this.loadData();
+            this.render(container);
+            this.bindEvents(container, lifecycle);
+          } else {
+            throw new Error(saveRes?.message || 'Failed to persist document metadata.');
+          }
+        } else {
+          throw new Error(data.message || 'File upload failed on server.');
+        }
+      } catch (err) {
+        logger.error('StoreEmployeeDocuments', 'Onboarding document upload failed:', err);
+        notificationStore.danger(`Upload failed: ${err.message}`);
+      } finally {
+        if (progressContainer) progressContainer.style.display = 'none';
+        if (dropzone) dropzone.style.display = 'block';
+      }
+    };
+
+    if (dropzone && fileInput) {
+      const handleDropzoneClick = (e) => {
+        if (e.target !== fileInput) {
+          fileInput.click();
+        }
+      };
+      const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+          triggerUpload(e.target.files[0]);
+        }
+      };
+      
+      dropzone.addEventListener('click', handleDropzoneClick);
+      fileInput.addEventListener('change', handleFileChange);
+      
+      lifecycle.onCleanup(() => {
+        dropzone.removeEventListener('click', handleDropzoneClick);
+        fileInput.removeEventListener('change', handleFileChange);
+      });
     }
   }
 
   // ---------------------------------------------------------------------------
   // PRIVATE RENDERING SUB-ROUTINES
   // ---------------------------------------------------------------------------
+
+  _mapUploadedDoc(doc) {
+    // Map database category / type prefix to UI filter categories: 'hr', 'compliance'
+    let uiCategory = 'compliance';
+    const typeLower = (doc.documentType || '').toLowerCase();
+    if (typeLower.startsWith('personal') || typeLower.startsWith('address') || typeLower.includes('contract') || typeLower.includes('hr')) {
+      uiCategory = 'hr';
+    }
+    
+    const dateStr = doc.uploadedAt 
+      ? new Date(doc.uploadedAt).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })
+      : 'Today';
+
+    return {
+      id: doc.id,
+      name: doc.documentName,
+      category: uiCategory,
+      size: '1.2 MB', 
+      type: doc.documentName.split('.').pop().toUpperCase() || 'PDF',
+      date: dateStr,
+      filePath: doc.filePath,
+      isStoreManual: false,
+      approved: doc.approved,
+      documentType: doc.documentType
+    };
+  }
 
   _renderDocsList(container) {
     const listContainer = container.querySelector('#doc-feed-container');
@@ -264,7 +379,54 @@ export default class StoreEmployeeDocuments {
 
     listContainer.replaceChildren();
 
-    const filteredDocs = this.state.documentsList.filter(d => {
+    // Standard static company-provided manuals/SOPs (read-only)
+    const storeManuals = [
+      { 
+        id: 'manual-1',
+        name: 'Grinder Calibration & Beverage SOP', 
+        category: 'sop', 
+        size: '2.4 MB', 
+        type: 'PDF', 
+        date: '01 Jun 2026', 
+        filePath: 'modules/store-employee/pages/documents/sample_sop.pdf',
+        isStoreManual: true
+      },
+      { 
+        id: 'manual-2',
+        name: 'Monsoon Drink Recipe Brew Sheet', 
+        category: 'sop', 
+        size: '1.2 MB', 
+        type: 'PDF', 
+        date: '01 Jul 2026', 
+        filePath: 'modules/store-employee/pages/documents/sample_monsoon_brew.pdf',
+        isStoreManual: true
+      },
+      { 
+        id: 'manual-3',
+        name: 'Store Safety & Emergency Evacuation Plan', 
+        category: 'compliance', 
+        size: '3.0 MB', 
+        type: 'PDF', 
+        date: '15 Mar 2026', 
+        filePath: 'modules/store-employee/pages/documents/sample_evacuation.pdf',
+        isStoreManual: true
+      },
+      { 
+        id: 'manual-4',
+        name: 'Employee Handbook & Code of Conduct', 
+        category: 'hr', 
+        size: '5.5 MB', 
+        type: 'PDF', 
+        date: '01 Jan 2026', 
+        filePath: 'modules/store-employee/pages/documents/sample_handbook.pdf',
+        isStoreManual: true
+      }
+    ];
+
+    const mappedUploaded = (this.uploadedDocs || []).map(d => this._mapUploadedDoc(d));
+    const allDocs = [...storeManuals, ...mappedUploaded];
+
+    const filteredDocs = allDocs.filter(d => {
       const matchCat = this.filterCategory === 'all' || d.category === this.filterCategory;
       const matchSearch = d.name.toLowerCase().includes(this.searchQuery.toLowerCase());
       return matchCat && matchSearch;
@@ -281,17 +443,48 @@ export default class StoreEmployeeDocuments {
       if (!rowTpl) return;
       const clone = rowTpl.content.cloneNode(true);
 
-      const row = clone.querySelector('.doc-row');
       const nameEl = clone.querySelector('.doc-name');
       const sublineEl = clone.querySelector('.doc-subline');
       const downloadBtn = clone.querySelector('.btn-doc-download');
+      const deleteBtn = clone.querySelector('.btn-doc-delete');
+      const statusBadge = clone.querySelector('.doc-status-badge');
 
       if (nameEl) nameEl.textContent = doc.name;
       if (sublineEl) {
         sublineEl.innerHTML = `Size: ${doc.size} &nbsp;·&nbsp; Type: ${doc.type} &nbsp;·&nbsp; Uploaded: ${doc.date}`;
       }
+
+      // Download button setup
       if (downloadBtn) {
         downloadBtn.setAttribute('data-name', doc.name);
+        downloadBtn.setAttribute('data-path', doc.filePath);
+      }
+
+      // Deletion setup (only for employee uploaded documents that are not yet approved)
+      if (deleteBtn) {
+        if (!doc.isStoreManual && !doc.approved) {
+          deleteBtn.style.display = 'block';
+          deleteBtn.setAttribute('data-type', doc.documentType);
+          deleteBtn.setAttribute('data-name', doc.name);
+        } else {
+          deleteBtn.style.display = 'none';
+        }
+      }
+
+      // Status badge setup
+      if (statusBadge) {
+        if (doc.isStoreManual) {
+          statusBadge.style.display = 'none';
+        } else {
+          statusBadge.style.display = 'inline-block';
+          if (doc.approved) {
+            statusBadge.className = 'doc-status-badge badge-approved';
+            statusBadge.textContent = 'Approved';
+          } else {
+            statusBadge.className = 'doc-status-badge badge-pending';
+            statusBadge.textContent = 'Pending';
+          }
+        }
       }
 
       listContainer.appendChild(clone);

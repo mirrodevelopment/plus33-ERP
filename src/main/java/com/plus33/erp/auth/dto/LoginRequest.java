@@ -5,25 +5,26 @@
  * Developer         : Sivasurya
  *
  * Module            : Auth Module
- * Package           : com.plus33.erp.auth.dto
  * File              : LoginRequest.java
- * Purpose           : Data Transfer Object for request/response in Auth Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: LoginController
- * Related Service   : LoginService, LoginServiceImpl
- * Related Repository: LoginRepository
- * Related Entity    : Login
- * Related DTO       : LoginRequest
- * Related Mapper    : LoginMapper
- * Related DB Table  : logins
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : LoginController, LoginService, LoginServiceImpl
+ * Path              : src/main/java/com/plus33/erp/auth/dto/LoginRequest.java
+ * Purpose           : Carries user email and password credentials submitted to the
+ *                     POST /api/v1/auth/login endpoint for JWT token generation.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * DTO for Auth Module HTTP serialization. Annotated with Jakarta Bean Validation constraints.
+ * Immutable Java record representing the HTTP request body for the login
+ * endpoint. Contains two fields validated by Jakarta Bean Validation:
+ *
+ *   email    — required, must conform to valid email format (@Email).
+ *              Used as the primary authentication principal identifier.
+ *   password — required, non-blank string used for BCrypt credential
+ *              verification via Spring AuthenticationManager.
+ *
+ * Consumed exclusively by AuthController.login(). Deserialized from
+ * application/json request body by Spring MVC. Validation failures
+ * result in 400 Bad Request responses before the controller executes.
+ * Does not persist to any database table.
  ******************************************************************************/
 package com.plus33.erp.auth.dto;
 

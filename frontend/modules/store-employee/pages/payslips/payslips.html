@@ -3,96 +3,112 @@
  * Project           : PLUS33 Coffee ERP
  * Module            : Store Employee — Earnings Statement (Payslips)
  * File              : payslips.html
- * Path              : frontend/modules/store-employee/payslips/payslips.html
- * Purpose           : HTML template for Store Employee Payslips page layout
- * Version           : 2.0.0
- *
- * Related JS        : payslips.js
- * Related CSS       : payslips.css
- *
- * Description
- * ---------------------------------------------------------------------------
- * Structural layout of monthly paycheck balances, releases history ledger tables,
- * dispute inquiry tickets form composer, and breakdown modal popups.
- * No inline styles, no inline javascript event handlers.
+ * Version           : 3.0.0
  ******************************************************************************
 -->
 
 <div class="employee-payroll-workspace animate-fade-in">
 
   <!-- ===== PAGE HEADER ===== -->
-  <div class="card glass header-banner-card">
-    <div class="welcome-details">
-      <h2 class="welcome-title">Earnings Statement</h2>
-      <p class="welcome-subtitle">
-        Employee: <span class="highlight-val" id="lbl-barista-name">—</span> &nbsp;·&nbsp; Role: <span class="highlight-val" id="lbl-barista-role">—</span>
-      </p>
+  <div class="card glass payroll-header-card">
+    <div class="payroll-header-left">
+      <div class="payroll-header-icon-wrap">
+        <i data-lucide="receipt-text" aria-hidden="true"></i>
+      </div>
+      <div>
+        <h2 class="payroll-header-title">Earnings Statement</h2>
+        <p class="payroll-header-sub">
+          <span id="lbl-barista-name">—</span>
+          &nbsp;·&nbsp;
+          <span id="lbl-nation-tag" class="nation-badge">N/A</span>
+          &nbsp;·&nbsp;
+          <span id="lbl-employee-code" class="payroll-code-badge">EMP-???</span>
+          &nbsp;·&nbsp;
+          <span id="lbl-barista-role">—</span>
+        </p>
+      </div>
     </div>
-    
-    <div class="header-status-pill" role="status" aria-live="polite">
-      <i data-lucide="check" aria-hidden="true"></i>
-      <span>Salary Account Active (France FR Region)</span>
+    <div class="payroll-header-right">
+      <div class="header-status-pill" role="status" aria-live="polite">
+        <i data-lucide="shield-check" aria-hidden="true"></i>
+        <span>Salary Account Active</span>
+      </div>
     </div>
   </div>
 
-  <!-- ===== 4 PAYROLL KPI CARDS ===== -->
+  <!-- ===== 5 PAYROLL KPI CARDS ===== -->
   <div class="kpi-grid-row" role="region" aria-label="Payslip monthly summary metrics">
-    
-    <!-- KPI 1: Net Salary -->
+
     <div class="kpi-block-card">
-      <div class="kpi-icon-wrapper kpi-icon-wrapper--green" aria-hidden="true">
-        <i data-lucide="banknote"></i>
-      </div>
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--green" aria-hidden="true"><i data-lucide="banknote"></i></div>
       <div class="kpi-meta-details">
         <div class="kpi-value" id="kpi-net-salary">—</div>
         <div class="kpi-label">Net Salary (Latest)</div>
       </div>
     </div>
 
-    <!-- KPI 2: Gross Earnings -->
     <div class="kpi-block-card">
-      <div class="kpi-icon-wrapper kpi-icon-wrapper--normal" aria-hidden="true">
-        <i data-lucide="wallet"></i>
-      </div>
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--normal" aria-hidden="true"><i data-lucide="wallet"></i></div>
       <div class="kpi-meta-details">
         <div class="kpi-value" id="kpi-gross-earnings">—</div>
         <div class="kpi-label">Gross Earnings</div>
       </div>
     </div>
 
-    <!-- KPI 3: Overtime & Allowances -->
     <div class="kpi-block-card">
-      <div class="kpi-icon-wrapper kpi-icon-wrapper--blue" aria-hidden="true">
-        <i data-lucide="plus-circle"></i>
-      </div>
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--blue" aria-hidden="true"><i data-lucide="clock-4"></i></div>
       <div class="kpi-meta-details">
         <div class="kpi-value" id="kpi-overtime-allowances">—</div>
         <div class="kpi-label">Overtime &amp; Allowances</div>
       </div>
     </div>
 
-    <!-- KPI 4: Deductions & Taxes -->
     <div class="kpi-block-card">
-      <div class="kpi-icon-wrapper kpi-icon-wrapper--red" aria-hidden="true">
-        <i data-lucide="minus-circle"></i>
-      </div>
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--red" aria-hidden="true"><i data-lucide="minus-circle"></i></div>
       <div class="kpi-meta-details">
         <div class="kpi-value" id="kpi-deductions-taxes">—</div>
         <div class="kpi-label">Deductions &amp; Taxes</div>
       </div>
     </div>
 
+    <div class="kpi-block-card kpi-block-card--purple">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--purple" aria-hidden="true"><i data-lucide="trending-up"></i></div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-ytd-net">—</div>
+        <div class="kpi-label">YTD Net Earnings</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== 6-MONTH NET PAY TREND CHART ===== -->
+  <div class="card glass trend-chart-card">
+    <div class="card-header-split">
+      <div>
+        <h3 class="card-split-title">Net Pay Trend</h3>
+        <p class="card-split-subtitle">Last 6 pay periods</p>
+      </div>
+      <i data-lucide="bar-chart-3" class="card-split-icon" aria-hidden="true"></i>
+    </div>
+    <div class="trend-chart-wrap">
+      <canvas id="payslip-trend-chart" aria-label="Net pay trend for last 6 months" role="img"></canvas>
+    </div>
   </div>
 
   <!-- ===== MAIN GRID SPLIT WORKSPACE ===== -->
   <div class="workspace-grid-layout">
-    
-    <!-- Left Column: History releases table -->
+
+    <!-- Left Column: History table -->
     <div class="layout-column-left">
       <div class="card glass history-card">
         <div class="card-header-split">
           <h3 class="card-split-title">Payroll Release History</h3>
-          <i data-lucide="history" class="card-split-icon" aria-hidden="true"></i>
+          <div class="history-controls">
+            <select id="filter-year-select" class="filter-year-select" aria-label="Filter by year">
+              <option value="all">All Years</option>
+            </select>
+            <i data-lucide="history" class="card-split-icon" aria-hidden="true"></i>
+          </div>
         </div>
 
         <div class="table-scroller">
@@ -100,22 +116,21 @@
             <thead>
               <tr class="table-header-row">
                 <th scope="col">Billing Period</th>
+                <th scope="col">Status</th>
+                <th scope="col">Payment Date</th>
                 <th scope="col">Gross Pay</th>
                 <th scope="col">Deductions</th>
                 <th scope="col">Net Paid</th>
-                <th scope="col">Run #</th>
                 <th scope="col" class="text-center">Action</th>
               </tr>
             </thead>
-            <tbody id="payslip-history-tbody">
-              <!-- Populated dynamically by JS -->
-            </tbody>
+            <tbody id="payslip-history-tbody"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Inquiry tickets composer -->
+    <!-- Right Column: Inquiry form -->
     <div class="layout-column-right">
       <div class="card glass inquiry-card">
         <div class="card-header-split">
@@ -130,9 +145,7 @@
 
           <div class="form-group">
             <label for="query-billing-period" class="form-label">Select billing Period</label>
-            <select id="query-billing-period" class="form-select">
-              <!-- Loaded dynamically -->
-            </select>
+            <select id="query-billing-period" class="form-select"></select>
           </div>
 
           <div class="form-group">
@@ -159,36 +172,421 @@
 
   </div>
 
+  <!-- ===== PAYROLL POLICY CARD ===== -->
+  <div class="card glass policy-guide-card animate-slide-up" role="button" tabindex="0" id="btn-open-policy-guide" aria-label="Open payroll guidelines">
+    <div class="policy-guide-icon-wrap">
+      <i data-lucide="book-open" aria-hidden="true"></i>
+    </div>
+    <div class="policy-guide-content">
+      <h4 class="policy-guide-title">Payroll Policy &amp; Paycheck Guide</h4>
+      <p class="policy-guide-desc">Learn about base salary calculations, overtime multipliers, statutory tax deductions, and accounts dispute workflows.</p>
+    </div>
+    <div class="policy-guide-chevron">
+      <i data-lucide="chevron-right" aria-hidden="true"></i>
+    </div>
+  </div>
+
   <!-- ===== BREAKDOWN MODAL OVERLAY ===== -->
   <div id="payslip-modal-overlay" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="card glass modal-content-panel animate-slide-up" id="payslip-modal-content">
-      <!-- Loaded dynamically on breakdown click -->
-    </div>
+    <div class="card glass modal-content-panel animate-slide-up" id="payslip-modal-content"></div>
   </div>
 
 </div>
 
 
-<!-- ===== EMPTY HISTORIES TABLE ROW TEMPLATE ===== -->
 <template id="payslip-empty-row-tpl">
   <tr>
-    <td colspan="6" class="empty-releases-cell">No paycheck releases found in system database.</td>
+    <td colspan="7" class="empty-releases-cell">No paycheck releases found in system database.</td>
   </tr>
 </template>
 
-
-<!-- ===== HISTORY TABLE ITEM ROW TEMPLATE ===== -->
 <template id="payslip-row-tpl">
   <tr class="payslip-row">
     <td class="period-cell font-bold"></td>
+    <td class="status-cell"></td>
+    <td class="payment-date-cell text-muted"></td>
     <td class="gross-cell font-mono"></td>
     <td class="deductions-cell font-mono color-danger"></td>
     <td class="net-cell font-bold font-mono"></td>
-    <td class="run-cell font-bold text-muted"></td>
     <td class="actions-cell text-center">
-      <button class="btn btn-secondary btn-view-payslip" type="button">
-        View Breakdown
-      </button>
-    </td>
+      <button class="btn btn-secondary btn-view-payslip" type="button">View Breakdown</button>
   </tr>
 </template>
+
+<template id="payslip-breakdown-tpl">
+  <div class="modal-header-split">
+    <h3 class="modal-title">Payslip Breakdown — <span class="val-run-number"></span></h3>
+    <button class="btn-close-modal" type="button" aria-label="Close modal">
+      <i data-lucide="x" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="modal-details-body animate-fade-in">
+    <!-- Employee meta bar -->
+    <div class="modal-emp-meta-bar">
+      <div><span class="modal-meta-label">Employee</span><span class="modal-meta-val val-emp-name"></span></div>
+      <div><span class="modal-meta-label">Code</span><span class="modal-meta-val val-emp-code"></span></div>
+      <div><span class="modal-meta-label">Base Rate</span><span class="modal-meta-val val-base-rate"></span></div>
+      <div><span class="modal-meta-label">Monthly Base</span><span class="modal-meta-val val-monthly-base"></span></div>
+      <div><span class="modal-meta-label">Employment</span><span class="modal-meta-val val-employment-type"></span></div>
+      <div><span class="modal-meta-label">Payment Date</span><span class="modal-meta-val val-payment-date"></span></div>
+      <div><span class="modal-meta-label">Bank</span><span class="modal-meta-val val-bank-name"></span></div>
+      <div><span class="modal-meta-label">Account No</span><span class="modal-meta-val val-bank-account"></span></div>
+      <div><span class="modal-meta-label">IFSC / Sort Code</span><span class="modal-meta-val val-bank-ifsc"></span></div>
+    </div>
+
+    <!-- Work Summary highlight box -->
+    <div class="modal-work-summary-box">
+      <div class="modal-work-summary-title">
+        <i data-lucide="calendar-check-2" aria-hidden="true"></i>
+        Work Summary
+      </div>
+      <div class="modal-work-stats-grid">
+        <div class="work-stat-item work-stat-item--primary">
+          <div class="work-stat-val val-days-worked"></div>
+          <div class="work-stat-label">Days Worked</div>
+        </div>
+        <div class="work-stat-item">
+          <div class="work-stat-val val-hours-worked"></div>
+          <div class="work-stat-label">Hours Worked</div>
+        </div>
+        <div class="work-stat-item work-stat-item--orange">
+          <div class="work-stat-val val-ot-hours"></div>
+          <div class="work-stat-label">Overtime Hours</div>
+        </div>
+        <div class="work-stat-item">
+          <div class="work-stat-val val-night-hours"></div>
+          <div class="work-stat-label">Night Shift</div>
+        </div>
+        <div class="work-stat-item work-stat-item--green">
+          <div class="work-stat-val val-total-bonus"></div>
+          <div class="work-stat-label">Total Bonus</div>
+        </div>
+        <div class="work-stat-item">
+          <div class="work-stat-val val-attendance-rate"></div>
+          <div class="work-stat-label">Attendance</div>
+        </div>
+        <div class="work-stat-item">
+          <div class="work-stat-val val-absent-days"></div>
+          <div class="work-stat-label">Absent</div>
+        </div>
+        <div class="work-stat-item">
+          <div class="work-stat-val val-leave-used"></div>
+          <div class="work-stat-label">Leave Used</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Earnings & Deductions side by side -->
+    <div class="modal-split-row-2">
+      <div class="modal-outline-box modal-outline-box--earnings">
+        <div class="modal-box-title">Earnings Breakdown</div>
+        <div class="box-earnings-rows"></div>
+        <div class="modal-flex-line-bold modal-flex-line-bold-top color-success">
+          <span>Gross Earnings:</span>
+          <span class="val-gross-earnings"></span>
+        </div>
+      </div>
+
+      <div class="modal-outline-box modal-outline-box--deductions">
+        <div class="modal-box-title">Deductions Breakdown</div>
+        <div class="box-deductions-rows"></div>
+        <div class="modal-flex-line-bold modal-flex-line-bold-top color-danger">
+          <span>Total Deductions:</span>
+          <span class="val-total-deductions"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax Snapshot Section -->
+    <div class="modal-tax-breakdown-section" style="display:none;">
+      <div class="modal-outline-box modal-outline-box--tax">
+        <div class="modal-box-title">Tax Snapshot Breakdown</div>
+        <div class="box-tax-rows"></div>
+        <div class="modal-flex-line-bold modal-flex-line-bold-top color-danger">
+          <span>Total Tax Withheld:</span>
+          <span class="val-total-tax"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employer Contributions -->
+    <div class="modal-outline-box modal-outline-box--contributions">
+      <div class="modal-box-title">Employer Statutory Contributions</div>
+      <div class="contributions-grid-3">
+        <div>Employer PF: <strong class="val-employer-pf"></strong></div>
+        <div>Employer ESI: <strong class="val-employer-esi"></strong></div>
+        <div>Employer Pension: <strong class="val-employer-pension"></strong></div>
+        <div>Social Security: <strong class="val-employer-soc-sec"></strong></div>
+        <div>Health Insurance: <strong class="val-employer-health"></strong></div>
+        <div>End of Service: <strong class="val-employer-eos"></strong></div>
+      </div>
+      <div class="modal-flex-line-bold modal-flex-line-bold-top color-blue">
+        <span>Total Employer Cost:</span>
+        <span class="val-employer-total"></span>
+      </div>
+    </div>
+
+    <!-- Net Pay Banner -->
+    <div class="modal-total-banner-row">
+      <span>Net Take-Home Salary</span>
+      <span class="val-net-pay"></span>
+    </div>
+
+    <!-- Bank Credit Details -->
+    <div class="modal-bank-credit-box">
+      <div class="modal-bank-credit-title">
+        <i data-lucide="landmark" aria-hidden="true"></i>
+        Bank Credit Details
+      </div>
+      <div class="modal-bank-credit-grid">
+        <div class="modal-bank-credit-item">
+          <span class="modal-bank-credit-label">Bank Name</span>
+          <span class="modal-bank-credit-val val-bank-name-btm">—</span>
+        </div>
+        <div class="modal-bank-credit-item">
+          <span class="modal-bank-credit-label">Account No</span>
+          <span class="modal-bank-credit-val val-bank-account-btm">—</span>
+        </div>
+        <div class="modal-bank-credit-item">
+          <span class="modal-bank-credit-label">IFSC / Sort Code</span>
+          <span class="modal-bank-credit-val val-bank-ifsc-btm">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit -->
+    <div class="modal-audit-certificate-line">
+      Audit Certificate &nbsp;·&nbsp;
+      Processed by: <span class="val-audit-by"></span> &nbsp;·&nbsp;
+      Date: <span class="val-audit-date"></span> &nbsp;·&nbsp;
+      Status: <strong class="val-audit-status"></strong>
+    </div>
+
+    <!-- Export Action Buttons -->
+    <div class="modal-action-btn-row">
+      <button class="btn btn-secondary btn-doc-download" type="button">
+        <i data-lucide="printer" aria-hidden="true"></i> Print / Save PDF
+      </button>
+      <button class="btn btn-export-image" type="button" id="btn-export-img">
+        <i data-lucide="image" aria-hidden="true"></i> Download as Image
+      </button>
+    </div>
+  </div>
+</template>
+
+<template id="payroll-policy-tpl">
+  <div class="modal-header-split">
+    <h3 class="modal-title">Payroll Policy &amp; Paycheck Guide</h3>
+    <button class="btn-close-modal" type="button" aria-label="Close modal">
+      <i data-lucide="x" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="modal-details-body animate-fade-in">
+    <div class="modal-outline-box modal-outline-box--contributions">
+      <div class="modal-box-title">1. Base Salary &amp; Wages</div>
+      <p class="guide-text">
+        • <strong>Regular Time</strong>: Calculated as your hourly base rate multiplied by your worked hours.<br>
+        • <strong>Monthly Base Pay</strong>: For salaried employees, this represents the standard monthly salary calculated based on active contractual status.
+      </p>
+    </div>
+
+    <div class="modal-outline-box modal-outline-box--earnings">
+      <div class="modal-box-title">2. Overtime &amp; Allowances</div>
+      <p class="guide-text">
+        • <strong>Overtime Pay (Tiered)</strong>: Any hours worked beyond standard contract shifts are compensated at a multiplier (normally <strong>1.5x</strong> of the base hourly rate).<br>
+        • <strong>Night Shift Allowance</strong>: Shifts worked between 10:00 PM and 6:00 AM receive a night differential multiplier of <strong>1.2x</strong>.<br>
+        • <strong>Holiday Work Pay</strong>: Public holiday shifts are paid at a <strong>2.0x</strong> base multiplier.<br>
+        • <strong>Performance &amp; Attendance Bonuses</strong>: Attendance bonuses are awarded for zero unexcused leaves and 98%+ attendance rate. Performance bonuses are assigned based on store KPI ratings.
+      </p>
+    </div>
+
+    <div class="modal-outline-box modal-outline-box--deductions">
+      <div class="modal-box-title">3. Taxes &amp; Deductions</div>
+      <p class="guide-text">
+        • <strong>Income Tax</strong>: Deducted progressively as per local/regional tax tables and brackets.<br>
+        • <strong>Statutory Contributions</strong>: Standard employee deductions like Provident Fund (PF), ESI, pension schemes, and insurance programs.<br>
+        • <strong>Penalties &amp; Late Clockings</strong>: Delay deductions are applied progressively if delays exceed the grace period. Unpaid leave without prior authorization (LWP) is deducted at full rate.
+      </p>
+    </div>
+
+    <div class="modal-outline-box modal-outline-box--tax">
+      <div class="modal-box-title">4. Employer Contributions</div>
+      <p class="guide-text">
+        • Statutory employer expenses (Employer PF, ESI, Social Security, and Health Insurance) are paid directly by the company on your behalf and do not impact your net take-home salary.
+      </p>
+    </div>
+
+    <div class="modal-outline-box">
+      <div class="modal-box-title">5. Paycheck Dispute Resolution Workflow</div>
+      <p class="guide-text">
+        • If you find any discrepancies (e.g. incorrect hours, missing overtime, incorrect tax), please use the <strong>Payroll Inquiry</strong> box on the right of the page to file a ticket directly to the accounts and HR division.<br>
+        • Accounts team SLA for resolution is 48 business hours.
+      </p>
+    </div>
+
+    <div class="modal-total-banner-row">
+      <span>Net Take-Home = Gross Earnings - Total Deductions</span>
+    </div>
+  </div>
+</template>
+
+<template id="print-pdf-tpl">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', Arial, sans-serif; font-size: 12px; color: #1a1a1a;
+      background: #fff; padding: 24px 32px; }
+
+    /* ── INFO BAR ── */
+    .info-bar { font-size: 10.5px; color: #374151; margin-bottom: 14px; line-height: 1.8; }
+    .info-bar strong { font-weight: 700; }
+
+    /* ── HEADER ── */
+    .ps-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; border-bottom: 1px solid #d1d5db; padding-bottom: 14px; }
+    .ps-logo { width: 64px; height: 64px; object-fit: contain; }
+    .ps-company { flex: 1; }
+    .ps-company-name { font-size: 14px; font-weight: 700; }
+    .ps-company-address { font-size: 11px; color: #6b7280; margin-top: 3px; line-height: 1.6; }
+    .ps-title { font-size: 16px; font-weight: 800; text-align: center; flex: 1; padding-top: 12px; color: #1e3a5f; }
+
+    /* ── EMP INFO BOX ── */
+    .ps-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1.5px solid #374151; margin-bottom: 18px; }
+    .ps-info-left, .ps-info-right { padding: 10px 14px; font-size: 12px; line-height: 1.9; }
+    .ps-info-left { border-right: 1px solid #374151; }
+    .ps-info-label { font-weight: 700; }
+    .ps-info-val { font-weight: 400; }
+
+    /* ── TABLES ── */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    td, th { padding: 5px 8px; vertical-align: middle; }
+
+    /* Section header row (big, bold, underlined with top spacing) */
+    .sec-hdr td { background: transparent; color: #1e3a5f; font-weight: 800;
+      font-size: 14px; padding: 22px 8px 8px 8px; text-decoration: underline; text-underline-offset: 4px; }
+
+    /* Sub-section header (light navy) */
+    .sub-hdr td { background: #e8eef5; color: #1e3a5f; font-weight: 700;
+      font-size: 11.5px; }
+
+    /* Column headers row */
+    .col-hdr td { background: #e8eef5; font-weight: 700; font-size: 11px;
+      border-bottom: 1px solid #94a3b8; }
+
+    /* Data rows */
+    tr:not(.sec-hdr):not(.sub-hdr):not(.col-hdr):not(.total-row) td {
+      border-bottom: 1px solid #e5e7eb;
+    }
+    tr:not(.sec-hdr):not(.sub-hdr):not(.col-hdr) { background: #fff; }
+    tr:not(.sec-hdr):not(.sub-hdr):not(.col-hdr):nth-child(even) { background: #f9fafb; }
+
+    /* Total rows */
+    .total-row td { background: #e8eef5; border-top: 1px solid #94a3b8; font-size: 12px; }
+
+    /* Number alignment */
+    .num { text-align: right; font-family: 'Courier New', Courier, monospace; }
+
+    /* ── NET PAY / AMOUNT PAID ── */
+    .net-section { border: 2px solid #1e3a5f; margin-bottom: 14px; }
+    .net-section .sec-hdr td { font-size: 13px; background: #1e3a5f; color: #fff; text-decoration: none; padding: 6px 8px; }
+    .net-row td { padding: 8px; font-size: 13px; }
+
+    /* ── AVAILABILITY / BENEFITS INFO ── */
+    .avail-section td { padding: 4px 8px; font-size: 11.5px; border-bottom: 1px solid #e5e7eb; }
+
+    /* ── FOOTER ── */
+    .ps-footer-bar { background: #1e3a5f; color: #fff; font-weight: 700;
+      font-size: 12px; padding: 8px 14px; margin-top: 14px; }
+
+    @media print {
+      body { padding: 12px; }
+      tr { page-break-inside: avoid; }
+    }
+  </style>
+
+  <div class="info-bar">
+    <strong>Payroll Helpdesk</strong> – For pay queries, contact HR or your store manager.<br>
+    <strong>PLUS33 Coffee Enterprise ERP</strong> – This is a system-generated earnings statement. Do not alter.
+  </div>
+
+  <div class="ps-header">
+    <img class="ps-logo" src="" alt="PLUS33 Logo" onerror="this.style.display='none'">
+    <div class="ps-company">
+      <div class="ps-company-name">PLUS33 Coffee Company</div>
+      <div class="ps-company-address">
+        <span class="val-store-name"></span><br>
+        <span class="val-store-region"></span><br>
+        <span class="val-store-address"></span>
+      </div>
+    </div>
+    <div class="ps-title">
+      Earnings Statement
+    </div>
+  </div>
+
+  <div class="ps-info-grid">
+    <div class="ps-info-left">
+      <div><span class="ps-info-label">Name:</span> <span class="ps-info-val val-emp-name"></span></div>
+      <div><span class="ps-info-label">Employee Code:</span> <span class="ps-info-val val-emp-code"></span></div>
+      <div><span class="ps-info-label">Designation:</span> <span class="ps-info-val val-emp-desig"></span></div>
+      <div><span class="ps-info-label">Email:</span> <span class="ps-info-val val-emp-email"></span></div>
+      <div><span class="ps-info-label">Bank:</span> <span class="ps-info-val val-bank-name"></span></div>
+      <div><span class="ps-info-label">IFSC / Sort Code:</span> <span class="ps-info-val val-bank-ifsc"></span></div>
+    </div>
+    <div class="ps-info-right">
+      <div><span class="ps-info-label">Pay Type</span> <span class="ps-info-val val-pay-type">&nbsp;&nbsp;&nbsp;&nbsp;Regular</span></div>
+      <div><span class="ps-info-label">Pay Period</span> <span class="ps-info-val val-pay-period"></span></div>
+      <div><span class="ps-info-label">Pay Date</span> <span class="ps-info-val val-pay-date"></span></div>
+      <div><span class="ps-info-label">Hourly Rate</span> <span class="ps-info-val val-hourly-rate"></span></div>
+      <div><span class="ps-info-label">Account No:</span> <span class="ps-info-val val-bank-account"></span></div>
+    </div>
+  </div>
+
+  <table>
+    <tr class="sec-hdr"><td colspan="5">Earnings</td></tr>
+    <tr class="col-hdr">
+      <td>Description</td>
+      <td class="num">Rate</td>
+      <td class="num">Hours</td>
+      <td class="num">Current</td>
+      <td class="num">YTD</td>
+    </tr>
+    <tbody class="earnings-tbody"></tbody>
+  </table>
+
+  <table>
+    <tr class="sec-hdr"><td colspan="3">Deductions</td></tr>
+    <tr class="col-hdr">
+      <td>Description</td>
+      <td class="num">Current</td>
+      <td class="num">YTD</td>
+    </tr>
+    <tbody class="deductions-tbody"></tbody>
+  </table>
+
+  <table>
+    <tr class="sec-hdr"><td colspan="3">Employer Statutory Contributions</td></tr>
+    <tr class="col-hdr"><td>Component</td><td class="num">Current</td><td class="num">YTD</td></tr>
+    <tbody class="contributions-tbody"></tbody>
+  </table>
+
+  <div class="net-section">
+    <table>
+      <tr class="sec-hdr"><td colspan="3">Amount Paid</td></tr>
+      <tr class="col-hdr"><td>Description</td><td class="num">Current</td><td class="num">YTD</td></tr>
+      <tr class="net-row">
+        <td>Net Take-Home Salary</td>
+        <td class="num"><strong class="val-net-current"></strong></td>
+        <td class="num val-net-ytd"></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ps-footer-bar">
+    For Payroll Questions, contact HR &nbsp;|&nbsp;
+    Processed by: <span class="val-audit-by"></span> &nbsp;|&nbsp; <span class="val-audit-date"></span> &nbsp;|&nbsp;
+    PLUS33 Coffee Enterprise ERP
+  </div>
+</template>
+

@@ -29,9 +29,12 @@ package com.plus33.erp.organization.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
 import com.plus33.erp.common.dto.PageResponse;
+import com.plus33.erp.common.exception.BusinessException;
 import com.plus33.erp.organization.dto.StoreRequest;
 import com.plus33.erp.organization.dto.StoreResponse;
 import com.plus33.erp.organization.dto.StoreSearchRequest;
+import com.plus33.erp.organization.entity.Store;
+import com.plus33.erp.organization.repository.StoreRepository;
 import com.plus33.erp.organization.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,6 +46,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * <b>PLUS33 Coffee ERP -- Organization Module</b>
@@ -75,9 +82,11 @@ import org.springframework.web.bind.annotation.*;
 public class StoreController {
 
     private final StoreService storeService;
+    private final StoreRepository storeRepository;
 
-    public StoreController(StoreService storeService) {
+    public StoreController(StoreService storeService, StoreRepository storeRepository) {
         this.storeService = storeService;
+        this.storeRepository = storeRepository;
     }
 
     /**
@@ -223,5 +232,48 @@ public class StoreController {
     public ResponseEntity<ApiResponse<com.plus33.erp.organization.dto.StoreSettingResponse>> updateStoreSettings(@PathVariable Long id, @Valid @RequestBody com.plus33.erp.organization.dto.StoreSettingRequest request) {
         com.plus33.erp.organization.dto.StoreSettingResponse response = storeService.updateStoreSettings(id, request);
         return ResponseEntity.ok(ApiResponse.success("Store settings updated successfully", response));
+    }
+
+    /**
+     * Store Admin or Shift Supervisor sets the store's GPS location from their device.
+     * Coordinates are saved permanently and persist until the next explicit update.
+     *
+     * <p>Body: {@code { "latitude": 48.8566, "longitude": 2.3522 }}</p>
+     *
+     * @param id  the store's database ID
+     * @param body request body containing latitude and longitude
+     * @return the updated GPS coordinates and store name
+     */
+    @PutMapping("/{id}/location")
+    @PreAuthorize("hasAuthority('STORE_UPDATE')")
+    @Operation(summary = "Set store GPS location",
+            description = "Saves the store's GPS coordinates. Set once from the admin device; persists until next explicit update.")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> setStoreLocation(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        Store store = storeRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Store not found: " + id));
+
+        try {
+            BigDecimal lat = new BigDecimal(body.getOrDefault("latitude", "").toString());
+            BigDecimal lng = new BigDecimal(body.getOrDefault("longitude", "").toString());
+            store.setLatitude(lat);
+            store.setLongitude(lng);
+            if (body.containsKey("geofenceRadiusMeters")) {
+                store.setGeofenceRadiusMeters(Integer.parseInt(body.get("geofenceRadiusMeters").toString()));
+            }
+            storeRepository.save(store);
+        } catch (NumberFormatException e) {
+            throw new BusinessException("Invalid coordinates. Provide numeric latitude and longitude values.");
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("storeId", store.getId());
+        result.put("storeName", store.getName());
+        result.put("latitude", store.getLatitude());
+        result.put("longitude", store.getLongitude());
+        result.put("geofenceRadiusMeters", store.getGeofenceRadiusMeters());
+        result.put("message", "Store location saved. This will remain active until you update it again.");
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

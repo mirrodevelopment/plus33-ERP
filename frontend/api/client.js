@@ -7,19 +7,18 @@
  * Module            : Api Module
  * File              : client.js
  * Path              : frontend/api/client.js
- * Purpose           : HTTP API client wrapper for backend communication
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related API       : N/A
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : core/logger, core/storage, core/eventBus
- * Depends On        : core/logger, core/storage, core/eventBus
+ * Purpose           : Primary client-side HTTP network client wrapper; injects Bearer JWT authentication headers, handles HTTP 401 session expiration, 403 access denial, 15-second timeouts, character sanitization, and structured ApiResponse/ErrorResponse parsing.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * HTTP API client wrapper for backend communication. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Core fetch API wrapper for REST communication with Spring Boot backend endpoints.
+ * Key capabilities:
+ *   - Automatically attaches `Authorization: Bearer <token>` from LocalStorage on all requests.
+ *   - Intercepts 401 Unauthorized responses to publish 'auth:session-expired' events to trigger login redirects.
+ *   - Intercepts 403 Forbidden responses to surface clearance errors.
+ *   - Sanitizes special character encoding anomalies (e.g. Île-de-France, Café) coming from database responses.
+ *   - Provides convenient wrapper methods: get(endpoint, queryParams), post(endpoint, body), put(endpoint, body), delete(endpoint), patch(endpoint, body).
  ******************************************************************************/
 
 import { logger } from '../core/logger.js';

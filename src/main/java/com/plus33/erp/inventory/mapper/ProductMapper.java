@@ -55,6 +55,7 @@ public interface ProductMapper {
     @Mapping(target = "unit", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "imageUrl", ignore = true)
     Product toEntity(ProductRequest request);
 
     @Mapping(target = "categoryId", source = "category.id")
@@ -68,5 +69,6 @@ public interface ProductMapper {
     @Mapping(target = "unit", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "imageUrl", ignore = true)
     void updateEntity(ProductRequest request, @MappingTarget Product entity);
 }

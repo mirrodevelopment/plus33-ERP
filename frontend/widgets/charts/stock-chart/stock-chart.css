@@ -1,3 +1,19 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : UI Widgets Component Library
+ * File              : stock-chart.css
+ * Path              : frontend/widgets/charts/stock-chart/stock-chart.css
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for UI Widgets Component Library
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
 /* Stock Chart / Store Status Styles */
 .stock-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -391,3 +407,4 @@
     opacity: 1;
   }
 }
+

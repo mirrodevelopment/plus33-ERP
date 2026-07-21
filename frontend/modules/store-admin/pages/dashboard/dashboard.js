@@ -31,6 +31,7 @@ import { htmlLoader } from '../../../../core/htmlLoader.js';
 import { apiClient } from '../../../../api/client.js';
 import { dashboardService } from '../../../../services/dashboard/DashboardService.js';
 import { eventBus } from '../../../../core/eventBus.js';
+import { StoreAdminDashboardCharts } from './dashboard.charts.js';
 
 /** Path to the dashboard HTML template */
 const TEMPLATE_URL = 'modules/store-admin/pages/dashboard/dashboard.html';
@@ -52,6 +53,9 @@ export default class StoreAdminDashboard {
     this.storeId = null;
     this.employees = [];
     this.storeDetails = null;
+    this.pendingLeaves = [];
+    this.awayPermissions = [];
+    this.ongoingAwayPermissions = [];
     
     // Downtown schedule telemetry presets
     this.scheduleRoster = [
@@ -135,6 +139,20 @@ export default class StoreAdminDashboard {
       } else {
         this.employees = [];
       }
+
+      // Fetch pending leaves, away permissions, and ongoing away permissions for approvals card
+      const [pendingRes, awayRes, ongoingAwayRes] = await Promise.all([
+        apiClient.get('/leaves/pending').catch(() => null),
+        apiClient.get('/api/v1/away-permission/pending').catch(() => null),
+        apiClient.get('/api/v1/away-permission/ongoing').catch(() => null)
+      ]);
+      if (pendingRes?.success) {
+        this.pendingLeaves = pendingRes.data?.pending || [];
+      } else {
+        this.pendingLeaves = [];
+      }
+      this.awayPermissions = awayRes?.success ? (awayRes.data || []) : [];
+      this.ongoingAwayPermissions = ongoingAwayRes?.success ? (ongoingAwayRes.data || []) : [];
     } catch (err) {
       logger.error('StoreAdminDashboard', 'Failed to fetch backend metrics overview', err);
     }
@@ -269,19 +287,14 @@ export default class StoreAdminDashboard {
 
     if (widgetTotalSales) widgetTotalSales.textContent = formatCurrency(todaySales);
     if (widgetTargetSales) widgetTargetSales.textContent = formatCurrency(todayTarget);
-    if (widgetProgressGauge) {
-      widgetProgressGauge.style.background = todayAchievedPercent > 0 
-        ? `conic-gradient(var(--status-success) 0% ${todayAchievedPercent}%, rgba(255,255,255,0.05) ${todayAchievedPercent}% 100%)`
-        : 'rgba(255,255,255,0.05)';
-    }
-    if (widgetProgressPercentage) widgetProgressPercentage.textContent = todayAchievedPercent > 0 ? `${todayAchievedPercent}%` : 'NA/DB';
+    
+    // Render Sales Progress Gauge using helper
+    StoreAdminDashboardCharts.renderSalesProgress(container, todayAchievedPercent);
 
     // Populate Widget 2: Workforce Overview
     const onShiftVal = container.querySelector('#val-on-shift');
     const absentVal = container.querySelector('#val-absent');
     const onLeaveVal = container.querySelector('#val-on-leave');
-    const attendanceGauge = container.querySelector('#attendance-gauge');
-    const attendanceGaugePercent = container.querySelector('#attendance-gauge-percent');
     
     const presentPercent = totalStaff > 0 ? ((activeStaff / totalStaff) * 100).toFixed(0) : 0;
     const absentCount = Number(workforceOverview.absent || 0);
@@ -290,12 +303,9 @@ export default class StoreAdminDashboard {
     if (onShiftVal) onShiftVal.textContent = valOrNa(activeStaff);
     if (absentVal) absentVal.textContent = valOrNa(absentCount);
     if (onLeaveVal) onLeaveVal.textContent = valOrNa(onLeaveCount);
-    if (attendanceGauge) {
-      attendanceGauge.style.background = presentPercent > 0
-        ? `conic-gradient(var(--status-success) 0% ${presentPercent}%, var(--status-danger) ${presentPercent}% 100%)`
-        : 'rgba(255,255,255,0.05)';
-    }
-    if (attendanceGaugePercent) attendanceGaugePercent.textContent = presentPercent > 0 ? `${presentPercent}%` : 'NA/DB';
+    
+    // Render Attendance Gauge using helper
+    StoreAdminDashboardCharts.renderAttendanceGauge(container, presentPercent);
 
     const txtPresentStaff = container.querySelector('#txt-present-staff');
     const txtAbsentStaff = container.querySelector('#txt-absent-staff');
@@ -305,16 +315,26 @@ export default class StoreAdminDashboard {
     if (txtAbsentStaff) txtAbsentStaff.textContent = absentCount > 0 ? `${absentCount} (${((absentCount / totalStaff) * 100).toFixed(0)}%)` : 'NA/DB';
     if (txtLeaveStaff) txtLeaveStaff.textContent = onLeaveCount > 0 ? `${onLeaveCount} (${((onLeaveCount / totalStaff) * 100).toFixed(0)}%)` : 'NA/DB';
 
-    // Populate Widget 3: Inventory Overview
-    const lowStockVal = container.querySelector('#val-low-stock');
-    const outStockVal = container.querySelector('#val-out-stock');
-    const expiringStockVal = container.querySelector('#val-expiring-stock');
-    const pendingRequestsVal = container.querySelector('#val-pending-requests');
+    // Populate Widget 3: Supply Chain & Inventory Redesigned
+    const valTotalStock = container.querySelector('#val-total-stock-items');
+    const valLowStock = container.querySelector('#val-low-stock-items');
+    const valOutStock = container.querySelector('#val-out-stock-items');
+    const exp30 = container.querySelector('#exp-30-days');
+    const exp60 = container.querySelector('#exp-60-days');
+    const exp90 = container.querySelector('#exp-90-days');
 
-    if (lowStockVal) lowStockVal.textContent = lowStockCount > 0 ? `${lowStockCount} Items` : 'NA/DB';
-    if (outStockVal) outStockVal.textContent = outOfStockCount > 0 ? `${outOfStockCount} Items` : 'NA/DB';
-    if (expiringStockVal) expiringStockVal.textContent = Number(inventoryOverview.expiringCount || 0) > 0 ? `${Number(inventoryOverview.expiringCount)} Items` : 'NA/DB';
-    if (pendingRequestsVal) pendingRequestsVal.textContent = Number(inventoryOverview.pendingSupplyRequests || 0) > 0 ? `${Number(inventoryOverview.pendingSupplyRequests)} Requests` : 'NA/DB';
+    const totalStockVal = Number(inventoryOverview.stockInHand || 0);
+    if (valTotalStock) valTotalStock.textContent = totalStockVal.toLocaleString();
+    if (valLowStock) valLowStock.textContent = valOrNa(lowStockCount);
+    if (valOutStock) valOutStock.textContent = valOrNa(outOfStockCount);
+
+    const expiryAlerts = inventoryOverview.expiryAlerts || {};
+    if (exp30) exp30.textContent = valOrNa(expiryAlerts.within30);
+    if (exp60) exp60.textContent = valOrNa(expiryAlerts.within60);
+    if (exp90) exp90.textContent = valOrNa(expiryAlerts.within90);
+
+    // Draw inventory donut chart using helper
+    StoreAdminDashboardCharts.renderInventoryDonut(container, inventoryOverview);
 
     // Populate Widget 4: Financials Panel
     const finCashEl = container.querySelector('#fin-cash-sales');
@@ -465,6 +485,7 @@ export default class StoreAdminDashboard {
 
     // Render worker roster list
     this._renderWorkerRoster(container);
+    this._renderApprovalsHub(container);
   }
 
   // ---------------------------------------------------------------------------
@@ -584,6 +605,9 @@ export default class StoreAdminDashboard {
 
     // Store admin pages redirects
     registerRouterRedirect('wa-btn-leaves', '#leaves');
+
+    // Bind Approvals Hub actions
+    this._bindApprovalsHubEvents(container, lifecycle);
   }
 
   // ---------------------------------------------------------------------------
@@ -683,6 +707,341 @@ export default class StoreAdminDashboard {
   // ---------------------------------------------------------------------------
   // PRIVATE STATE MANAGEMENT
   // ---------------------------------------------------------------------------
+
+  _renderApprovalsHub(container) {
+    const leavesList = container.querySelector('#sa-pending-leaves-list');
+    const awayList = container.querySelector('#sa-pending-away-list');
+
+    // 1. Render Leaves
+    if (leavesList) {
+      leavesList.replaceChildren();
+      if (this.pendingLeaves.length === 0) {
+        leavesList.innerHTML = `
+          <div class="empty-approvals-banner" style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.8rem;">
+            <i data-lucide="check-square" style="width: 24px; height: 24px; margin-bottom: 8px; color: var(--accent-primary); display: block; margin-left: auto; margin-right: auto;"></i>
+            <div>All leaves processed</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">No pending leave applications.</div>
+          </div>
+        `;
+      } else {
+        this.pendingLeaves.forEach(req => {
+          const item = document.createElement('div');
+          item.className = 'approval-item-card';
+          item.style.cssText = 'background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;';
+          
+          const startDate = req.startDate ? new Date(req.startDate).toLocaleDateString() : '';
+          const endDate = req.endDate ? new Date(req.endDate).toLocaleDateString() : '';
+          
+          item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">${req.employeeName || 'Employee'}</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">${req.leaveTypeName || 'Leave'} · ${req.durationDays || 0} days</div>
+              </div>
+              <span style="font-size: 0.65rem; background: rgba(201,164,106,0.12); color: var(--accent-primary); border: 1px solid rgba(201,164,106,0.2); padding: 2px 6px; border-radius: 4px; font-weight: 600;">PENDING</span>
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary);">
+              <strong>Period:</strong> ${startDate} - ${endDate} (${req.session || 'Full Day'})
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary);">
+              <strong>Reason:</strong> <em>${req.reason || 'No reason provided'}</em>
+            </div>
+            <div class="form-group" style="margin-top: 4px;">
+              <input type="text" class="form-input sa-leave-comment-input" data-id="${req.id}" placeholder="Optional approval comment..." style="font-size: 0.7rem; padding: 4px 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px;">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <button type="button" class="btn btn-primary btn-sa-leave-approve" data-id="${req.id}" style="flex: 1; padding: 6px; font-size: 0.74rem;">✓ Approve</button>
+              <button type="button" class="btn btn-danger btn-sa-leave-reject" data-id="${req.id}" style="flex: 1; padding: 6px; font-size: 0.74rem;">✕ Reject</button>
+            </div>
+          `;
+          leavesList.appendChild(item);
+        });
+      }
+    }
+
+    // 2. Render Away Passes
+    if (awayList) {
+      awayList.replaceChildren();
+      if (this.awayPermissions.length === 0) {
+        awayList.innerHTML = `
+          <div class="empty-approvals-banner" style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.8rem;">
+            <i data-lucide="map-pin" style="width: 24px; height: 24px; margin-bottom: 8px; color: var(--accent-warning, #f59e0b); display: block; margin-left: auto; margin-right: auto;"></i>
+            <div>All employees on site</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">No pending away pass requests.</div>
+          </div>
+        `;
+      } else {
+        this.awayPermissions.forEach(req => {
+          const item = document.createElement('div');
+          item.className = 'approval-item-card';
+          item.style.cssText = 'background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;';
+          
+          const statusColor = req.status === 'EXTENSION_REQUESTED' ? '#f59e0b' : 'var(--accent-primary)';
+          const tag = req.status === 'EXTENSION_REQUESTED' ? '🔁 Extension' : '⏸ Away Pass';
+          const since = req.requestedAt ? new Date(req.requestedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
+
+          item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">${req.employeeName || 'Employee'}</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Requested at ${since}</div>
+              </div>
+              <span style="font-size: 0.65rem; background: rgba(245,158,11,0.12); color: ${statusColor}; border: 1px solid rgba(245,158,11,0.2); padding: 2px 6px; border-radius: 4px; font-weight: 600;">${tag}</span>
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 2px;">
+              ${req.reason ? `<div><strong>Original Reason:</strong> <em>${req.reason}</em></div>` : ''}
+              ${req.status === 'EXTENSION_REQUESTED' && req.extensionReason ? `<div><strong>Extension Request:</strong> <em style="color: var(--accent-warning, #f59e0b);">${req.extensionReason}</em></div>` : ''}
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <button type="button" class="btn btn-primary btn-sa-away-approve" data-id="${req.id}" style="flex: 1; padding: 6px; font-size: 0.74rem;">✓ Approve</button>
+              <button type="button" class="btn btn-danger btn-sa-away-reject" data-id="${req.id}" style="flex: 1; padding: 6px; font-size: 0.74rem;">✕ Deny</button>
+            </div>
+          `;
+          awayList.appendChild(item);
+        });
+      }
+    }
+
+    // 3. Render Ongoing Away Passes
+    const ongoingList = container.querySelector('#sa-ongoing-away-list');
+    if (ongoingList) {
+      ongoingList.replaceChildren();
+      if (this.ongoingAwayPermissions.length === 0) {
+        ongoingList.innerHTML = `
+          <div class="empty-approvals-banner" style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.8rem;">
+            <i data-lucide="door-open" style="width: 24px; height: 24px; margin-bottom: 8px; color: var(--status-success, #4caf50); display: block; margin-left: auto; margin-right: auto;"></i>
+            <div>No ongoing away passes</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">All staff currently inside geofence.</div>
+          </div>
+        `;
+      } else {
+        this.ongoingAwayPermissions.forEach(req => {
+          const item = document.createElement('div');
+          item.className = 'approval-item-card';
+          item.style.cssText = 'background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;';
+          
+          const until = req.approvedUntil ? new Date(req.approvedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+          const duration = req.approvedDurationMins || 0;
+
+          item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">${req.employeeName || 'Employee'}</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Away for ${duration} mins</div>
+              </div>
+              <span style="font-size: 0.65rem; background: rgba(76,175,80,0.12); color: #4caf50; border: 1px solid rgba(76,175,80,0.2); padding: 2px 6px; border-radius: 4px; font-weight: 600;">ACTIVE</span>
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary);">
+              <strong>Approved Until:</strong> ${until}
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary);">
+              <strong>Reason:</strong> <em>${req.reason || 'No reason provided'}</em>
+            </div>
+          `;
+          ongoingList.appendChild(item);
+        });
+      }
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  _bindApprovalsHubEvents(container, lifecycle) {
+    // 1. Approve Leave
+    const leaveApproveBtns = container.querySelectorAll('.btn-sa-leave-approve');
+    leaveApproveBtns.forEach(btn => {
+      const leaveId = btn.getAttribute('data-id');
+      const commentInput = container.querySelector(`.sa-leave-comment-input[data-id="${leaveId}"]`);
+      const handleApprove = async () => {
+        const comment = commentInput?.value?.trim() || '';
+        btn.disabled = true;
+        try {
+          const res = await apiClient.put(`/leaves/${leaveId}/approve`, { comment });
+          if (res?.success) {
+            notificationStore.success('Leave request approved successfully.');
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to approve leave request.');
+            btn.disabled = false;
+          }
+        } catch (err) {
+          notificationStore.danger('Error approving leave: ' + err.message);
+          btn.disabled = false;
+        }
+      };
+      btn.addEventListener('click', handleApprove);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handleApprove));
+    });
+
+    // 2. Reject Leave
+    const leaveRejectBtns = container.querySelectorAll('.btn-sa-leave-reject');
+    const modal = container.querySelector('#sa-reject-modal');
+    const modalSubmit = container.querySelector('#sa-reject-modal-submit');
+    const modalClose = container.querySelector('#sa-reject-modal-close');
+    const modalCancel = container.querySelector('#sa-reject-modal-cancel');
+    const rejectReasonInput = container.querySelector('#sa-reject-reason-input');
+
+    leaveRejectBtns.forEach(btn => {
+      const leaveId = btn.getAttribute('data-id');
+      const handleOpenReject = () => {
+        if (modalSubmit) modalSubmit.dataset.leaveId = leaveId;
+        if (rejectReasonInput) rejectReasonInput.value = '';
+        if (modal) {
+          modal.style.display = 'flex';
+          modal.setAttribute('aria-hidden', 'false');
+        }
+      };
+      btn.addEventListener('click', handleOpenReject);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handleOpenReject));
+    });
+
+    const closeModal = () => {
+      if (modal) {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+      }
+    };
+
+    if (modalClose) {
+      modalClose.addEventListener('click', closeModal);
+      lifecycle.onCleanup(() => modalClose.removeEventListener('click', closeModal));
+    }
+    if (modalCancel) {
+      modalCancel.addEventListener('click', closeModal);
+      lifecycle.onCleanup(() => modalCancel.removeEventListener('click', closeModal));
+    }
+
+    if (modalSubmit) {
+      const handleConfirmReject = async () => {
+        const leaveId = modalSubmit.dataset.leaveId;
+        const reason = rejectReasonInput?.value?.trim() || '';
+        if (!reason) {
+          notificationStore.danger('Rejection reason is required.');
+          return;
+        }
+        modalSubmit.disabled = true;
+        try {
+          const res = await apiClient.put(`/leaves/${leaveId}/reject`, { rejectionReason: reason });
+          if (res?.success) {
+            notificationStore.success('Leave request rejected.');
+            closeModal();
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to reject leave request.');
+            modalSubmit.disabled = false;
+          }
+        } catch (err) {
+          notificationStore.danger('Error rejecting leave: ' + err.message);
+          modalSubmit.disabled = false;
+        }
+      };
+      modalSubmit.addEventListener('click', handleConfirmReject);
+      lifecycle.onCleanup(() => modalSubmit.removeEventListener('click', handleConfirmReject));
+    }
+
+    // 3. Approve Away Pass
+    const awayApproveBtns = container.querySelectorAll('.btn-sa-away-approve');
+    const awayOverlay = container.querySelector('#sa-away-approve-overlay');
+    const awayConfirm = container.querySelector('#sa-away-confirm');
+    const awayClose = container.querySelector('#sa-away-close');
+    const awayCancel = container.querySelector('#sa-away-cancel');
+    const awayDurationInput = container.querySelector('#sa-away-duration');
+    const awayHint = container.querySelector('#sa-away-hint');
+
+    awayApproveBtns.forEach(btn => {
+      const awayId = btn.getAttribute('data-id');
+      const handleOpenAwayApprove = () => {
+        if (awayConfirm) awayConfirm.dataset.awayId = awayId;
+        if (awayDurationInput) awayDurationInput.value = '30';
+        if (awayHint) awayHint.textContent = 'Employee will have 30 min + 10 min grace = 40 min total.';
+        if (awayOverlay) {
+          awayOverlay.style.display = 'flex';
+          awayOverlay.setAttribute('aria-hidden', 'false');
+        }
+      };
+      btn.addEventListener('click', handleOpenAwayApprove);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handleOpenAwayApprove));
+    });
+
+    const closeAwayOverlay = () => {
+      if (awayOverlay) {
+        awayOverlay.style.display = 'none';
+        awayOverlay.setAttribute('aria-hidden', 'true');
+      }
+    };
+
+    if (awayClose) {
+      awayClose.addEventListener('click', closeAwayOverlay);
+      lifecycle.onCleanup(() => awayClose.removeEventListener('click', closeAwayOverlay));
+    }
+    if (awayCancel) {
+      awayCancel.addEventListener('click', closeAwayOverlay);
+      lifecycle.onCleanup(() => awayCancel.removeEventListener('click', closeAwayOverlay));
+    }
+
+    if (awayDurationInput) {
+      const handleDurationInput = () => {
+        const val = parseInt(awayDurationInput.value || '30');
+        if (awayHint) {
+          awayHint.textContent = `Employee will have ${val} min + 10 min grace = ${val + 10} min total.`;
+        }
+      };
+      awayDurationInput.addEventListener('input', handleDurationInput);
+      lifecycle.onCleanup(() => awayDurationInput.removeEventListener('input', handleDurationInput));
+    }
+
+    if (awayConfirm) {
+      const handleAwayConfirm = async () => {
+        const awayId = awayConfirm.dataset.awayId;
+        const duration = parseInt(awayDurationInput?.value || '30');
+        if (!duration || duration < 1) {
+          notificationStore.danger('Please enter a valid duration.');
+          return;
+        }
+        awayConfirm.disabled = true;
+        try {
+          const res = await apiClient.put(`/api/v1/away-permission/${awayId}/approve`, { durationMins: duration });
+          if (res?.success) {
+            notificationStore.success(`Away pass approved for ${duration} minutes.`);
+            closeAwayOverlay();
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to approve away pass.');
+            awayConfirm.disabled = false;
+          }
+        } catch (err) {
+          notificationStore.danger('Error approving away pass: ' + err.message);
+          awayConfirm.disabled = false;
+        }
+      };
+      awayConfirm.addEventListener('click', handleAwayConfirm);
+      lifecycle.onCleanup(() => awayConfirm.removeEventListener('click', handleAwayConfirm));
+    }
+
+    // 4. Deny Away Pass
+    const awayRejectBtns = container.querySelectorAll('.btn-sa-away-reject');
+    awayRejectBtns.forEach(btn => {
+      const awayId = btn.getAttribute('data-id');
+      const handleAwayReject = async () => {
+        btn.disabled = true;
+        try {
+          const res = await apiClient.put(`/api/v1/away-permission/${awayId}/deny`, {});
+          if (res?.success) {
+            notificationStore.success('Away pass request denied.');
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to deny away pass.');
+            btn.disabled = false;
+          }
+        } catch (err) {
+          notificationStore.danger('Error denying away pass: ' + err.message);
+          btn.disabled = false;
+        }
+      };
+      btn.addEventListener('click', handleAwayReject);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handleAwayReject));
+    });
+  }
 
   _loadCss() {
     const cssId = 'store-admin-dashboard-page-css';

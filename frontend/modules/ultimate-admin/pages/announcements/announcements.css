@@ -1,0 +1,730 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Ultimate Admin Module
+ * File              : announcements.css
+ * Path              : frontend/modules/ultimate-admin/pages/announcements/announcements.css
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Ultimate Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+/* ============================================================
+   PLUS33 Coffee ERP | Ultimate Admin | Broadcast Announcements
+   File    : announcements.css
+   Purpose : Styles for ultimate admin enterprise broadcast bulletins page
+   ============================================================ */
+
+/* ── Page Layout ─────────────────────────────────────────── */
+.ult-ann-page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+/* ── Page Header ─────────────────────────────────────────── */
+.ult-ann-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  border-bottom: 1px solid rgba(217, 70, 239, 0.15);
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.ult-ann-header__title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: 800;
+  font-size: 1.65rem;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.ult-ann-header__icon {
+  color: #d946ef;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(217, 70, 239, 0.4));
+}
+
+.ult-ann-header__subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.ult-ann-header__right-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ult-ann-live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #d946ef;
+  background: rgba(217, 70, 239, 0.12);
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(217, 70, 239, 0.30);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+/* ── Policy Banner Bar (Matching User Screenshot) ───────── */
+.ult-ann-policy-bar {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: var(--spacing-xl);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.ult-ann-policy-bar:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(217, 70, 239, 0.4);
+  transform: translateY(-1px);
+}
+
+.ult-ann-policy-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ult-ann-policy-bar__icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: rgba(217, 70, 239, 0.08);
+  border: 1px solid rgba(217, 70, 239, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d946ef;
+  flex-shrink: 0;
+}
+
+.ult-ann-policy-bar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ult-ann-policy-bar__title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.ult-ann-policy-bar__sub {
+  font-size: 0.73rem;
+  color: #a1a1aa;
+  font-weight: 500;
+}
+
+.ult-ann-policy-bar__arrow {
+  color: #71717a;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.ult-ann-policy-bar:hover .ult-ann-policy-bar__arrow {
+  color: #d946ef;
+  transform: translateX(3px);
+}
+
+/* ── Policy Modal Pop-Up ─────────────────────────────────── */
+.ult-ann-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.ult-ann-modal-card {
+  background: #171717;
+  border: 1px solid rgba(217, 70, 239, 0.25);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 540px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  color: #fff;
+  position: relative;
+  animation: scaleUp 0.2s ease-out;
+}
+
+.ult-ann-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 14px;
+}
+
+.ult-ann-modal-title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ult-ann-modal-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ult-ann-modal-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.ult-ann-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Color & Tag Legend in Policy Modal */
+.ann-color-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.ann-role-badge-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+}
+
+.ann-tag-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ann-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.73rem;
+  color: #a1a1aa;
+}
+
+/* Priority Badge Color Tag Themes */
+.ult-ann-bulletin__priority-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+}
+
+.priority-badge--critical,
+.ann-tag-pill--critical {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+.priority-badge--bulletin,
+.ann-tag-pill--bulletin {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: #a855f7 !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+}
+
+.priority-badge--notice,
+.ann-tag-pill--notice {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+}
+
+.ult-ann-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d946ef;
+  box-shadow: 0 0 8px #d946ef;
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+/* Ultimate Admin Audit Toggle */
+.ult-ann-audit-toggle-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.ult-ann-audit-toggle-btn:hover,
+.ult-ann-audit-toggle-btn--active {
+  background: #ef4444;
+  color: #000;
+}
+
+/* ── Two-Column Grid ─────────────────────────────────────── */
+.ult-ann-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .ult-ann-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.ult-ann-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.ult-ann-card__title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ult-ann-card__icon {
+  color: #d946ef;
+  flex-shrink: 0;
+}
+
+/* ── Feed List ───────────────────────────────────────────── */
+.ult-ann-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.ult-ann-empty-state {
+  text-align: center;
+  padding: 40px var(--spacing-md);
+  border: 1px dashed rgba(217, 70, 239, 0.15);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ult-ann-empty-state__icon {
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.ult-ann-empty-state__title {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 600;
+}
+
+.ult-ann-empty-state__desc {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
+/* ── Bulletin Item ───────────────────────────────────────── */
+.ult-ann-bulletin {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  position: relative;
+  border-left: 4px solid #d946ef;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ult-ann-bulletin:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ult-ann-bulletin--deleted {
+  opacity: 0.65;
+  border-left-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.04) !important;
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+}
+
+.ult-ann-bulletin--deleted .ult-ann-bulletin__title {
+  text-decoration: line-through;
+  color: #f87171;
+}
+
+.ult-ann-bulletin__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.ult-ann-bulletin__badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.ult-ann-bulletin__priority-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+.ult-ann-bulletin__role-badge {
+  display: inline-block;
+  font-size: 0.60rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+}
+
+.ult-ann-bulletin__deleted-badge {
+  display: inline-block;
+  font-size: 0.60rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.ult-ann-bulletin__title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.ult-ann-bulletin__content {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 4px 0 0;
+}
+
+.ult-ann-bulletin__footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  margin-top: 4px;
+  padding-top: var(--spacing-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ult-ann-btn-delete {
+  background: #ff6b6b;
+  border: none;
+  color: #000;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.ult-ann-btn-delete:hover {
+  background: #ff5252;
+  color: #fff;
+}
+
+/* ── Attachment Renderers ────────────────────────────────── */
+
+.ult-ann-attach-video {
+  margin: 8px 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  max-height: 250px;
+  background: #000;
+}
+
+.ult-ann-attach-video video {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+}
+
+.ult-ann-attach-audio {
+  margin: 8px 0;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ult-ann-attach-audio__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ult-ann-attach-audio__label {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ult-ann-attach-audio audio {
+  width: 100%;
+  height: 36px;
+}
+
+.ult-ann-attach-pdf,
+.ult-ann-attach-doc {
+  margin: 8px 0;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.ult-ann-attach-pdf__info,
+.ult-ann-attach-doc__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ult-ann-attach-pdf__label,
+.ult-ann-attach-doc__label {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ult-ann-attach-pdf__open,
+.ult-ann-attach-doc__open {
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid #d946ef;
+  background: transparent;
+  color: #d946ef;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.ult-ann-attach-pdf__open:hover,
+.ult-ann-attach-doc__open:hover {
+  background: rgba(217, 70, 239, 0.15);
+}
+
+.ult-ann-attach-img {
+  margin: 8px 0;
+  max-height: 200px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.ult-ann-attach-img img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 200px;
+}
+
+/* ── Compose Form ────────────────────────────────────────── */
+.ult-ann-compose-col .ult-ann-card {
+  text-align: left;
+}
+
+.ult-ann-compose-desc {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.ult-ann-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.ult-ann-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ult-ann-form-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ult-ann-form-optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+.ult-ann-form-input {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.20);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ult-ann-form-input:focus {
+  border-color: #d946ef;
+}
+
+.ult-ann-form-textarea {
+  resize: none;
+  line-height: 1.45;
+}
+
+.ult-ann-form-file {
+  cursor: pointer;
+}
+
+.ult-ann-submit-btn {
+  background: #d946ef;
+  color: #000;
+  font-weight: 800;
+  font-size: 0.84rem;
+  padding: 11px 22px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: var(--spacing-xs);
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  box-shadow: 0 0 16px rgba(217, 70, 239, 0.35);
+}
+
+.ult-ann-submit-btn:hover {
+  opacity: 0.92;
+}
+
+.ult-ann-submit-btn:active {
+  transform: scale(0.98);
+}
+
+.ult-ann-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

@@ -1,323 +1,444 @@
 ﻿<!--
- ******************************************************************************
+/******************************************************************************
  * Project           : PLUS33 Coffee ERP
- * Module            : Store Employee â€” Barista Roster Profile
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Employee Module
  * File              : profile.html
  * Path              : frontend/modules/store-employee/pages/profile-employee/profile.html
- * Purpose           : HTML template for the Employee Profile page (tabbed layout)
- * Version           : 3.0.0
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Store Employee Module
+ * Version           : 1.0.0
  *
- * Related JS        : profile.js
- * Related CSS       : profile.css
- *
- * Tabs
+ * Description
  * ---------------------------------------------------------------------------
- *  Tab 1 â€” My Profile   : Avatar, info grid, edit form
- *  Tab 2 â€” Documents    : 11 onboarding document category cards
- *  Tab 3 â€” Payslips     : Recent payslip summary with link to full page
- ******************************************************************************
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
 -->
+<!-- ============================================================
+     PLUS33 Coffee ERP | Store Employee / Barista Profile Page
+     Module  : Store Employee — Employee Profile
+     File    : profile.html
+     Path    : frontend/modules/store-employee/pages/profile-employee/profile.html
+     Purpose : High-performance 4-row glassmorphic dashboard with Country Banking
+     ============================================================ -->
+<div class="emp-profile-page animate-fade-in" style="display: flex; flex-direction: column; gap: 20px; padding: 24px; max-width: 1400px; margin: 0 auto; color: #f4f4f5;">
 
-<div class="workspace-container animate-fade-in">
+  <!-- Hero Header Banner Card -->
+  <div class="emp-profile-hero" style="position: relative; border-radius: 16px; background: rgba(18, 18, 20, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); padding: 24px; box-shadow: 0 12px 32px rgba(0,0,0,0.4); overflow: hidden;">
+    <div style="position: absolute; top:0; left:0; right:0; height:100%; background: radial-gradient(circle at 80% 20%, rgba(16,185,129,0.15) 0%, transparent 60%); pointer-events: none;"></div>
+    
+    <div style="position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="position: relative; cursor: pointer;" id="avatar-container-box" title="Change Profile Avatar">
+          <img id="emp-avatar-img" src="imgs/female-avatar.jpg" alt="Barista Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(16, 185, 129, 0.4); box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);">
+          <button type="button" id="btn-edit-avatar-pencil" title="Change Profile Picture" style="position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; border-radius: 50%; background: #10b981; border: 2px solid #121214; color: #121214; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.5); transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.15)';" onmouseout="this.style.transform='scale(1)';">
+            ✏️
+          </button>
+          <input type="file" id="input-emp-avatar-file" accept="image/*" style="display: none;">
+        </div>
 
-  <!-- ===== PAGE HEADER ===== -->
-  <div class="profile-header-container">
-    <div>
-      <h2 class="profile-title">Barista Roster Profile</h2>
-      <span class="profile-subtitle">Manage your employee profile details, onboarding records and access password</span>
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+            <h2 id="emp-user-fullname" style="font-size: 1.4rem; font-weight: 800; color: #ffffff; margin: 0;">Neha Sharma</h2>
+            <span style="font-size: 0.62rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.4);">BARISTA / EMPLOYEE</span>
+          </div>
+          <p id="emp-user-email" style="font-size: 0.85rem; color: #a1a1aa; margin: 0 0 8px 0;">neha.sharma@plus33.coffee</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <span id="emp-country-code-badge" style="font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.4); color: #60a5fa; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+              🇮🇳 IN (+91)
+            </span>
+            <span id="emp-scope-badge" style="font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #d4d4d8;">
+              📍 Green Park Café, City Center
+            </span>
+            <span id="emp-docs-verified-badge" style="font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.35); color: #f59e0b; font-weight: 600;">
+              ⏳ Onboarding Documents Pending
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 10px 16px; min-width: 95px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+          <span style="font-size: 1.15rem; font-weight: 800; color: #ffffff;" id="stat-emp-hours">164 hrs</span>
+          <span style="font-size: 0.62rem; font-weight: 600; color: #a1a1aa; text-transform: uppercase;">Hours Worked</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 10px 16px; min-width: 95px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+          <span style="font-size: 1.15rem; font-weight: 800; color: #ffffff;" id="stat-emp-certs">5 Certs</span>
+          <span style="font-size: 0.62rem; font-weight: 600; color: #a1a1aa; text-transform: uppercase;">Training</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 10px 16px; min-width: 95px; border-radius: 10px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);">
+          <span style="font-size: 1.15rem; font-weight: 800; color: #10b981;" id="stat-emp-attendance">98.5%</span>
+          <span style="font-size: 0.62rem; font-weight: 600; color: #a1a1aa; text-transform: uppercase;">Attendance</span>
+        </div>
+      </div>
     </div>
-    <span class="badge-status-container">
-      <span class="pulse-indicator"></span>
-      DB BACKED
-    </span>
   </div>
 
-  <!-- ===== TAB NAVIGATION ===== -->
-  <div class="profile-tabs-nav">
-    <button class="profile-tab-btn active" data-tab="profile" id="tab-btn-profile">
-      <i data-lucide="user" aria-hidden="true"></i>
-      <span>My Profile</span>
-    </button>
-    <button class="profile-tab-btn" data-tab="documents" id="tab-btn-documents">
-      <i data-lucide="folder-open" aria-hidden="true"></i>
-      <span>Documents</span>
-    </button>
-    <button class="profile-tab-btn" data-tab="payslips" id="tab-btn-payslips">
-      <i data-lucide="banknote" aria-hidden="true"></i>
-      <span>Payslips</span>
-    </button>
-  </div>
-
-  <!-- ===== TAB 1: MY PROFILE ===== -->
-  <div id="tab-profile" class="profile-tab-pane active">
-    <div class="profile-grid">
-
-      <!-- Left Column: Profile Card & Information Grid -->
-      <div class="card glass profile-card">
-        <div class="avatar-wrapper">
-          <img id="profile-card-image" src="" alt="Avatar" />
-          <div class="avatar-status-dot"></div>
-        </div>
-        
-        <div class="profile-user-summary">
-          <h3 id="profile-display-name">Loading...</h3>
-          <div class="profile-store-row">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span id="profile-display-store">...</span>
+  <!-- ROW 1: Two Column Layout (Employee Info Left + Security Right) -->
+  <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px;" class="profile-row-1">
+    
+    <!-- Personal, Employment, Salary & Country Banking Card -->
+    <div style="border-radius: 16px; background: rgba(18, 18, 20, 0.75); border: 1px solid rgba(255,255,255,0.08); padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+      
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 1.1rem;">
+            👤
           </div>
-          <div class="profile-badges">
-            <span class="badge-role" id="profile-display-role">BARISTA</span>
-            <span class="badge-code" id="profile-display-code">ID: ...</span>
+          <div>
+            <h3 style="font-size: 0.98rem; font-weight: 800; color: #ffffff; margin: 0;">Employee Information</h3>
+            <span style="font-size: 0.68rem; color: #a1a1aa;">Personal, Compensation &amp; Country Banking Details</span>
           </div>
         </div>
 
-        <!-- Info Details Grid -->
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Employee Name</span>
-            <span class="info-value" id="info-name">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Employee ID</span>
-            <span class="info-value" id="info-code">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Worker Type</span>
-            <span class="info-value" id="info-designation">Barista</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Email Address</span>
-            <span class="info-value text-break" id="info-email">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Mobile Number</span>
-            <span class="info-value" id="info-phone">...</span>
-          </div>
-          <div class="info-item full-width">
-            <span class="info-label">Contact Address</span>
-            <span class="info-value" id="info-address">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Department</span>
-            <span class="info-value" id="info-department">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Working Type</span>
-            <span class="info-value" id="info-working-type">Permanent</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Salary Per Hour</span>
-            <span class="info-value highlight-salary" id="info-salary">â‚¬0.00/hr</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Joined Date</span>
-            <span class="info-value" id="info-joined-date">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Assigned Store</span>
-            <span class="info-value" id="info-store">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Store Type</span>
-            <span class="info-value highlight-text" id="info-store-type">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Store Region</span>
-            <span class="info-value" id="info-region">...</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Country</span>
-            <span class="info-value" id="info-country">...</span>
-          </div>
-        </div>
-
-        <button type="button" class="btn btn-secondary" id="btn-toggle-edit-mode">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          Edit Profile
+        <button type="button" id="btn-toggle-edit-personal" style="padding: 6px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #d4d4d8; font-size: 0.74rem; font-weight: 700; cursor: pointer;">
+          ✏️ Edit Details
         </button>
       </div>
 
-      <!-- Edit Profile Card (Hidden by default) -->
-      <div class="card glass edit-card" id="edit-profile-card" style="display: none;">
-        <h3 class="card-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          Edit Barista Profile Details
-        </h3>
+      <form id="form-emp-personal-info" style="display: flex; flex-direction: column; gap: 14px;">
         
-        <form id="form-edit-profile">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="input-profile-name">Full Name</label>
-              <input type="text" id="input-profile-name" required />
-            </div>
-            <div class="form-group">
-              <label for="input-profile-email">Email Address</label>
-              <input type="email" id="input-profile-email" required />
+        <!-- Row 1: Identity -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">First Name</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">👤</span>
+              <input type="text" id="input-emp-firstname" value="" placeholder="First Name" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="input-profile-phone">Mobile Number</label>
-              <input type="text" id="input-profile-phone" placeholder="Enter mobile number" />
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Last Name</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">👤</span>
+              <input type="text" id="input-emp-lastname" value="" placeholder="Last Name" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
             </div>
-            <div class="form-group">
-              <label for="select-profile-gender">Gender</label>
-              <select id="select-profile-gender">
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+          </div>
+        </div>
+
+        <!-- Row 2: Contact -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Email Address</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">✉️</span>
+              <input type="email" id="input-emp-email" value="" placeholder="Email Address" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Contact Phone</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">📞</span>
+              <input type="tel" id="input-emp-phone" value="" placeholder="Phone Number" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Staff & Role -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Employee Staff ID</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">🪪</span>
+              <input type="text" id="input-emp-empid" value="" placeholder="Staff ID" disabled readonly style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Role Title</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">👔</span>
+              <input type="text" id="input-emp-designation" value="" placeholder="Designation / Role" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4: Joined Date, Base Salary & Gender -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Joined Date</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">📅</span>
+              <input type="text" id="input-emp-joined" value="" placeholder="Joined Date" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Base Salary Rate</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">💵</span>
+              <input type="text" id="input-emp-salary" value="" placeholder="Base Salary" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Gender Avatar</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">🚻</span>
+              <select id="input-emp-gender" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.82rem; width: 100%; outline: none; cursor: pointer;">
+                <option value="Female" style="background: #18181b; color: #fff;">Female (👩 Default)</option>
+                <option value="Male" style="background: #18181b; color: #fff;">Male (👨 Default)</option>
+                <option value="Other" style="background: #18181b; color: #fff;">Other</option>
               </select>
             </div>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="select-profile-avatar-type">Profile Picture Source</label>
-            <select id="select-profile-avatar-type">
-              <option value="imgs/male-avatar.png">Default Avatar (Male)</option>
-              <option value="imgs/female-avatar.png">Default Avatar (Female)</option>
-              <option value="custom">Upload Local Image File</option>
-            </select>
-          </div>
+        <!-- Row 5: Country-Specific Banking Details Header -->
+        <div style="margin-top: 4px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: #10b981; text-transform: uppercase; letter-spacing: 0.4px;">
+            🏦 Country Direct Deposit Bank Details
+          </span>
+          <span id="lbl-emp-bank-country" style="font-size: 0.65rem; font-weight: 800; color: #a1a1aa;">🇮🇳 India Standard</span>
+        </div>
 
-          <div class="form-group file-upload-group" id="avatar-file-upload-container" style="display: none;">
-            <label>Upload Custom Photo</label>
-            <div class="file-uploader-box" id="avatar-drop-zone">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-              <span class="file-info" id="avatar-file-name">Click or Drag image file here (Max 10MB)</span>
-              <input type="file" id="input-profile-file" accept="image/*" style="display: none;" />
+        <!-- Row 6: Bank Name & Account / IBAN -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Bank Name</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">🏛️</span>
+              <input type="text" id="input-emp-bankname" value="" placeholder="Bank Name" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary" id="btn-save-profile">Save Profile Changes</button>
-        </form>
-      </div>
-
-      <!-- Security: Update Password Card -->
-      <div class="card glass security-card">
-        <h3 class="card-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Security &amp; Password Credentials
-        </h3>
-        <span class="card-subtitle">Keep your employee account keys updated periodically</span>
-
-        <form id="form-change-password">
-          <div class="form-group">
-            <label for="input-password-current">Current Password</label>
-            <input type="password" id="input-password-current" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="input-password-new">New Password</label>
-              <input type="password" id="input-password-new" required placeholder="Min 6 chars" />
-            </div>
-            <div class="form-group">
-              <label for="input-password-confirm">Confirm New Password</label>
-              <input type="password" id="input-password-confirm" required placeholder="Repeat new password" />
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;" id="lbl-bank-acc-num">Account Number / IBAN</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">💳</span>
+              <input type="text" id="input-emp-bankacc" value="" placeholder="Account Number / IBAN" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
             </div>
           </div>
-          <button type="submit" class="btn btn-primary" id="btn-submit-password">Update Security Password</button>
-        </form>
-      </div>
+        </div>
+
+        <!-- Row 7: IFSC / BIC / SWIFT & Branch / WPS ID -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;" id="lbl-bank-ifsc-code">IFSC / BIC / SWIFT Code</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">🔍</span>
+              <input type="text" id="input-emp-ifsc" value="" placeholder="IFSC / BIC / SWIFT Code" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;" id="lbl-bank-branch-wps">Branch Location / WPS Routing ID</label>
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: 0.9rem; color: #10b981;">📍</span>
+              <input type="text" id="input-emp-branch" value="" placeholder="Branch / WPS ID" disabled style="background: transparent; border: none; color: #ffffff; font-size: 0.85rem; width: 100%; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <div id="emp-personal-actions" style="display: none; justify-content: flex-end; gap: 10px; margin-top: 6px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);">
+          <button type="button" id="btn-cancel-personal" style="padding: 8px 16px; border-radius: 8px; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; font-size: 0.8rem; cursor: pointer;">Cancel</button>
+          <button type="submit" id="btn-save-personal" style="padding: 8px 18px; border-radius: 8px; background: #10b981; border: none; color: #121214; font-size: 0.8rem; font-weight: 800; cursor: pointer;">Save Changes</button>
+        </div>
+      </form>
 
     </div>
-  </div>
-  <!-- END TAB 1 -->
 
-  <!-- ===== TAB 2: DOCUMENTS ===== -->
-  <!-- Content is rendered dynamically by profile.js based on the employee's country -->
-  <div id="tab-documents" class="profile-tab-pane">
-    <div id="docs-dynamic-container">
-      <div class="docs-loading-state">
-        <div class="docs-loading-spinner"></div>
-        <p>Loading document requirements for your country...</p>
-      </div>
-    </div>
-  </div>
-  <!-- END TAB 2 -->
-  <!-- ===== TAB 3: PAYSLIPS ===== -->
-  <div id="tab-payslips" class="profile-tab-pane">
-
-    <!-- Payslip KPI Summary Row -->
-    <div class="payslip-kpi-row">
-      <div class="payslip-kpi-card">
-        <div class="payslip-kpi-icon payslip-kpi-icon--green">
-          <i data-lucide="banknote" aria-hidden="true"></i>
+    <!-- Security & Account Card -->
+    <div style="border-radius: 16px; background: rgba(18, 18, 20, 0.75); border: 1px solid rgba(255,255,255,0.08); padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+      
+      <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 1.1rem;">
+          🛡️
         </div>
-        <div class="payslip-kpi-meta">
-          <div class="payslip-kpi-value" id="ps-kpi-net-salary">â€”</div>
-          <div class="payslip-kpi-label">Net Salary (Latest)</div>
-        </div>
-      </div>
-      <div class="payslip-kpi-card">
-        <div class="payslip-kpi-icon payslip-kpi-icon--normal">
-          <i data-lucide="wallet" aria-hidden="true"></i>
-        </div>
-        <div class="payslip-kpi-meta">
-          <div class="payslip-kpi-value" id="ps-kpi-gross">â€”</div>
-          <div class="payslip-kpi-label">Gross Earnings</div>
-        </div>
-      </div>
-      <div class="payslip-kpi-card">
-        <div class="payslip-kpi-icon payslip-kpi-icon--red">
-          <i data-lucide="minus-circle" aria-hidden="true"></i>
-        </div>
-        <div class="payslip-kpi-meta">
-          <div class="payslip-kpi-value" id="ps-kpi-deductions">â€”</div>
-          <div class="payslip-kpi-label">Deductions &amp; Taxes</div>
-        </div>
-      </div>
-      <div class="payslip-kpi-card">
-        <div class="payslip-kpi-icon payslip-kpi-icon--blue">
-          <i data-lucide="calendar-check" aria-hidden="true"></i>
-        </div>
-        <div class="payslip-kpi-meta">
-          <div class="payslip-kpi-value" id="ps-kpi-last-date">â€”</div>
-          <div class="payslip-kpi-label">Last Payment Date</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Payslips Table -->
-    <div class="card glass payslip-history-card">
-      <div class="card-header-row">
         <div>
-          <h3 class="card-title">
-            <i data-lucide="receipt" aria-hidden="true" class="accent-icon"></i>
-            Recent Payslip History
-          </h3>
-          <span class="card-subtitle">Last 6 months of salary disbursements</span>
+          <h3 style="font-size: 0.98rem; font-weight: 800; color: #ffffff; margin: 0;">Security &amp; Account</h3>
+          <span style="font-size: 0.68rem; color: #a1a1aa;">Manage your login credentials</span>
         </div>
-        <button type="button" class="btn btn-secondary" id="btn-goto-payslips" style="font-size:0.72rem; padding: 8px 14px;">
-          <i data-lucide="external-link" aria-hidden="true"></i>
-          View All Payslips
-        </button>
       </div>
 
-      <div class="payslip-table-wrap">
-        <table class="payslip-mini-table">
-          <thead>
-            <tr>
-              <th>Pay Period</th>
-              <th>Gross (â‚¬)</th>
-              <th>Deductions (â‚¬)</th>
-              <th>Net Pay (â‚¬)</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="payslip-mini-tbody">
-            <tr>
-              <td colspan="6" class="payslip-loading-row">
-                <span class="payslip-loading-text">Loading payslip data...</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <form id="form-emp-change-password" style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Current Password</label>
+          <input type="password" id="input-emp-curr-password" placeholder="••••••••••••" required style="padding: 10px 12px; border-radius: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; font-size: 0.85rem; outline: none;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">New Password</label>
+            <input type="password" id="input-emp-new-password" placeholder="Minimum 8 chars" required style="padding: 10px 12px; border-radius: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; font-size: 0.85rem; outline: none;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: #a1a1aa; text-transform: uppercase;">Confirm Password</label>
+            <input type="password" id="input-emp-confirm-password" placeholder="Repeat new password" required style="padding: 10px 12px; border-radius: 8px; background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; font-size: 0.85rem; outline: none;">
+          </div>
+        </div>
+
+        <button type="submit" id="btn-emp-update-password" style="padding: 12px; border-radius: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #ffffff; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px; box-shadow: 0 4px 14px rgba(16,185,129,0.3);">
+          🔒 Update Security Credentials
+        </button>
+      </form>
+
+    </div>
+
+  </div>
+
+  <!-- ROW 2: 4 Colored Glassmorphic Feature Cards (4-Column Grid) -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;" class="profile-row-2">
+    
+    <!-- Card 1: Store Assignment (Green Glass) -->
+    <div style="border-radius: 14px; background: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.15) 0%, rgba(18, 18, 20, 0.85) 70%); border: 1px solid rgba(16, 185, 129, 0.3); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <span style="font-size: 1.3rem;">☕</span>
+          <div>
+            <h4 style="font-size: 0.88rem; font-weight: 800; color: #ffffff; margin: 0;">Store Assignment</h4>
+            <span style="font-size: 0.65rem; color: #10b981;">Work Location</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.75rem;">
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Primary Store</span>
+            <strong style="color: #ffffff;">Green Park Café, City Center</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Supervisor</span>
+            <strong style="color: #ffffff;">Rohan Sharma (SUPV-70942)</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Status</span>
+            <strong style="color: #10b981;">Full-Time Permanent Barista</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Verification Hub (Amber Glass) -->
+    <div style="border-radius: 14px; background: radial-gradient(circle at 80% 20%, rgba(201, 164, 106, 0.15) 0%, rgba(18, 18, 20, 0.85) 70%); border: 1px solid rgba(201, 164, 106, 0.3); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <span style="font-size: 1.3rem;">📜</span>
+          <div>
+            <h4 style="font-size: 0.88rem; font-weight: 800; color: #ffffff; margin: 0;">Verification Documents</h4>
+            <span style="font-size: 0.65rem; color: #c9a46a;">Compliance Overview</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.75rem;">
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Compliance Standard</span>
+            <strong style="color: #c9a46a;">Employee Onboarding (12 Cat)</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Verification</span>
+            <strong style="color: #10b981;">Verified Active</strong>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" onclick="document.querySelector('.doc-hub-grid-wrapper')?.scrollIntoView({behavior:'smooth'});" style="padding: 8px; border-radius: 8px; background: rgba(201,164,106,0.15); border: 1px solid rgba(201,164,106,0.4); color: #c9a46a; font-size: 0.75rem; font-weight: 800; cursor: pointer;">
+        Go to Verification Hub
+      </button>
+    </div>
+
+    <!-- Card 3: Training & Certs (Cyan Glass) -->
+    <div style="border-radius: 14px; background: radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, rgba(18, 18, 20, 0.85) 70%); border: 1px solid rgba(6, 182, 212, 0.3); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <span style="font-size: 1.3rem;">🎓</span>
+          <div>
+            <h4 style="font-size: 0.88rem; font-weight: 800; color: #ffffff; margin: 0;">Barista Training</h4>
+            <span style="font-size: 0.65rem; color: #06b6d4;">Certifications</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.75rem;">
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Certificates Earned</span>
+            <strong style="color: #ffffff;">5 Certified Modules</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Espresso Calibration</span>
+            <strong style="color: #10b981;">Passed Level-3</strong>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" style="padding: 8px; border-radius: 8px; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: #06b6d4; font-size: 0.75rem; font-weight: 800; cursor: pointer;">
+        View My Certificates
+      </button>
+    </div>
+
+    <!-- Card 4: Payslips & Schedule (Purple Glass) -->
+    <div style="border-radius: 14px; background: radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.15) 0%, rgba(18, 18, 20, 0.85) 70%); border: 1px solid rgba(168, 85, 247, 0.3); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <span style="font-size: 1.3rem;">💵</span>
+          <div>
+            <h4 style="font-size: 0.88rem; font-weight: 800; color: #ffffff; margin: 0;">Payroll &amp; Roster</h4>
+            <span style="font-size: 0.65rem; color: #c084fc;">Compensation</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.75rem;">
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Monthly Base Rate</span>
+            <strong style="color: #ffffff;">₹45,000 / month</strong>
+          </div>
+          <div>
+            <span style="font-size: 0.65rem; color: #a1a1aa; text-transform: uppercase; display: block;">Next Shift</span>
+            <strong style="color: #c084fc;">Tomorrow • 06:00 AM</strong>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" style="padding: 8px; border-radius: 8px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-size: 0.75rem; font-weight: 800; cursor: pointer;">
+        View Payslip History
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ROW 3: Full Width Compliance Document Categories Container -->
+  <div style="border-radius: 16px; background: rgba(18, 18, 20, 0.75); border: 1px solid rgba(255,255,255,0.08); padding: 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" class="profile-row-3">
+    <div id="emp-doc-hub-container"></div>
+  </div>
+
+  <!-- ROW 4: Bottom Quick Utility Links Bar (4-Column Footer Cards) -->
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;" class="profile-row-4">
+    
+    <div style="border-radius: 12px; background: rgba(24, 24, 27, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease;">
+      <span style="font-size: 1.3rem;">📅</span>
+      <div>
+        <strong style="font-size: 0.82rem; color: #ffffff; display: block;">My Shift Schedule</strong>
+        <span style="font-size: 0.68rem; color: #a1a1aa;">View upcoming roster</span>
+      </div>
+    </div>
+
+    <div style="border-radius: 12px; background: rgba(24, 24, 27, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease;">
+      <span style="font-size: 1.3rem;">📝</span>
+      <div>
+        <strong style="font-size: 0.82rem; color: #ffffff; display: block;">Leave Requests</strong>
+        <span style="font-size: 0.68rem; color: #a1a1aa;">Apply for time off</span>
+      </div>
+    </div>
+
+    <div style="border-radius: 12px; background: rgba(24, 24, 27, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease;">
+      <span style="font-size: 1.3rem;">💵</span>
+      <div>
+        <strong style="font-size: 0.82rem; color: #ffffff; display: block;">Payroll &amp; Payslips</strong>
+        <span style="font-size: 0.68rem; color: #a1a1aa;">Download payment stubs</span>
+      </div>
+    </div>
+
+    <div style="border-radius: 12px; background: rgba(24, 24, 27, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease;">
+      <span style="font-size: 1.3rem;">❓</span>
+      <div>
+        <strong style="font-size: 0.82rem; color: #ffffff; display: block;">HR Help &amp; Support</strong>
+        <span style="font-size: 0.68rem; color: #a1a1aa;">Get employee assistance</span>
       </div>
     </div>
 
   </div>
-  <!-- END TAB 3 -->
 
 </div>
+

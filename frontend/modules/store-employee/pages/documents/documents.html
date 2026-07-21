@@ -80,10 +80,17 @@
           <i data-lucide="upload-cloud" class="card-split-icon" aria-hidden="true"></i>
         </div>
 
-        <div class="upload-portal-body">
           <p class="upload-hint-para">
             Upload medical certificates, food safety credential cards, or training logs.
           </p>
+
+          <!-- Document Type Dropdown Selector -->
+          <div class="form-group document-select-group">
+            <label for="doc-type-selector" class="doc-input-label font-bold">Select Document Type</label>
+            <select id="doc-type-selector" class="doc-select-input">
+              <option value="" disabled selected>Choose a category...</option>
+            </select>
+          </div>
 
           <!-- Drag & Drop Zone -->
           <div id="doc-upload-dropzone" class="upload-dropzone-box" tabindex="0" role="button" aria-label="Upload document file selector">
@@ -132,12 +139,20 @@
         <i data-lucide="file-text"></i>
       </div>
       <div class="doc-text-meta">
-        <strong class="doc-name font-bold"></strong>
+        <div class="doc-title-row">
+          <strong class="doc-name font-bold"></strong>
+          <span class="doc-status-badge"></span>
+        </div>
         <span class="doc-subline text-muted"></span>
       </div>
     </div>
-    <button class="btn btn-secondary btn-doc-download" type="button">
-      <i data-lucide="download" aria-hidden="true"></i> Download
-    </button>
+    <div class="doc-actions-right">
+      <button class="btn btn-secondary btn-doc-download" type="button">
+        <i data-lucide="download" aria-hidden="true"></i> Download
+      </button>
+      <button class="btn btn-danger btn-doc-delete" type="button" style="display: none;">
+        <i data-lucide="trash-2" aria-hidden="true"></i> Delete
+      </button>
+    </div>
   </div>
 </template>

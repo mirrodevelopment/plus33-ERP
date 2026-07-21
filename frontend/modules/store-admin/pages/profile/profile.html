@@ -1,388 +1,191 @@
-<div class="workspace-container animate-fade-in">
-  <!-- Header -->
-  <div class="profile-header-container">
-    <div>
-      <h2 class="profile-title">Store Admin Profile</h2>
-      <span class="profile-subtitle">Manage your manager credentials and location configuration</span>
+﻿<!--
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Admin Module
+ * File              : profile.html
+ * Path              : frontend/modules/store-admin/pages/profile/profile.html
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Store Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+-->
+<!-- ============================================================
+     PLUS33 Coffee ERP | Store Manager / Admin Profile Page
+     Module  : Store Admin — My Profile
+     File    : profile.html
+     Path    : frontend/modules/store-admin/pages/profile/profile.html
+     Purpose : Glassmorphic 4-row profile page — Gold store-admin theme
+     ============================================================ -->
+<div class="store-profile-page animate-fade-in">
+
+  <!-- Hero Header Banner Card -->
+  <div class="store-profile-hero">
+    <div class="store-profile-hero__bg"></div>
+    <div class="store-profile-hero__content">
+
+      <!-- Avatar -->
+      <div class="store-profile-avatar-wrapper" id="avatar-container-box" title="Change Profile Avatar">
+        <div class="store-profile-avatar">
+          <img id="store-avatar-img" src="imgs/female-avatar.jpg" alt="Store Manager Avatar" class="store-profile-avatar__img">
+          <div class="store-profile-avatar__overlay"><span>📷</span><span>Change</span></div>
+        </div>
+        <button type="button" id="btn-edit-avatar-pencil" class="store-profile-avatar__pencil" title="Change Profile Picture">✏️</button>
+        <span class="store-profile-status-dot"></span>
+        <input type="file" id="input-store-avatar-file" accept="image/*" style="display:none;">
+      </div>
+
+      <!-- Info -->
+      <div class="store-profile-hero__meta">
+        <div class="store-profile-hero__title-row">
+          <h2 id="store-user-fullname" class="store-profile-hero__name">Store Manager</h2>
+          <span class="store-role-badge">STORE ADMIN</span>
+        </div>
+        <p id="store-user-email" class="store-profile-hero__email">storemanager@plus33.coffee</p>
+        <div class="store-profile-hero__tags">
+          <span id="store-country-code-badge" class="store-tag-pill">🇮🇳 IN (+91)</span>
+          <span id="store-scope-badge" class="store-tag-pill">☕ Green Park Café</span>
+          <span id="store-docs-verified-badge" class="store-tag-pill">⏳ Onboarding Documents Pending</span>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="store-profile-hero__stats">
+        <div class="store-stat-card"><span class="store-stat-card__val" id="stat-store-sales">—</span><span class="store-stat-card__lbl">Daily Sales</span></div>
+        <div class="store-stat-card"><span class="store-stat-card__val" id="stat-store-staff">—</span><span class="store-stat-card__lbl">Staff Count</span></div>
+        <div class="store-stat-card store-stat-card--accent"><span class="store-stat-card__val" id="stat-store-rating">—</span><span class="store-stat-card__lbl">Store Rating</span></div>
+      </div>
     </div>
-    <span class="badge-status-container">
-      <span class="pulse-indicator"></span>
-      DB BACKED
-    </span>
   </div>
 
-  <div class="profile-grid">
-    <!-- Left Column: Profile Card -->
-    <div class="card glass profile-card">
-      <div class="avatar-wrapper">
-        <img id="profile-card-image" src="" alt="Avatar" />
-        <div class="avatar-status-dot"></div>
+  <!-- ROW 1: Info Form + Security -->
+  <div class="store-profile-row-1">
+
+    <!-- Personal + Banking Info Card -->
+    <div class="store-profile-card">
+      <div class="store-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="store-profile-card__icon">👤</div>
+          <div>
+            <h3 class="store-profile-card__title">Store Manager Information</h3>
+            <span class="store-profile-card__sub">Personal, Compensation &amp; Banking Details</span>
+          </div>
+        </div>
+        <button type="button" id="btn-toggle-edit-personal" class="store-profile-btn-sec">✏️ Edit Details</button>
       </div>
-      
-      <div class="profile-user-summary">
-        <h3 id="profile-display-name">Loading...</h3>
-        <div class="profile-store-row">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span id="profile-display-store">...</span>
+      <form id="form-store-personal-info" class="store-profile-form">
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">First Name</label><div class="store-form-input-wrap"><span class="store-form-icon">👤</span><input type="text" id="input-store-firstname" placeholder="First Name" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Last Name</label><div class="store-form-input-wrap"><span class="store-form-icon">👤</span><input type="text" id="input-store-lastname" placeholder="Last Name" disabled class="store-form-input"></div></div>
         </div>
-        <div class="profile-badges">
-          <span class="badge-role" id="profile-display-role">STORE ADMIN</span>
-          <span class="badge-code" id="profile-display-code">ID: ...</span>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Email Address</label><div class="store-form-input-wrap"><span class="store-form-icon">✉️</span><input type="email" id="input-store-email" placeholder="Email Address" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Contact Phone</label><div class="store-form-input-wrap"><span class="store-form-icon">📞</span><input type="tel" id="input-store-phone" placeholder="Phone Number" disabled class="store-form-input"></div></div>
         </div>
-      </div>
-
-      <!-- Info Details Grid -->
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Manager Name</span>
-          <span class="info-value" id="info-name">...</span>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Staff ID</label><div class="store-form-input-wrap"><span class="store-form-icon">🪪</span><input type="text" id="input-store-empid" placeholder="Staff ID" disabled readonly class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Role Title</label><div class="store-form-input-wrap"><span class="store-form-icon">👔</span><input type="text" id="input-store-designation" placeholder="Designation / Role" disabled class="store-form-input"></div></div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Employee ID</span>
-          <span class="info-value" id="info-code">...</span>
+        <div class="store-form-row store-form-row--3">
+          <div class="store-form-group"><label class="store-form-label">Joined Date</label><div class="store-form-input-wrap"><span class="store-form-icon">📅</span><input type="text" id="input-store-joined" placeholder="Joined Date" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Base Salary Rate</label><div class="store-form-input-wrap"><span class="store-form-icon">💵</span><input type="text" id="input-store-salary" placeholder="Base Salary" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Gender Avatar</label><div class="store-form-input-wrap"><span class="store-form-icon">🚻</span><select id="input-store-gender" disabled class="store-form-input"><option value="Female">Female (👩 Default)</option><option value="Male">Male (👨 Default)</option><option value="Other">Other</option></select></div></div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Email Address</span>
-          <span class="info-value text-break" id="info-email">...</span>
+        <div class="store-banking-header">
+          <span>🏦 Country Direct Deposit Bank Details</span>
+          <span id="lbl-store-bank-country" class="store-banking-country">🇮🇳 India Standard</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Mobile Number</span>
-          <span class="info-value" id="info-phone">...</span>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Bank Name</label><div class="store-form-input-wrap"><span class="store-form-icon">🏛️</span><input type="text" id="input-store-bankname" placeholder="Bank Name" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label" id="lbl-bank-acc-num">Account Number / IBAN</label><div class="store-form-input-wrap"><span class="store-form-icon">💳</span><input type="text" id="input-store-bankacc" placeholder="Account Number / IBAN" disabled class="store-form-input"></div></div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Designation</span>
-          <span class="info-value" id="info-designation">Store Manager</span>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label" id="lbl-bank-ifsc-code">IFSC / BIC / SWIFT Code</label><div class="store-form-input-wrap"><span class="store-form-icon">🔍</span><input type="text" id="input-store-ifsc" placeholder="IFSC / BIC / SWIFT" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label" id="lbl-bank-branch-wps">Branch / WPS Routing ID</label><div class="store-form-input-wrap"><span class="store-form-icon">📍</span><input type="text" id="input-store-branch" placeholder="Branch / WPS ID" disabled class="store-form-input"></div></div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Department</span>
-          <span class="info-value" id="info-department">Store Operations</span>
+        <div id="store-personal-actions" class="store-form-actions" style="display:none;">
+          <button type="button" id="btn-cancel-personal" class="store-btn-ghost">Cancel</button>
+          <button type="submit" id="btn-save-personal" class="store-btn-primary">Save Changes</button>
         </div>
-        <div class="info-item">
-          <span class="info-label">Assigned Store</span>
-          <span class="info-value" id="info-store">...</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Store Type</span>
-          <span class="info-value highlight-text" id="info-store-type">...</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Store Region</span>
-          <span class="info-value" id="info-region">...</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Country</span>
-          <span class="info-value" id="info-country">...</span>
-        </div>
-        <div class="info-item full-width">
-          <span class="info-label">Contact Address</span>
-          <span class="info-value" id="info-address">...</span>
-        </div>
-      </div>
-
-      <button type="button" class="btn btn-secondary" id="btn-toggle-edit-mode">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-        Edit Profile
-      </button>
-    </div>
-
-    <!-- Edit Profile Card (Hidden by default) -->
-    <div class="card glass edit-card" id="edit-profile-card" style="display: none;">
-      <h3 class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-        Edit Store Manager Profile
-      </h3>
-      
-      <form id="form-edit-profile">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="input-profile-name">Full Name</label>
-            <input type="text" id="input-profile-name" required />
-          </div>
-          <div class="form-group">
-            <label for="input-profile-email">Email Address</label>
-            <input type="email" id="input-profile-email" required />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="input-profile-phone">Mobile Number</label>
-            <input type="text" id="input-profile-phone" placeholder="Enter mobile number" />
-          </div>
-          <div class="form-group">
-            <label for="select-profile-gender">Gender</label>
-            <select id="select-profile-gender">
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="select-profile-avatar-type">Profile Picture Source</label>
-          <select id="select-profile-avatar-type">
-            <option value="imgs/male-avatar.png">Default Avatar (Male)</option>
-            <option value="imgs/female-avatar.png">Default Avatar (Female)</option>
-            <option value="custom">Upload Local Image File</option>
-          </select>
-        </div>
-
-        <div class="form-group file-upload-group" id="avatar-file-upload-container" style="display: none;">
-          <label>Upload Custom Photo</label>
-          <div class="file-uploader-box" id="avatar-drop-zone">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-            <span class="file-info" id="avatar-file-name">Click or Drag image file here (Max 10MB)</span>
-            <input type="file" id="input-profile-file" accept="image/*" style="display: none;" />
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="btn-save-profile">Save Profile Changes</button>
       </form>
     </div>
 
-    <!-- Store Management Documents Card -->
-    <div class="card glass doc-card" style="margin-bottom: var(--spacing-xl); padding: var(--spacing-xl); border: 1px solid var(--border-color); background: var(--bg-card); border-radius: var(--radius-lg); text-align: left;">
-      <div class="card-header-row" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: var(--spacing-sm); margin-bottom: var(--spacing-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-        <div>
-          <h3 class="card-title" style="font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--text-primary); margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Store Operations & Compliance Documents
-          </h3>
-          <span class="card-subtitle" style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Upload and monitor operational permits, agreements and certificates</span>
-        </div>
-        <span class="badge-required" style="font-size: 0.65rem; font-weight: 700; color: var(--accent-primary); background: rgba(201, 164, 106, 0.1); padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 4px;">
-          Required
-        </span>
-      </div>
-
-      <div class="docs-list" style="display: flex; flex-direction: column; gap: var(--spacing-md);">
-        <!-- Franchise -->
-        <div class="doc-row" id="doc-row-franchise">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <!-- Security Card -->
+    <div class="store-profile-card">
+      <div class="store-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="store-profile-card__icon">🛡️</div>
+          <div>
+            <h3 class="store-profile-card__title">Security &amp; Account</h3>
+            <span class="store-profile-card__sub">Manage your login credentials</span>
           </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Franchise</h4>
-            <p class="doc-desc">Agreement, Approval Letter, SOP</p>
-            <div class="doc-status-info" id="status-franchise"></div>
-            <div class="progress-bar-container" id="progress-container-franchise" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-franchise"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-franchise">Uploading...</span><span id="progress-pct-franchise">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-franchise"></div>
-          <input type="file" id="input-doc-franchise" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Legal -->
-        <div class="doc-row" id="doc-row-legal">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Legal</h4>
-            <p class="doc-desc">Trade License, Shop Registration</p>
-            <div class="doc-status-info" id="status-legal"></div>
-            <div class="progress-bar-container" id="progress-container-legal" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-legal"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-legal">Uploading...</span><span id="progress-pct-legal">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-legal"></div>
-          <input type="file" id="input-doc-legal" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Food Safety -->
-        <div class="doc-row" id="doc-row-foodSafety">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Food Safety</h4>
-            <p class="doc-desc">Food License, Health Inspection</p>
-            <div class="doc-status-info" id="status-foodSafety"></div>
-            <div class="progress-bar-container" id="progress-container-foodSafety" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-foodSafety"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-foodSafety">Uploading...</span><span id="progress-pct-foodSafety">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-foodSafety"></div>
-          <input type="file" id="input-doc-foodSafety" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Property -->
-        <div class="doc-row" id="doc-row-property">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Property</h4>
-            <p class="doc-desc">Lease Agreement, Ownership Papers</p>
-            <div class="doc-status-info" id="status-property"></div>
-            <div class="progress-bar-container" id="progress-container-property" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-property"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-property">Uploading...</span><span id="progress-pct-property">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-property"></div>
-          <input type="file" id="input-doc-property" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Employees -->
-        <div class="doc-row" id="doc-row-employees">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Employees</h4>
-            <p class="doc-desc">Contracts, IDs, Training Certificates</p>
-            <div class="doc-status-info" id="status-employees"></div>
-            <div class="progress-bar-container" id="progress-container-employees" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-employees"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-employees">Uploading...</span><span id="progress-pct-employees">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-employees"></div>
-          <input type="file" id="input-doc-employees" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Finance -->
-        <div class="doc-row" id="doc-row-finance">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Finance</h4>
-            <p class="doc-desc">Invoices, Royalty Payments, Bank Documents</p>
-            <div class="doc-status-info" id="status-finance"></div>
-            <div class="progress-bar-container" id="progress-container-finance" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-finance"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-finance">Uploading...</span><span id="progress-pct-finance">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-finance"></div>
-          <input type="file" id="input-doc-finance" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Suppliers -->
-        <div class="doc-row" id="doc-row-suppliers">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Suppliers</h4>
-            <p class="doc-desc">Vendor Agreements, Purchase Orders</p>
-            <div class="doc-status-info" id="status-suppliers"></div>
-            <div class="progress-bar-container" id="progress-container-suppliers" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-suppliers"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-suppliers">Uploading...</span><span id="progress-pct-suppliers">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-suppliers"></div>
-          <input type="file" id="input-doc-suppliers" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Equipment -->
-        <div class="doc-row" id="doc-row-equipment">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Equipment</h4>
-            <p class="doc-desc">Warranty, AMC, Service Reports</p>
-            <div class="doc-status-info" id="status-equipment"></div>
-            <div class="progress-bar-container" id="progress-container-equipment" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-equipment"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-equipment">Uploading...</span><span id="progress-pct-equipment">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-equipment"></div>
-          <input type="file" id="input-doc-equipment" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Compliance -->
-        <div class="doc-row" id="doc-row-compliance">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Compliance</h4>
-            <p class="doc-desc">Fire, Electrical, Pest Control Certificates</p>
-            <div class="doc-status-info" id="status-compliance"></div>
-            <div class="progress-bar-container" id="progress-container-compliance" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-compliance"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-compliance">Uploading...</span><span id="progress-pct-compliance">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-compliance"></div>
-          <input type="file" id="input-doc-compliance" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Insurance -->
-        <div class="doc-row" id="doc-row-insurance">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 17v-5h6v5"/><path d="M9 9h6"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Insurance</h4>
-            <p class="doc-desc">Shop, Equipment, Employee Policies</p>
-            <div class="doc-status-info" id="status-insurance"></div>
-            <div class="progress-bar-container" id="progress-container-insurance" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-insurance"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-insurance">Uploading...</span><span id="progress-pct-insurance">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-insurance"></div>
-          <input type="file" id="input-doc-insurance" accept="image/*,application/pdf" style="display: none;" />
-        </div>
-
-        <!-- Operations -->
-        <div class="doc-row" id="doc-row-operations">
-          <div class="doc-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          </div>
-          <div class="doc-details">
-            <h4 class="doc-title">Operations</h4>
-            <p class="doc-desc">Checklists, Audit Reports, Incident Reports</p>
-            <div class="doc-status-info" id="status-operations"></div>
-            <div class="progress-bar-container" id="progress-container-operations" style="display: none;">
-              <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar-operations"></div></div>
-              <div class="progress-bar-labels"><span id="progress-text-operations">Uploading...</span><span id="progress-pct-operations">0%</span></div>
-            </div>
-          </div>
-          <div class="doc-actions" id="actions-operations"></div>
-          <input type="file" id="input-doc-operations" accept="image/*,application/pdf" style="display: none;" />
         </div>
       </div>
-    </div>
-
-    <!-- Security: Update Password Card -->
-    <div class="card glass security-card">
-      <h3 class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Security & Password Credentials
-      </h3>
-      <span class="card-subtitle">Keep your manager account keys updated periodically</span>
-
-      <form id="form-change-password">
-        <div class="form-group">
-          <label for="input-password-current">Current Password</label>
-          <input type="password" id="input-password-current" required placeholder="••••••••" />
+      <form id="form-store-change-password" class="store-profile-form">
+        <div class="store-form-group"><label class="store-form-label">Current Password</label><input type="password" id="input-store-curr-password" placeholder="••••••••••••" required class="store-form-input"></div>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">New Password</label><input type="password" id="input-store-new-password" placeholder="Minimum 8 chars" required class="store-form-input"></div>
+          <div class="store-form-group"><label class="store-form-label">Confirm Password</label><input type="password" id="input-store-confirm-password" placeholder="Repeat new password" required class="store-form-input"></div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="input-password-new">New Password</label>
-            <input type="password" id="input-password-new" required placeholder="Min 6 chars" />
-          </div>
-          <div class="form-group">
-            <label for="input-password-confirm">Confirm New Password</label>
-            <input type="password" id="input-password-confirm" required placeholder="Repeat new password" />
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary" id="btn-submit-password">Update Security Password</button>
+        <button type="submit" id="btn-store-update-password" class="store-btn-primary full-width">🔒 Update Security Credentials</button>
       </form>
     </div>
-
   </div>
+
+  <!-- ROW 2: 4 Feature Cards -->
+  <div class="store-profile-row-2">
+    <div class="store-feature-card store-feature-card--gold">
+      <div class="store-feature-card__header"><span class="store-feature-card__icon">☕</span><div><h4 class="store-feature-card__title">Store Operations</h4><span class="store-feature-card__sub" style="color:#c9a46a;">Management Summary</span></div></div>
+      <div class="store-feature-card__body">
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Store Name</span><strong id="fc-store-name" class="store-feature-card__val">—</strong></div>
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Team Size</span><strong id="fc-store-team" class="store-feature-card__val">—</strong></div>
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Status</span><strong style="color:#c9a46a;">Active Store Manager</strong></div>
+      </div>
+    </div>
+    <div class="store-feature-card store-feature-card--amber">
+      <div class="store-feature-card__header"><span class="store-feature-card__icon">📜</span><div><h4 class="store-feature-card__title">Verification Documents</h4><span class="store-feature-card__sub" style="color:#f59e0b;">Compliance Overview</span></div></div>
+      <div class="store-feature-card__body">
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Compliance Standard</span><strong class="store-feature-card__val">Store Manager Onboarding</strong></div>
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Verification Status</span><strong id="fc-store-doc-status" style="color:#f59e0b;">Pending Review</strong></div>
+      </div>
+      <button type="button" onclick="document.querySelector('.doc-hub-grid-wrapper')?.scrollIntoView({behavior:'smooth'});" class="store-feature-card__btn store-feature-card__btn--amber">Go to Verification Hub</button>
+    </div>
+    <div class="store-feature-card store-feature-card--cyan">
+      <div class="store-feature-card__header"><span class="store-feature-card__icon">👥</span><div><h4 class="store-feature-card__title">Workforce Summary</h4><span class="store-feature-card__sub" style="color:#06b6d4;">Team Overview</span></div></div>
+      <div class="store-feature-card__body">
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Total Employees</span><strong id="fc-store-emp-count" class="store-feature-card__val">—</strong></div>
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Active Today</span><strong style="color:#10b981;">—</strong></div>
+      </div>
+      <button type="button" onclick="window.location.hash='#store-workforce'" class="store-feature-card__btn store-feature-card__btn--cyan">View Workforce</button>
+    </div>
+    <div class="store-feature-card store-feature-card--purple">
+      <div class="store-feature-card__header"><span class="store-feature-card__icon">💵</span><div><h4 class="store-feature-card__title">Payroll &amp; Revenue</h4><span class="store-feature-card__sub" style="color:#c084fc;">Financial Summary</span></div></div>
+      <div class="store-feature-card__body">
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Monthly Base Rate</span><strong id="fc-store-salary" class="store-feature-card__val">—</strong></div>
+        <div class="store-feature-card__row"><span class="store-feature-card__lbl">Daily Revenue</span><strong id="fc-store-revenue" style="color:#c084fc;">—</strong></div>
+      </div>
+      <button type="button" onclick="window.location.hash='#payslips'" class="store-feature-card__btn store-feature-card__btn--purple">View Payslip History</button>
+    </div>
+  </div>
+
+  <!-- ROW 3: Document Hub -->
+  <div class="store-profile-doc-hub">
+    <div id="store-doc-hub-container"></div>
+  </div>
+
+  <!-- ROW 4: Quick Utility Footer -->
+  <div class="store-profile-row-4">
+    <div class="store-utility-tile" onclick="window.location.hash='#store-workforce'"><span class="store-utility-tile__icon">👥</span><div><strong class="store-utility-tile__title">Workforce Overview</strong><span class="store-utility-tile__sub">Manage store team</span></div></div>
+    <div class="store-utility-tile" onclick="window.location.hash='#store-settings'"><span class="store-utility-tile__icon">⚙️</span><div><strong class="store-utility-tile__title">Store Settings</strong><span class="store-utility-tile__sub">Configure store preferences</span></div></div>
+    <div class="store-utility-tile" onclick="window.location.hash='#payslips'"><span class="store-utility-tile__icon">💵</span><div><strong class="store-utility-tile__title">Payroll &amp; Payslips</strong><span class="store-utility-tile__sub">Download payment stubs</span></div></div>
+    <div class="store-utility-tile"><span class="store-utility-tile__icon">❓</span><div><strong class="store-utility-tile__title">HR Help &amp; Support</strong><span class="store-utility-tile__sub">Get employee assistance</span></div></div>
+  </div>
+
 </div>
+

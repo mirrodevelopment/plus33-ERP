@@ -1,0 +1,117 @@
+﻿<!--
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Admin Module
+ * File              : usage.html
+ * Path              : frontend/modules/store-admin/pages/usage/usage.html
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Store Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+-->
+<!-- ===== 1. PAGE HEADER ===== -->
+<div class="usage-header">
+  <div class="header-info">
+    <h2>Daily Usage Tracker</h2>
+    <p class="section-desc">Record daily ingredient consumption and manage historical usage logs</p>
+  </div>
+</div>
+
+<!-- ===== 2. TWO-COLUMN LAYOUT ===== -->
+<div class="usage-layout-row">
+  <!-- Left Side: Log Usage Form Card -->
+  <div class="quick-log-card">
+    <div class="card-header">
+      <h3>Record Usage</h3>
+      <p class="section-desc">Log raw ingredients consumed at this store today</p>
+    </div>
+    <div class="card-body">
+      <form id="usage-log-form">
+        <!-- Autocomplete Product Select -->
+        <div class="form-group">
+          <label>Select Product / Ingredient</label>
+          <div class="searchable-select" id="usage-search-select-wrapper">
+            <input type="text" id="usage-product-search" placeholder="Type to search products..." autocomplete="off" required>
+            <span class="dropdown-chevron">▼</span>
+            <div class="searchable-options-list" id="usage-options-list" style="display: none;">
+              <!-- Dynamically populated options -->
+            </div>
+          </div>
+          <input type="hidden" id="usage-product-id-val" required>
+        </div>
+
+        <!-- Collapsible details fields -->
+        <div id="usage-fields-container" style="display: none;">
+          <!-- Product image preview and file path -->
+          <div class="form-group-row">
+            <div class="image-preview-box">
+              <img src="imgs/coffee_cup_default.png" id="usage-product-img-view" alt="Preview">
+            </div>
+            <div class="form-group flex-fill-group">
+              <label for="usage-date-picker">Date of Consumption</label>
+              <input type="date" id="usage-date-picker" required>
+            </div>
+          </div>
+
+          <!-- Quantity to deduct -->
+          <div class="form-group">
+            <label for="usage-qty">Usage Count / Quantity</label>
+            <input type="number" id="usage-qty" min="0.000001" step="any" placeholder="Enter consumed quantity..." required>
+          </div>
+
+          <!-- Text report / Notes -->
+          <div class="form-group">
+            <label for="usage-notes">Usage Report / Notes</label>
+            <textarea id="usage-notes" rows="3" placeholder="Explain the consumption reason or any variances..." maxlength="1000"></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary-block" id="btn-submit-usage">📋 Log Consumption</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Side: Usage History Log Card -->
+  <div class="usage-history-card">
+    <div class="card-header">
+      <h3>Consumption History</h3>
+      <div class="header-actions">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="usage-search-input" placeholder="Search by SKU or name...">
+        </div>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="usage-data-table">
+        <thead>
+          <tr>
+            <th style="width: 50px;">Image</th>
+            <th style="width: 100px;">Date</th>
+            <th>SKU</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Report / Notes</th>
+          </tr>
+        </thead>
+        <tbody id="usage-table-body">
+          <tr>
+            <td colspan="7" class="loading-placeholder">
+              <span class="spinner"></span> Loading consumption logs...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

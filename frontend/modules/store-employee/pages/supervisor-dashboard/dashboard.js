@@ -48,6 +48,9 @@ export default class ShiftSupervisorDashboard {
     this.stateKey = `supervisor_dashboard_state_${this.user?.username || 'rohan'}`;
     this.pendingLeaves = [];
     this.cancellationRequests = [];
+    this.awayPermissions = []; // pending away pass requests
+    this.ongoingAwayPermissions = []; // active/ongoing away pass requests
+    this.overtimeRequests = []; // pending overtime requests
     
     this.loadState();
   }
@@ -138,15 +141,23 @@ export default class ShiftSupervisorDashboard {
 
   async _loadData() {
     try {
-      const pendingRes = await apiClient.get('/leaves/pending');
+      const [pendingRes, awayRes, ongoingAwayRes, otRes] = await Promise.all([
+        apiClient.get('/leaves/pending').catch(() => null),
+        apiClient.get('/api/v1/away-permission/pending').catch(() => null),
+        apiClient.get('/api/v1/away-permission/ongoing').catch(() => null),
+        apiClient.get('/api/v1/overtime-requests/pending').catch(() => null)
+      ]);
       if (pendingRes?.success) {
         this.pendingLeaves = pendingRes.data?.pending || [];
         this.cancellationRequests = pendingRes.data?.cancellationRequests || [];
       } else {
         logger.error('ShiftSupervisorDashboard', 'Failed to fetch pending leaves');
       }
+      this.awayPermissions = awayRes?.success ? (awayRes.data || []) : [];
+      this.ongoingAwayPermissions = ongoingAwayRes?.success ? (ongoingAwayRes.data || []) : [];
+      this.overtimeRequests = otRes?.success ? (otRes.data || []) : [];
     } catch (err) {
-      logger.error('ShiftSupervisorDashboard', 'Network error fetching pending leaves', err);
+      logger.error('ShiftSupervisorDashboard', 'Network error fetching dashboard data', err);
     }
   }
 
@@ -197,6 +208,12 @@ export default class ShiftSupervisorDashboard {
 
     // Render leave approvals hub list
     this._renderApprovalsList(container);
+
+    // Render away permission requests
+    this._renderAwayPermissions(container);
+
+    // Render overtime requests
+    this._renderOvertimeRequests(container);
   }
 
   // ---------------------------------------------------------------------------
@@ -312,6 +329,12 @@ export default class ShiftSupervisorDashboard {
       modal.addEventListener('click', handleModalBgClick);
       lifecycle.onCleanup(() => modal.removeEventListener('click', handleModalBgClick));
     }
+
+    // 4. Away Permission Buttons
+    this._bindAwayPermissionButtons(container, lifecycle);
+
+    // 5. Overtime Request Buttons
+    this._bindOvertimeRequestButtons(container, lifecycle);
   }
 
   // ---------------------------------------------------------------------------
@@ -466,6 +489,301 @@ export default class ShiftSupervisorDashboard {
       link.href = 'modules/store-employee/pages/supervisor-dashboard/dashboard.css';
       document.head.appendChild(link);
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // AWAY PERMISSION RENDERING
+  // ---------------------------------------------------------------------------
+
+  _renderAwayPermissions(container) {
+    const section = container.querySelector('#sup-away-permissions-section');
+    if (!section) return;
+
+    const count = this.awayPermissions.length;
+    const badge = section.querySelector('#sup-away-badge');
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+
+    const list = section.querySelector('#sup-away-permissions-list');
+    if (list) {
+      if (count === 0) {
+        list.innerHTML = `
+          <div class="empty-approvals-banner">
+            <i data-lucide="map-pin" aria-hidden="true"></i>
+            <span class="empty-approvals-title">All employees on site</span>
+            <span class="empty-approvals-subtitle">No pending away pass requests from your team.</span>
+          </div>`;
+      } else {
+        list.innerHTML = this.awayPermissions.map(req => {
+          const statusColor = req.status === 'EXTENSION_REQUESTED' ? '#f59e0b' : 'var(--accent-primary)';
+          const tag = req.status === 'EXTENSION_REQUESTED' ? '🔁 Extension Requested' : '⏸ Away Pass Requested';
+          const since = req.requestedAt ? new Date(req.requestedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
+          return `
+            <div style="
+              background:rgba(255,255,255,0.03);
+              border:1px solid var(--border-color);
+              border-left:3px solid ${statusColor};
+              border-radius:var(--radius-md,8px);
+              padding:12px 16px;
+              display:flex; flex-direction:column; gap:8px;
+              margin-bottom:8px;
+            ">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; font-size:0.82rem; color:var(--text-primary);">${req.employeeName || 'Employee'}</span>
+                <span style="font-size:0.68rem; color:${statusColor}; font-weight:600;">${tag}</span>
+              </div>
+              <div style="font-size:0.74rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:2px;">
+                ${req.reason ? `<div><strong>Original Reason:</strong> <em>${req.reason}</em></div>` : ''}
+                ${req.status === 'EXTENSION_REQUESTED' && req.extensionReason ? `<div><strong>Extension Request:</strong> <em style="color:var(--accent-warning, #ff9800);">${req.extensionReason}</em></div>` : ''}
+              </div>
+              <div style="font-size:0.68rem; color:var(--text-muted);">Requested at ${since}</div>
+              <div style="display:flex; gap:8px; margin-top:4px;">
+                <button type="button" class="btn btn-primary btn-away-approve" data-away-id="${req.id}"
+                  style="flex:1; padding:6px; font-size:0.74rem;">✓ Approve Pass</button>
+                <button type="button" class="btn btn-secondary btn-away-deny" data-away-id="${req.id}"
+                  style="flex:1; padding:6px; font-size:0.74rem;">✕ Deny</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    const ongoingSection = section.querySelector('#sup-ongoing-away-section');
+    const ongoingList = section.querySelector('#sup-ongoing-away-list');
+    if (ongoingSection && ongoingList) {
+      const ongoingCount = this.ongoingAwayPermissions.length;
+      if (ongoingCount > 0) {
+        ongoingSection.style.display = 'block';
+        ongoingList.innerHTML = this.ongoingAwayPermissions.map(req => {
+          const until = req.approvedUntil ? new Date(req.approvedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+          const duration = req.approvedDurationMins || 0;
+          return `
+            <div style="
+              background:rgba(255,255,255,0.03);
+              border:1px solid var(--border-color);
+              border-left:3px solid var(--status-success, #4caf50);
+              border-radius:var(--radius-md,8px);
+              padding:12px 16px;
+              display:flex; flex-direction:column; gap:6px;
+              margin-bottom:8px;
+            ">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; font-size:0.82rem; color:var(--text-primary);">${req.employeeName || 'Employee'}</span>
+                <span style="font-size:0.65rem; background:rgba(76,175,80,0.12); color:#4caf50; border:1px solid rgba(76,175,80,0.2); padding:2px 6px; border-radius:4px; font-weight:600;">ACTIVE</span>
+              </div>
+              <div style="font-size:0.74rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:2px;">
+                <div><strong>Approved:</strong> ${duration} mins (until ${until})</div>
+                ${req.reason ? `<div><strong>Reason:</strong> <em>${req.reason}</em></div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        ongoingSection.style.display = 'none';
+        ongoingList.innerHTML = '';
+      }
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  _bindAwayPermissionButtons(container, lifecycle) {
+    container.querySelectorAll('.btn-away-approve').forEach(btn => {
+      const handler = () => this._showSupervisorAwayApproveCard(container, lifecycle, btn.getAttribute('data-away-id'));
+      btn.addEventListener('click', handler);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handler));
+    });
+
+    container.querySelectorAll('.btn-away-deny').forEach(btn => {
+      const handler = async () => {
+        btn.disabled = true; btn.textContent = 'Denying…';
+        try {
+          const res = await apiClient.put(`/api/v1/away-permission/${btn.getAttribute('data-away-id')}/deny`, {});
+          if (res?.success) {
+            notificationStore.success('Away pass denied.');
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to deny.');
+            btn.disabled = false; btn.textContent = '✕ Deny';
+          }
+        } catch (e) {
+          notificationStore.danger('Error: ' + e.message);
+          btn.disabled = false; btn.textContent = '✕ Deny';
+        }
+      };
+      btn.addEventListener('click', handler);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handler));
+    });
+  }
+
+  _showSupervisorAwayApproveCard(container, lifecycle, awayId) {
+    let overlay = document.getElementById('sup-away-approve-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'sup-away-approve-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:9999;';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `
+      <div style="background:var(--bg-card,#1e1e2e);border:1px solid var(--border-color);border-radius:14px;padding:28px 24px;width:340px;max-width:95vw;display:flex;flex-direction:column;gap:16px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h3 style="margin:0;font-size:0.95rem;font-weight:700;color:var(--text-primary);">⏱ Approve Away Pass</h3>
+          <button id="btn-sup-away-close" type="button" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;">✕</button>
+        </div>
+        <p style="margin:0;font-size:0.8rem;color:var(--text-secondary);line-height:1.5;">Set how many minutes the employee is allowed away. A <strong>10-minute grace buffer</strong> is added automatically.</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:0.75rem;color:var(--text-muted);font-weight:600;">Duration (minutes)</label>
+          <input id="sup-away-duration" type="number" min="5" max="240" value="30" style="background:rgba(255,255,255,0.05);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);padding:8px 12px;font-size:0.85rem;width:100%;box-sizing:border-box;">
+          <span id="sup-away-hint" style="font-size:0.68rem;color:var(--text-muted);">Employee will have 30 min + 10 min grace = 40 min total.</span>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button id="btn-sup-away-confirm" type="button" class="btn btn-primary" style="flex:1;padding:9px;">✓ Confirm</button>
+          <button id="btn-sup-away-cancel" type="button" class="btn btn-secondary" style="flex:1;padding:9px;">Cancel</button>
+        </div>
+      </div>`;
+    overlay.style.display = 'flex';
+
+    const close = () => { overlay.style.display = 'none'; };
+    const dInput = overlay.querySelector('#sup-away-duration');
+    const hint = overlay.querySelector('#sup-away-hint');
+    dInput?.addEventListener('input', () => {
+      const d = parseInt(dInput.value || '30');
+      if (hint) hint.textContent = `Employee will have ${d} min + 10 min grace = ${d + 10} min total.`;
+    });
+    overlay.querySelector('#btn-sup-away-close')?.addEventListener('click', close);
+    overlay.querySelector('#btn-sup-away-cancel')?.addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    const confirmBtn = overlay.querySelector('#btn-sup-away-confirm');
+    confirmBtn?.addEventListener('click', async () => {
+      const dMins = parseInt(dInput?.value || '30');
+      if (!dMins || dMins < 1) { notificationStore.danger('Please enter a valid duration.'); return; }
+      confirmBtn.disabled = true; confirmBtn.textContent = 'Approving…';
+      try {
+        const res = await apiClient.put(`/api/v1/away-permission/${awayId}/approve`, { durationMins: dMins });
+        if (res?.success) {
+          close();
+          notificationStore.success(`Away pass approved for ${dMins} minutes (+10 min grace).`);
+          await this.loadAndRender(container, lifecycle);
+        } else {
+          notificationStore.danger(res?.message || 'Failed to approve.');
+          confirmBtn.disabled = false; confirmBtn.textContent = '✓ Confirm';
+        }
+      } catch (e) {
+        notificationStore.danger('Error: ' + e.message);
+        confirmBtn.disabled = false; confirmBtn.textContent = '✓ Confirm';
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // OVERTIME REQUEST RENDERING & ACTIONS
+  // ---------------------------------------------------------------------------
+
+  _renderOvertimeRequests(container) {
+    const section = container.querySelector('#sup-overtime-requests-section');
+    if (!section) return;
+
+    const count = this.overtimeRequests.length;
+    const badge = section.querySelector('#sup-overtime-badge');
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+
+    const list = section.querySelector('#sup-overtime-requests-list');
+    if (!list) return;
+
+    if (count === 0) {
+      list.innerHTML = `
+        <div class="empty-approvals-banner">
+          <i data-lucide="clock" aria-hidden="true"></i>
+          <span class="empty-approvals-title">No Overtime Requests</span>
+          <span class="empty-approvals-subtitle">No baristas have requested overtime shifts today.</span>
+        </div>`;
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
+    list.innerHTML = this.overtimeRequests.map(req => {
+      const since = req.requestedDateDisplay || req.requestedDate || '';
+      return `
+        <div style="
+          background:rgba(255,255,255,0.03);
+          border:1px solid var(--border-color);
+          border-left:3px solid var(--accent-primary);
+          border-radius:var(--radius-md,8px);
+          padding:12px 16px;
+          display:flex; flex-direction:column; gap:8px;
+          margin-bottom:8px;
+        ">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:700; font-size:0.82rem; color:var(--text-primary);">${req.employeeName || 'Employee'}</span>
+            <span style="font-size:0.68rem; color:var(--accent-primary); font-weight:600;">⏳ Overtime Requested</span>
+          </div>
+          <div style="font-size:0.74rem; color:var(--text-secondary);">
+            Requested date: <strong>${since}</strong> &nbsp;·&nbsp; Shift: <strong>${req.shiftName || ''}</strong>
+          </div>
+          <div style="font-size:0.74rem; color:var(--text-secondary);">
+            ${req.reason ? `Reason: <em>${req.reason}</em>` : '<span style="color:var(--text-muted);font-style:italic;">No reason provided</span>'}
+          </div>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button type="button" class="btn btn-primary btn-ot-approve" data-ot-id="${req.id}"
+              style="flex:1; padding:6px; font-size:0.74rem;">✓ Approve Request</button>
+            <button type="button" class="btn btn-secondary btn-ot-deny" data-ot-id="${req.id}"
+              style="flex:1; padding:6px; font-size:0.74rem;">✕ Deny</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  _bindOvertimeRequestButtons(container, lifecycle) {
+    container.querySelectorAll('.btn-ot-approve').forEach(btn => {
+      const handler = async () => {
+        btn.disabled = true; btn.textContent = 'Approving…';
+        try {
+          const res = await apiClient.put(`/api/v1/overtime-requests/${btn.getAttribute('data-ot-id')}/approve`, {});
+          if (res?.success) {
+            notificationStore.success('Overtime shift approved and roster updated.');
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to approve request.');
+            btn.disabled = false; btn.textContent = '✓ Approve Request';
+          }
+        } catch (e) {
+          notificationStore.danger('Error: ' + e.message);
+          btn.disabled = false; btn.textContent = '✓ Approve Request';
+        }
+      };
+      btn.addEventListener('click', handler);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handler));
+    });
+
+    container.querySelectorAll('.btn-ot-deny').forEach(btn => {
+      const handler = async () => {
+        btn.disabled = true; btn.textContent = 'Denying…';
+        try {
+          const res = await apiClient.put(`/api/v1/overtime-requests/${btn.getAttribute('data-ot-id')}/deny`, {});
+          if (res?.success) {
+            notificationStore.success('Overtime shift denied.');
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to deny.');
+            btn.disabled = false; btn.textContent = '✕ Deny';
+          }
+        } catch (e) {
+          notificationStore.danger('Error: ' + e.message);
+          btn.disabled = false; btn.textContent = '✕ Deny';
+        }
+      };
+      btn.addEventListener('click', handler);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handler));
+    });
   }
 }
 export { ShiftSupervisorDashboard };

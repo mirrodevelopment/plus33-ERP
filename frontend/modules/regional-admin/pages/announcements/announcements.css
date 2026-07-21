@@ -1,0 +1,791 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Regional Admin Module
+ * File              : announcements.css
+ * Path              : frontend/modules/regional-admin/pages/announcements/announcements.css
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Regional Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+/* ============================================================
+   PLUS33 Coffee ERP | Regional Admin | Broadcast Announcements
+   File    : announcements.css
+   Purpose : Styles for regional admin announcements broadcast page
+   ============================================================ */
+
+/* ── Page Layout ─────────────────────────────────────────── */
+.ann-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+/* ── Page Header ─────────────────────────────────────────── */
+.ann-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.ann-header__title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.ann-header__icon {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.ann-header__subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.ann-header__right-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ann-live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  background: rgba(201, 164, 106, 0.10);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(201, 164, 106, 0.20);
+  white-space: nowrap;
+}
+
+/* ── Policy Banner Bar (Matching User Screenshot) ───────── */
+.ann-policy-bar {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: var(--spacing-xl);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.ann-policy-bar:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(201, 164, 106, 0.3);
+  transform: translateY(-1px);
+}
+
+.ann-policy-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ann-policy-bar__icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary, #c9a46a);
+  flex-shrink: 0;
+}
+
+.ann-policy-bar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ann-policy-bar__title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary, #fff);
+}
+
+.ann-policy-bar__sub {
+  font-size: 0.73rem;
+  color: var(--text-muted, #a1a1aa);
+  font-weight: 500;
+}
+
+.ann-policy-bar__arrow {
+  color: var(--text-muted, #71717a);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.ann-policy-bar:hover .ann-policy-bar__arrow {
+  color: var(--accent-primary, #c9a46a);
+  transform: translateX(3px);
+}
+
+/* ── Policy Modal Pop-Up ─────────────────────────────────── */
+.ann-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.ann-modal-card {
+  background: #171717;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 540px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  color: #fff;
+  position: relative;
+  animation: scaleUp 0.2s ease-out;
+}
+
+.ann-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 14px;
+}
+
+.ann-modal-title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ann-modal-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ann-modal-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.ann-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ann-policy-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.ann-policy-item__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(201, 164, 106, 0.1);
+  color: var(--accent-primary, #c9a46a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ann-policy-item__text h5 {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.ann-policy-item__text p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #a1a1aa;
+  line-height: 1.45;
+}
+
+/* Color & Tag Legend in Policy Modal */
+.ann-color-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.ann-role-badge-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+}
+
+.ann-tag-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ann-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.73rem;
+  color: #a1a1aa;
+}
+
+/* Priority Badge Color Tag Themes */
+.ann-bulletin__priority-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+}
+
+.priority-badge--critical,
+.ann-tag-pill--critical {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+.priority-badge--bulletin,
+.ann-tag-pill--bulletin {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: #a855f7 !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+}
+
+.priority-badge--notice,
+.ann-tag-pill--notice {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+}
+
+.ann-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-success, #4ade80);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+/* Ultimate Admin Audit Toggle */
+.ann-audit-toggle-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.ann-audit-toggle-btn:hover,
+.ann-audit-toggle-btn--active {
+  background: #ef4444;
+  color: #000;
+}
+
+/* ── Two-Column Grid ─────────────────────────────────────── */
+.ann-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .ann-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.ann-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.ann-card__title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ann-card__icon {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+/* ── Feed List ───────────────────────────────────────────── */
+.ann-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Empty state */
+.ann-empty-state {
+  text-align: center;
+  padding: 40px var(--spacing-md);
+  border: 1px dashed rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ann-empty-state__icon {
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.ann-empty-state__title {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 600;
+}
+
+.ann-empty-state__desc {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
+/* ── Bulletin Item ───────────────────────────────────────── */
+.ann-bulletin {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  position: relative;
+  border-left: 4px solid var(--accent-primary);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ann-bulletin:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* Role Color Themes */
+.ann-role--ultimate-admin {
+  border-left-color: #d946ef;
+  box-shadow: 0 0 12px rgba(217, 70, 239, 0.08);
+}
+
+.ann-role--national-admin {
+  border-left-color: #3b82f6;
+}
+
+.ann-role--regional-admin {
+  border-left-color: #06b6d4;
+}
+
+.ann-role--store-admin {
+  border-left-color: #c9a46a;
+}
+
+.ann-role--shift-supervisor {
+  border-left-color: #f97316;
+}
+
+/* Soft-Deleted Audit Style */
+.ann-bulletin--deleted {
+  opacity: 0.65;
+  border-left-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.04) !important;
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+}
+
+.ann-bulletin--deleted .ann-bulletin__title {
+  text-decoration: line-through;
+  color: #f87171;
+}
+
+.ann-bulletin__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.ann-bulletin__badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.ann-bulletin__priority-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+.ann-bulletin__role-badge {
+  display: inline-block;
+  font-size: 0.60rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+}
+
+.ann-bulletin__deleted-badge {
+  display: inline-block;
+  font-size: 0.60rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.ann-bulletin__title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.ann-bulletin__content {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 4px 0 0;
+}
+
+.ann-bulletin__footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  margin-top: 4px;
+  padding-top: var(--spacing-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Delete button */
+.ann-btn-delete {
+  background: #ff6b6b;
+  border: none;
+  color: #000;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.ann-btn-delete:hover {
+  background: #ff5252;
+  color: #fff;
+}
+
+/* ── Attachment Renderers ────────────────────────────────── */
+
+/* Video Attachment */
+.ann-attach-video {
+  margin: 8px 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  max-height: 250px;
+  background: #000;
+}
+
+.ann-attach-video video {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+}
+
+/* Audio Attachment */
+.ann-attach-audio {
+  margin: 8px 0;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ann-attach-audio__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ann-attach-audio__label {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ann-attach-audio audio {
+  width: 100%;
+  height: 36px;
+}
+
+/* PDF & Office Document Attachment */
+.ann-attach-pdf,
+.ann-attach-doc {
+  margin: 8px 0;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.ann-attach-pdf__info,
+.ann-attach-doc__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ann-attach-pdf__label,
+.ann-attach-doc__label {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ann-attach-pdf__open,
+.ann-attach-doc__open {
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--accent-primary);
+  background: transparent;
+  color: var(--accent-primary);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.ann-attach-pdf__open:hover,
+.ann-attach-doc__open:hover {
+  background: rgba(201, 164, 106, 0.1);
+}
+
+/* Image Attachment */
+.ann-attach-img {
+  margin: 8px 0;
+  max-height: 200px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.ann-attach-img img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 200px;
+}
+
+/* ── Compose Form ────────────────────────────────────────── */
+.ann-compose-col .ann-card {
+  text-align: left;
+}
+
+.ann-compose-desc {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.ann-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.ann-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ann-form-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ann-form-optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+.ann-form-input {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.20);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ann-form-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.ann-form-textarea {
+  resize: none;
+  line-height: 1.45;
+}
+
+.ann-form-file {
+  cursor: pointer;
+}
+
+.ann-submit-btn {
+  background: var(--accent-primary);
+  color: #000;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: var(--spacing-xs);
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+}
+
+.ann-submit-btn:hover {
+  opacity: 0.9;
+}
+
+.ann-submit-btn:active {
+  transform: scale(0.98);
+}
+
+.ann-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

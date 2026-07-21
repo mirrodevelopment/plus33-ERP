@@ -7,18 +7,18 @@
  * Module            : Layouts Module
  * File              : dashboard.js
  * Path              : frontend/layouts/dashboard.js
- * Purpose           : Dashboard layout controller — loads HTML, binds events
+ * Purpose           : Main layout shell controller for all authenticated ERP dashboards; handles dynamic HTML template loading, role-based profile routing, sidebar navigation, header breadcrumbs, user status updates, notification bells/badges, and toast popups.
  * Version           : 2.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Refactored to HTML + CSS + JS mixed architecture.
- * HTML structure lives in layouts/html/dashboard-layout.html
- * This controller is responsible only for:
- *   - Loading the HTML template via htmlLoader
- *   - Populating dynamic data (user profile, menu, breadcrumbs)
- *   - Binding event listeners
- *   - Managing toast notifications
+ * Frontend layout manager for the SPA shell.
+ * Key capabilities:
+ *   - Renders the dashboard shell layout from layouts/html/dashboard-layout.html.
+ *   - Dynamically resolves user role (ultimateAdmin, nationalAdmin, regionalAdmin, storeAdmin, shiftSupervisor, storeEmployee) to map topbar and sidebar profile card clicks directly to role-specific profile page hash routes (#ultimate-profile, #national-profile, #regional-profile, #store-profile, #supervisor-profile, #employee-profile).
+ *   - Builds dynamic sidebar navigation menus from navigation/menus.js with role filtering and Lucide icons.
+ *   - Manages topbar breadcrumbs trail based on window.location.hash.
+ *   - Handles real-time eventBus listeners for user profile changes, authentication state changes, document pending approval count badges, and toast messages.
  ******************************************************************************/
 
 import { htmlLoader } from '../core/htmlLoader.js';
@@ -48,7 +48,6 @@ export const dashboardLayout = {
     this._populateUserProfile();
     this._renderSidebarMenu();
     this._renderBreadcrumbs();
-    this._applyRoleVisibility();
 
     // 3. Bind all layout-level event listeners
     this._bindEvents();
@@ -61,6 +60,34 @@ export const dashboardLayout = {
   // ---------------------------------------------------------------------------
 
   /**
+   * Resolve appropriate profile route hash based on user role.
+   */
+  _getProfileHashForUser() {
+    const role = authStore.getRole();
+    switch (role) {
+      case 'ultimateAdmin':
+        return '#ultimate-profile';
+      case 'nationalAdmin':
+        return '#national-profile';
+      case 'regionalAdmin':
+        return '#regional-profile';
+      case 'storeAdmin':
+      case 'store':
+        return '#store-profile';
+      case 'shiftSupervisor':
+      case 'supervisor':
+        return '#supervisor-profile';
+      case 'storeEmployee':
+        return '#employee-profile';
+      case 'nationalWarehouseAdmin':
+      case 'regionalWarehouseAdmin':
+      default:
+        return '#profile';
+    }
+  },
+
+
+  /**
    * Populate sidebar user profile section with current user data.
    */
   _populateUserProfile() {
@@ -71,43 +98,87 @@ export const dashboardLayout = {
       ? (profile.avatarUrl.includes('unsplash.com') ? profile.avatarUrl : `${profile.avatarUrl}?t=${Date.now()}`)
       : 'imgs/male-avatar.png';
 
+    const targetHash = this._getProfileHashForUser();
+
     const avatarEl = document.getElementById('user-avatar-sidebar');
     const nameEl = document.getElementById('user-name-sidebar');
     const roleEl = document.getElementById('user-role-sidebar');
+    const sidebarLink = document.getElementById('sidebar-profile-link');
 
-    if (avatarEl) avatarEl.src = avatarUrl;
-    if (nameEl) nameEl.textContent = profile?.name || 'User';
-    if (roleEl) roleEl.textContent = user?.role || '—';
+    const formatRoleName = (r) => {
+      if (!r) return '—';
+      if (r === 'nationalAdmin') return 'National Admin';
+      if (r === 'regionalAdmin') return 'Regional Admin';
+      if (r === 'storeAdmin') return 'Store Manager';
+      if (r === 'supervisor') return 'Shift Lead';
+      if (r === 'storeEmployee') return 'Barista / Employee';
+      if (r === 'ultimateAdmin') return 'Ultimate Admin';
+      return r.replace(/([a-z])([A-Z])/g, '$1 $2').replace('_', ' ');
+    };
+
+    const navigateToProfile = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const hash = this._getProfileHashForUser();
+      logger.info('DashboardLayout', `Navigating to profile page: ${hash}`);
+      window.location.hash = hash;
+    };
+
+    if (avatarEl) {
+      avatarEl.src = avatarUrl;
+      avatarEl.style.cursor = 'pointer';
+      avatarEl.onclick = navigateToProfile;
+    }
+    if (nameEl) {
+      nameEl.textContent = profile?.name || 'User';
+      nameEl.style.cursor = 'pointer';
+      nameEl.onclick = navigateToProfile;
+    }
+    if (roleEl) {
+      roleEl.textContent = formatRoleName(user?.role);
+      roleEl.style.cursor = 'pointer';
+      roleEl.onclick = navigateToProfile;
+    }
+    if (sidebarLink) {
+      sidebarLink.href = targetHash;
+      sidebarLink.onclick = navigateToProfile;
+    }
 
     // Populate header profile card
     const avatarHeader = document.getElementById('user-avatar-header');
     const nameHeader = document.getElementById('user-name-header');
     const roleHeader = document.getElementById('user-role-header');
+    const headerProfileCard = document.getElementById('header-profile-card');
 
-    if (avatarHeader) avatarHeader.src = avatarUrl;
-    if (nameHeader) nameHeader.textContent = profile?.name || 'User';
-    if (roleHeader) roleHeader.textContent = user?.role || '—';
+    if (avatarHeader) {
+      avatarHeader.src = avatarUrl;
+      avatarHeader.style.cursor = 'pointer';
+      avatarHeader.title = 'Click to view profile page';
+      avatarHeader.onclick = navigateToProfile;
+    }
+    if (nameHeader) {
+      nameHeader.textContent = profile?.name || 'User';
+      nameHeader.style.cursor = 'pointer';
+      nameHeader.onclick = navigateToProfile;
+    }
+    if (roleHeader) {
+      roleHeader.textContent = formatRoleName(user?.role);
+      roleHeader.style.cursor = 'pointer';
+      roleHeader.onclick = navigateToProfile;
+    }
+    if (headerProfileCard) {
+      headerProfileCard.style.cursor = 'pointer';
+      headerProfileCard.title = 'Click to view profile page';
+      headerProfileCard.onclick = navigateToProfile;
+    }
   },
 
   /**
    * Show/hide role-specific elements (e.g. shift card for store role).
    */
-  _applyRoleVisibility() {
-    // WHAT IT DOES: 
-    // Evaluates the current logged-in user's role and controls the visibility of the sidebar shift card.
-    // 
-    // DATA SOURCE (ORIGIN):
-    // authStore.getUser() returns the user profile metadata cached during authentication.
-    // 
-    // STORAGE/VISIBILITY:
-    // Visible only for storeEmployee (barista) and shiftSupervisor roles. Hidden for store (Store Admin) and administrative roles.
-    const user = authStore.getUser();
-    const shiftCard = document.getElementById('sidebar-shift-card');
-    if (shiftCard) {
-      const showCard = user?.role === 'storeEmployee' || user?.role === 'shiftSupervisor';
-      shiftCard.style.setProperty('display', showCard ? 'flex' : 'none', 'important');
-    }
-  },
+
 
   /**
    * Render sidebar navigation menu items using DOM manipulation.
@@ -257,13 +328,50 @@ export const dashboardLayout = {
       });
     }
 
-    // End shift button (store role)
-    const endShiftBtn = document.getElementById('btn-end-shift');
-    if (endShiftBtn) {
-      endShiftBtn.addEventListener('click', () => {
-        document.getElementById('btn-logout')?.click();
+    // Profile Top Bar & Avatar Click -> Open User Profile Page for ALL users
+    const navigateToProfile = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const targetHash = this._getProfileHashForUser();
+      logger.info('DashboardLayout', `Navigating user to profile page: ${targetHash}`);
+      window.location.hash = targetHash;
+    };
+
+    // Attach explicit click handlers to topbar and sidebar profile elements
+    const profileSelectors = [
+      '#user-avatar-header',
+      '#user-avatar-sidebar',
+      '#header-profile-card',
+      '#user-name-header',
+      '#user-role-header',
+      '#user-name-sidebar',
+      '#user-role-sidebar',
+      '#sidebar-profile-link',
+      '.user-avatar',
+      '.header-profile',
+      '#header-user-profile',
+      '.user-profile-widget'
+    ];
+
+    profileSelectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(el => {
+        el.style.cursor = 'pointer';
+        el.title = 'Click to open profile page';
+        el.addEventListener('click', navigateToProfile);
       });
-    }
+    });
+
+    // Global capture-phase click delegation listener for any profile image/card elements across all pages
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('#user-avatar-header, #user-avatar-sidebar, #header-profile-card, #user-name-header, #user-role-header, .user-avatar, .header-profile, #header-user-profile, .user-profile-widget, #sidebar-profile-link, .sidebar-footer');
+      if (target && !e.target.closest('#btn-logout')) {
+        navigateToProfile(e);
+      }
+    }, true);
+
+
 
     // Toast notification listener
     eventBus.on('notification:toast', (notification) => {
@@ -304,22 +412,40 @@ export const dashboardLayout = {
     });
 
     // User profile update listener
-    eventBus.on('user:profile-updated', ({ role, profile }) => {
-      const user = authStore.getUser();
-      if (user?.role === role) {
-        const avatarEl = document.getElementById('user-avatar-sidebar');
-        const avatarHeader = document.getElementById('user-avatar-header');
+    eventBus.on('user:profile-updated', (data) => {
+      const profile = data?.profile || data || {};
+      const displayName = profile.name || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'User Profile';
+
+      const avatarEl = document.getElementById('user-avatar-sidebar');
+      const avatarHeader = document.getElementById('user-avatar-header');
+      const nameEl = document.getElementById('user-name-sidebar');
+      const nameHeader = document.getElementById('user-name-header');
+      const welcomeName = document.getElementById('header-user-name');
+
+      let avatarUrl = profile.avatarUrl;
+      const gender = (profile.gender || 'Male').toLowerCase();
+
+      if (!avatarUrl || avatarUrl === 'imgs/male-avatar.png' || avatarUrl === 'imgs/female-avatar.jpg') {
+        avatarUrl = (gender === 'female') ? 'imgs/female-avatar.jpg' : 'imgs/male-avatar.png';
+      } else if (!avatarUrl.includes('unsplash.com') && !avatarUrl.startsWith('http') && !avatarUrl.includes('?')) {
+        avatarUrl = `${avatarUrl}?t=${Date.now()}`;
+      }
+
+      if (avatarEl) avatarEl.src = avatarUrl;
+      if (avatarHeader) avatarHeader.src = avatarUrl;
+      if (nameEl) nameEl.textContent = displayName;
+      if (nameHeader) nameHeader.textContent = displayName;
+      if (welcomeName) welcomeName.textContent = displayName;
+    });
+
+    eventBus.on('auth:state-changed', ({ user }) => {
+      if (user && user.name) {
         const nameEl = document.getElementById('user-name-sidebar');
         const nameHeader = document.getElementById('user-name-header');
-        
-        const avatarUrl = profile.avatarUrl
-          ? (profile.avatarUrl.includes('unsplash.com') ? profile.avatarUrl : `${profile.avatarUrl}?t=${Date.now()}`)
-          : 'imgs/male-avatar.png';
-
-        if (avatarEl) avatarEl.src = avatarUrl;
-        if (avatarHeader) avatarHeader.src = avatarUrl;
-        if (nameEl) nameEl.textContent = profile.name;
-        if (nameHeader) nameHeader.textContent = profile.name;
+        const welcomeName = document.getElementById('header-user-name');
+        if (nameEl) nameEl.textContent = user.name;
+        if (nameHeader) nameHeader.textContent = user.name;
+        if (welcomeName) welcomeName.textContent = user.name;
       }
     });
 

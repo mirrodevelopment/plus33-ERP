@@ -57,6 +57,9 @@ public interface EmployeeMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "emergencyContactPhone", ignore = true)
+    @Mapping(target = "bankName", ignore = true)
+    @Mapping(target = "bankAccountNumber", ignore = true)
+    @Mapping(target = "ifscNumber", ignore = true)
     Employee toEntity(EmployeeRequest request);
 
     @Mapping(target = "companyId", source = "company.id")
@@ -83,5 +86,8 @@ public interface EmployeeMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "emergencyContactPhone", ignore = true)
+    @Mapping(target = "bankName", ignore = true)
+    @Mapping(target = "bankAccountNumber", ignore = true)
+    @Mapping(target = "ifscNumber", ignore = true)
     void updateEntity(EmployeeRequest request, @MappingTarget Employee entity);
 }

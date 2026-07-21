@@ -7,19 +7,17 @@
  * Module            : Navigation Module
  * File              : menus.js
  * Path              : frontend/navigation/menus.js
- * Purpose           : Frontend utility: menus for PLUS33 Coffee ERP
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related API       : N/A
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : store/permissionStore
- * Depends On        : store/permissionStore
+ * Purpose           : Navigation menu generator providing role-specific sidebar navigation groups and items filtered against user permissions for nationalAdmin, regionalAdmin, storeAdmin, shiftSupervisor, storeEmployee, warehouse roles, and ultimateAdmin.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Frontend utility: menus for PLUS33 Coffee ERP. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Menu structure provider for sidebar navigation in frontend/layouts/dashboard.js.
+ * Features:
+ *   - Reads active user role via authStore.getRole().
+ *   - Dynamically constructs sidebar navigation sections for each role.
+ *   - Points 'My Profile' links to correct role-specific routes (#national-profile, #regional-profile, #supervisor-profile, #employee-profile, #store-profile, #ultimate-profile).
+ *   - Filters items against permissionStore.hasPermission() to enforce RBAC.
  ******************************************************************************/
 
 import { permissionStore } from '../store/permissionStore.js';
@@ -31,17 +29,17 @@ import { authStore } from '../store/authStore.js';
 export function getMenuItems() {
   const role = authStore.getRole();
 
-  if (role === 'nationalAdmin' || role === 'regionalAdmin') {
+  if (role === 'nationalAdmin') {
     return [
       {
         title: 'OPERATIONS',
         items: [
-          { name: 'Regions Management', icon: 'map', route: '#regions' },
-          { name: 'Stores Management', icon: 'coffee', route: '#stores' },
-          { name: 'Warehouse Overview', icon: 'warehouse', route: '#warehouse' },
-          { name: 'Sales Overview', icon: 'chart', route: '#sales' },
-          { name: 'Inventory Overview', icon: 'package', route: '#inventory' },
-          { name: 'Supply Requests', icon: 'truck', route: '#supply-chain' }
+          { name: 'Regions Management', icon: 'map', route: '#regional-regions' },
+          { name: 'Stores Management', icon: 'coffee', route: '#regional-stores' },
+          { name: 'Warehouse Overview', icon: 'warehouse', route: '#regional-warehouse' },
+          { name: 'Sales Overview', icon: 'chart', route: '#regional-sales' },
+          { name: 'Inventory Overview', icon: 'package', route: '#regional-inventory' },
+          { name: 'Supply Requests', icon: 'truck', route: '#regional-supply-requests' }
         ]
       },
       {
@@ -53,34 +51,77 @@ export function getMenuItems() {
       {
         title: 'WORKFORCE',
         items: [
-          { name: 'Employee Overview', icon: 'users', route: '#workforce' },
-          { name: 'Recruitment', icon: 'user-plus', route: '#recruitment' },
-          { name: 'Training & Development', icon: 'graduation-cap', route: '#training' },
-          { name: 'Performance', icon: 'star', route: '#performance' }
-        ]
-      },
-      {
-        title: 'VENDORS & PROCUREMENT',
-        items: [
-          { name: 'Vendors', icon: 'truck', route: '#vendors' },
-          { name: 'Purchase Management', icon: 'shopping-bag', route: '#purchases' },
-          { name: 'Contracts', icon: 'file-text', route: '#contracts' }
-        ]
-      },
-      {
-        title: 'COMPLIANCE & SUPPORT',
-        items: [
-          { name: 'Complaints Management', icon: 'message-square', route: '#complaints' },
-          { name: 'Legal Cases', icon: 'scale', route: '#legal' },
-          { name: 'Audit & Compliance', icon: 'shield', route: '#audit' }
+          { name: 'Employee Overview', icon: 'users', route: '#regional-employees' },
+          { name: 'Recruitment', icon: 'user-plus', route: '#regional-recruitment' },
+          { name: 'Training & Development', icon: 'graduation-cap', route: '#regional-training' },
+          { name: 'Performance', icon: 'star', route: '#regional-performance' }
         ]
       },
       {
         title: 'REPORTS & ANALYTICS',
         items: [
-          { name: 'Reports', icon: 'bar-chart', route: '#reports' },
-          { name: 'Analytics', icon: 'activity', route: '#insights' },
-          { name: 'Settings', icon: 'settings', route: '#settings' }
+          { name: 'Reports', icon: 'bar-chart', route: '#regional-reports' },
+          { name: 'Analytics', icon: 'activity', route: '#regional-analytics' },
+          { name: 'Settings', icon: 'settings', route: '#regional-settings' },
+          { name: 'My Profile', icon: 'user', route: '#national-profile' },
+          { name: 'Help & Support', icon: 'help-circle', route: '#regional-help' }
+        ]
+      }
+    ];
+  }
+
+  if (role === 'regionalAdmin') {
+    return [
+      {
+        title: 'OPERATIONS',
+        items: [
+          { name: 'Regions Management', icon: 'map', route: '#regional-regions' },
+          { name: 'Stores Management', icon: 'coffee', route: '#regional-stores' },
+          { name: 'Warehouse Overview', icon: 'warehouse', route: '#regional-warehouse' },
+          { name: 'Sales Overview', icon: 'chart', route: '#regional-sales' },
+          { name: 'Inventory Overview', icon: 'package', route: '#regional-inventory' },
+          { name: 'Supply Requests', icon: 'truck', route: '#regional-supply-requests' }
+        ]
+      },
+      {
+        title: 'COMMUNICATION',
+        items: [
+          { name: 'Broadcast Announcement', icon: 'send', route: '#regional-announcements' }
+        ]
+      },
+      {
+        title: 'WORKFORCE',
+        items: [
+          { name: 'Employee Overview', icon: 'users', route: '#regional-employees' },
+          { name: 'Recruitment', icon: 'user-plus', route: '#regional-recruitment' },
+          { name: 'Training & Development', icon: 'graduation-cap', route: '#regional-training' },
+          { name: 'Performance', icon: 'star', route: '#regional-performance' }
+        ]
+      },
+      {
+        title: 'VENDORS & PROCUREMENT',
+        items: [
+          { name: 'Vendors', icon: 'truck', route: '#regional-vendors' },
+          { name: 'Purchase Management', icon: 'shopping-bag', route: '#regional-purchase' },
+          { name: 'Contracts', icon: 'file-text', route: '#regional-contracts' }
+        ]
+      },
+      {
+        title: 'COMPLIANCE & SUPPORT',
+        items: [
+          { name: 'Complaints Management', icon: 'message-square', route: '#regional-complaints' },
+          { name: 'Legal Cases', icon: 'scale', route: '#regional-legal' },
+          { name: 'Audit & Compliance', icon: 'shield', route: '#regional-audit' }
+        ]
+      },
+      {
+        title: 'REPORTS & ANALYTICS',
+        items: [
+          { name: 'Reports', icon: 'bar-chart', route: '#regional-reports' },
+          { name: 'Analytics', icon: 'activity', route: '#regional-analytics' },
+          { name: 'Settings', icon: 'settings', route: '#regional-settings' },
+          { name: 'My Profile', icon: 'user', route: '#regional-profile' },
+          { name: 'Help & Support', icon: 'help-circle', route: '#regional-help' }
         ]
       }
     ];
@@ -133,7 +174,7 @@ export function getMenuItems() {
         title: 'PERSONAL',
         items: [
           { name: 'Leave Management', icon: 'plane-takeoff', route: '#leave' },
-          { name: 'My Profile', icon: 'user', route: '#profile' },
+          { name: 'My Profile', icon: 'user', route: '#supervisor-profile' },
           { name: 'Settings', icon: 'settings', route: '#settings' }
         ]
       }
@@ -153,7 +194,7 @@ export function getMenuItems() {
           { name: 'Leave', icon: 'plane-takeoff', route: '#leave' },
           { name: 'Announcements', icon: 'megaphone', route: '#announcements' },
           { name: 'Documents', icon: 'file-text', route: '#documents' },
-          { name: 'My Profile', icon: 'user', route: '#profile' },
+          { name: 'My Profile', icon: 'user', route: '#employee-profile' },
           { name: 'Payslips', icon: 'banknote', route: '#payslips' },
           { name: 'Settings', icon: 'settings', route: '#settings' },
           { name: 'Help & Support', icon: 'help-circle', route: '#support' }
@@ -167,8 +208,14 @@ export function getMenuItems() {
       {
         title: 'OPERATIONS',
         items: [
-          { name: 'Inventory Overview', icon: 'package', route: '#inventory' },
           { name: 'Sales Overview', icon: 'chart', route: '#sales' }
+        ]
+      },
+      {
+        title: 'INVENTORY',
+        items: [
+          { name: 'Inventory Overview', icon: 'package', route: '#store-inventory' },
+          { name: 'Daily Usage Tracker', icon: 'clipboard', route: '#store-usage' }
         ]
       },
       {
@@ -178,7 +225,7 @@ export function getMenuItems() {
           { name: 'Leave Management', icon: 'calendar', route: '#store-leave' },
           { name: 'Workforce Overview', icon: 'users', route: '#store-workforce' },
           { name: 'Store Settings', icon: 'settings', route: '#store-settings' },
-          { name: 'My Profile', icon: 'user', route: '#profile' }
+          { name: 'My Profile', icon: 'user', route: '#store-profile' }
         ]
       }
     ];
@@ -196,7 +243,13 @@ export function getMenuItems() {
         { name: 'Users & Roles', icon: 'users', route: '#users' },
         { name: 'Roles & Permissions', icon: 'shield', route: '#permissions' },
         { name: 'System Settings', icon: 'settings', route: '#settings' },
-        { name: 'My Profile', icon: 'user', route: '#profile' }
+        { name: 'My Profile', icon: 'user', route: '#ultimate-profile' }
+      ]
+    },
+    {
+      title: 'COMMUNICATION',
+      items: [
+        { name: 'Broadcast Announcement', icon: 'send', route: '#ultimate-announcements' }
       ]
     },
     {

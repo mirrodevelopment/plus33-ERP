@@ -105,6 +105,15 @@ public class Employee {
     @Column(name = "hire_date", nullable = false)
     private LocalDate hireDate;
 
+    @Column(name = "bank_name", length = 100)
+    private String bankName;
+
+    @Column(name = "bank_account_number", length = 100)
+    private String bankAccountNumber;
+
+    @Column(name = "ifsc_number", length = 100)
+    private String ifscNumber;
+
     @Column(nullable = false, length = 30)
     private String status = "ACTIVE";
 

@@ -5,25 +5,35 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.entity
  * File              : Permission.java
- * Purpose           : JPA Entity representing a persistent database record in Security Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: PermissionController
- * Related Service   : PermissionService, PermissionServiceImpl
- * Related Repository: PermissionRepository
- * Related Entity    : Permission
- * Related DTO       : N/A
- * Related Mapper    : PermissionMapper
- * Related DB Table  : permissions
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : PermissionRepository, PermissionMapper
+ * Path              : src/main/java/com/plus33/erp/security/entity/Permission.java
+ * Purpose           : JPA entity mapping the 'permissions' table — stores granular
+ *                     action-level permission codes assigned to roles for fine-grained
+ *                     API and UI access control throughout the ERP platform.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * JPA Entity mapped to 'permissions'. Defines persistent domain object for Security Module with validation, relationship mappings, and lifecycle callbacks.
+ * Granular permission entity within the PLUS33 Coffee ERP RBAC system.
+ * Permissions are assigned to Roles via the role_permissions join table.
+ * Each permission code becomes a GrantedAuthority string embedded in JWT
+ * tokens by UserDetailsServiceImpl and checked by @PreAuthorize expressions
+ * on controller endpoints.
+ *
+ * Columns:
+ *   id          — auto-incremented primary key.
+ *   code        — unique string (max 100 chars) identifying the permission
+ *                 (e.g. "inventory.read", "payroll.approve", "reports.view").
+ *                 Used directly as GrantedAuthority.getAuthority() value.
+ *   name        — human-readable label (max 150 chars).
+ *   description — freeform text for developer/admin documentation.
+ *   createdAt   — set on insert, not updatable.
+ *   roles       — inverse side of the ManyToMany relationship with Role
+ *                 (mappedBy "permissions"). Not directly traversed in auth flow.
+ *
+ * Used by: Role (authority assignment), UserDetailsServiceImpl (authority
+ *          flattening into JWT claims), @PreAuthorize method security.
+ * Seeded via Flyway migrations. Not managed via API endpoints.
  ******************************************************************************/
 package com.plus33.erp.security.entity;
 

@@ -1,0 +1,191 @@
+﻿<!--
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Regional Admin Module
+ * File              : profile.html
+ * Path              : frontend/modules/regional-admin/pages/profile/profile.html
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Regional Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+-->
+<!-- ============================================================
+     PLUS33 Coffee ERP | Regional Admin Profile Page
+     Module  : Regional Admin — My Profile
+     File    : profile.html
+     Path    : frontend/modules/regional-admin/pages/profile/profile.html
+     Purpose : Glassmorphic 4-row profile page — Blue regional-admin theme
+     ============================================================ -->
+<div class="reg-profile-page animate-fade-in">
+
+  <!-- Hero Header Banner Card -->
+  <div class="reg-profile-hero">
+    <div class="reg-profile-hero__bg"></div>
+    <div class="reg-profile-hero__content">
+
+      <!-- Avatar -->
+      <div class="reg-profile-avatar-wrapper" id="avatar-container-box" title="Change Profile Avatar">
+        <div class="reg-profile-avatar">
+          <img id="reg-avatar-img" src="imgs/male-avatar.png" alt="Regional Admin Avatar" class="reg-profile-avatar__img">
+          <div class="reg-profile-avatar__overlay"><span>📷</span><span>Change</span></div>
+        </div>
+        <button type="button" id="btn-edit-avatar-pencil" class="reg-profile-avatar__pencil" title="Change Profile Picture">✏️</button>
+        <span class="reg-profile-status-dot"></span>
+        <input type="file" id="input-reg-avatar-file" accept="image/*" style="display:none;">
+      </div>
+
+      <!-- Info -->
+      <div class="reg-profile-hero__meta">
+        <div class="reg-profile-hero__title-row">
+          <h2 id="reg-user-fullname" class="reg-profile-hero__name">Regional Director</h2>
+          <span class="reg-role-badge">REGIONAL ADMIN</span>
+        </div>
+        <p id="reg-user-email" class="reg-profile-hero__email">regional.admin@plus33.coffee</p>
+        <div class="reg-profile-hero__tags">
+          <span id="reg-country-code-badge" class="reg-tag-pill">🇮🇳 IN (+91)</span>
+          <span id="reg-scope-badge" class="reg-tag-pill">🌐 South India Regional Hub</span>
+          <span id="reg-docs-verified-badge" class="reg-tag-pill">⏳ Onboarding Documents Pending</span>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="reg-profile-hero__stats">
+        <div class="reg-stat-card"><span class="reg-stat-card__val" id="stat-reg-stores">—</span><span class="reg-stat-card__lbl">Stores</span></div>
+        <div class="reg-stat-card"><span class="reg-stat-card__val" id="stat-reg-employees">—</span><span class="reg-stat-card__lbl">Employees</span></div>
+        <div class="reg-stat-card reg-stat-card--accent"><span class="reg-stat-card__val" id="stat-reg-revenue">—</span><span class="reg-stat-card__lbl">Regional Revenue</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: Info Form + Security -->
+  <div class="reg-profile-row-1">
+
+    <!-- Personal + Banking Info Card -->
+    <div class="reg-profile-card">
+      <div class="reg-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="reg-profile-card__icon">👤</div>
+          <div>
+            <h3 class="reg-profile-card__title">Regional Admin Information</h3>
+            <span class="reg-profile-card__sub">Personal, Compensation &amp; Banking Details</span>
+          </div>
+        </div>
+        <button type="button" id="btn-toggle-edit-personal" class="reg-profile-btn-sec">✏️ Edit Details</button>
+      </div>
+      <form id="form-reg-personal-info" class="reg-profile-form">
+        <div class="reg-form-row">
+          <div class="reg-form-group"><label class="reg-form-label">First Name</label><div class="reg-form-input-wrap"><span class="reg-form-icon">👤</span><input type="text" id="input-reg-firstname" placeholder="First Name" disabled class="reg-form-input"></div></div>
+          <div class="reg-form-group"><label class="reg-form-label">Last Name</label><div class="reg-form-input-wrap"><span class="reg-form-icon">👤</span><input type="text" id="input-reg-lastname" placeholder="Last Name" disabled class="reg-form-input"></div></div>
+        </div>
+        <div class="reg-form-row">
+          <div class="reg-form-group"><label class="reg-form-label">Email Address</label><div class="reg-form-input-wrap"><span class="reg-form-icon">✉️</span><input type="email" id="input-reg-email" placeholder="Email Address" disabled class="reg-form-input"></div></div>
+          <div class="reg-form-group"><label class="reg-form-label">Contact Phone</label><div class="reg-form-input-wrap"><span class="reg-form-icon">📞</span><input type="tel" id="input-reg-phone" placeholder="Phone Number" disabled class="reg-form-input"></div></div>
+        </div>
+        <div class="reg-form-row">
+          <div class="reg-form-group"><label class="reg-form-label">Staff ID</label><div class="reg-form-input-wrap"><span class="reg-form-icon">🪪</span><input type="text" id="input-reg-empid" placeholder="Staff ID" disabled readonly class="reg-form-input"></div></div>
+          <div class="reg-form-group"><label class="reg-form-label">Role Title</label><div class="reg-form-input-wrap"><span class="reg-form-icon">👔</span><input type="text" id="input-reg-designation" placeholder="Designation / Role" disabled class="reg-form-input"></div></div>
+        </div>
+        <div class="reg-form-row reg-form-row--3">
+          <div class="reg-form-group"><label class="reg-form-label">Joined Date</label><div class="reg-form-input-wrap"><span class="reg-form-icon">📅</span><input type="text" id="input-reg-joined" placeholder="Joined Date" disabled class="reg-form-input"></div></div>
+          <div class="reg-form-group"><label class="reg-form-label">Base Salary Rate</label><div class="reg-form-input-wrap"><span class="reg-form-icon">💵</span><input type="text" id="input-reg-salary" placeholder="Base Salary" disabled class="reg-form-input"></div></div>
+          <div class="reg-form-group"><label class="reg-form-label">Gender Avatar</label><div class="reg-form-input-wrap"><span class="reg-form-icon">🚻</span><select id="input-reg-gender" disabled class="reg-form-input"><option value="Male">Male (👨 Default)</option><option value="Female">Female (👩 Default)</option><option value="Other">Other</option></select></div></div>
+        </div>
+        <div class="reg-banking-header">
+          <span>🏦 Country Direct Deposit Bank Details</span>
+          <span id="lbl-reg-bank-country" class="reg-banking-country">🇮🇳 India Standard</span>
+        </div>
+        <div class="reg-form-row">
+          <div class="reg-form-group"><label class="reg-form-label">Bank Name</label><div class="reg-form-input-wrap"><span class="reg-form-icon">🏛️</span><input type="text" id="input-reg-bankname" placeholder="Bank Name" disabled class="reg-form-input"></div></div>
+          <div class="reg-form-group"><label class="reg-form-label" id="lbl-bank-acc-num">Account Number / IBAN</label><div class="reg-form-input-wrap"><span class="reg-form-icon">💳</span><input type="text" id="input-reg-bankacc" placeholder="Account Number / IBAN" disabled class="reg-form-input"></div></div>
+        </div>
+        <div class="reg-form-row">
+          <div class="reg-form-group"><label class="reg-form-label" id="lbl-bank-ifsc-code">IFSC / BIC / SWIFT Code</label><div class="reg-form-input-wrap"><span class="reg-form-icon">🔍</span><input type="text" id="input-reg-ifsc" placeholder="IFSC / BIC / SWIFT" disabled class="reg-form-input"></div></div>
+          <div class="reg-form-group"><label class="reg-form-label" id="lbl-bank-branch-wps">Branch / WPS Routing ID</label><div class="reg-form-input-wrap"><span class="reg-form-icon">📍</span><input type="text" id="input-reg-branch" placeholder="Branch / WPS ID" disabled class="reg-form-input"></div></div>
+        </div>
+        <div id="reg-personal-actions" class="reg-form-actions" style="display:none;">
+          <button type="button" id="btn-cancel-personal" class="reg-btn-ghost">Cancel</button>
+          <button type="submit" id="btn-save-personal" class="reg-btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Security Card -->
+    <div class="reg-profile-card">
+      <div class="reg-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="reg-profile-card__icon">🛡️</div>
+          <div>
+            <h3 class="reg-profile-card__title">Security &amp; Account</h3>
+            <span class="reg-profile-card__sub">Manage your login credentials</span>
+          </div>
+        </div>
+      </div>
+      <form id="form-reg-change-password" class="reg-profile-form">
+        <div class="reg-form-group"><label class="reg-form-label">Current Password</label><input type="password" id="input-reg-curr-password" placeholder="••••••••••••" required class="reg-form-input"></div>
+        <div class="reg-form-row">
+          <div class="reg-form-group"><label class="reg-form-label">New Password</label><input type="password" id="input-reg-new-password" placeholder="Minimum 8 chars" required class="reg-form-input"></div>
+          <div class="reg-form-group"><label class="reg-form-label">Confirm Password</label><input type="password" id="input-reg-confirm-password" placeholder="Repeat new password" required class="reg-form-input"></div>
+        </div>
+        <button type="submit" id="btn-reg-update-password" class="reg-btn-primary full-width">🔒 Update Security Credentials</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ROW 2: 4 Feature Cards -->
+  <div class="reg-profile-row-2">
+    <div class="reg-feature-card reg-feature-card--blue">
+      <div class="reg-feature-card__header"><span class="reg-feature-card__icon">🌐</span><div><h4 class="reg-feature-card__title">Regional Jurisdiction</h4><span class="reg-feature-card__sub" style="color:#3b82f6;">Area Overview</span></div></div>
+      <div class="reg-feature-card__body">
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Stores in Region</span><strong id="fc-reg-stores" class="reg-feature-card__val">—</strong></div>
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Total Employees</span><strong id="fc-reg-emp" class="reg-feature-card__val">—</strong></div>
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Status</span><strong style="color:#3b82f6;">Active Regional Director</strong></div>
+      </div>
+    </div>
+    <div class="reg-feature-card reg-feature-card--amber">
+      <div class="reg-feature-card__header"><span class="reg-feature-card__icon">📜</span><div><h4 class="reg-feature-card__title">Verification Documents</h4><span class="reg-feature-card__sub" style="color:#f59e0b;">Compliance Overview</span></div></div>
+      <div class="reg-feature-card__body">
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Compliance Standard</span><strong class="reg-feature-card__val">Regional Admin Onboarding</strong></div>
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Verification Status</span><strong id="fc-reg-doc-status" style="color:#f59e0b;">Pending Review</strong></div>
+      </div>
+      <button type="button" onclick="document.querySelector('.doc-hub-grid-wrapper')?.scrollIntoView({behavior:'smooth'});" class="reg-feature-card__btn reg-feature-card__btn--amber">Go to Verification Hub</button>
+    </div>
+    <div class="reg-feature-card reg-feature-card--cyan">
+      <div class="reg-feature-card__header"><span class="reg-feature-card__icon">📊</span><div><h4 class="reg-feature-card__title">Regional Analytics</h4><span class="reg-feature-card__sub" style="color:#06b6d4;">Performance</span></div></div>
+      <div class="reg-feature-card__body">
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Regional Revenue</span><strong id="fc-reg-revenue" class="reg-feature-card__val">—</strong></div>
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Performance</span><strong style="color:#10b981;">On Target</strong></div>
+      </div>
+      <button type="button" onclick="window.location.hash='#regional-analytics'" class="reg-feature-card__btn reg-feature-card__btn--cyan">View Analytics</button>
+    </div>
+    <div class="reg-feature-card reg-feature-card--purple">
+      <div class="reg-feature-card__header"><span class="reg-feature-card__icon">🏢</span><div><h4 class="reg-feature-card__title">Vendor &amp; Contracts</h4><span class="reg-feature-card__sub" style="color:#c084fc;">Partnerships</span></div></div>
+      <div class="reg-feature-card__body">
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Active Vendors</span><strong class="reg-feature-card__val">—</strong></div>
+        <div class="reg-feature-card__row"><span class="reg-feature-card__lbl">Open Contracts</span><strong style="color:#c084fc;">—</strong></div>
+      </div>
+      <button type="button" onclick="window.location.hash='#regional-vendors'" class="reg-feature-card__btn reg-feature-card__btn--purple">View Vendors</button>
+    </div>
+  </div>
+
+  <!-- ROW 3: Document Hub -->
+  <div class="reg-profile-doc-hub">
+    <div id="reg-doc-hub-container"></div>
+  </div>
+
+  <!-- ROW 4: Quick Utility Footer -->
+  <div class="reg-profile-row-4">
+    <div class="reg-utility-tile" onclick="window.location.hash='#regional-stores'"><span class="reg-utility-tile__icon">☕</span><div><strong class="reg-utility-tile__title">Store Network</strong><span class="reg-utility-tile__sub">View all stores in region</span></div></div>
+    <div class="reg-utility-tile" onclick="window.location.hash='#regional-recruitment'"><span class="reg-utility-tile__icon">🧑‍💼</span><div><strong class="reg-utility-tile__title">Recruitment</strong><span class="reg-utility-tile__sub">Manage hiring pipeline</span></div></div>
+    <div class="reg-utility-tile" onclick="window.location.hash='#regional-regions'"><span class="reg-utility-tile__icon">🗺️</span><div><strong class="reg-utility-tile__title">Regions Map</strong><span class="reg-utility-tile__sub">View region boundaries</span></div></div>
+    <div class="reg-utility-tile"><span class="reg-utility-tile__icon">❓</span><div><strong class="reg-utility-tile__title">HR Help &amp; Support</strong><span class="reg-utility-tile__sub">Get admin assistance</span></div></div>
+  </div>
+
+</div>
+

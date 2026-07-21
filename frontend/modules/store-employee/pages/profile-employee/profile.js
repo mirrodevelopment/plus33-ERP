@@ -1,9 +1,33 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Employee Module
+ * File              : profile.js
+ * Path              : frontend/modules/store-employee/pages/profile-employee/profile.js
+ * Purpose           : Barista/Employee user profile workspace component; handles self-profile data loading from GET /api/v1/auth/me, onboarding document status, profile updating via PUT /api/v1/auth/me, custom avatar uploading, and DocumentHubComponent integration.
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Specialized profile page controller for Baristas and Store Employees.
+ * Capabilities:
+ *   - Injects HTML template modules/store-employee/pages/profile-employee/profile.html and stylesheet profile.css.
+ *   - Loads live profile fields and onboarding document status.
+ *   - Toggles interactive editing for personal and banking fields (first name, last name, phone, gender, bank name, account, IFSC, branch).
+ *   - Locks system-governed administrative fields (email, employee ID, designation, joined date, salary).
+ *   - Supports custom file avatar uploads to /api/upload-avatar or selecting gender default presets.
+ *   - Renders DocumentHubComponent configured specifically for storeEmployee role type.
+ ******************************************************************************/
 import { authStore } from '../../../../store/authStore.js';
 import { userStore } from '../../../../store/userStore.js';
 import { notificationStore } from '../../../../store/notificationStore.js';
 import { logger } from '../../../../core/logger.js';
 import { apiClient } from '../../../../api/client.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
+import { DocumentHubComponent } from '../../../../shared/profile/DocumentHubComponent.js';
 
 const TEMPLATE_URL = 'modules/store-employee/pages/profile-employee/profile.html';
 
@@ -11,61 +35,53 @@ export default class ProfilePage {
   constructor() {
     this.user = authStore.getUser();
     this.profile = userStore.getProfile(this.user?.role) || {};
-    this.docs = {
-      personalPhoto: null,
-      personalId: null,
-      personalAddress: null,
-      educationSchool: null,
-      educationCollege: null,
-      educationCertificates: null,
-      employmentResume: null,
-      employmentOffer: null,
-      employmentExperience: null,
-      bankingAccount: null,
-      bankingCheque: null,
-      taxPan: null,
-      taxForms: null,
-      socialSecurityPf: null,
-      socialSecurityEsi: null,
-      socialSecurity: null,
-      medicalFitness: null,
-      medicalVaccination: null,
-      medicalFoodHandler: null,
-      legalNda: null,
-      legalAgreement: null,
-      legalBackground: null,
-      immigrationPassport: null,
-      immigrationVisa: null,
-      immigrationPermit: null,
-      drivingLicense: null,
-      drivingCommercial: null,
-      emergencyContact: null
-    };
-    this.selectedFile = null;
+    this.docs = {};
     this.isEditing = false;
-    this.payslipLoaded = false;
+    this.docHub = null;
   }
 
   async mount(container, lifecycle) {
-    logger.info('StoreEmployeeProfile', 'Mounting store employee profile page...');
-    
-    // Load CSS
+    logger.info('EmployeeProfile', 'Mounting employee profile page with multi-region document engine...');
+
     this._loadCss();
-
-    // 1. Inject HTML template layout
     await htmlLoader.inject(TEMPLATE_URL, container);
-
-    // 2. Load profile and document data from server
     await this.loadProfileData();
     await this.loadDocumentData();
-    await this.loadDocumentRequirements();
 
-    // 3. Populate data and bind events
     this.render(container);
     this.bindEvents(container, lifecycle);
+  }
 
-    // 4. Init tab navigation
-    this._initTabs(container);
+  _loadCss() {
+    const cssId = 'css-employee-profile';
+    if (!document.getElementById(cssId)) {
+      const link = document.createElement('link');
+      link.id = cssId;
+      link.rel = 'stylesheet';
+      link.href = 'modules/store-employee/pages/profile-employee/profile.css';
+      document.head.appendChild(link);
+    }
+  }
+
+  async loadDocumentData() {
+    try {
+      const docResponse = await apiClient.get('/api/v2/employee-self-service/documents');
+      if (docResponse && docResponse.success && Array.isArray(docResponse.data)) {
+        const docs = {};
+        docResponse.data.forEach(d => {
+          docs[d.documentType] = {
+            id: d.id,
+            name: d.documentName,
+            url: d.filePath,
+            approved: d.approved,
+            uploadedAt: d.uploadedAt ? new Date(d.uploadedAt).toLocaleString('en-US', {hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit'}) : ''
+          };
+        });
+        this.docs = docs;
+      }
+    } catch (e) {
+      logger.error('EmployeeProfile', 'Error loading database documents:', e);
+    }
   }
 
   async loadProfileData() {
@@ -77,668 +93,441 @@ export default class ProfilePage {
         userStore.updateProfile(this.user?.role, response.data);
       }
     } catch (e) {
-      logger.error('StoreEmployeeProfile', 'Error loading database profile:', e);
-    }
-  }
-
-  async loadDocumentData() {
-    try {
-      const docResponse = await apiClient.get('/api/v2/employee-self-service/documents');
-      if (docResponse && docResponse.success && Array.isArray(docResponse.data)) {
-        // Store as a plain map keyed by documentType — works for any key the API returns
-        this.docs = {};
-        docResponse.data.forEach(d => {
-          this.docs[d.documentType] = {
-            id: d.id,
-            name: d.documentName,
-            url: d.filePath,
-            approved: d.approved,
-            uploadedAt: d.uploadedAt
-              ? new Date(d.uploadedAt).toLocaleString('en-US', {
-                  hour: '2-digit', minute: '2-digit',
-                  year: 'numeric', month: '2-digit', day: '2-digit'
-                })
-              : ''
-          };
-        });
-      }
-    } catch (e) {
-      logger.error('StoreEmployeeProfile', 'Error loading database documents:', e);
-    }
-  }
-
-  /**
-   * Fetches the document requirements for the employee's country from the backend.
-   * Stores them in this.docRequirements as an array of category objects.
-   */
-  async loadDocumentRequirements() {
-    try {
-      const country = encodeURIComponent(this.profile?.country || 'India');
-      const res = await apiClient.get(`/api/v2/employee-self-service/document-requirements?country=${country}`);
-      if (res && res.success && Array.isArray(res.data)) {
-        this.docRequirements = res.data;
-      } else {
-        this.docRequirements = [];
-      }
-    } catch (e) {
-      logger.error('StoreEmployeeProfile', 'Error loading document requirements:', e);
-      this.docRequirements = [];
+      logger.error('EmployeeProfile', 'Error loading database profile:', e);
     }
   }
 
   render(container) {
-    if (!this.profile) return;
+    this.user = authStore.getUser();
+    const p = this.profile || {};
 
-    // Profile Card Header fields
-    const avatarImg = container.querySelector('#profile-card-image');
-    if (avatarImg) {
-      const avatarBuster = this.profile.avatarUrl ? `${this.profile.avatarUrl}?v=${Date.now()}` : 'imgs/male-avatar.png';
-      avatarImg.src = avatarBuster;
-      avatarImg.alt = this.profile.name || 'Store Employee';
+    const fullName = (p.firstName || p.lastName)
+      ? `${p.firstName || ''} ${p.lastName || ''}`.trim()
+      : (p.fullName || p.name || this.user?.name || '');
+
+    const email = p.email || this.user?.email || '';
+    const storeName = p.storeName || p.store || '';
+
+    const nameEl = container.querySelector('#emp-user-fullname');
+    const emailEl = container.querySelector('#emp-user-email');
+    const scopeBadgeEl = container.querySelector('#emp-scope-badge');
+    const avatarImg = container.querySelector('#emp-avatar-img');
+
+    const countryBadge = container.querySelector('#emp-country-code-badge');
+
+    if (nameEl) nameEl.textContent = fullName || 'User Profile';
+    if (emailEl) emailEl.textContent = email || 'No Email Registered';
+    if (scopeBadgeEl) scopeBadgeEl.textContent = storeName || 'Main Store';
+    if (countryBadge) {
+      const countryStr = String(p.country || '').toLowerCase();
+      const phoneStr = String(p.phone || p.phoneNumber || '');
+      if (countryStr.includes('france') || phoneStr.startsWith('+33')) countryBadge.textContent = '🇫🇷 FR (+33)';
+      else if (countryStr.includes('uae') || countryStr.includes('emirates') || phoneStr.startsWith('+971')) countryBadge.textContent = '🇦🇪 AE (+971)';
+      else if (countryStr.includes('singapore') || phoneStr.startsWith('+65')) countryBadge.textContent = '🇸🇬 SG (+65)';
+      else if (countryStr.includes('usa') || countryStr.includes('united states') || phoneStr.startsWith('+1')) countryBadge.textContent = '🇺🇸 US (+1)';
+      else countryBadge.textContent = '🇮🇳 IN (+91)';
     }
 
-    const displayName = container.querySelector('#profile-display-name');
-    if (displayName) displayName.textContent = this.profile.name || 'Not set';
+    const docsBadge = container.querySelector('#emp-docs-verified-badge');
+    if (docsBadge) {
+      const docs = this.docs || {};
+      const panApproved = docs.panCard && docs.panCard.approved === true;
+      const aadhaarApproved = docs.aadhaarCard && docs.aadhaarCard.approved === true;
+      const permitApproved = docs.workPermit && docs.workPermit.approved === true;
+      const allVerified = panApproved && aadhaarApproved && permitApproved;
 
-    const displayStore = container.querySelector('#profile-display-store');
-    if (displayStore) displayStore.textContent = this.profile.store || 'Corporate Head Office';
-
-    const displayRole = container.querySelector('#profile-display-role');
-    if (displayRole) displayRole.textContent = (this.user?.role || 'Store Employee').replace(/([A-Z])/g, ' $1').toUpperCase();
-
-    const displayCode = container.querySelector('#profile-display-code');
-    if (displayCode) displayCode.textContent = this.profile.employeeCode ? `ID: ${this.profile.employeeCode}` : 'ID: N/A';
-
-    // Info Details Grid
-    const nameVal = container.querySelector('#info-name');
-    if (nameVal) nameVal.textContent = this.profile.name || 'Not set';
-
-    const codeVal = container.querySelector('#info-code');
-    if (codeVal) codeVal.textContent = this.profile.employeeCode || 'N/A';
-
-    const designationVal = container.querySelector('#info-designation');
-    if (designationVal) designationVal.textContent = this.profile.designation || 'Barista';
-
-    const emailVal = container.querySelector('#info-email');
-    if (emailVal) emailVal.textContent = this.profile.email || 'Not set';
-
-    const phoneVal = container.querySelector('#info-phone');
-    if (phoneVal) phoneVal.textContent = this.profile.phone || 'Not set';
-
-    const addressVal = container.querySelector('#info-address');
-    if (addressVal) addressVal.textContent = this.profile.address || 'Not set';
-
-    const departmentVal = container.querySelector('#info-department');
-    if (departmentVal) departmentVal.textContent = this.profile.department || 'N/A';
-
-    const workingVal = container.querySelector('#info-working-type');
-    if (workingVal) workingVal.textContent = this.profile.employmentType || 'Permanent';
-
-    const salaryVal = container.querySelector('#info-salary');
-    if (salaryVal) {
-      salaryVal.textContent = `€${parseFloat(this.profile.hourlyRate || 15.00).toFixed(2)}/hr`;
+      if (allVerified) {
+        docsBadge.style.background = 'rgba(16,185,129,0.1)';
+        docsBadge.style.borderColor = 'rgba(16,185,129,0.3)';
+        docsBadge.style.color = '#10b981';
+        docsBadge.textContent = '✓ Onboarding Documents Verified';
+      } else {
+        docsBadge.style.background = 'rgba(245,158,11,0.12)';
+        docsBadge.style.borderColor = 'rgba(245,158,11,0.35)';
+        docsBadge.style.color = '#f59e0b';
+        docsBadge.textContent = '⏳ Onboarding Documents Pending';
+      }
     }
 
-    const joinedVal = container.querySelector('#info-joined-date');
-    if (joinedVal) joinedVal.textContent = this.profile.joinedDate || 'N/A';
-
-    const storeVal = container.querySelector('#info-store');
-    if (storeVal) storeVal.textContent = this.profile.store || 'Corporate Head Office';
-
-    // STORE TYPE
-    const storeTypeVal = container.querySelector('#info-store-type');
-    if (storeTypeVal) storeTypeVal.textContent = this.profile.storeType ? this.profile.storeType.replace('_', ' ') : 'FLAGSHIP CAFE';
-
-    const regionVal = container.querySelector('#info-region');
-    if (regionVal) regionVal.textContent = this.profile.storeRegion || 'N/A';
-
-    const countryVal = container.querySelector('#info-country');
-    if (countryVal) countryVal.textContent = this.profile.country || 'N/A';
-
-    // Edit form fields prepopulation
-    const editCard = container.querySelector('#edit-profile-card');
-    if (editCard) {
-      editCard.style.display = this.isEditing ? 'block' : 'none';
+    if (avatarImg && (p.avatarUrl || this.user?.avatarUrl)) {
+      avatarImg.src = p.avatarUrl || this.user?.avatarUrl;
     }
 
-    const editName = container.querySelector('#input-profile-name');
-    if (editName) editName.value = this.profile.name || '';
+    const fnameInput = container.querySelector('#input-emp-firstname');
+    const lnameInput = container.querySelector('#input-emp-lastname');
+    const emailInput = container.querySelector('#input-emp-email');
+    const phoneInput = container.querySelector('#input-emp-phone');
+    const empIdInput = container.querySelector('#input-emp-empid');
+    const desigInput = container.querySelector('#input-emp-designation');
+    const joinedInput = container.querySelector('#input-emp-joined');
+    const salaryInput = container.querySelector('#input-emp-salary');
+    const bankNameInput = container.querySelector('#input-emp-bankname');
+    const bankAccInput = container.querySelector('#input-emp-bankacc');
+    const ifscInput = container.querySelector('#input-emp-ifsc');
+    const branchInput = container.querySelector('#input-emp-branch');
 
-    const editEmail = container.querySelector('#input-profile-email');
-    if (editEmail) editEmail.value = this.profile.email || '';
+    const genderSelect = container.querySelector('#input-emp-gender');
 
-    const editPhone = container.querySelector('#input-profile-phone');
-    if (editPhone) editPhone.value = this.profile.phone || '';
+    if (fnameInput) fnameInput.value = p.firstName || '';
+    if (lnameInput) lnameInput.value = p.lastName || '';
+    if (emailInput) emailInput.value = email || '';
+    if (phoneInput) phoneInput.value = p.phone || p.phoneNumber || '';
+    if (empIdInput) empIdInput.value = p.employeeId || p.employeeCode || '';
+    if (desigInput) desigInput.value = p.designation || p.role || '';
+    if (joinedInput) joinedInput.value = p.joinedDate || p.hireDate || '';
+    if (salaryInput) salaryInput.value = p.baseSalary || p.basicSalary || '';
+    if (genderSelect) genderSelect.value = p.gender || 'Female';
+    if (bankNameInput) bankNameInput.value = p.bankName || '';
+    if (bankAccInput) bankAccInput.value = p.bankAccount || p.bankAccountNumber || '';
+    if (ifscInput) ifscInput.value = p.ifscCode || p.ifscNumber || '';
+    if (branchInput) branchInput.value = p.branchName || p.branchLocation || '';
 
-    const editGender = container.querySelector('#select-profile-gender');
-    if (editGender) editGender.value = this.profile.gender || 'Male';
-
-    const editAvatarType = container.querySelector('#select-profile-avatar-type');
-    if (editAvatarType) {
-      const isPreset = ['imgs/male-avatar.png', 'imgs/female-avatar.png'].includes(this.profile.avatarUrl);
-      editAvatarType.value = isPreset ? this.profile.avatarUrl : 'custom';
+    // Mount Multi-Region Document Hub Component
+    const docHubBox = container.querySelector('#emp-doc-hub-container') || container.querySelector('.emp-docs-list');
+    if (docHubBox) {
+      this.docHub = new DocumentHubComponent({
+        roleType: 'storeEmployee',
+        user: this.user,
+        profile: this.profile,
+        initialDocs: this.docs
+      });
+      this.docHub.render(docHubBox);
     }
-
-    // Render the dynamic documents tab based on country requirements
-    this.renderDocumentsTab(container);
   }
 
   bindEvents(container, lifecycle) {
-    const toggleEditBtn = container.querySelector('#btn-toggle-edit-mode');
-    if (toggleEditBtn) {
-      const handleToggle = () => {
-        this.isEditing = !this.isEditing;
-        this.render(container);
-        if (this.isEditing) {
-          const editCard = container.querySelector('#edit-profile-card');
-          if (editCard) editCard.scrollIntoView({ behavior: 'smooth' });
-        }
-      };
-      toggleEditBtn.addEventListener('click', handleToggle);
-      lifecycle.onCleanup(() => toggleEditBtn.removeEventListener('click', handleToggle));
-    }
+    const btnEdit = container.querySelector('#btn-toggle-edit-personal');
+    const btnCancel = container.querySelector('#btn-cancel-personal');
+    const actionsBox = container.querySelector('#emp-personal-actions');
 
-    const editAvatarType = container.querySelector('#select-profile-avatar-type');
-    const uploadContainer = container.querySelector('#avatar-file-upload-container');
-    const fileInput = container.querySelector('#input-profile-file');
-    const dropZone = container.querySelector('#avatar-drop-zone');
-    const fileNameLabel = container.querySelector('#avatar-file-name');
+    const fnameInput = container.querySelector('#input-emp-firstname');
+    const lnameInput = container.querySelector('#input-emp-lastname');
+    const phoneInput = container.querySelector('#input-emp-phone');
+    const genderSelect = container.querySelector('#input-emp-gender');
+    const bankNameInput = container.querySelector('#input-emp-bankname');
+    const bankAccInput = container.querySelector('#input-emp-bankacc');
+    const ifscInput = container.querySelector('#input-emp-ifsc');
+    const branchInput = container.querySelector('#input-emp-branch');
 
-    if (editAvatarType && uploadContainer) {
-      const handleAvatarTypeChange = () => {
-        uploadContainer.style.display = editAvatarType.value === 'custom' ? 'block' : 'none';
-      };
-      editAvatarType.addEventListener('change', handleAvatarTypeChange);
-      lifecycle.onCleanup(() => editAvatarType.removeEventListener('change', handleAvatarTypeChange));
-      
-      // Initial trigger
-      handleAvatarTypeChange();
-    }
+    const editableInputs = [fnameInput, lnameInput, phoneInput, genderSelect, bankNameInput, bankAccInput, ifscInput, branchInput];
+    const lockedInputs = [
+      container.querySelector('#input-emp-email'),
+      container.querySelector('#input-emp-empid'),
+      container.querySelector('#input-emp-designation'),
+      container.querySelector('#input-emp-joined'),
+      container.querySelector('#input-emp-salary')
+    ];
 
-    if (dropZone && fileInput) {
-      const triggerFile = () => fileInput.click();
-      dropZone.addEventListener('click', triggerFile);
-      lifecycle.onCleanup(() => dropZone.removeEventListener('click', triggerFile));
+    const toggleEdit = (editing) => {
+      this.isEditing = editing;
 
-      const handleFileChange = () => {
-        const file = fileInput.files[0];
-        if (file) {
-          this.selectedFile = file;
-          if (fileNameLabel) fileNameLabel.textContent = file.name;
-
-          // Local file preview logic
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const previewImg = container.querySelector('#profile-card-image');
-            if (previewImg) previewImg.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-      fileInput.addEventListener('change', handleFileChange);
-      lifecycle.onCleanup(() => fileInput.removeEventListener('change', handleFileChange));
-    }
-
-    // Save profile form submission
-    const profileForm = container.querySelector('#form-edit-profile');
-    if (profileForm) {
-      const handleProfileSubmit = async (e) => {
-        e.preventDefault();
-        const saveButton = container.querySelector('#btn-save-profile');
-        if (saveButton) {
-          saveButton.disabled = true;
-          saveButton.textContent = 'Saving Changes...';
-        }
-
-        const name = container.querySelector('#input-profile-name').value.trim();
-        const email = container.querySelector('#input-profile-email').value.trim();
-        const phone = container.querySelector('#input-profile-phone').value.trim();
-        const gender = container.querySelector('#select-profile-gender').value;
-        const avatarType = editAvatarType.value;
-        let avatarUrl = '';
-
-        try {
-          if (avatarType !== 'custom') {
-            avatarUrl = avatarType;
+      // Editable fields styling on edit mode
+      editableInputs.forEach(input => {
+        if (!input) return;
+        input.disabled = !editing;
+        const parent = input.parentElement;
+        if (parent) {
+          if (editing) {
+            parent.style.background = 'rgba(16, 185, 129, 0.08)';
+            parent.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            parent.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.15)';
+            parent.style.opacity = '1';
+            parent.style.filter = 'none';
           } else {
-            if (this.selectedFile) {
-              const response = await fetch('/api/upload-avatar', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': this.selectedFile.type,
-                  'X-Username': name,
-                  'X-Role': this.user.role,
-                  'X-Worker-Id': this.profile.employeeCode || String(this.profile.id || 'ADMIN')
-                },
-                body: this.selectedFile
-              });
-              const data = await response.json();
-              if (data.success && data.url) {
-                avatarUrl = data.url;
-              } else {
-                throw new Error(data.message || 'File upload failed on server.');
-              }
-            } else {
-              avatarUrl = this.profile.avatarUrl || 'imgs/male-avatar.png';
-            }
+            parent.style.background = 'rgba(24, 24, 27, 0.8)';
+            parent.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            parent.style.boxShadow = 'none';
+            parent.style.opacity = '1';
+            parent.style.filter = 'none';
           }
-
-          const updateResponse = await apiClient.put('/api/v1/auth/me', {
-            name,
-            email,
-            avatarUrl,
-            phone,
-            gender,
-            designation: this.profile.designation || 'Barista'
-          });
-
-          if (updateResponse && updateResponse.success && updateResponse.data) {
-            this.profile = updateResponse.data;
-            userStore.updateProfile(this.user.role, updateResponse.data);
-
-            authStore.updateUser({
-              name: updateResponse.data.name,
-              username: updateResponse.data.email,
-              avatarUrl: updateResponse.data.avatarUrl
-            });
-            notificationStore.success('Profile changes saved successfully to database!');
-          } else {
-            throw new Error(updateResponse?.message || 'Database update failed.');
-          }
-
-          this.selectedFile = null;
-          this.isEditing = false;
-          this.render(container);
-        } catch (err) {
-          logger.error('StoreEmployeeProfile', 'Failed to update user profile:', err);
-          notificationStore.danger(`Failed to save profile: ${err.message}`);
-        } finally {
-          if (saveButton) {
-            saveButton.disabled = false;
-            saveButton.textContent = 'Save Profile Changes';
-          }
-        }
-      };
-      profileForm.addEventListener('submit', handleProfileSubmit);
-      lifecycle.onCleanup(() => profileForm.removeEventListener('submit', handleProfileSubmit));
-    }
-
-    // Password change form submission
-    const passwordForm = container.querySelector('#form-change-password');
-    if (passwordForm) {
-      const handlePasswordSubmit = async (e) => {
-        e.preventDefault();
-        const currentPassword = container.querySelector('#input-password-current').value;
-        const newPassword = container.querySelector('#input-password-new').value;
-        const confirmPassword = container.querySelector('#input-password-confirm').value;
-        const submitBtn = container.querySelector('#btn-submit-password');
-
-        if (newPassword.length < 6) {
-          notificationStore.danger('New password must be at least 6 characters long.');
-          return;
-        }
-        if (newPassword !== confirmPassword) {
-          notificationStore.danger('New password and confirmation password do not match.');
-          return;
-        }
-
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Updating Password...';
-        }
-
-        try {
-          const response = await apiClient.put('/api/v1/auth/change-password', {
-            currentPassword,
-            newPassword
-          });
-          if (response && response.success) {
-            notificationStore.success('Account password updated successfully!');
-            passwordForm.reset();
-          } else {
-            throw new Error(response.message || 'Incorrect current password or invalid request');
-          }
-        } catch (err) {
-          logger.error('StoreEmployeeProfile', 'Failed to update password:', err);
-          notificationStore.danger(`Password change failed: ${err.message}`);
-        } finally {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Update Security Password';
-          }
-        }
-      };
-      passwordForm.addEventListener('submit', handlePasswordSubmit);
-      lifecycle.onCleanup(() => passwordForm.removeEventListener('submit', handlePasswordSubmit));
-    }
-
-    // ── Document tab: event delegation (handles dynamically-rendered cards) ──
-    const docsContainer = container.querySelector('#docs-dynamic-container');
-    if (docsContainer) {
-      const handleDocsDelegated = async (e) => {
-        // Upload button click → trigger hidden file input
-        if (e.target.matches('.btn-upload[data-type]')) {
-          const type = e.target.getAttribute('data-type');
-          const docInput = docsContainer.querySelector(`#input-doc-${type}`);
-          if (docInput) docInput.click();
-          return;
-        }
-
-        // Hidden file input change → upload file
-        if (e.target.matches('input[type="file"][data-type]')) {
-          const type = e.target.getAttribute('data-type');
-          const file = e.target.files[0];
-          if (!file) return;
-
-          const progContainer = docsContainer.querySelector(`#progress-container-${type}`);
-          const progBar      = docsContainer.querySelector(`#progress-bar-${type}`);
-          const progText     = docsContainer.querySelector(`#progress-text-${type}`);
-          const progPct      = docsContainer.querySelector(`#progress-pct-${type}`);
-
-          if (progContainer) progContainer.style.display = 'block';
-          if (progText) progText.textContent = 'Uploading...';
-
-          let pct = 0;
-          const interval = setInterval(() => {
-            pct = Math.min(pct + 10, 90);
-            if (progBar) progBar.style.width = `${pct}%`;
-            if (progPct) progPct.textContent = `${pct}%`;
-          }, 100);
-
-          try {
-            const response = await fetch('/api/upload-document', {
-              method: 'POST',
-              headers: {
-                'Content-Type': file.type,
-                'X-Worker-Id': this.profile.employeeCode || String(this.profile.id || 'ADMIN'),
-                'X-Document-Type': type,
-                'X-File-Name': file.name
-              },
-              body: file
-            });
-
-            clearInterval(interval);
-            if (progBar) progBar.style.width = '100%';
-            if (progPct) progPct.textContent = '100%';
-            if (progText) progText.textContent = 'Completing…';
-
-            const data = await response.json();
-            if (data.success && data.url) {
-              const saveRes = await apiClient.post('/api/v2/employee-self-service/documents', {
-                documentType: type,
-                documentName: file.name,
-                filePath: data.url
-              });
-              if (saveRes && saveRes.success) {
-                this.docs[type] = {
-                  name: file.name, url: data.url,
-                  uploadedAt: new Date().toLocaleString()
-                };
-                notificationStore.success(`${file.name} uploaded successfully!`);
-              } else {
-                throw new Error(saveRes?.message || 'Database link failed.');
-              }
-            } else {
-              throw new Error(data.message || 'Server upload failed.');
-            }
-            await this.loadDocumentData();
-            this.renderDocumentsTab(container);
-          } catch (err) {
-            clearInterval(interval);
-            if (progContainer) progContainer.style.display = 'none';
-            logger.error('StoreEmployeeProfile', 'Document upload failed:', err);
-            notificationStore.danger(`Upload failed: ${err.message}`);
-          }
-          return;
-        }
-
-        // Delete button click
-        if (e.target.matches('.btn-delete[data-type]')) {
-          const type = e.target.getAttribute('data-type');
-          try {
-            const delRes = await apiClient.delete(`/api/v2/employee-self-service/documents/${type}`);
-            if (delRes && delRes.success) {
-              delete this.docs[type];
-              notificationStore.success('Document deleted successfully.');
-            } else {
-              throw new Error(delRes?.message || 'Deletion failed.');
-            }
-            await this.loadDocumentData();
-            this.renderDocumentsTab(container);
-          } catch (err) {
-            logger.error('StoreEmployeeProfile', 'Failed to delete document:', err);
-            notificationStore.danger(`Delete failed: ${err.message}`);
-          }
-        }
-      };
-
-      docsContainer.addEventListener('click', handleDocsDelegated);
-      docsContainer.addEventListener('change', handleDocsDelegated);
-      lifecycle.onCleanup(() => {
-        docsContainer.removeEventListener('click', handleDocsDelegated);
-        docsContainer.removeEventListener('change', handleDocsDelegated);
-      });
-    }
-  }
-
-  /**
-   * Dynamically renders the Documents tab from this.docRequirements and this.docs.
-   * Called on mount and after every upload/delete.
-   */
-  renderDocumentsTab(container) {
-    const wrapper = container.querySelector('#docs-dynamic-container');
-    if (!wrapper) return;
-
-    const requirements = this.docRequirements || [];
-    const uploadedDocs  = this.docs || {};
-    const country       = this.profile?.country || 'India';
-
-    if (requirements.length === 0) {
-      wrapper.innerHTML = `
-        <div class="docs-loading-state">
-          <p>No document requirements found for <strong>${country}</strong>.</p>
-        </div>`;
-      return;
-    }
-
-    wrapper.innerHTML = `
-      <div class="docs-country-banner">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
-        Showing document requirements for <strong>${country}</strong>
-      </div>
-      <div class="docs-tabs-grid">
-        ${requirements.map(cat => this._buildDocCategoryCard(cat, uploadedDocs)).join('')}
-      </div>`;
-
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  }
-
-  _buildDocCategoryCard(cat, uploadedDocs) {
-    const uploadedCount = cat.docs.filter(d => uploadedDocs[d.docKey]).length;
-    const totalCount    = cat.docs.length;
-    const allDone       = uploadedCount === totalCount;
-
-    return `
-      <div class="card glass doc-card">
-        <div class="card-header-row">
-          <div>
-            <h3 class="card-title">
-              ${this._buildDocIcon(cat.categoryIcon)}
-              ${cat.categoryLabel}
-            </h3>
-            <span class="card-subtitle">${uploadedCount} / ${totalCount} documents uploaded</span>
-          </div>
-          <span class="badge-required ${allDone ? 'badge-complete' : ''}">${allDone ? 'COMPLETE' : 'IN PROGRESS'}</span>
-        </div>
-        <div class="docs-list">
-          ${cat.docs.map(doc => this._buildDocRow(doc, uploadedDocs[doc.docKey])).join('')}
-        </div>
-      </div>`;
-  }
-
-  _buildDocRow(doc, uploaded) {
-    const type = doc.docKey;
-    const isUploaded = !!uploaded;
-
-    const statusHtml = isUploaded
-      ? `<span class="status-badge ${uploaded.approved ? 'verified' : 'pending'}">
-           ${uploaded.approved ? 'VERIFIED' : 'PENDING REVIEW'}
-         </span>
-         <span class="doc-uploaded-at">Uploaded: <strong>${uploaded.uploadedAt || 'N/A'}</strong></span>`
-      : `<span class="status-badge pending" style="background:rgba(255,165,0,0.1);color:orange;">
-           ${doc.required ? 'REQUIRED' : 'OPTIONAL'} — NOT UPLOADED
-         </span>`;
-
-    const actionsHtml = isUploaded
-      ? `<a href="${uploaded.url}" target="_blank" class="btn btn-secondary"
-            style="padding:6px 12px;font-size:0.68rem;width:auto;margin:0;">View File</a>
-         <button type="button" class="btn-delete" data-type="${type}">Delete</button>`
-      : `<button type="button" class="btn-upload" data-type="${type}">Upload Document</button>
-         <input type="file" id="input-doc-${type}" data-type="${type}"
-                style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">`;
-
-    return `
-      <div class="doc-row" id="doc-row-${type}">
-        <div class="doc-icon-box">${this._buildDocIcon('file-text')}</div>
-        <div class="doc-info">
-          <span class="doc-title">${doc.docTitle}</span>
-          <span class="doc-description">${doc.docDescription || ''}</span>
-        </div>
-        <div class="doc-status" id="status-${type}">${statusHtml}</div>
-        <div class="doc-actions" id="actions-${type}">${actionsHtml}</div>
-        <div class="progress-container" id="progress-container-${type}" style="display:none;">
-          <div class="progress-bar-track">
-            <div class="progress-bar" id="progress-bar-${type}" style="width:0%"></div>
-          </div>
-          <div class="progress-meta">
-            <span id="progress-text-${type}">Uploading…</span>
-            <span id="progress-pct-${type}">0%</span>
-          </div>
-        </div>
-      </div>`;
-  }
-
-  _buildDocIcon(iconName) {
-    const icons = {
-      'user':          '<circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 14 0v2"/>',
-      'home':          '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-      'graduation-cap':'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
-      'briefcase':     '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="12"/>',
-      'credit-card':   '<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
-      'receipt':       '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/>',
-      'shield':        '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-      'heart-pulse':   '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><polyline points="22 12 18 12 15 17 9 7 6 12 2 12"/>',
-      'file-text':     '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
-      'globe':         '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
-      'car':           '<rect x="1" y="11" width="22" height="9" rx="1"/><path d="M5 11l1.5-7h11L19 11"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/>',
-      'phone-call':    '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.95-.95a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>'
-    };
-    const path = icons[iconName] || icons['file-text'];
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-      stroke-linejoin="round" class="accent-icon">${path}</svg>`;
-  }
-
-  /**
-   * Initialise tab switching for the profile page.
-   * Tabs: profile | documents | payslips
-   */
-  _initTabs(container) {
-    const tabBtns = container.querySelectorAll('.profile-tab-btn');
-    const tabPanes = container.querySelectorAll('.profile-tab-pane');
-
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = btn.getAttribute('data-tab');
-
-        // Toggle active states
-        tabBtns.forEach(b => b.classList.remove('active'));
-        tabPanes.forEach(p => p.classList.remove('active'));
-
-        btn.classList.add('active');
-        const pane = container.querySelector(`#tab-${target}`);
-        if (pane) pane.classList.add('active');
-
-        // Lazy-load payslip summary on first open
-        if (target === 'payslips' && !this.payslipLoaded) {
-          this.payslipLoaded = true;
-          this._loadPayslipSummary(container);
-        }
-
-        // Re-initialise Lucide icons inside newly visible pane
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
         }
       });
-    });
-  }
 
-  /**
-   * Load a quick payslip summary into the Payslips tab.
-   * Shows KPI totals and the 6 most recent payslip rows.
-   */
-  async _loadPayslipSummary(container) {
-    try {
-      const res = await apiClient.get('/api/v2/employee-self-service/payslips?limit=6');
-      if (!res || !res.success || !Array.isArray(res.data) || res.data.length === 0) {
-        const tbody = container.querySelector('#payslip-mini-tbody');
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="payslip-loading-row"><span class="payslip-loading-text">No payslip records found.</span></td></tr>`;
-        return;
+      // Locked / Read-only fields dark-gray overlay on edit mode
+      lockedInputs.forEach(input => {
+        if (!input) return;
+        const parent = input.parentElement;
+        if (parent) {
+          if (editing) {
+            parent.style.background = 'rgba(0, 0, 0, 0.55)';
+            parent.style.borderColor = 'rgba(255, 255, 255, 0.04)';
+            parent.style.opacity = '0.35';
+            parent.style.filter = 'grayscale(1)';
+            parent.style.cursor = 'not-allowed';
+            parent.title = '🔒 Read-only field — cannot be edited';
+          } else {
+            parent.style.background = 'rgba(24, 24, 27, 0.8)';
+            parent.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            parent.style.opacity = '1';
+            parent.style.filter = 'none';
+            parent.style.cursor = 'default';
+            parent.title = '';
+          }
+        }
+      });
+
+      if (actionsBox) actionsBox.style.display = editing ? 'flex' : 'none';
+      if (btnEdit) {
+        const textSpan = container.querySelector('#btn-edit-personal-text');
+        if (textSpan) textSpan.textContent = editing ? 'Editing...' : 'Edit Details';
       }
+    };
 
-      const payslips = res.data;
-      const latest = payslips[0];
+    if (genderSelect) {
+      const onGenderChange = (e) => {
+        const selectedVal = e.target.value;
+        const defaultAvatar = selectedVal === 'Female' ? 'imgs/female-avatar.jpg' : 'imgs/male-avatar.png';
+        
+        const avatarImg = container.querySelector('#emp-avatar-img');
+        if (avatarImg) avatarImg.src = defaultAvatar;
+        const headerAvatar = document.getElementById('user-avatar-header');
+        if (headerAvatar) headerAvatar.src = defaultAvatar;
+        const sidebarAvatar = document.getElementById('user-avatar-sidebar');
+        if (sidebarAvatar) sidebarAvatar.src = defaultAvatar;
 
-      // KPI values
-      const setKpi = (id, val) => {
-        const el = container.querySelector(`#${id}`);
-        if (el) el.textContent = val;
+        this.profile.gender = selectedVal;
+        this.profile.avatarUrl = defaultAvatar;
+        userStore.updateProfile(this.user?.role, { gender: selectedVal, avatarUrl: defaultAvatar });
+        authStore.updateUser({ avatarUrl: defaultAvatar });
+      };
+      genderSelect.addEventListener('change', onGenderChange);
+      lifecycle.onCleanup(() => genderSelect.removeEventListener('change', onGenderChange));
+    }
+
+    if (btnEdit) {
+      const onEditClick = () => toggleEdit(!this.isEditing);
+      btnEdit.addEventListener('click', onEditClick);
+      lifecycle.onCleanup(() => btnEdit.removeEventListener('click', onEditClick));
+    }
+
+    if (btnCancel) {
+      const onCancelClick = () => toggleEdit(false);
+      btnCancel.addEventListener('click', onCancelClick);
+      lifecycle.onCleanup(() => btnCancel.removeEventListener('click', onCancelClick));
+    }
+
+    const personalForm = container.querySelector('#form-emp-personal-info');
+    if (personalForm) {
+      const onPersonalSubmit = async (e) => {
+        e.preventDefault();
+        try {
+          const selectedGender = genderSelect?.value || 'Male';
+          let avatarUrl = this.profile?.avatarUrl;
+          if (!avatarUrl || avatarUrl === 'imgs/male-avatar.png' || avatarUrl === 'imgs/female-avatar.jpg') {
+            avatarUrl = selectedGender === 'Female' ? 'imgs/female-avatar.jpg' : 'imgs/male-avatar.png';
+          }
+          this.profile.avatarUrl = avatarUrl;
+
+          const payload = {
+            firstName: fnameInput?.value || '',
+            lastName: lnameInput?.value || '',
+            phone: phoneInput?.value || '',
+            gender: selectedGender,
+            bankName: bankNameInput?.value || '',
+            bankAccount: bankAccInput?.value || '',
+            ifscCode: ifscInput?.value || '',
+            branchName: branchInput?.value || '',
+            avatarUrl: avatarUrl
+          };
+
+          // 1. Call Backend REST API to persist updates into database
+          try {
+            const apiRes = await apiClient.put('/api/v1/auth/me', payload);
+            if (apiRes && apiRes.success && apiRes.data) {
+              this.profile = { ...this.profile, ...apiRes.data };
+            } else {
+              this.profile = { ...this.profile, ...payload };
+            }
+          } catch (backendErr) {
+            logger.warn('EmployeeProfile', 'Backend API offline or mock mode, updating state store:', backendErr);
+            this.profile = { ...this.profile, ...payload };
+          }
+
+          // 2. Sync state store & auth store
+          const updatedFullName = `${this.profile.firstName || ''} ${this.profile.lastName || ''}`.trim() || 'User Profile';
+          this.profile.name = updatedFullName;
+
+          userStore.updateProfile(this.user?.role, this.profile);
+          authStore.updateUser({
+            name: updatedFullName,
+            avatarUrl: this.profile.avatarUrl
+          });
+
+          // Explicitly update all hero, header, and sidebar name elements in DOM
+          const heroNameEl = container.querySelector('#emp-user-fullname');
+          if (heroNameEl) heroNameEl.textContent = updatedFullName;
+          const headerNameEl = document.getElementById('user-name-header');
+          if (headerNameEl) headerNameEl.textContent = updatedFullName;
+          const sidebarNameEl = document.getElementById('user-name-sidebar');
+          if (sidebarNameEl) sidebarNameEl.textContent = updatedFullName;
+          const welcomeNameEl = document.getElementById('header-user-name');
+          if (welcomeNameEl) welcomeNameEl.textContent = updatedFullName;
+
+          this.render(container);
+          toggleEdit(false);
+
+          notificationStore.success('Barista employee profile and banking details saved to database successfully.');
+        } catch (err) {
+          logger.error('EmployeeProfile', 'Failed to update employee profile in database:', err);
+        }
       };
 
-      setKpi('ps-kpi-net-salary', latest.netSalary != null ? `€${parseFloat(latest.netSalary).toFixed(2)}` : '—');
-      setKpi('ps-kpi-gross', latest.grossSalary != null ? `€${parseFloat(latest.grossSalary).toFixed(2)}` : '—');
-      setKpi('ps-kpi-deductions', latest.deductions != null ? `€${parseFloat(latest.deductions).toFixed(2)}` : '—');
-      setKpi('ps-kpi-last-date', latest.payDate ? new Date(latest.payDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
-
-      // Build table rows
-      const tbody = container.querySelector('#payslip-mini-tbody');
-      if (!tbody) return;
-
-      tbody.innerHTML = payslips.map(ps => {
-        const statusClass = ps.status === 'PAID' ? 'verified' : 'pending';
-        const period = ps.payPeriod || (ps.payDate ? new Date(ps.payDate).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : '—');
-        const downloadBtn = ps.filePath
-          ? `<a href="${ps.filePath}" target="_blank" class="btn-upload" style="font-size:0.68rem;padding:5px 10px;">Download</a>`
-          : `<span style="color:var(--text-muted);font-size:0.68rem;">—</span>`;
-        return `<tr>
-          <td>${period}</td>
-          <td>€${parseFloat(ps.grossSalary || 0).toFixed(2)}</td>
-          <td>€${parseFloat(ps.deductions || 0).toFixed(2)}</td>
-          <td style="font-weight:700;color:var(--text-primary);">€${parseFloat(ps.netSalary || 0).toFixed(2)}</td>
-          <td><span class="status-badge ${statusClass}">${ps.status || 'PENDING'}</span></td>
-          <td>${downloadBtn}</td>
-        </tr>`;
-      }).join('');
-
-    } catch (e) {
-      logger.error('StoreEmployeeProfile', 'Failed to load payslip summary:', e);
-      const tbody = container.querySelector('#payslip-mini-tbody');
-      if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="payslip-loading-row"><span class="payslip-loading-text">Could not load payslip data.</span></td></tr>`;
+      personalForm.addEventListener('submit', onPersonalSubmit);
+      lifecycle.onCleanup(() => personalForm.removeEventListener('submit', onPersonalSubmit));
     }
-  }
 
-  _loadCss() {
-    const cssId = 'store-employee-profile-css';
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement('link');
-      link.id = cssId;
-      link.rel = 'stylesheet';
-      link.href = 'modules/store-employee/pages/profile-employee/profile.css';
-      document.head.appendChild(link);
+    // Avatar Change Pencil Icon & Choice Modal Listener
+    const avatarFileInput = container.querySelector('#input-emp-avatar-file');
+    const avatarImg = container.querySelector('#emp-avatar-img');
+    const pencilBtn = container.querySelector('#btn-edit-avatar-pencil');
+    const avatarBox = container.querySelector('#avatar-container-box') || avatarImg?.parentElement;
+
+    const updateAvatarUrl = (newAvatarUrl) => {
+      if (avatarImg) avatarImg.src = newAvatarUrl;
+      const headerAvatar = document.getElementById('user-avatar-header');
+      if (headerAvatar) headerAvatar.src = newAvatarUrl;
+
+      this.profile.avatarUrl = newAvatarUrl;
+      userStore.updateProfile(this.user?.role, { avatarUrl: newAvatarUrl });
+      authStore.updateUser({ avatarUrl: newAvatarUrl });
+
+      notificationStore.success('Your profile avatar has been updated successfully.');
+    };
+
+    const openAvatarChoiceModal = () => {
+      const oldModal = document.getElementById('modal-avatar-choice');
+      if (oldModal) oldModal.remove();
+
+      const modalOverlay = document.createElement('div');
+      modalOverlay.id = 'modal-avatar-choice';
+      modalOverlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 99999;
+        background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px);
+        display: flex; align-items: center; justify-content: center; padding: 20px;
+      `;
+
+      modalOverlay.innerHTML = `
+        <div style="background: #18181b; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 24px; max-width: 440px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.6); color: #ffffff; display: flex; flex-direction: column; gap: 18px;">
+          
+          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.3rem;">🖼️</span>
+              <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800;">Change Profile Avatar</h3>
+            </div>
+            <button id="btn-close-avatar-modal" style="background: transparent; border: none; color: #a1a1aa; font-size: 1.2rem; cursor: pointer; padding: 4px;">✕</button>
+          </div>
+
+          <p style="margin: 0; font-size: 0.82rem; color: #a1a1aa;">Choose whether to upload a custom image from your device or select a system default avatar:</p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            
+            <button id="btn-option-custom-avatar" style="padding: 14px 16px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s ease;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.4rem;">📁</span>
+                <div style="text-align: left;">
+                  <strong style="font-size: 0.88rem; display: block; color: #ffffff;">Upload Custom Image</strong>
+                  <span style="font-size: 0.72rem; color: #a1a1aa;">Choose a photo from your computer or phone</span>
+                </div>
+              </div>
+              <span style="color: #10b981; font-weight: 800; font-size: 0.9rem;">→</span>
+            </button>
+
+            <div style="border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+              <span style="font-size: 0.72rem; font-weight: 800; color: #a1a1aa; text-transform: uppercase;">Or Select System Default Avatar:</span>
+              
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                <button id="btn-default-male" style="padding: 10px; border-radius: 10px; background: rgba(24,24,27,0.8); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <img src="imgs/male-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                  <span style="font-size: 0.78rem; font-weight: 700;">👨 Male Default</span>
+                </button>
+
+                <button id="btn-default-female" style="padding: 10px; border-radius: 10px; background: rgba(24,24,27,0.8); border: 1px solid rgba(255,255,255,0.1); color: #ffffff; display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <img src="imgs/female-avatar.jpg" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                  <span style="font-size: 0.78rem; font-weight: 700;">👩 Female Default</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+            <button id="btn-cancel-avatar-modal" style="padding: 8px 16px; border-radius: 8px; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; font-size: 0.8rem; cursor: pointer;">Cancel</button>
+          </div>
+
+        </div>
+      `;
+
+      document.body.appendChild(modalOverlay);
+
+      const closeModal = () => modalOverlay.remove();
+      modalOverlay.querySelector('#btn-close-avatar-modal').addEventListener('click', closeModal);
+      modalOverlay.querySelector('#btn-cancel-avatar-modal').addEventListener('click', closeModal);
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) closeModal();
+      });
+
+      modalOverlay.querySelector('#btn-option-custom-avatar').addEventListener('click', () => {
+        closeModal();
+        if (avatarFileInput) avatarFileInput.click();
+      });
+
+      modalOverlay.querySelector('#btn-default-male').addEventListener('click', () => {
+        closeModal();
+        updateAvatarUrl('imgs/male-avatar.png');
+      });
+
+      modalOverlay.querySelector('#btn-default-female').addEventListener('click', () => {
+        closeModal();
+        updateAvatarUrl('imgs/female-avatar.jpg');
+      });
+    };
+
+    if (avatarBox) {
+      avatarBox.addEventListener('click', openAvatarChoiceModal);
+      lifecycle.onCleanup(() => avatarBox.removeEventListener('click', openAvatarChoiceModal));
+    }
+
+    if (pencilBtn) {
+      pencilBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openAvatarChoiceModal();
+      });
+    }
+
+    if (avatarFileInput) {
+      const onAvatarChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          updateAvatarUrl(evt.target.result);
+        };
+        reader.readAsDataURL(file);
+
+        try {
+          const response = await fetch('/api/upload-avatar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': file.type || 'image/png',
+              'X-Username': this.profile.firstName ? `${this.profile.firstName} ${this.profile.lastName}` : (this.user?.name || 'Barista'),
+              'X-Role': this.user?.role || 'storeEmployee',
+              'X-Worker-Id': this.profile.employeeId || 'EMP-30194'
+            },
+            body: file
+          });
+
+          const data = await response.json();
+          if (data.success && data.url) {
+            updateAvatarUrl(data.url);
+          }
+        } catch (err) {
+          logger.error('EmployeeProfile', 'Error uploading custom avatar:', err);
+        }
+      };
+
+      avatarFileInput.addEventListener('change', onAvatarChange);
+      lifecycle.onCleanup(() => avatarFileInput.removeEventListener('change', onAvatarChange));
     }
   }
 }

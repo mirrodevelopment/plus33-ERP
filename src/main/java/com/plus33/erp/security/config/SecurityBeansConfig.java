@@ -5,25 +5,28 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.config
  * File              : SecurityBeansConfig.java
- * Purpose           : Spring Configuration bean for Security Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: SecurityBeansConfigController
- * Related Service   : SecurityBeansConfigService, SecurityBeansConfigServiceImpl
- * Related Repository: SecurityBeansConfigRepository
- * Related Entity    : SecurityBeansConfig
- * Related DTO       : N/A
- * Related Mapper    : SecurityBeansConfigMapper
- * Related DB Table  : security_beans_configs
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Security Module components
+ * Path              : src/main/java/com/plus33/erp/security/config/SecurityBeansConfig.java
+ * Purpose           : Registers the BCrypt PasswordEncoder Spring bean used for
+ *                     password hashing during user creation and credential verification
+ *                     throughout the ERP authentication flow.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Security Module within the PLUS33 Coffee ERP platform.
+ * Minimal Spring @Configuration class that exposes the PasswordEncoder bean.
+ * Separated from SecurityConfig to avoid circular dependency issues between
+ * security configuration beans.
+ *
+ * passwordEncoder():
+ *   Returns a BCryptPasswordEncoder instance. BCrypt is an adaptive one-way
+ *   hashing algorithm with salting built in. Used in:
+ *     - SecurityConfig / DaoAuthenticationProvider — verifies login credentials
+ *       by comparing BCrypt hash of submitted password against stored hash.
+ *     - AuthController.changePassword() — hashes new password before save.
+ *
+ * No application.properties configuration needed — BCrypt uses default strength.
+ * Injected as a shared singleton across all Spring context consumers.
  ******************************************************************************/
 package com.plus33.erp.security.config;
 

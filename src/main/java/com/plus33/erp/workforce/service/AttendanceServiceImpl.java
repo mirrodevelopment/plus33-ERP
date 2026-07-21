@@ -1,5 +1,7 @@
 package com.plus33.erp.workforce.service;
 
+import com.plus33.erp.organization.entity.Store;
+import com.plus33.erp.organization.repository.StoreRepository;
 import com.plus33.erp.security.entity.User;
 import com.plus33.erp.security.repository.UserRepository;
 import com.plus33.erp.workforce.entity.*;
@@ -34,6 +36,9 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final UserRepository userRepository;
     private final UserStoreRepository userStoreRepository;
     private final LeaveServiceImpl leaveService;
+    private final EmployeeLeaveBalanceRepository employeeLeaveBalanceRepository;
+    private final AwayPermissionRepository awayPermissionRepository;
+    private final StoreRepository storeRepository;
 
     public AttendanceServiceImpl(
             AttendanceRepository attendanceRepository,
@@ -47,7 +52,10 @@ public class AttendanceServiceImpl implements AttendanceService {
             HolidayCalendarRepository holidayCalendarRepository,
             UserRepository userRepository,
             UserStoreRepository userStoreRepository,
-            LeaveServiceImpl leaveService) {
+            LeaveServiceImpl leaveService,
+            EmployeeLeaveBalanceRepository employeeLeaveBalanceRepository,
+            AwayPermissionRepository awayPermissionRepository,
+            StoreRepository storeRepository) {
         this.attendanceRepository = attendanceRepository;
         this.attendanceBreakRepository = attendanceBreakRepository;
         this.attendanceCorrectionRepository = attendanceCorrectionRepository;
@@ -60,6 +68,9 @@ public class AttendanceServiceImpl implements AttendanceService {
         this.userRepository = userRepository;
         this.userStoreRepository = userStoreRepository;
         this.leaveService = leaveService;
+        this.employeeLeaveBalanceRepository = employeeLeaveBalanceRepository;
+        this.awayPermissionRepository = awayPermissionRepository;
+        this.storeRepository = storeRepository;
     }
 
     @Override
@@ -84,7 +95,40 @@ public class AttendanceServiceImpl implements AttendanceService {
 
             boolean breakActive = "ON_BREAK".equals(att.getStatus());
             state.put("breakActive", breakActive);
+
+            // Sum breaks so far
+            List<AttendanceBreak> breaks = attendanceBreakRepository.findByAttendanceId(att.getId());
+            int breakMinutes = 0;
+            for (AttendanceBreak b : breaks) {
+                if (b.getBreakEnd() != null) {
+                    breakMinutes += b.getDurationMinutes();
+                } else {
+                    // currently on break, add minutes up to now
+                    Duration diff = Duration.between(b.getBreakStart(), LocalDateTime.now());
+                    breakMinutes += (int) diff.toMinutes();
+                }
+            }
+            state.put("breakMinutes", breakMinutes);
+            state.put("workMinutes", att.getWorkMinutes() != null ? att.getWorkMinutes() : 0);
         }
+
+        // Add today's scheduled shift details
+        Optional<EmployeeShift> empShiftOpt = employeeShiftRepository.findActiveShiftForEmployeeOnDate(employee.getId(), today);
+        if (empShiftOpt.isPresent()) {
+            Shift shift = empShiftOpt.get().getShift();
+            state.put("shiftScheduled", true);
+            state.put("shiftName", shift.getName());
+            state.put("shiftStartTime", shift.getStartTime() != null ? shift.getStartTime().toString() : null);
+            state.put("shiftEndTime", shift.getEndTime() != null ? shift.getEndTime().toString() : null);
+            state.put("shiftCode", shift.getCode());
+        } else {
+            state.put("shiftScheduled", false);
+            state.put("shiftName", "Day Off");
+            state.put("shiftStartTime", null);
+            state.put("shiftEndTime", null);
+            state.put("shiftCode", null);
+        }
+
         return state;
     }
 
@@ -175,6 +219,16 @@ public class AttendanceServiceImpl implements AttendanceService {
         double attendanceRate = presentDays + absentDays > 0 ? ((double) presentDays / (presentDays + absentDays)) * 100.0 : 100.0;
         double averageHours = presentDays > 0 ? workedHoursSum / presentDays : 0.0;
 
+        // Sum leave balances
+        int currentYearVal = LocalDate.now().getYear();
+        List<EmployeeLeaveBalance> balances = employeeLeaveBalanceRepository.findByEmployeeIdAndYear(employee.getId(), currentYearVal);
+        double totalLeaveUsed = 0.0;
+        double totalLeaveRemaining = 0.0;
+        for (EmployeeLeaveBalance bal : balances) {
+            totalLeaveUsed += bal.getUsed() != null ? bal.getUsed().doubleValue() : 0.0;
+            totalLeaveRemaining += bal.getRemaining() != null ? bal.getRemaining().doubleValue() : 0.0;
+        }
+
         Optional<EmployeeShift> realShiftOpt = employeeShiftRepository.findActiveShiftForEmployeeOnDate(employee.getId(), today);
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("presentDays", presentDays);
@@ -196,6 +250,11 @@ public class AttendanceServiceImpl implements AttendanceService {
         stats.put("averageHours", Math.round(averageHours * 10) / 10.0);
         stats.put("lateCount", lateCount);
         stats.put("earlyCheckoutCount", earlyCheckoutCount);
+
+        // Custom stats for front-end KPIs
+        stats.put("workedDays", presentDays);
+        stats.put("leaveUsed", Math.round(totalLeaveUsed * 10) / 10.0);
+        stats.put("leaveLeft", Math.round(totalLeaveRemaining * 10) / 10.0);
 
         return stats;
     }
@@ -226,7 +285,11 @@ public class AttendanceServiceImpl implements AttendanceService {
 
             if (attOpt.isPresent()) {
                 Attendance att = attOpt.get();
-                dayMap.put("status", att.getStatus());
+                if (leaveOpt.isPresent() && !"FULL_DAY".equals(leaveOpt.get().getLeaveSession())) {
+                    dayMap.put("status", "HALF_DAY");
+                } else {
+                    dayMap.put("status", att.getStatus());
+                }
                 dayMap.put("checkIn", att.getCheckInTime() != null ? att.getCheckInTime().format(timeFormatter) : null);
                 dayMap.put("checkOut", att.getCheckOutTime() != null ? att.getCheckOutTime().format(timeFormatter) : null);
                 dayMap.put("hoursWorked", Math.round(((att.getWorkMinutes() != null ? att.getWorkMinutes() : 0) / 60.0) * 10) / 10.0);
@@ -234,7 +297,11 @@ public class AttendanceServiceImpl implements AttendanceService {
                 dayMap.put("isLate", att.getLateMinutes() != null && att.getLateMinutes() > 0);
                 dayMap.put("isEarlyOut", att.getEarlyOutMinutes() != null && att.getEarlyOutMinutes() > 0);
             } else if (leaveOpt.isPresent()) {
-                dayMap.put("status", "LEAVE");
+                if (!"FULL_DAY".equals(leaveOpt.get().getLeaveSession())) {
+                    dayMap.put("status", "HALF_DAY");
+                } else {
+                    dayMap.put("status", "LEAVE");
+                }
                 dayMap.put("checkIn", null);
                 dayMap.put("checkOut", null);
                 dayMap.put("hoursWorked", 0.0);
@@ -359,12 +426,47 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Transactional
     public Attendance checkIn(Employee employee, String gps, String device, String ip, String userAgent) {
         LocalDate today = LocalDate.now();
-        Optional<Attendance> attOpt = attendanceRepository.findByEmployeeIdAndAttendanceDate(employee.getId(), today);
-        if (attOpt.isPresent() && attOpt.get().getCheckInTime() != null) {
-            throw new BusinessException("You are already checked in for today.");
+
+        // ── Guard 1: Shift must be explicitly allocated for today ──────────────
+        Optional<EmployeeShift> shiftOpt = employeeShiftRepository.findActiveShiftForEmployeeOnDate(employee.getId(), today);
+        if (shiftOpt.isEmpty()) {
+            // Use structured error code so the frontend can show the "Rest Day" popup card
+            throw new BusinessException("NO_SHIFT_TODAY: You have no shift scheduled for today. Contact your supervisor to request overtime.");
         }
 
-        Shift shift = getActiveShift(employee, today);
+        // ── Guard 2: Employee must be within 30 m of their store ───────────────
+        Store employeeStore = resolveEmployeeStore(employee);
+        assertWithinGeofence(gps, employeeStore, 30);
+
+        Optional<Attendance> attOpt = attendanceRepository.findByEmployeeIdAndAttendanceDate(employee.getId(), today);
+        if (attOpt.isPresent() && attOpt.get().getCheckInTime() != null) {
+            Attendance att = attOpt.get();
+            if (att.getCheckOutTime() == null) {
+                throw new BusinessException("You are already checked in for today.");
+            }
+
+            // Re-check-in: calculate away time as break
+            LocalDateTime clockedOutAt = att.getCheckOutTime();
+            LocalDateTime now = LocalDateTime.now();
+
+            AttendanceBreak awayBreak = new AttendanceBreak();
+            awayBreak.setAttendance(att);
+            awayBreak.setBreakStart(clockedOutAt);
+            awayBreak.setBreakEnd(now);
+            awayBreak.setDurationMinutes((int) Duration.between(clockedOutAt, now).toMinutes());
+            attendanceBreakRepository.save(awayBreak);
+
+            att.setCheckOutTime(null);
+            att.setStatus("ACTIVE");
+            att.setGpsCoordinates(gps);
+            att.setDeviceInfo(device != null ? device : userAgent);
+
+            Attendance saved = attendanceRepository.save(att);
+            writeAudit(employee.getUser(), saved, "CHECK_IN", ip, userAgent, null, now.toString(), "Barista Shift Clock In (Re-entry)");
+            return saved;
+        }
+
+        Shift shift = shiftOpt.get().getShift();
         String countryCode = resolveCountryCode(employee);
         CountryWorkPolicy policy = countryWorkPolicyRepository.findByCountryCode(countryCode)
                 .orElseGet(() -> {
@@ -541,16 +643,15 @@ public class AttendanceServiceImpl implements AttendanceService {
                     return attendanceRepository.save(dummy);
                 });
 
-        DateTimeFormatter timeParser = DateTimeFormatter.ofPattern("hh:mm a", Locale.US);
         LocalDateTime requestedCheckIn = null;
         LocalDateTime requestedCheckOut = null;
 
         if (checkInStr != null && !checkInStr.trim().isEmpty()) {
-            LocalTime t = LocalTime.parse(checkInStr.trim(), timeParser);
+            LocalTime t = parseTimeRobust(checkInStr);
             requestedCheckIn = LocalDateTime.of(date, t);
         }
         if (checkOutStr != null && !checkOutStr.trim().isEmpty()) {
-            LocalTime t = LocalTime.parse(checkOutStr.trim(), timeParser);
+            LocalTime t = parseTimeRobust(checkOutStr);
             requestedCheckOut = LocalDateTime.of(date, t);
         }
 
@@ -650,8 +751,14 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public CountryWorkPolicy getCountryWorkPolicy(String countryCode) {
-        return countryWorkPolicyRepository.findByCountryCode(countryCode)
-                .orElseThrow(() -> new BusinessException("Work policy not found for country: " + countryCode));
+        String code = countryCode;
+        if (code == null || code.trim().isEmpty()) {
+            code = resolveCountryCode(null);
+        }
+        final String searchCode = code;
+        return countryWorkPolicyRepository.findByCountryCode(searchCode)
+                .or(() -> countryWorkPolicyRepository.findByCountryCode("FR"))
+                .orElseThrow(() -> new BusinessException("Work policy not found for country: " + searchCode));
     }
 
     private String resolveCountryCode(Employee employee) {
@@ -700,11 +807,204 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     private Shift getActiveShift(Employee employee, LocalDate date) {
+        // NOTE: checkIn() now enforces shift allocation directly. This method remains
+        // for other callers that need a fallback (e.g. correction, payroll).
         return employeeShiftRepository.findActiveShiftForEmployeeOnDate(employee.getId(), date)
                 .map(EmployeeShift::getShift)
                 .orElseGet(() -> shiftRepository.findByCode("SHIFT_MORN")
                         .orElseGet(() -> shiftRepository.findAll().stream().findFirst()
                                 .orElseThrow(() -> new BusinessException("No shifts configured in the system."))));
+    }
+
+    /**
+     * Resolves the primary store assigned to the employee.
+     * Returns null if no store assignment exists.
+     */
+    private Store resolveEmployeeStore(Employee employee) {
+        if (employee == null || employee.getUser() == null) return null;
+        List<UserStore> userStores = userStoreRepository.findByIdUserId(employee.getUser().getId());
+        if (userStores == null || userStores.isEmpty()) return null;
+        return userStores.get(0).getStore();
+    }
+
+    /**
+     * Validates that the employee's current GPS position is within {@code radiusMeters} of the store.
+     * <ul>
+     *   <li>If the store has no GPS configured → silently skip (allow clock-in with info).</li>
+     *   <li>If GPS string is missing → throw GPS_REQUIRED.</li>
+     *   <li>If distance exceeds radius → throw OUT_OF_RANGE with distance and store name.</li>
+     * </ul>
+     */
+    private void assertWithinGeofence(String gps, Store store, int radiusMeters) {
+        if (store == null || store.getLatitude() == null || store.getLongitude() == null) {
+            // Store has no GPS configured — skip geofence check
+            return;
+        }
+        if (gps == null || gps.isBlank()) {
+            throw new BusinessException("GPS_REQUIRED: Location access is required to clock in. Please enable GPS in your browser.");
+        }
+        String[] parts = gps.split(",");
+        if (parts.length < 2) {
+            throw new BusinessException("GPS_REQUIRED: Invalid GPS format. Expected 'latitude,longitude'.");
+        }
+        try {
+            double empLat = Double.parseDouble(parts[0].trim());
+            double empLng = Double.parseDouble(parts[1].trim());
+            double storeLat = store.getLatitude().doubleValue();
+            double storeLng = store.getLongitude().doubleValue();
+            double distance = haversineMeters(empLat, empLng, storeLat, storeLng);
+            if (distance > radiusMeters) {
+                int rounded = (int) Math.round(distance);
+                throw new BusinessException("OUT_OF_RANGE: You are " + rounded + " m away from " + store.getName()
+                        + ". You must be within " + radiusMeters + " m to clock in.");
+            }
+        } catch (BusinessException be) {
+            throw be;
+        } catch (Exception e) {
+            throw new BusinessException("GPS_REQUIRED: Could not parse GPS coordinates. Please try again.");
+        }
+    }
+
+    /**
+     * Calculates the Haversine distance in metres between two GPS coordinates.
+     */
+    private double haversineMeters(double lat1, double lng1, double lat2, double lng2) {
+        final double R = 6_371_000; // Earth radius in metres
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLng = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    /**
+     * Called by the frontend every 5 minutes while an employee is clocked in.
+     * Determines whether the employee is within the geofence and handles auto clock-out logic.
+     *
+     * <p>Network resilience: when the client was offline, it sends {@code networkRestored=true}.
+     * In that case we check the current position only — no penalty for offline time.</p>
+     *
+     * <p>Grace period: after the away pass {@code approvedUntil} expires, a 10-minute grace buffer
+     * allows the employee to return. During grace they can request an extension.
+     * After grace expires → auto clock-out.</p>
+     *
+     * @return a map with key {@code action}: OK | WARNING | AWAY_PASS_ACTIVE | IN_GRACE_PERIOD | AUTO_CLOCKED_OUT
+     */
+    @Transactional
+    public Map<String, Object> pingLocation(Employee employee, String gps, boolean networkRestored, String ip, String userAgent) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        LocalDate today = LocalDate.now();
+
+        // Must be currently clocked in
+        Optional<Attendance> attOpt = attendanceRepository.findByEmployeeIdAndAttendanceDate(employee.getId(), today);
+        if (attOpt.isEmpty() || attOpt.get().getCheckInTime() == null || attOpt.get().getCheckOutTime() != null) {
+            result.put("action", "NOT_CLOCKED_IN");
+            return result;
+        }
+        Attendance att = attOpt.get();
+
+        Store store = resolveEmployeeStore(employee);
+        if (store == null || store.getLatitude() == null || store.getLongitude() == null) {
+            result.put("action", "OK");
+            result.put("note", "Store GPS not configured — monitoring skipped.");
+            return result;
+        }
+
+        if (gps == null || gps.isBlank()) {
+            result.put("action", "GPS_REQUIRED");
+            return result;
+        }
+
+        String[] parts = gps.split(",");
+        double empLat, empLng;
+        try {
+            empLat = Double.parseDouble(parts[0].trim());
+            empLng = Double.parseDouble(parts[1].trim());
+        } catch (Exception e) {
+            result.put("action", "GPS_REQUIRED");
+            return result;
+        }
+
+        double distance = haversineMeters(empLat, empLng, store.getLatitude().doubleValue(), store.getLongitude().doubleValue());
+        int autoClockOutRadius = store.getGeofenceRadiusMeters() != null ? store.getGeofenceRadiusMeters() : 200;
+        int warningRadius = (int) (autoClockOutRadius * 0.75); // warn at 75% (150m for 200m limit)
+
+        result.put("distance", (int) Math.round(distance));
+        result.put("storeName", store.getName());
+
+        if (distance <= autoClockOutRadius) {
+            // Within safe zone
+            if (distance > warningRadius) {
+                result.put("action", "WARNING");
+                result.put("message", "You are getting close to the store boundary (" + (int) Math.round(distance) + " m away).");
+            } else {
+                result.put("action", "OK");
+            }
+            return result;
+        }
+
+        // Employee is beyond the auto clock-out radius — check for an active away pass
+        List<AwayPermissionRequest> activePasses = awayPermissionRepository.findActivePassesForAttendance(att.getId());
+        AwayPermissionRequest activePass = activePasses.isEmpty() ? null : activePasses.get(0);
+
+        if (activePass != null && activePass.isActive()) {
+            if (activePass.isInGracePeriod()) {
+                // Pass has expired but still in 10-min grace — employee can extend
+                result.put("action", "IN_GRACE_PERIOD");
+                result.put("graceExpiresAt", activePass.getApprovedUntil().plusMinutes(activePass.getGraceBufferMins()).toString());
+                result.put("message", "Your away pass has expired. You have " + activePass.getGraceBufferMins() + " minutes to return or request an extension.");
+                // Mark pass as EXTENSION_REQUESTED if not already done
+                if (!awayPermissionRepository.existsByAttendanceIdAndStatus(att.getId(), "EXTENSION_REQUESTED")) {
+                    activePass.setStatus("EXTENSION_REQUESTED");
+                    awayPermissionRepository.save(activePass);
+                }
+            } else {
+                result.put("action", "AWAY_PASS_ACTIVE");
+                result.put("approvedUntil", activePass.getApprovedUntil().toString());
+                result.put("graceUntil", activePass.getApprovedUntil().plusMinutes(activePass.getGraceBufferMins()).toString());
+                result.put("message", "Away pass active until " + activePass.getApprovedUntil().toString() + ".");
+            }
+            return result;
+        }
+
+        // No active pass and outside geofence → auto clock-out
+        performAutoCheckOut(att, employee, ip, userAgent, (int) Math.round(distance), store.getName());
+        result.put("action", "AUTO_CLOCKED_OUT");
+        result.put("message", "You have been automatically clocked out because you moved " + (int) Math.round(distance) + " m away from " + store.getName() + ".");
+        return result;
+    }
+
+    /**
+     * Performs automatic clock-out when an employee exceeds the geofence without an active away pass.
+     */
+    private void performAutoCheckOut(Attendance att, Employee employee, String ip, String userAgent, int distanceMeters, String storeName) {
+        LocalDateTime now = LocalDateTime.now();
+        att.setCheckOutTime(now);
+
+        // Sum existing breaks
+        List<AttendanceBreak> breaks = attendanceBreakRepository.findByAttendanceId(att.getId());
+        int breakMinutesTotal = 0;
+        for (AttendanceBreak b : breaks) {
+            if (b.getBreakEnd() != null) {
+                breakMinutesTotal += b.getDurationMinutes();
+            } else {
+                b.setBreakEnd(now);
+                int d = (int) Duration.between(b.getBreakStart(), now).toMinutes();
+                b.setDurationMinutes(d);
+                attendanceBreakRepository.save(b);
+                breakMinutesTotal += d;
+            }
+        }
+
+        int workMinutes = Math.max(0, (int) Duration.between(att.getCheckInTime(), now).toMinutes() - breakMinutesTotal);
+        att.setWorkMinutes(workMinutes);
+        att.setStatus("PRESENT");
+        att.setNotes("Auto clocked-out: " + distanceMeters + " m from " + storeName);
+        attendanceRepository.save(att);
+
+        writeAudit(employee.getUser(), att, "AUTO_CHECK_OUT", ip, userAgent, null, now.toString(),
+                "Auto clock-out: employee was " + distanceMeters + " m from " + storeName);
     }
 
     private void writeAudit(User user, Attendance attendance, String actionType, String ip, String device, String prev, String next, String reason) {
@@ -718,5 +1018,27 @@ public class AttendanceServiceImpl implements AttendanceService {
         audit.setNewValue(next);
         audit.setReason(reason);
         attendanceAuditTrailRepository.save(audit);
+    }
+
+    private LocalTime parseTimeRobust(String input) {
+        if (input == null) return null;
+        String clean = input.trim().toUpperCase();
+        
+        // Try parsing as 24-hour time first (e.g., "08:00", "16:30", "8:00")
+        try {
+            return LocalTime.parse(clean, DateTimeFormatter.ofPattern("[H]H:mm"));
+        } catch (Exception e) {
+            // Ignored, try next
+        }
+        
+        // Try parsing as 12-hour time with AM/PM (e.g. "08:00 AM", "8:00AM", "08:00AM", "8:00 AM")
+        try {
+            String amPmClean = clean.replaceAll("\\s+", " ");
+            return LocalTime.parse(amPmClean, DateTimeFormatter.ofPattern("[h]h:mm a", Locale.US));
+        } catch (Exception e) {
+            // Ignored, try next
+        }
+        
+        throw new BusinessException("Invalid time format: '" + input + "'. Please use 'HH:mm' (e.g., 16:30) or 'hh:mm AM/PM' (e.g., 04:30 PM).");
     }
 }

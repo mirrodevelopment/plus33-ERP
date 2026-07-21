@@ -1,0 +1,191 @@
+﻿<!--
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : National Admin Module
+ * File              : profile.html
+ * Path              : frontend/modules/national-admin/pages/profile/profile.html
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for National Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+-->
+<!-- ============================================================
+     PLUS33 Coffee ERP | National Admin Profile Page
+     Module  : National Admin — My Profile
+     File    : profile.html
+     Path    : frontend/modules/national-admin/pages/profile/profile.html
+     Purpose : Glassmorphic 4-row profile page — Indigo national-admin theme
+     ============================================================ -->
+<div class="nat-profile-page animate-fade-in">
+
+  <!-- Hero Header Banner Card -->
+  <div class="nat-profile-hero">
+    <div class="nat-profile-hero__bg"></div>
+    <div class="nat-profile-hero__content">
+
+      <!-- Avatar -->
+      <div class="nat-profile-avatar-wrapper" id="avatar-container-box" title="Change Profile Avatar">
+        <div class="nat-profile-avatar">
+          <img id="nat-avatar-img" src="imgs/male-avatar.png" alt="National Admin Avatar" class="nat-profile-avatar__img">
+          <div class="nat-profile-avatar__overlay"><span>📷</span><span>Change</span></div>
+        </div>
+        <button type="button" id="btn-edit-avatar-pencil" class="nat-profile-avatar__pencil" title="Change Profile Picture">✏️</button>
+        <span class="nat-profile-status-dot"></span>
+        <input type="file" id="input-nat-avatar-file" accept="image/*" style="display:none;">
+      </div>
+
+      <!-- Info -->
+      <div class="nat-profile-hero__meta">
+        <div class="nat-profile-hero__title-row">
+          <h2 id="nat-user-fullname" class="nat-profile-hero__name">National Administrator</h2>
+          <span class="nat-role-badge">NATIONAL ADMIN</span>
+        </div>
+        <p id="nat-user-email" class="nat-profile-hero__email">national.admin@plus33.coffee</p>
+        <div class="nat-profile-hero__tags">
+          <span id="nat-country-code-badge" class="nat-tag-pill">🇮🇳 IN (+91)</span>
+          <span id="nat-scope-badge" class="nat-tag-pill">🌏 National Operations</span>
+          <span id="nat-docs-verified-badge" class="nat-tag-pill">⏳ Onboarding Documents Pending</span>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="nat-profile-hero__stats">
+        <div class="nat-stat-card"><span class="nat-stat-card__val" id="stat-nat-regions">—</span><span class="nat-stat-card__lbl">Regions</span></div>
+        <div class="nat-stat-card"><span class="nat-stat-card__val" id="stat-nat-stores">—</span><span class="nat-stat-card__lbl">Stores</span></div>
+        <div class="nat-stat-card nat-stat-card--accent"><span class="nat-stat-card__val" id="stat-nat-staff">—</span><span class="nat-stat-card__lbl">Total Staff</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: Info Form + Security -->
+  <div class="nat-profile-row-1">
+
+    <!-- Personal + Banking Info Card -->
+    <div class="nat-profile-card">
+      <div class="nat-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="nat-profile-card__icon">👤</div>
+          <div>
+            <h3 class="nat-profile-card__title">National Admin Information</h3>
+            <span class="nat-profile-card__sub">Personal, Compensation &amp; Banking Details</span>
+          </div>
+        </div>
+        <button type="button" id="btn-toggle-edit-personal" class="nat-profile-btn-sec">✏️ Edit Details</button>
+      </div>
+      <form id="form-nat-personal-info" class="nat-profile-form">
+        <div class="nat-form-row">
+          <div class="nat-form-group"><label class="nat-form-label">First Name</label><div class="nat-form-input-wrap"><span class="nat-form-icon">👤</span><input type="text" id="input-nat-firstname" placeholder="First Name" disabled class="nat-form-input"></div></div>
+          <div class="nat-form-group"><label class="nat-form-label">Last Name</label><div class="nat-form-input-wrap"><span class="nat-form-icon">👤</span><input type="text" id="input-nat-lastname" placeholder="Last Name" disabled class="nat-form-input"></div></div>
+        </div>
+        <div class="nat-form-row">
+          <div class="nat-form-group"><label class="nat-form-label">Email Address</label><div class="nat-form-input-wrap"><span class="nat-form-icon">✉️</span><input type="email" id="input-nat-email" placeholder="Email Address" disabled class="nat-form-input"></div></div>
+          <div class="nat-form-group"><label class="nat-form-label">Contact Phone</label><div class="nat-form-input-wrap"><span class="nat-form-icon">📞</span><input type="tel" id="input-nat-phone" placeholder="Phone Number" disabled class="nat-form-input"></div></div>
+        </div>
+        <div class="nat-form-row">
+          <div class="nat-form-group"><label class="nat-form-label">Staff ID</label><div class="nat-form-input-wrap"><span class="nat-form-icon">🪪</span><input type="text" id="input-nat-empid" placeholder="Staff ID" disabled readonly class="nat-form-input"></div></div>
+          <div class="nat-form-group"><label class="nat-form-label">Role Title</label><div class="nat-form-input-wrap"><span class="nat-form-icon">👔</span><input type="text" id="input-nat-designation" placeholder="Designation / Role" disabled class="nat-form-input"></div></div>
+        </div>
+        <div class="nat-form-row nat-form-row--3">
+          <div class="nat-form-group"><label class="nat-form-label">Joined Date</label><div class="nat-form-input-wrap"><span class="nat-form-icon">📅</span><input type="text" id="input-nat-joined" placeholder="Joined Date" disabled class="nat-form-input"></div></div>
+          <div class="nat-form-group"><label class="nat-form-label">Base Salary Rate</label><div class="nat-form-input-wrap"><span class="nat-form-icon">💵</span><input type="text" id="input-nat-salary" placeholder="Base Salary" disabled class="nat-form-input"></div></div>
+          <div class="nat-form-group"><label class="nat-form-label">Gender Avatar</label><div class="nat-form-input-wrap"><span class="nat-form-icon">🚻</span><select id="input-nat-gender" disabled class="nat-form-input"><option value="Male">Male (👨 Default)</option><option value="Female">Female (👩 Default)</option><option value="Other">Other</option></select></div></div>
+        </div>
+        <div class="nat-banking-header">
+          <span>🏦 Country Direct Deposit Bank Details</span>
+          <span id="lbl-nat-bank-country" class="nat-banking-country">🇮🇳 India Standard</span>
+        </div>
+        <div class="nat-form-row">
+          <div class="nat-form-group"><label class="nat-form-label">Bank Name</label><div class="nat-form-input-wrap"><span class="nat-form-icon">🏛️</span><input type="text" id="input-nat-bankname" placeholder="Bank Name" disabled class="nat-form-input"></div></div>
+          <div class="nat-form-group"><label class="nat-form-label" id="lbl-bank-acc-num">Account Number / IBAN</label><div class="nat-form-input-wrap"><span class="nat-form-icon">💳</span><input type="text" id="input-nat-bankacc" placeholder="Account Number / IBAN" disabled class="nat-form-input"></div></div>
+        </div>
+        <div class="nat-form-row">
+          <div class="nat-form-group"><label class="nat-form-label" id="lbl-bank-ifsc-code">IFSC / BIC / SWIFT Code</label><div class="nat-form-input-wrap"><span class="nat-form-icon">🔍</span><input type="text" id="input-nat-ifsc" placeholder="IFSC / BIC / SWIFT" disabled class="nat-form-input"></div></div>
+          <div class="nat-form-group"><label class="nat-form-label" id="lbl-bank-branch-wps">Branch / WPS Routing ID</label><div class="nat-form-input-wrap"><span class="nat-form-icon">📍</span><input type="text" id="input-nat-branch" placeholder="Branch / WPS ID" disabled class="nat-form-input"></div></div>
+        </div>
+        <div id="nat-personal-actions" class="nat-form-actions" style="display:none;">
+          <button type="button" id="btn-cancel-personal" class="nat-btn-ghost">Cancel</button>
+          <button type="submit" id="btn-save-personal" class="nat-btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Security Card -->
+    <div class="nat-profile-card">
+      <div class="nat-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="nat-profile-card__icon">🛡️</div>
+          <div>
+            <h3 class="nat-profile-card__title">Security &amp; Account</h3>
+            <span class="nat-profile-card__sub">Manage your login credentials</span>
+          </div>
+        </div>
+      </div>
+      <form id="form-nat-change-password" class="nat-profile-form">
+        <div class="nat-form-group"><label class="nat-form-label">Current Password</label><input type="password" id="input-nat-curr-password" placeholder="••••••••••••" required class="nat-form-input"></div>
+        <div class="nat-form-row">
+          <div class="nat-form-group"><label class="nat-form-label">New Password</label><input type="password" id="input-nat-new-password" placeholder="Minimum 8 chars" required class="nat-form-input"></div>
+          <div class="nat-form-group"><label class="nat-form-label">Confirm Password</label><input type="password" id="input-nat-confirm-password" placeholder="Repeat new password" required class="nat-form-input"></div>
+        </div>
+        <button type="submit" id="btn-nat-update-password" class="nat-btn-primary full-width">🔒 Update Security Credentials</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ROW 2: 4 Feature Cards -->
+  <div class="nat-profile-row-2">
+    <div class="nat-feature-card nat-feature-card--indigo">
+      <div class="nat-feature-card__header"><span class="nat-feature-card__icon">🌏</span><div><h4 class="nat-feature-card__title">National Jurisdiction</h4><span class="nat-feature-card__sub" style="color:#6366f1;">Country Overview</span></div></div>
+      <div class="nat-feature-card__body">
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">Regions Under Control</span><strong id="fc-nat-regions" class="nat-feature-card__val">—</strong></div>
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">Total Stores</span><strong id="fc-nat-stores" class="nat-feature-card__val">—</strong></div>
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">Status</span><strong style="color:#6366f1;">Active National Admin</strong></div>
+      </div>
+    </div>
+    <div class="nat-feature-card nat-feature-card--amber">
+      <div class="nat-feature-card__header"><span class="nat-feature-card__icon">📜</span><div><h4 class="nat-feature-card__title">Verification Documents</h4><span class="nat-feature-card__sub" style="color:#f59e0b;">Compliance Overview</span></div></div>
+      <div class="nat-feature-card__body">
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">Compliance Standard</span><strong class="nat-feature-card__val">National Admin Onboarding</strong></div>
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">Verification Status</span><strong id="fc-nat-doc-status" style="color:#f59e0b;">Pending Review</strong></div>
+      </div>
+      <button type="button" onclick="document.querySelector('.doc-hub-grid-wrapper')?.scrollIntoView({behavior:'smooth'});" class="nat-feature-card__btn nat-feature-card__btn--amber">Go to Verification Hub</button>
+    </div>
+    <div class="nat-feature-card nat-feature-card--cyan">
+      <div class="nat-feature-card__header"><span class="nat-feature-card__icon">📊</span><div><h4 class="nat-feature-card__title">National Analytics</h4><span class="nat-feature-card__sub" style="color:#06b6d4;">Performance</span></div></div>
+      <div class="nat-feature-card__body">
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">Total Staff</span><strong id="fc-nat-staff" class="nat-feature-card__val">—</strong></div>
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">National Performance</span><strong style="color:#10b981;">On Target</strong></div>
+      </div>
+      <button type="button" onclick="window.location.hash='#national-dashboard'" class="nat-feature-card__btn nat-feature-card__btn--cyan">View Dashboard</button>
+    </div>
+    <div class="nat-feature-card nat-feature-card--purple">
+      <div class="nat-feature-card__header"><span class="nat-feature-card__icon">📣</span><div><h4 class="nat-feature-card__title">Announcements</h4><span class="nat-feature-card__sub" style="color:#c084fc;">Communications</span></div></div>
+      <div class="nat-feature-card__body">
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">Broadcast Reach</span><strong class="nat-feature-card__val">All Regions</strong></div>
+        <div class="nat-feature-card__row"><span class="nat-feature-card__lbl">Latest Update</span><strong style="color:#c084fc;">—</strong></div>
+      </div>
+      <button type="button" onclick="window.location.hash='#regional-announcements'" class="nat-feature-card__btn nat-feature-card__btn--purple">Manage Announcements</button>
+    </div>
+  </div>
+
+  <!-- ROW 3: Document Hub -->
+  <div class="nat-profile-doc-hub">
+    <div id="nat-doc-hub-container"></div>
+  </div>
+
+  <!-- ROW 4: Quick Utility Footer -->
+  <div class="nat-profile-row-4">
+    <div class="nat-utility-tile" onclick="window.location.hash='#national-dashboard'"><span class="nat-utility-tile__icon">🌏</span><div><strong class="nat-utility-tile__title">National Dashboard</strong><span class="nat-utility-tile__sub">Country-wide overview</span></div></div>
+    <div class="nat-utility-tile" onclick="window.location.hash='#regional-regions'"><span class="nat-utility-tile__icon">🗺️</span><div><strong class="nat-utility-tile__title">All Regions</strong><span class="nat-utility-tile__sub">Manage regional operations</span></div></div>
+    <div class="nat-utility-tile" onclick="window.location.hash='#regional-announcements'"><span class="nat-utility-tile__icon">📣</span><div><strong class="nat-utility-tile__title">Announcements</strong><span class="nat-utility-tile__sub">Broadcast to all regions</span></div></div>
+    <div class="nat-utility-tile" onclick="window.location.hash='#settings'"><span class="nat-utility-tile__icon">⚙️</span><div><strong class="nat-utility-tile__title">System Settings</strong><span class="nat-utility-tile__sub">Configure platform settings</span></div></div>
+  </div>
+
+</div>
+

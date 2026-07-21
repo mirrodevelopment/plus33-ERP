@@ -65,6 +65,9 @@ export default class StoreEmployeeSchedule {
 
     // 4. Bind event listeners
     this.bindEvents(container, lifecycle);
+
+    // 5. Start away pass timer interval
+    this.startAwayPassTimer(container, lifecycle);
   }
 
   async _loadTemplate(container) {
@@ -102,14 +105,30 @@ export default class StoreEmployeeSchedule {
       today.setHours(0, 0, 0, 0);
       const todayStr = this.formatDateYMD(today);
       
-      const res = await apiClient.get(`/api/v1/shift-assignments/my-schedule?startDate=${todayStr}`);
-      const assignments = (res && res.success) ? res.data : [];
+      const [assignRes, shiftsRes, swapsRes, otRes, attendanceRes, awayRes] = await Promise.all([
+        apiClient.get(`/api/v1/shift-assignments/my-schedule?startDate=${todayStr}`),
+        apiClient.get('/api/v1/shifts'),
+        apiClient.get('/api/v1/shift-swaps/my-requests'),
+        apiClient.get('/api/v1/overtime-requests/my').catch(() => null),
+        apiClient.get('/api/v1/attendance/today').catch(() => null),
+        apiClient.get('/api/v1/away-permission/my').catch(() => null)
+      ]);
 
-      const shiftsRes = await apiClient.get('/api/v1/shifts');
+      const assignments = (assignRes && assignRes.success) ? assignRes.data : [];
       this.systemShifts = (shiftsRes && shiftsRes.success) ? shiftsRes.data : [];
-
-      const swapsRes = await apiClient.get('/api/v1/shift-swaps/my-requests');
       const swaps = (swapsRes && swapsRes.success) ? swapsRes.data : [];
+      const overtimeRequests = (otRes && otRes.success) ? otRes.data : [];
+
+      this.clockedIn = attendanceRes?.success && attendanceRes.data?.clockedIn;
+      this.shiftStartTime = attendanceRes?.success ? attendanceRes.data?.shiftStartTime : '';
+      this.shiftEndTime = attendanceRes?.success ? attendanceRes.data?.shiftEndTime : '';
+      if (this.clockedIn && awayRes?.success && awayRes.data) {
+        const list = awayRes.data;
+        list.sort((a, b) => b.id - a.id);
+        this.currentAwayPass = list[0] || null;
+      } else {
+        this.currentAwayPass = null;
+      }
 
       const shifts = [];
       const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -157,6 +176,7 @@ export default class StoreEmployeeSchedule {
         selectedShiftId: null,
         shifts: shifts,
         swaps: swaps,
+        overtimeRequests: overtimeRequests,
         preferences: {
           preferredShift: 'Morning',
           availableWeekends: false,
@@ -176,6 +196,7 @@ export default class StoreEmployeeSchedule {
       selectedShiftId: null,
       shifts: [],
       swaps: [],
+      overtimeRequests: [],
       preferences: {
         preferredShift: 'Morning',
         availableWeekends: false,
@@ -284,7 +305,40 @@ export default class StoreEmployeeSchedule {
     // 4. Render trades swap log table rows
     this._renderSwapLogs(container);
 
+    // 5. Populate overtime shift options
+    const otShiftSelect = container.querySelector('#ot-req-shift');
+    if (otShiftSelect) {
+      otShiftSelect.replaceChildren();
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = '-- Choose shift type --';
+      otShiftSelect.appendChild(defaultOpt);
 
+      this.systemShifts.filter(s => s.active).forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.name} (${s.startTime} - ${s.endTime})`;
+        otShiftSelect.appendChild(opt);
+      });
+    }
+
+    // Set overtime date min/max to next 7 days
+    const otDateInput = container.querySelector('#ot-req-date');
+    if (otDateInput) {
+      const todayD = new Date();
+      todayD.setHours(0, 0, 0, 0);
+      const minDate = new Date(todayD);
+      minDate.setDate(minDate.getDate() + 1);
+      const maxDate7 = new Date(todayD);
+      maxDate7.setDate(maxDate7.getDate() + 7);
+      otDateInput.min = this.formatDateYMD(minDate);
+      otDateInput.max = this.formatDateYMD(maxDate7);
+      otDateInput.value = '';
+    }
+
+    // 6. Render overtime request log table rows
+    this._renderOvertimeLogs(container);
+    this._renderAwayPassCard(container);
   }
 
   // ---------------------------------------------------------------------------
@@ -322,6 +376,24 @@ export default class StoreEmployeeSchedule {
       };
       overlay.addEventListener('click', handleOverlayClick);
       lifecycle.onCleanup(() => overlay.removeEventListener('click', handleOverlayClick));
+    }
+
+    // 0. Policy Card Expand / Collapse Toggle
+    const policyToggle = container.querySelector('#policy-card-toggle');
+    const policyBody   = container.querySelector('#policy-card-body');
+    if (policyToggle && policyBody) {
+      const togglePolicy = () => {
+        const isOpen = policyToggle.getAttribute('aria-expanded') === 'true';
+        policyToggle.setAttribute('aria-expanded', String(!isOpen));
+        policyBody.setAttribute('aria-hidden', String(isOpen));
+      };
+      policyToggle.addEventListener('click', togglePolicy);
+      policyToggle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePolicy(); }
+      });
+      lifecycle.onCleanup(() => {
+        policyToggle.removeEventListener('click', togglePolicy);
+      });
     }
 
     // 1. Click Calendar Card for Shift Details
@@ -535,6 +607,190 @@ export default class StoreEmployeeSchedule {
       btn.addEventListener('click', handleEscalate);
       lifecycle.onCleanup(() => btn.removeEventListener('click', handleEscalate));
     });
+
+    // 7. Submit Overtime Request click
+    const submitOtBtn = container.querySelector('#btn-submit-ot');
+    if (submitOtBtn) {
+      const handleOtSubmit = async () => {
+        const otShiftSelect = container.querySelector('#ot-req-shift');
+        const otDateInput = container.querySelector('#ot-req-date');
+        const otReasonInput = container.querySelector('#ot-req-reason');
+
+        const shiftId = parseInt(otShiftSelect?.value);
+        const requestedDate = otDateInput?.value;
+        const reason = otReasonInput?.value?.trim();
+
+        if (isNaN(shiftId)) {
+          notificationStore.danger('Please select a shift type.');
+          return;
+        }
+        if (!requestedDate) {
+          notificationStore.danger('Please select a date.');
+          return;
+        }
+        if (!reason) {
+          notificationStore.danger('Please provide a reason for the overtime request.');
+          return;
+        }
+
+        const payload = {
+          shiftId: shiftId,
+          requestedDate: requestedDate,
+          reason: reason
+        };
+
+        try {
+          const res = await apiClient.post('/api/v1/overtime-requests', payload);
+          if (res && res.success) {
+            notificationStore.success('Overtime request submitted for supervisor approval.');
+            if (otShiftSelect) otShiftSelect.value = '';
+            if (otDateInput) otDateInput.value = '';
+            if (otReasonInput) otReasonInput.value = '';
+
+            await this.loadScheduleData();
+            this.render(container);
+            this.bindEvents(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to submit overtime request.');
+          }
+        } catch (err) {
+          logger.error('StoreEmployeeSchedule', 'Error submitting overtime request:', err);
+          notificationStore.danger(err.message || 'Error submitting overtime request.');
+        }
+      };
+      submitOtBtn.addEventListener('click', handleOtSubmit);
+      lifecycle.onCleanup(() => submitOtBtn.removeEventListener('click', handleOtSubmit));
+    }
+
+    // Away Pass Manager event handlers
+    const btnSubmitAway = container.querySelector('#btn-submit-away-pass');
+    const selectAwayReason = container.querySelector('#away-pass-reason-select');
+    const customReasonGroup = container.querySelector('#away-pass-custom-reason-group');
+    const inputAwayReason = container.querySelector('#away-pass-reason');
+    const selectAwayDuration = container.querySelector('#away-pass-duration-select');
+
+    if (selectAwayReason) {
+      const handleReasonSelectChange = () => {
+        if (customReasonGroup) {
+          customReasonGroup.style.display = selectAwayReason.value === 'custom' ? 'block' : 'none';
+        }
+      };
+      selectAwayReason.addEventListener('change', handleReasonSelectChange);
+      lifecycle.onCleanup(() => selectAwayReason.removeEventListener('change', handleReasonSelectChange));
+    }
+    
+    if (btnSubmitAway) {
+      const handleSubmitAway = async () => {
+        let rawReason = '';
+        if (selectAwayReason?.value === 'custom') {
+          rawReason = inputAwayReason?.value.trim() || '';
+          if (!rawReason) {
+            notificationStore.danger('Please provide custom reason details.');
+            return;
+          }
+        } else {
+          rawReason = selectAwayReason?.value || 'No reason';
+        }
+        
+        const startVal = container.querySelector('#away-pass-start-time-select')?.value || 'now';
+        const mins = selectAwayDuration?.value || '30';
+        const startLabel = startVal === 'now' ? 'Now' : startVal;
+        const reason = `${rawReason} (Start: ${startLabel}) (Requested Duration: ${mins} mins)`;
+        
+        btnSubmitAway.disabled = true;
+        try {
+          const res = await apiClient.post('/api/v1/away-permission/request', { reason });
+          if (res?.success) {
+            notificationStore.success('Away pass request submitted successfully.');
+            if (inputAwayReason) inputAwayReason.value = '';
+            await this.loadScheduleData();
+            this.render(container);
+            this.bindEvents(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to submit away pass request.');
+            btnSubmitAway.disabled = false;
+          }
+        } catch (e) {
+          notificationStore.danger('Failed to request away pass: ' + e.message);
+          btnSubmitAway.disabled = false;
+        }
+      };
+      btnSubmitAway.addEventListener('click', handleSubmitAway);
+      lifecycle.onCleanup(() => btnSubmitAway.removeEventListener('click', handleSubmitAway));
+    }
+
+    const btnExtendAway = container.querySelector('#btn-extend-away-pass');
+    if (btnExtendAway) {
+      const handleExtendAway = async () => {
+        const pass = this.currentAwayPass;
+        if (!pass) return;
+
+        const minsInput = prompt('How many additional minutes do you need? (e.g., 15, 30, 45, 60):', '30');
+        if (minsInput === null) return; // User cancelled
+
+        const mins = parseInt(minsInput.trim(), 10);
+        if (isNaN(mins) || mins <= 0) {
+          notificationStore.danger('Please enter a valid number of minutes.');
+          return;
+        }
+
+        const reasonInput = prompt('Reason for extension (optional):');
+        if (reasonInput === null) return; // User cancelled
+
+        let extensionReason = `Requested ${mins} extra minutes.`;
+        if (reasonInput.trim()) {
+          extensionReason += ` Reason: ${reasonInput.trim()}`;
+        }
+        
+        btnExtendAway.disabled = true;
+        try {
+          const res = await apiClient.post(`/api/v1/away-permission/${pass.id}/extend`, {
+            reason: extensionReason
+          });
+          if (res?.success) {
+            notificationStore.success('Extension request sent to your supervisor.');
+            await this.loadScheduleData();
+            this.render(container);
+            this.bindEvents(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to request extension.');
+            btnExtendAway.disabled = false;
+          }
+        } catch (e) {
+          notificationStore.danger('Failed to request extension: ' + e.message);
+          btnExtendAway.disabled = false;
+        }
+      };
+      btnExtendAway.addEventListener('click', handleExtendAway);
+      lifecycle.onCleanup(() => btnExtendAway.removeEventListener('click', handleExtendAway));
+    }
+
+    const btnReturnAway = container.querySelector('#btn-return-away-pass');
+    if (btnReturnAway) {
+      const handleReturnAway = async () => {
+        const pass = this.currentAwayPass;
+        if (!pass) return;
+        
+        btnReturnAway.disabled = true;
+        try {
+          const res = await apiClient.post(`/api/v1/away-permission/${pass.id}/return`, {});
+          if (res?.success) {
+            notificationStore.success('Away pass ended successfully. Welcome back!');
+            await this.loadScheduleData();
+            this.render(container);
+            this.bindEvents(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to end away pass.');
+            btnReturnAway.disabled = false;
+          }
+        } catch (e) {
+          notificationStore.danger('Failed to end away pass: ' + e.message);
+          btnReturnAway.disabled = false;
+        }
+      };
+      btnReturnAway.addEventListener('click', handleReturnAway);
+      lifecycle.onCleanup(() => btnReturnAway.removeEventListener('click', handleReturnAway));
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -639,7 +895,244 @@ export default class StoreEmployeeSchedule {
     });
   }
 
+  _renderOvertimeLogs(container) {
+    const tbody = container.querySelector('#ot-requests-tbody');
+    const emptyTpl = container.querySelector('#ot-empty-row-tpl');
+    const rowTpl = container.querySelector('#ot-row-tpl');
 
+    if (!tbody) return;
+
+    tbody.replaceChildren();
+
+    const otRequests = this.state.overtimeRequests || [];
+    if (otRequests.length === 0) {
+      if (emptyTpl) {
+        tbody.appendChild(emptyTpl.content.cloneNode(true));
+      }
+      return;
+    }
+
+    otRequests.forEach(ot => {
+      if (!rowTpl) return;
+      const clone = rowTpl.content.cloneNode(true);
+
+      const dateEl = clone.querySelector('.ot-date-cell');
+      const shiftEl = clone.querySelector('.ot-shift-cell');
+      const reasonEl = clone.querySelector('.ot-reason-cell');
+      const statusEl = clone.querySelector('.ot-status-cell');
+
+      if (dateEl) dateEl.textContent = ot.requestedDateDisplay || ot.requestedDate || '';
+      if (shiftEl) shiftEl.textContent = ot.shiftName || '';
+      if (reasonEl) {
+        reasonEl.textContent = ot.reason || '—';
+        reasonEl.style.fontSize = '0.7rem';
+        reasonEl.style.color = 'var(--text-muted)';
+      }
+      if (statusEl) {
+        statusEl.replaceChildren();
+        if (ot.status === 'APPROVED' || ot.status === 'Approved') {
+          statusEl.className = 'ot-status-cell font-bold';
+          statusEl.style.color = '#4caf50';
+          statusEl.textContent = '✓ Approved';
+        } else if (ot.status === 'DENIED' || ot.status === 'Denied') {
+          statusEl.className = 'ot-status-cell font-bold';
+          statusEl.style.color = '#ff6b6b';
+          statusEl.textContent = '✗ Denied';
+        } else if (ot.status === 'PENDING' || ot.status === 'Pending') {
+          statusEl.className = 'ot-status-cell font-bold';
+          statusEl.style.color = '#ffc107';
+          statusEl.textContent = '⏳ Pending Review';
+        } else {
+          statusEl.className = 'ot-status-cell font-bold';
+          statusEl.style.color = '#ffc107';
+          statusEl.textContent = ot.status || 'Pending';
+        }
+      }
+
+      tbody.appendChild(clone);
+    });
+  }
+
+  _renderAwayPassCard(container) {
+    const card = container.querySelector('#away-pass-card');
+    if (!card) return;
+
+    const notClocked = container.querySelector('#away-pass-not-clocked');
+    const containerEl = container.querySelector('#away-pass-container');
+    const activeInfo = container.querySelector('#away-pass-active-info');
+    const statusText = container.querySelector('#away-pass-status-text');
+    const statusDetail = container.querySelector('#away-pass-status-detail');
+    const timerBlock = container.querySelector('#away-pass-timer-block');
+    const requestForm = container.querySelector('#away-pass-request-form');
+    const btnExtend = container.querySelector('#btn-extend-away-pass');
+
+    if (!this.clockedIn) {
+      if (notClocked) notClocked.style.display = 'block';
+      if (containerEl) containerEl.style.display = 'none';
+      return;
+    }
+
+    if (notClocked) notClocked.style.display = 'none';
+    if (containerEl) containerEl.style.display = 'block';
+
+    const btnReturn = container.querySelector('#btn-return-away-pass');
+    const pass = this.currentAwayPass;
+    const isResolved = !pass || ['RETURNED', 'DENIED', 'EXPIRED'].includes(pass.status);
+
+    if (isResolved) {
+      if (requestForm) requestForm.style.display = 'block';
+      if (activeInfo) activeInfo.style.display = 'none';
+      if (btnExtend) btnExtend.style.display = 'none';
+      if (btnReturn) btnReturn.style.display = 'none';
+
+      // Populate Start Time dropdown with Now and Shift timings
+      const startSelect = container.querySelector('#away-pass-start-time-select');
+      if (startSelect) {
+        startSelect.innerHTML = '<option value="now" selected>Now</option>';
+        const startTimeStr = this.shiftStartTime || '';
+        const endTimeStr = this.shiftEndTime || '';
+        if (startTimeStr && endTimeStr) {
+          try {
+            const parseTime = (str) => {
+              const parts = str.split(':');
+              return {
+                hours: parseInt(parts[0], 10),
+                minutes: parseInt(parts[1], 10)
+              };
+            };
+            const start = parseTime(startTimeStr);
+            const end = parseTime(endTimeStr);
+            let startMins = start.hours * 60 + start.minutes;
+            let endMins = end.hours * 60 + end.minutes;
+            if (endMins < startMins) {
+              endMins += 24 * 60;
+            }
+            for (let m = startMins; m <= endMins; m += 30) {
+              const displayHour = Math.floor(m / 60) % 24;
+              const displayMin = m % 60;
+              const timeVal = `${String(displayHour).padStart(2, '0')}:${String(displayMin).padStart(2, '0')}`;
+              const ampm = displayHour >= 12 ? 'PM' : 'AM';
+              const hr12 = displayHour % 12 || 12;
+              const timeLabel = `${hr12}:${String(displayMin).padStart(2, '0')} ${ampm}`;
+              const opt = document.createElement('option');
+              opt.value = timeVal;
+              opt.textContent = timeLabel;
+              startSelect.appendChild(opt);
+            }
+          } catch (e) {
+            logger.error('StoreEmployeeSchedule', 'Failed to populate shift times dropdown', e);
+          }
+        }
+      }
+    } else {
+      if (requestForm) requestForm.style.display = 'none';
+      if (activeInfo) activeInfo.style.display = 'flex';
+
+      const status = pass.status;
+      if (status === 'PENDING') {
+        if (statusText) {
+          statusText.textContent = '⏳ Pending Approval';
+          statusText.style.color = '#ff9800';
+        }
+        if (statusDetail) statusDetail.textContent = `Reason: ${pass.reason || '—'}`;
+        if (timerBlock) timerBlock.style.display = 'none';
+        if (btnExtend) btnExtend.style.display = 'none';
+        if (btnReturn) btnReturn.style.display = 'none';
+      } else if (status === 'APPROVED') {
+        if (statusText) {
+          statusText.textContent = '✓ Approved';
+          statusText.style.color = '#4caf50';
+        }
+        const timeStr = pass.approvedUntil ? new Date(pass.approvedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+        if (statusDetail) statusDetail.textContent = `Approved until ${timeStr}`;
+        if (timerBlock) timerBlock.style.display = 'flex';
+        if (btnExtend) {
+          btnExtend.style.display = 'block';
+          btnExtend.disabled = false;
+        }
+        if (btnReturn) {
+          btnReturn.style.display = 'block';
+          btnReturn.disabled = false;
+        }
+      } else if (status === 'EXTENSION_REQUESTED') {
+        if (statusText) {
+          statusText.textContent = '🔁 Extension Requested';
+          statusText.style.color = '#ffc107';
+        }
+        if (statusDetail) statusDetail.textContent = 'Waiting for supervisor approval';
+        if (timerBlock) timerBlock.style.display = 'flex';
+        if (btnExtend) {
+          btnExtend.style.display = 'block';
+          btnExtend.disabled = true;
+        }
+        if (btnReturn) {
+          btnReturn.style.display = 'block';
+          btnReturn.disabled = false;
+        }
+      }
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  startAwayPassTimer(container, lifecycle) {
+    const self = this;
+    const updateAwayTimer = () => {
+      self.updateAwayPassTimer(container);
+    };
+    updateAwayTimer();
+    const interval = setInterval(updateAwayTimer, 1000);
+    lifecycle.onCleanup(() => clearInterval(interval));
+  }
+
+  updateAwayPassTimer(container) {
+    const timerBlock = container.querySelector('#away-pass-timer-block');
+    const timerVal = container.querySelector('#away-pass-timer-value');
+    if (!timerBlock || !timerVal) return;
+
+    const pass = this.currentAwayPass;
+    if (!pass || !this.clockedIn || (pass.status !== 'APPROVED' && pass.status !== 'EXTENSION_REQUESTED')) {
+      timerBlock.style.display = 'none';
+      return;
+    }
+
+    const deadlineStr = pass.graceUntil || pass.approvedUntil;
+    if (!deadlineStr) {
+      timerBlock.style.display = 'none';
+      return;
+    }
+
+    const now = new Date();
+    const deadline = new Date(deadlineStr);
+    const diffMs = deadline - now;
+
+    if (diffMs > 0) {
+      timerBlock.style.display = 'flex';
+      timerVal.textContent = this.formatDuration(diffMs);
+      
+      const approvedUntil = new Date(pass.approvedUntil);
+      if (now > approvedUntil) {
+        timerVal.style.color = '#ff6b6b';
+      } else {
+        timerVal.style.color = 'var(--accent-warning, #ff9800)';
+      }
+    } else {
+      timerBlock.style.display = 'flex';
+      timerVal.textContent = '00:00:00';
+      timerVal.style.color = '#ff6b6b';
+      if (!this._lastAwayReload || (now - this._lastAwayReload) > 10000) {
+        this._lastAwayReload = now;
+        this.loadScheduleData().then(() => this.render(container));
+      }
+    }
+  }
+
+  formatDuration(ms) {
+    const totalSecs = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSecs / 3600);
+    const minutes = Math.floor((totalSecs % 3600) / 60);
+    const seconds = totalSecs % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
 
   _loadCss() {
     const cssId = 'store-employee-schedule-page-css';

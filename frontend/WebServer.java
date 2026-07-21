@@ -97,6 +97,61 @@ public class WebServer {
                 }
             }
 
+            if (path.equals("/api/upload-product-image") && "POST".equalsIgnoreCase(t.getRequestMethod())) {
+                try {
+                    String contentType = t.getRequestHeaders().getFirst("Content-Type");
+                    String fileNameHeader = t.getRequestHeaders().getFirst("X-File-Name");
+                    
+                    File prodDir = new File("frontend/user_uploads/products");
+                    if (!prodDir.exists()) {
+                        prodDir.mkdirs();
+                    }
+                    
+                    String ext = "png";
+                    if (contentType != null) {
+                        if (contentType.contains("png")) {
+                            ext = "png";
+                        } else if (contentType.contains("jpeg") || contentType.contains("jpg")) {
+                            ext = "jpg";
+                        } else if (contentType.contains("gif")) {
+                            ext = "gif";
+                        } else if (contentType.contains("webp")) {
+                            ext = "webp";
+                        }
+                    } else if (fileNameHeader != null && fileNameHeader.contains(".")) {
+                        ext = fileNameHeader.substring(fileNameHeader.lastIndexOf(".") + 1);
+                    }
+                    
+                    String uniqueName = java.util.UUID.randomUUID().toString() + "." + ext;
+                    File outFile = new File(prodDir, uniqueName);
+                    
+                    InputStream is = t.getRequestBody();
+                    byte[] bytes = is.readAllBytes();
+                    Files.write(outFile.toPath(), bytes);
+                    
+                    String relativeUrl = "user_uploads/products/" + uniqueName;
+                    String jsonResponse = "{\"success\":true,\"url\":\"" + relativeUrl + "\"}";
+                    
+                    t.getResponseHeaders().set("Content-Type", "application/json");
+                    t.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+                    t.sendResponseHeaders(200, jsonResponse.length());
+                    OutputStream os = t.getResponseBody();
+                    os.write(jsonResponse.getBytes());
+                    os.close();
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    String errResponse = "{\"success\":false,\"message\":\"" + e.getMessage() + "\"}";
+                    t.getResponseHeaders().set("Content-Type", "application/json");
+                    t.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+                    t.sendResponseHeaders(500, errResponse.length());
+                    OutputStream os = t.getResponseBody();
+                    os.write(errResponse.getBytes());
+                    os.close();
+                    return;
+                }
+            }
+
             // Endpoint: POST /api/upload-document
             // WHAT IT DOES: 
             // Handles multipart document file streams uploaded from the profile page.
@@ -209,28 +264,26 @@ public class WebServer {
                     }
                     
                     String ext = "png";
-                    if (contentType != null) {
-                        if (contentType.contains("png")) {
-                            ext = "png";
-                        } else if (contentType.contains("jpeg") || contentType.contains("jpg")) {
-                            ext = "jpg";
-                        } else if (contentType.contains("gif")) {
-                            ext = "gif";
-                        } else if (contentType.contains("webp")) {
-                            ext = "webp";
-                        } else if (contentType.contains("pdf")) {
-                            ext = "pdf";
-                        } else if (contentType.contains("mp4")) {
-                            ext = "mp4";
-                        } else if (contentType.contains("webm")) {
-                            ext = "webm";
-                        } else if (contentType.contains("ogg")) {
-                            ext = "ogg";
-                        } else if (contentType.contains("quicktime")) {
-                            ext = "mov";
-                        }
-                    } else if (fileNameHeader != null && fileNameHeader.contains(".")) {
-                        ext = fileNameHeader.substring(fileNameHeader.lastIndexOf(".") + 1);
+                    if (fileNameHeader != null && fileNameHeader.contains(".")) {
+                        ext = fileNameHeader.substring(fileNameHeader.lastIndexOf(".") + 1).toLowerCase();
+                    } else if (contentType != null) {
+                        if (contentType.contains("png")) ext = "png";
+                        else if (contentType.contains("jpeg") || contentType.contains("jpg")) ext = "jpg";
+                        else if (contentType.contains("gif")) ext = "gif";
+                        else if (contentType.contains("webp")) ext = "webp";
+                        else if (contentType.contains("svg")) ext = "svg";
+                        else if (contentType.contains("pdf")) ext = "pdf";
+                        else if (contentType.contains("mp4")) ext = "mp4";
+                        else if (contentType.contains("webm")) ext = "webm";
+                        else if (contentType.contains("ogg")) ext = "ogg";
+                        else if (contentType.contains("quicktime")) ext = "mov";
+                        else if (contentType.contains("audio/mpeg") || contentType.contains("mp3")) ext = "mp3";
+                        else if (contentType.contains("audio/wav") || contentType.contains("wav")) ext = "wav";
+                        else if (contentType.contains("audio/aac") || contentType.contains("aac")) ext = "aac";
+                        else if (contentType.contains("audio/x-m4a") || contentType.contains("m4a")) ext = "m4a";
+                        else if (contentType.contains("wordprocessingml") || contentType.contains("docx")) ext = "docx";
+                        else if (contentType.contains("spreadsheetml") || contentType.contains("xlsx")) ext = "xlsx";
+                        else if (contentType.contains("zip")) ext = "zip";
                     }
                     
                     String uniqueName = java.util.UUID.randomUUID().toString() + "." + ext;
@@ -317,8 +370,10 @@ public class WebServer {
                     return;
                 } catch (Exception err) {
                     System.err.println("Proxy exception on: " + targetUrl + " -> " + err.getMessage());
-                    String response = "502 Bad Gateway: " + err.getMessage();
-                    t.sendResponseHeaders(502, response.length());
+                    String response = "{\"success\":false,\"message\":\"Spring Boot backend on Port 8080 is initializing. Please wait a few seconds and try again.\",\"status\":503}";
+                    t.getResponseHeaders().set("Content-Type", "application/json");
+                    t.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+                    t.sendResponseHeaders(503, response.length());
                     OutputStream os = t.getResponseBody();
                     os.write(response.getBytes());
                     os.close();

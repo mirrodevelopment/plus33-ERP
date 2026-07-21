@@ -264,4 +264,70 @@ public class InventoryAnalyticsController {
         inventoryAnalyticsService.refreshAllViews();
         return ResponseEntity.ok(ApiResponse.success("Inventory analytics views refresh triggered successfully", null));
     }
+
+    @GetMapping("/store-ledger")
+    @PreAuthorize("hasAuthority('INVENTORY_ANALYTICS_VIEW')")
+    @Operation(summary = "Get Store stock ledger details")
+    public ResponseEntity<ApiResponse<java.util.List<java.util.Map<String, Object>>>> getStoreLedger(
+            @RequestParam Long storeId
+    ) {
+        java.util.List<java.util.Map<String, Object>> result = inventoryAnalyticsService.getStoreLedger(storeId);
+        return ResponseEntity.ok(ApiResponse.success("Store inventory ledger retrieved successfully", result));
+    }
+
+    @GetMapping("/store-trend")
+    @PreAuthorize("hasAuthority('INVENTORY_ANALYTICS_VIEW')")
+    @Operation(summary = "Get Store monthly inventory trend metrics")
+    public ResponseEntity<ApiResponse<java.util.List<java.util.Map<String, Object>>>> getStoreTrend(
+            @RequestParam Long storeId
+    ) {
+        java.util.List<java.util.Map<String, Object>> result = inventoryAnalyticsService.getStoreMonthlyTrend(storeId);
+        return ResponseEntity.ok(ApiResponse.success("Store inventory monthly trend retrieved successfully", result));
+    }
+
+    @GetMapping("/products-catalog")
+    @PreAuthorize("hasAuthority('INVENTORY_ANALYTICS_VIEW')")
+    @Operation(summary = "Get active products catalog list")
+    public ResponseEntity<ApiResponse<java.util.List<java.util.Map<String, Object>>>> getProductsCatalog() {
+        java.util.List<java.util.Map<String, Object>> result = inventoryAnalyticsService.getProductsCatalog();
+        return ResponseEntity.ok(ApiResponse.success("Products catalog retrieved successfully", result));
+    }
+
+    @PostMapping("/add-product-stock")
+    @PreAuthorize("hasAuthority('INVENTORY_ANALYTICS_VIEW')")
+    @Operation(summary = "Directly initialize or add product stock/image for a store")
+    public ResponseEntity<ApiResponse<Void>> addProductStock(
+            @RequestParam Long storeId,
+            @RequestParam Long productId,
+            @RequestParam(required = false) java.math.BigDecimal quantity,
+            @RequestParam(required = false) String imageUrl
+    ) {
+        inventoryAnalyticsService.addProductStock(storeId, productId, quantity, imageUrl);
+        return ResponseEntity.ok(ApiResponse.success("Product stock updated successfully", null));
+    }
+
+    @PostMapping("/log-daily-usage")
+    @PreAuthorize("hasAuthority('INVENTORY_ANALYTICS_VIEW')")
+    @Operation(summary = "Log daily inventory usage counts and deduct from stock levels")
+    public ResponseEntity<ApiResponse<Void>> logDailyUsage(
+            @RequestParam Long storeId,
+            @RequestParam Long productId,
+            @RequestParam java.math.BigDecimal quantity,
+            @RequestParam String usageDate,
+            @RequestParam(required = false) String notes
+    ) {
+        java.time.LocalDate dateObj = java.time.LocalDate.parse(usageDate);
+        inventoryAnalyticsService.logDailyUsage(storeId, productId, quantity, dateObj, notes);
+        return ResponseEntity.ok(ApiResponse.success("Daily usage logged successfully", null));
+    }
+
+    @GetMapping("/daily-usage-history")
+    @PreAuthorize("hasAuthority('INVENTORY_ANALYTICS_VIEW')")
+    @Operation(summary = "Get daily inventory usage logs history for a store")
+    public ResponseEntity<ApiResponse<java.util.List<java.util.Map<String, Object>>>> getDailyUsageHistory(
+            @RequestParam Long storeId
+    ) {
+        java.util.List<java.util.Map<String, Object>> result = inventoryAnalyticsService.getDailyUsageHistory(storeId);
+        return ResponseEntity.ok(ApiResponse.success("Daily usage history retrieved successfully", result));
+    }
 }

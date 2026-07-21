@@ -1,3 +1,21 @@
+﻿<!--
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Employee Module
+ * File              : shift-dashboard.html
+ * Path              : frontend/modules/store-employee/pages/shift-dashboard/shift-dashboard.html
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Store Employee Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+-->
 <div class="sd-page-container animate-fade-in">
 
   <!-- ===== HEADER ===== -->
@@ -127,7 +145,74 @@
     </div>
   </div>
 
-</div>
+  <!-- ===== AWAY PERMISSION REQUESTS CARD ===== -->
+  <div class="card glass sd-card">
+    <h2 class="sd-card-title">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+        fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="sd-card-icon">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      Away Pass Requests
+      <span id="sd-away-badge" style="
+        display:none; align-items:center; justify-content:center;
+        background:#f59e0b; color:#000; border-radius:50%;
+        width:18px; height:18px; font-size:0.65rem; font-weight:700;
+        margin-left:6px;
+      ">0</span>
+    </h2>
+    <p class="sd-card-subtitle">
+      Employees out of the store geofence can request an away pass. Approve with a custom time limit.
+      A <strong>10-minute grace buffer</strong> is always applied before auto clock-out triggers.
+    </p>
+
+    <div id="sd-away-permissions-list">
+      <div style="text-align:center; color:var(--text-muted); font-size:0.78rem; font-style:italic; padding:16px;">
+        No pending away pass requests right now.
+      </div>
+    </div>
+    
+    <!-- Ongoing Active Away Passes -->
+    <div id="sd-ongoing-away-section" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; display: none;">
+      <h4 style="margin: 0 0 8px 0; font-size: 0.8rem; font-weight: 600; color: var(--status-success, #4caf50); display: flex; align-items: center; gap: 4px;">
+        <i data-lucide="door-open" style="width: 14px; height: 14px;"></i> Ongoing Away Passes
+      </h4>
+      <div id="sd-ongoing-away-list">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== OVERTIME REQUESTS CARD ===== -->
+  <div class="card glass sd-card">
+    <h2 class="sd-card-title">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+        fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="sd-card-icon">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Overtime Shift Requests
+      <span id="sd-ot-badge" style="
+        display:none; align-items:center; justify-content:center;
+        background:var(--accent-primary); color:#000; border-radius:50%;
+        width:18px; height:18px; font-size:0.65rem; font-weight:700;
+        margin-left:6px;
+      ">0</span>
+    </h2>
+    <p class="sd-card-subtitle">
+      Review and approve or deny requests from employees wanting to pick up overtime shifts.
+    </p>
+
+    <div id="sd-ot-requests-list">
+      <div style="text-align:center; color:var(--text-muted); font-size:0.78rem; font-style:italic; padding:16px;">
+        No pending overtime requests right now.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PENDING SWAP REQUESTS CARD ===== -->
 
 <!-- ===== SWAP APPROVAL MODAL ===== -->
 <div id="swap-approval-overlay" class="sd-modal-overlay" aria-modal="true" role="dialog" aria-labelledby="sd-modal-title">
@@ -225,3 +310,4 @@
     </div>
   </div>
 </div>
+

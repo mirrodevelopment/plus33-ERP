@@ -78,11 +78,21 @@ public class Shift {
     @Column(name = "break_minutes", nullable = false)
     private Integer breakMinutes = 0;
 
+    @Column(name = "shift_type", length = 30)
+    private String shiftType = "CUSTOM";
+
+    @Column(name = "min_employees")
+    private Integer minEmployees = 2;
+
+    @Column(name = "max_employees")
+    private Integer maxEmployees = 8;
+
     @Column(nullable = false)
     private Boolean overnight = false;
 
     @Column(nullable = false)
     private Boolean active = true;
+
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

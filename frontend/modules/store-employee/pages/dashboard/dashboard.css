@@ -297,7 +297,7 @@
 }
 
 .duty-timecard-card, .quick-actions-card, .leave-request-card,
-.tasks-checklist-card, .training-hub-card, .announcements-card {
+.tasks-checklist-card, .training-hub-card, .announcements-card, .away-pass-card {
   padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
@@ -334,7 +334,7 @@
 /* Duty Shift Timecard */
 .duty-shift-details-box {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: var(--spacing-md);
   background: rgba(0,0,0,0.15);
   padding: var(--spacing-md);

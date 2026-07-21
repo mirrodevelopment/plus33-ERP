@@ -1,0 +1,204 @@
+<!--
+ * ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Store Admin — Inventory Overview & Monthly Trend
+ * File              : inventory.html
+ * Path              : frontend/modules/store-admin/pages/inventory/inventory.html
+ * Purpose           : HTML template for Store Admin Inventory UI
+ * Version           : 1.0.0
+ * ******************************************************************************
+ -->
+
+<div class="store-inventory-workspace animate-fade-in">
+
+  <!-- ===== 1. HEADER HERO CARD ===== -->
+  <div class="store-inventory-header">
+    <div class="header-main">
+      <div class="header-icon-box">📦</div>
+      <div class="header-text">
+        <h2>Store Inventory Overview</h2>
+        <p class="store-subtitle" id="store-metadata-info">Loading active store metadata...</p>
+      </div>
+    </div>
+    <div class="header-meta-badge">
+      <span class="pulse-indicator"></span>
+      <span class="badge-text">LIVE DATABASE</span>
+    </div>
+  </div>
+
+  <!-- ===== 2. KPI METRICS CARDS ===== -->
+  <div class="inventory-kpis-grid">
+    <div class="kpi-card" id="kpi-tracked-products">
+      <div class="kpi-card-inner">
+        <div class="kpi-details">
+          <span class="kpi-title">Tracked Products</span>
+          <h3 class="kpi-value" id="val-tracked-products">0</h3>
+          <span class="kpi-desc">Distinct catalog items</span>
+        </div>
+        <div class="kpi-icon icon-blue">📋</div>
+      </div>
+    </div>
+
+    <div class="kpi-card" id="kpi-stock-value">
+      <div class="kpi-card-inner">
+        <div class="kpi-details">
+          <span class="kpi-title">Stock Value</span>
+          <h3 class="kpi-value" id="val-stock-value">₹ 0</h3>
+          <span class="kpi-desc">Total inventory valuation</span>
+        </div>
+        <div class="kpi-icon icon-green">⚡</div>
+      </div>
+    </div>
+
+    <div class="kpi-card" id="kpi-low-stock">
+      <div class="kpi-card-inner">
+        <div class="kpi-details">
+          <span class="kpi-title">Low Stock Items</span>
+          <h3 class="kpi-value" id="val-low-stock">0</h3>
+          <span class="kpi-desc">Below reorder level</span>
+        </div>
+        <div class="kpi-icon icon-amber">⚠️</div>
+      </div>
+    </div>
+
+    <div class="kpi-card" id="kpi-out-stock">
+      <div class="kpi-card-inner">
+        <div class="kpi-details">
+          <span class="kpi-title">Out of Stock</span>
+          <h3 class="kpi-value text-danger" id="val-out-stock">0</h3>
+          <span class="kpi-desc">Zero or negative qty</span>
+        </div>
+        <div class="kpi-icon icon-red">🚨</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 3. INVENTORY INSIGHTS ROW ===== -->
+  <div class="inventory-insights-row">
+    <!-- Monthly Inventory Trend -->
+    <div class="trend-section-card">
+      <div class="trend-card-header">
+        <div class="header-left">
+          <h3>Monthly Inventory Trend</h3>
+          <p class="section-desc">Tracks total products received (quantity in) per month based on fact ledger logs</p>
+        </div>
+        <div class="trend-summary-pill">
+          <span class="summary-label">Year:</span>
+          <span class="summary-val">2026</span>
+        </div>
+      </div>
+      
+      <div class="trend-graph-outer">
+        <div class="trend-axis-y" id="trend-axis-labels">
+          <span>0</span>
+          <span>0</span>
+          <span>0</span>
+          <span>0</span>
+        </div>
+        
+        <div class="trend-bars-container" id="trend-bars-wrapper">
+          <!-- Rendered dynamically by JS -->
+          <div class="no-data-overlay" id="trend-no-data-msg">
+            <span class="overlay-icon">📈</span>
+            <p>No historical inventory transaction data available in mv_inventory_monthly for this store.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Add Product Stock Card -->
+    <div class="add-product-card">
+      <div class="card-header">
+        <h3>Quick Add Stock</h3>
+        <p class="section-desc">Initialize or adjust stock levels for catalog products</p>
+      </div>
+      <div class="card-body">
+        <form id="add-product-form">
+          <div class="form-group">
+            <label>Select Catalog Product</label>
+            <div class="searchable-select" id="product-search-select-wrapper">
+              <input type="text" id="add-product-search" placeholder="Type to search catalog..." autocomplete="off" required>
+              <span class="dropdown-chevron">▼</span>
+              <div class="searchable-options-list" id="add-product-options-list" style="display: none;">
+                <!-- Dynamically loaded catalog options -->
+              </div>
+            </div>
+            <input type="hidden" id="add-product-id-val" required>
+          </div>
+
+          <!-- Expandable fields container, hidden until product is selected -->
+          <div id="add-product-fields-container" style="display: none;">
+            <!-- Image Preview & File input -->
+            <div class="form-group-row">
+              <div class="image-preview-box" id="product-image-preview-box">
+                <img src="imgs/coffee_cup_default.png" id="add-product-img-view" alt="Preview">
+              </div>
+              <div class="form-group image-url-group">
+                <label for="add-product-image-file">Product Image File</label>
+                <input type="file" id="add-product-image-file" accept="image/*">
+                <p class="field-desc" style="margin: 0.25rem 0 0 0; font-size: 0.72rem; color: var(--text-muted, rgba(255,255,255,0.45));">PNG, JPG, or WEBP from device</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="add-product-qty">Quantity to Add (Optional)</label>
+              <input type="number" id="add-product-qty" min="0" step="any" placeholder="Leave empty or 0 if only modifying image...">
+            </div>
+            <button type="submit" class="btn-primary-block" id="btn-submit-add-product">💾 Save Stock / Image</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4. INVENTORY STOCK LEDGER TABLE ===== -->
+  <div class="ledger-table-card">
+    <div class="table-card-header">
+      <h3>Active Stock Ledger</h3>
+      <div class="header-actions">
+        <!-- Search -->
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="ledger-search-input" placeholder="Search by SKU or Product Name...">
+        </div>
+        <!-- Category Filter -->
+        <select id="ledger-category-filter">
+          <option value="all">All Categories</option>
+        </select>
+        <!-- Status Filter Buttons -->
+        <div class="status-btn-group">
+          <button class="status-filter-btn active" data-status="all">All</button>
+          <button class="status-filter-btn" data-status="healthy">Healthy</button>
+          <button class="status-filter-btn" data-status="low">Low Stock</button>
+          <button class="status-filter-btn" data-status="out">Out of Stock</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="ledger-data-table">
+        <thead>
+          <tr>
+            <th style="width: 60px;">Image</th>
+            <th>SKU</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Stock Level</th>
+            <th>Reserved</th>
+            <th>Reorder Level</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="ledger-table-body">
+          <!-- Rendered dynamically by JS -->
+          <tr>
+            <td colspan="8" class="loading-placeholder">
+              <span class="spinner"></span> Loading stock ledger records...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

@@ -5,25 +5,54 @@
  * Developer         : Sivasurya
  *
  * Module            : Common Module
- * Package           : com.plus33.erp.common.exception
  * File              : GlobalExceptionHandler.java
- * Purpose           : REST Controller exposing HTTP endpoints for Common Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: GlobalExceptionHandler
- * Related Service   : GlobalExceptionHandlerService, GlobalExceptionHandlerServiceImpl
- * Related Repository: GlobalExceptionHandlerRepository
- * Related Entity    : GlobalExceptionHandler
- * Related DTO       : ErrorResponse, HttpServletRequest
- * Related Mapper    : GlobalExceptionHandlerMapper
- * Related DB Table  : global_exception_handlers
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Common Module components
+ * Path              : src/main/java/com/plus33/erp/common/exception/GlobalExceptionHandler.java
+ * Purpose           : Intercepts all uncaught exceptions thrown by any controller in the
+ *                     ERP and translates them into consistent JSON ErrorResponse payloads
+ *                     with appropriate HTTP status codes.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * REST Controller for Common Module. Exposes HTTP endpoints secured by @PreAuthorize. Delegates to service layer. Returns ApiResponse<T>. APIs: N/A
+ * @RestControllerAdvice class providing centralized exception handling for all
+ * REST controllers in the PLUS33 Coffee ERP. Each @ExceptionHandler maps a
+ * specific exception type to an HTTP status and ErrorResponse body.
+ *
+ * Exception handlers:
+ *   ResourceNotFoundException  → 404 Not Found
+ *     Thrown when a queried entity does not exist in the database.
+ *
+ *   DuplicateResourceException → 409 Conflict
+ *     Thrown when a create/update would violate uniqueness constraints.
+ *
+ *   BusinessException          → 400 Bad Request
+ *     Thrown for domain rule violations (e.g. insufficient stock, invalid state).
+ *
+ *   MethodArgumentNotValidException → 400 Bad Request
+ *     Thrown by Spring MVC when @Valid/@Validated DTO validation fails.
+ *     Collects all field-level errors into a Map<fieldName, message> included
+ *     in ErrorResponse.fieldErrors.
+ *
+ *   ConstraintViolationException → 400 Bad Request
+ *     Thrown when Jakarta Bean Validation on method parameters fails.
+ *
+ *   HttpMessageNotReadableException → 400 Bad Request
+ *     Thrown when the JSON request body is malformed or unreadable.
+ *
+ *   DataIntegrityViolationException → 409 Conflict
+ *     Thrown when a DB constraint (FK, unique) violation occurs at persist time.
+ *
+ *   ObjectOptimisticLockingFailureException / OptimisticLockException
+ *     → 409 Conflict. Thrown during concurrent purchase order modifications.
+ *
+ *   AccessDeniedException → 403 Forbidden
+ *     Thrown when @PreAuthorize evaluation fails for an authenticated user.
+ *
+ *   Exception (catch-all) → 500 Internal Server Error
+ *     Captures all unhandled runtime exceptions with the exception message.
+ *
+ * All responses use ErrorResponse DTO with: statusCode, error, message,
+ * path, fieldErrors (nullable), and timestamp.
  ******************************************************************************/
 package com.plus33.erp.common.exception;
 

@@ -1,468 +1,305 @@
 /******************************************************************************
  * Project           : PLUS33 Coffee ERP
- * Module            : Store Employee Module
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Employee — Announcements Board
  * File              : announcements.js
- * Path              : frontend/modules/store-employee/announcements/announcements.js
- * Purpose           : Controller component for Barista announcements feed Board UI
- * Version           : 2.0.0
+ * Path              : frontend/modules/store-employee/pages/announcements/announcements.js
+ * Purpose           : Read-only announcements board for store employees / baristas
+ * Version           : 5.0.0 (Pure DOM Controller - Multi-Media, Reactions & Role Color Badges)
  *
- * Related HTML      : frontend/modules/store-employee/announcements/announcements.html
- * Related CSS       : frontend/modules/store-employee/announcements/announcements.css
+ * Related HTML      : frontend/modules/store-employee/pages/announcements/announcements.html
+ * Related CSS       : frontend/modules/store-employee/pages/announcements/announcements.css
  * Related APIs      : GET /api/v1/announcements
- *                     POST /api/v1/announcements/:id/read
- *                     POST /api/v1/announcements/:id/react?type=:type
- *
- * Description
- * ---------------------------------------------------------------------------
- * Refactored to HTML + CSS + JS mixed architecture.
- * HTML structure lives in announcements.html — this file is a controller only.
+ *                     POST /api/v1/announcements/{id}/read
+ *                     POST /api/v1/announcements/{id}/react
  ******************************************************************************/
 
 import { authStore } from '../../../../store/authStore.js';
-import { userStore } from '../../../../store/userStore.js';
 import { notificationStore } from '../../../../store/notificationStore.js';
 import { logger } from '../../../../core/logger.js';
-import { apiClient } from '../../../../api/client.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
+import { apiClient } from '../../../../api/client.js';
 
-/** Path to the announcements HTML template */
 const TEMPLATE_URL = 'modules/store-employee/pages/announcements/announcements.html';
 
 export default class StoreEmployeeAnnouncements {
 
-  // ---------------------------------------------------------------------------
-  // LIFECYCLE: constructor
-  // ---------------------------------------------------------------------------
-
   constructor() {
     this.user = authStore.getUser();
-    this.profile = userStore.getProfile(this.user?.role) || {};
-    this.announcementsList = [];
-    this.filterStatus = 'all'; // 'all', 'unread', 'critical'
+    this.announcements = [];
   }
 
-  renderAttachment(url) {
-    if (!url) return '';
-    const lower = url.toLowerCase();
-    if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.ogg') || lower.endsWith('.mov')) {
-      return `
-        <div style="margin: 8px 0; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); max-height: 250px; background: #000;">
-          <video src="${url}" controls style="width: 100%; height: auto; max-height: 250px;"></video>
-        </div>
-      `;
-    } else if (lower.endsWith('.pdf')) {
-      return `
-        <div style="margin: 8px 0; padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm);">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
-            <span style="font-size: 0.78rem; color: var(--text-primary); font-weight: 600;">PDF Document Attachment</span>
-          </div>
-          <a href="${url}" target="_blank" class="btn" style="padding: 4px 10px; font-size: 0.7rem; border-radius: var(--radius-xs); border: 1px solid var(--accent-primary); background: transparent; color: var(--accent-primary); font-weight: 700; text-decoration: none;">Open PDF</a>
-        </div>
-      `;
-    } else {
-      return `
-        <div style="margin: 8px 0; max-height: 180px; overflow: hidden; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-          <img src="${url}" alt="Attachment" style="width: 100%; height: auto; object-fit: cover; max-height: 180px;">
-        </div>
-      `;
-    }
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // Lifecycle
+  // ─────────────────────────────────────────────────────────────────────────
 
-  // ---------------------------------------------------------------------------
-  // LIFECYCLE: mount
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Mount the StoreEmployeeAnnouncements component.
-   * @param {HTMLElement} container
-   * @param {{ onCleanup: Function }} lifecycle
-   */
   async mount(container, lifecycle) {
-    logger.info('StoreEmployeeAnnouncements', 'Mounting Barista Announcements Page...');
-    
-    // Load CSS
+    logger.info('StoreEmployeeAnnouncements', 'Mounting employee announcements board...');
+
     this._loadCss();
-
-    // 1. Inject HTML layout template
-    await this._loadTemplate(container);
-
-    // 2. Fetch announcements from PostgreSQL database
-    await this.fetchAnnouncements();
-
-    // 3. Render layout elements
-    this.render(container);
-
-    // 4. Bind event listeners
-    this.bindEvents(container, lifecycle);
-  }
-
-  async _loadTemplate(container) {
     await htmlLoader.inject(TEMPLATE_URL, container);
-  }
 
-  // ---------------------------------------------------------------------------
-  // DATA TELEMETRY SUB-ROUTINES
-  // ---------------------------------------------------------------------------
+    this._setupPolicyModal(container);
 
-  async fetchAnnouncements() {
-    try {
-      const response = await apiClient.get('/api/v1/announcements');
-      if (response?.success && response.data) {
-        this.announcementsList = response.data;
-      } else {
-        this.announcementsList = [];
-      }
-    } catch (err) {
-      logger.error('StoreEmployeeAnnouncements', 'Error fetching announcements from DB:', err);
-      notificationStore.danger('Failed to retrieve announcements from database.');
-      this.announcementsList = [];
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // PUBLIC HELPER (Legacy Bridge): loadAndRender
-  // ---------------------------------------------------------------------------
-
-  async loadAndRender(container, lifecycle) {
-    await this.fetchAnnouncements();
-    this.render(container);
-    this.bindEvents(container, lifecycle);
-  }
-
-  // ---------------------------------------------------------------------------
-  // LIFECYCLE: render
-  // ---------------------------------------------------------------------------
-
-  render(container) {
-    const unreadCount = this.announcementsList.filter(a => !a.read).length;
-    const totalCount = this.announcementsList.length;
-
-    // 1. Sync header text
-    const labelUnread = container.querySelector('#lbl-unread-alerts-count');
-    if (labelUnread) labelUnread.textContent = String(unreadCount);
-
-    // 2. Sync filters ribbon pills text & active state
-    const btnAll = container.querySelector('#btn-filter-all');
-    const btnUnread = container.querySelector('#btn-filter-unread');
-    const btnCritical = container.querySelector('#btn-filter-critical');
-
-    if (btnAll) {
-      btnAll.textContent = `All (${totalCount})`;
-      btnAll.className = `filter-pill ${this.filterStatus === 'all' ? 'active' : ''}`;
-    }
-    if (btnUnread) {
-      btnUnread.textContent = `Unread (${unreadCount})`;
-      btnUnread.className = `filter-pill ${this.filterStatus === 'unread' ? 'active' : ''}`;
-    }
-    if (btnCritical) {
-      btnCritical.className = `filter-pill ${this.filterStatus === 'critical' ? 'active' : ''}`;
-    }
-
-    // 3. Render Announcements Feed List
+    await this._fetchAnnouncements();
     this._renderFeed(container);
+    this._bindEvents(container, lifecycle);
   }
 
-  // ---------------------------------------------------------------------------
-  // LIFECYCLE: bindEvents
-  // ---------------------------------------------------------------------------
-
-  bindEvents(container, lifecycle) {
-    const overlay = container.querySelector('#ann-modal-overlay');
-    const modalContent = container.querySelector('#ann-modal-content');
-    const markAllBtn = container.querySelector('#btn-mark-all-read');
-
-    const showModal = (htmlContent) => {
-      if (overlay && modalContent) {
-        modalContent.innerHTML = htmlContent;
-        overlay.style.display = 'flex';
-        overlay.setAttribute('aria-hidden', 'false');
-        
-        const closeBtn = modalContent.querySelector('.btn-close-modal');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', () => hideModal());
-        }
-        if (window.lucide) window.lucide.createIcons();
-      }
-    };
-
-    const hideModal = () => {
-      if (overlay) {
-        overlay.style.display = 'none';
-        overlay.setAttribute('aria-hidden', 'true');
-      }
-    };
-
-    if (overlay) {
-      const handleOverlayClick = (e) => {
-        if (e.target === overlay) hideModal();
-      };
-      overlay.addEventListener('click', handleOverlayClick);
-      lifecycle.onCleanup(() => overlay.removeEventListener('click', handleOverlayClick));
-    }
-
-    // 1. Click Announcement to View Details & Mark Read
-    const annCards = container.querySelectorAll('.ann-card');
-    annCards.forEach(card => {
-      const handleOpenCard = async () => {
-        const id = parseInt(card.getAttribute('data-id'));
-        const ann = this.announcementsList.find(a => a.id === id);
-        if (!ann) return;
-
-        // Mark as Read in DB
-        try {
-          await apiClient.post(`/api/v1/announcements/${ann.id}/read`);
-          ann.read = true;
-        } catch (e) {
-          logger.error('StoreEmployeeAnnouncements', 'Error marking read on modal view:', e);
-        }
-
-        const isCrit = ann.priority === 'Critical Alert';
-        const pClass = isCrit ? 'priority-label--critical' : 
-                       (ann.priority === 'Standard Notice' ? 'priority-label--standard' : 'priority-label--normal');
-
-        const detailHtml = `
-          <div class="modal-header-split">
-            <h3 class="modal-title">Bulletin circular</h3>
-            <button class="btn-close-modal" type="button" aria-label="Close modal">
-              <i data-lucide="x" aria-hidden="true"></i>
-            </button>
-          </div>
-          <div class="modal-details-body">
-            <div class="modal-top-row">
-              <span class="priority-label ${pClass}">${ann.priority}</span>
-              <span class="date-label text-muted">${ann.date}</span>
-            </div>
-            
-            <h4 class="modal-ann-title">${ann.title}</h4>
-            <p class="modal-content-paragraph">${ann.content}</p>
-            
-            ${this.renderAttachment(ann.imageUrl)}
-
-            <div class="modal-publisher-row">
-              <span>Publisher: <strong>${ann.publisher}${ann.publisherRole ? ` (${ann.publisherRole})` : ''}</strong></span>
-              <span>Status: <strong style="color:var(--status-success);">Read</strong></span>
-            </div>
-            
-            <button class="btn btn-primary btn-ack-receipt btn-close-modal" type="button">
-              Acknowledge Receipt
-            </button>
-          </div>
-        `;
-        showModal(detailHtml);
-
-        // Bind inner closing btn
-        const innerClose = modalContent.querySelector('.btn-close-modal');
-        if (innerClose) {
-          const handleInnerClose = () => {
-            hideModal();
-            this.render(container);
-            this.bindEvents(container, lifecycle);
-          };
-          innerClose.addEventListener('click', handleInnerClose);
-        }
-      };
-      card.addEventListener('click', handleOpenCard);
-      lifecycle.onCleanup(() => card.removeEventListener('click', handleOpenCard));
-    });
-
-    // Readed button click (stops card details modal from opening)
-    const readCardBtns = container.querySelectorAll('.btn-mark-read-card');
-    readCardBtns.forEach(btn => {
-      const handleMarkRead = async (e) => {
-        e.stopPropagation();
-        const id = parseInt(btn.getAttribute('data-id'));
-        const ann = this.announcementsList.find(a => a.id === id);
-        if (ann) {
-          try {
-            await apiClient.post(`/api/v1/announcements/${ann.id}/read`);
-            ann.read = true;
-            notificationStore.success('Announcement marked as readed.');
-            this.render(container);
-            this.bindEvents(container, lifecycle);
-          } catch (err) {
-            logger.error('StoreEmployeeAnnouncements', 'Error marking read:', err);
-            notificationStore.danger('Failed to mark read in database.');
-          }
-        }
-      };
-      btn.addEventListener('click', handleMarkRead);
-      lifecycle.onCleanup(() => btn.removeEventListener('click', handleMarkRead));
-    });
-
-    // Reaction button click (stops card details modal from opening)
-    const reactBtns = container.querySelectorAll('.btn-react');
-    reactBtns.forEach(btn => {
-      const handleReact = async (e) => {
-        e.stopPropagation();
-        const id = parseInt(btn.getAttribute('data-id'));
-        const type = btn.getAttribute('data-type');
-        const ann = this.announcementsList.find(a => a.id === id);
-        if (ann) {
-          try {
-            await apiClient.post(`/api/v1/announcements/${id}/react?type=${type}`);
-            if (!ann.reactions) {
-              ann.reactions = { thumbsUp: 0, heart: 0, lightbulb: 0, coffee: 0 };
-            }
-            ann.reactions[type] = (ann.reactions[type] || 0) + 1;
-            
-            await this.fetchAnnouncements();
-            this.render(container);
-            this.bindEvents(container, lifecycle);
-          } catch (err) {
-            logger.error('StoreEmployeeAnnouncements', 'Reaction failed:', err);
-          }
-        }
-      };
-      btn.addEventListener('click', handleReact);
-      lifecycle.onCleanup(() => btn.removeEventListener('click', handleReact));
-    });
-
-    // 2. Mark All as Read
-    if (markAllBtn) {
-      const handleMarkAllRead = async () => {
-        markAllBtn.disabled = true;
-        markAllBtn.textContent = 'Processing...';
-        try {
-          for (let ann of this.announcementsList) {
-            if (!ann.read) {
-              await apiClient.post(`/api/v1/announcements/${ann.id}/read`);
-            }
-          }
-          notificationStore.success('All bulletins marked as read.');
-          await this.fetchAnnouncements();
-          this.render(container);
-          this.bindEvents(container, lifecycle);
-        } catch (err) {
-          logger.error('StoreEmployeeAnnouncements', 'Error marking all as read:', err);
-        } finally {
-          markAllBtn.disabled = false;
-          markAllBtn.innerHTML = '<i data-lucide="check" aria-hidden="true"></i> Mark all as Read';
-          if (window.lucide) window.lucide.createIcons();
-        }
-      };
-      markAllBtn.addEventListener('click', handleMarkAllRead);
-      lifecycle.onCleanup(() => markAllBtn.removeEventListener('click', handleMarkAllRead));
-    }
-
-    // 3. Filters click
-    const filterBtns = container.querySelectorAll('[data-filter]');
-    filterBtns.forEach(btn => {
-      const handleFilterClick = () => {
-        this.filterStatus = btn.getAttribute('data-filter');
-        this.render(container);
-        this.bindEvents(container, lifecycle);
-      };
-      btn.addEventListener('click', handleFilterClick);
-      lifecycle.onCleanup(() => btn.removeEventListener('click', handleFilterClick));
-    });
+  destroy() {
+    logger.info('StoreEmployeeAnnouncements', 'Employee announcements board destroyed.');
   }
 
-  // ---------------------------------------------------------------------------
-  // PRIVATE RENDERING SUB-ROUTINES
-  // ---------------------------------------------------------------------------
-
-  _renderFeed(container) {
-    const listContainer = container.querySelector('#ann-feed-list-container');
-    const emptyTpl = container.querySelector('#ann-empty-feed-tpl');
-    const cardTpl = container.querySelector('#ann-card-tpl');
-
-    if (!listContainer) return;
-
-    listContainer.replaceChildren();
-
-    // Apply filters
-    const filteredAnnouncements = this.announcementsList.filter(a => {
-      if (this.filterStatus === 'unread') return !a.read;
-      if (this.filterStatus === 'critical') return a.priority === 'Critical Alert';
-      return true;
-    });
-
-    if (filteredAnnouncements.length === 0) {
-      if (emptyTpl) {
-        listContainer.appendChild(emptyTpl.content.cloneNode(true));
-      }
-      return;
-    }
-
-    filteredAnnouncements.forEach(ann => {
-      if (!cardTpl) return;
-      const clone = cardTpl.content.cloneNode(true);
-
-      const card = clone.querySelector('.ann-card');
-      const priorityLabel = clone.querySelector('.priority-label');
-      const dateLabel = clone.querySelector('.date-label');
-      const titleText = clone.querySelector('.title-text');
-      const unreadDot = clone.querySelector('.unread-dot');
-      const contentParagraph = clone.querySelector('.content-paragraph');
-      const publisherLabel = clone.querySelector('.publisher-label');
-      const markReadBtn = clone.querySelector('.btn-mark-read-card');
-      const readedCheckmark = clone.querySelector('.readed-checkmark');
-
-      // Card custom class bindings
-      if (card) {
-        card.setAttribute('data-id', String(ann.id));
-        if (!ann.read) card.classList.add('unread');
-        if (ann.priority === 'Critical Alert') card.classList.add('critical');
-      }
-
-      // Priority colorings
-      if (priorityLabel) {
-        priorityLabel.textContent = ann.priority;
-        if (ann.priority === 'Critical Alert') {
-          priorityLabel.classList.add('priority-label--critical');
-        } else if (ann.priority === 'Standard Notice') {
-          priorityLabel.classList.add('priority-label--standard');
-        } else {
-          priorityLabel.classList.add('priority-label--normal');
-        }
-      }
-
-      if (dateLabel) dateLabel.textContent = ann.date;
-      if (titleText) titleText.textContent = ann.title;
-      if (unreadDot && ann.read) unreadDot.style.display = 'none';
-      if (contentParagraph) contentParagraph.textContent = ann.content;
-
-      const attachContainer = clone.querySelector('.ann-attachment-container');
-      if (attachContainer) {
-        attachContainer.innerHTML = this.renderAttachment(ann.imageUrl);
-      }
-
-      if (publisherLabel) publisherLabel.textContent = `Publisher: ${ann.publisher}` + (ann.publisherRole ? ` (${ann.publisherRole})` : '');
-
-      // Status buttons
-      if (ann.read) {
-        if (markReadBtn) markReadBtn.style.display = 'none';
-      } else {
-        if (readedCheckmark) readedCheckmark.style.display = 'none';
-      }
-      if (markReadBtn) markReadBtn.setAttribute('data-id', String(ann.id));
-
-      // Reactions binding
-      const reactions = ann.reactions || { thumbsUp: 0, heart: 0, lightbulb: 0, coffee: 0 };
-      const reactButtons = clone.querySelectorAll('.btn-react');
-      reactButtons.forEach(btn => {
-        btn.setAttribute('data-id', String(ann.id));
-        const rType = btn.getAttribute('data-type');
-        const countSpan = btn.querySelector('.react-count');
-        if (countSpan) {
-          countSpan.textContent = String(reactions[rType] || 0);
-        }
-      });
-
-      listContainer.appendChild(clone);
-    });
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // Setup Helpers
+  // ─────────────────────────────────────────────────────────────────────────
 
   _loadCss() {
-    const cssId = 'store-employee-ann-page-css';
-    if (!document.getElementById(cssId)) {
+    const id = 'store-employee-announcements-css';
+    if (!document.getElementById(id)) {
       const link = document.createElement('link');
-      link.id = cssId;
+      link.id = id;
       link.rel = 'stylesheet';
       link.href = 'modules/store-employee/pages/announcements/announcements.css';
       document.head.appendChild(link);
     }
   }
+
+  _setupPolicyModal(container) {
+    const policyBar = container.querySelector('#btn-emp-ann-policy-bar');
+    const modal     = container.querySelector('#modal-emp-ann-policy');
+    const closeBtn  = container.querySelector('#btn-close-emp-policy-modal');
+
+    if (policyBar && modal) {
+      policyBar.addEventListener('click', () => {
+        modal.style.display = 'flex';
+      });
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Data Fetching
+  // ─────────────────────────────────────────────────────────────────────────
+
+  async _fetchAnnouncements() {
+    try {
+      const response = await apiClient.get('/api/v1/announcements');
+      this.announcements = (response?.success && response.data) ? response.data : [];
+    } catch (e) {
+      logger.error('StoreEmployeeAnnouncements', 'Error reading published announcements:', e);
+      this.announcements = [];
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Template Cloning Render Engine
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _renderFeed(container) {
+    const list = container.querySelector('#emp-ann-feed-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (this.announcements.length === 0) {
+      const emptyTmpl = container.querySelector('#tmpl-emp-ann-empty');
+      if (emptyTmpl) {
+        list.appendChild(emptyTmpl.content.cloneNode(true));
+      }
+      return;
+    }
+
+    const bulletinTmpl = container.querySelector('#tmpl-emp-ann-bulletin');
+    if (!bulletinTmpl) return;
+
+    this.announcements.forEach(ann => {
+      const fragment  = bulletinTmpl.content.cloneNode(true);
+      const cardEl    = fragment.querySelector('.emp-ann-bulletin');
+      const badgeEl   = fragment.querySelector('.emp-ann-bulletin__priority-badge');
+      const roleBadge = fragment.querySelector('.emp-ann-bulletin__role-badge');
+      const readBadge = fragment.querySelector('.emp-ann-bulletin__read-badge');
+      const btnRead   = fragment.querySelector('.btn-mark-read');
+      const titleEl   = fragment.querySelector('.emp-ann-bulletin__title');
+      const bodyEl    = fragment.querySelector('.emp-ann-bulletin__content');
+      const slotEl    = fragment.querySelector('.emp-ann-bulletin__attachment-slot');
+      const pubEl     = fragment.querySelector('.emp-ann-bulletin__publisher');
+      const dateEl    = fragment.querySelector('.emp-ann-bulletin__date');
+
+      // Priority Badge
+      badgeEl.textContent = ann.priority;
+      badgeEl.className = 'emp-ann-bulletin__priority-badge';
+      if (ann.priority === 'Critical Alert') {
+        badgeEl.classList.add('priority-badge--critical');
+      } else if (ann.priority === 'Company Bulletin') {
+        badgeEl.classList.add('priority-badge--bulletin');
+      } else {
+        badgeEl.classList.add('priority-badge--notice');
+      }
+
+      // Publisher Role Badge & Color Theme
+      if (roleBadge && ann.publisherRole) {
+        roleBadge.textContent = ann.publisherRole.replace('_', ' ');
+        const color = ann.publisherColor || '#c9a46a';
+        roleBadge.style.background = `${color}20`;
+        roleBadge.style.color = color;
+        roleBadge.style.border = `1px solid ${color}40`;
+
+        // Apply role border color theme to bulletin card
+        cardEl.style.borderLeftColor = color;
+      }
+
+      // Read status
+      if (ann.read) {
+        if (readBadge) readBadge.style.display = 'inline-block';
+        if (btnRead) btnRead.style.display = 'none';
+      } else if (btnRead) {
+        btnRead.setAttribute('data-id', ann.id);
+      }
+
+      // Reactions count population
+      const reactions = ann.reactions || {};
+      ['thumbsUp', 'heart', 'lightbulb', 'coffee'].forEach(type => {
+        const countSpan = fragment.querySelector(`.react-count-${type}`);
+        if (countSpan) countSpan.textContent = reactions[type] || 0;
+
+        const reactBtn = fragment.querySelector(`.btn-react[data-type="${type}"]`);
+        if (reactBtn) reactBtn.setAttribute('data-id', ann.id);
+      });
+
+      // Title & Body
+      titleEl.textContent = ann.title;
+      bodyEl.textContent  = ann.content;
+
+      // Media attachment rendering
+      if (ann.imageUrl) {
+        const attachNode = this._createAttachmentNode(container, ann.imageUrl, ann.mediaType);
+        if (attachNode) slotEl.appendChild(attachNode);
+      }
+
+      // Metadata footer
+      pubEl.textContent  = `Publisher: ${ann.publisher || 'Admin'} (${ann.publisherRole || 'System'})`;
+      dateEl.textContent = `Date: ${ann.date || ''}${ann.expiresAt ? ` • Expires: ${ann.expiresAt}` : ''}`;
+
+      list.appendChild(fragment);
+    });
+  }
+
+  _createAttachmentNode(container, url, mediaType) {
+    if (!url) return null;
+    const lower = url.toLowerCase();
+    const type  = mediaType ? mediaType.toUpperCase() : '';
+
+    // Video (.mp4, .webm, .ogg, .mov)
+    if (type === 'VIDEO' || ['.mp4', '.webm', '.ogg', '.mov'].some(ext => lower.endsWith(ext))) {
+      const tmpl = container.querySelector('#tmpl-emp-ann-attach-video');
+      if (!tmpl) return null;
+      const frag  = tmpl.content.cloneNode(true);
+      const video = frag.querySelector('video');
+      if (video) video.src = url;
+      return frag;
+    }
+
+    // Audio (.mp3, .wav, .aac, .m4a)
+    if (type === 'AUDIO' || ['.mp3', '.wav', '.aac', '.m4a'].some(ext => lower.endsWith(ext))) {
+      const tmpl = container.querySelector('#tmpl-emp-ann-attach-audio');
+      if (!tmpl) return null;
+      const frag  = tmpl.content.cloneNode(true);
+      const audio = frag.querySelector('audio');
+      if (audio) audio.src = url;
+      return frag;
+    }
+
+    // PDF (.pdf)
+    if (type === 'PDF' || lower.endsWith('.pdf')) {
+      const tmpl = container.querySelector('#tmpl-emp-ann-attach-pdf');
+      if (!tmpl) return null;
+      const frag = tmpl.content.cloneNode(true);
+      const link = frag.querySelector('a');
+      if (link) link.href = url;
+      return frag;
+    }
+
+    // Office Documents (.doc, .docx, .xls, .xlsx, .zip)
+    if (type === 'DOCUMENT' || ['.doc', '.docx', '.xls', '.xlsx', '.zip'].some(ext => lower.endsWith(ext))) {
+      const tmpl = container.querySelector('#tmpl-emp-ann-attach-doc');
+      if (!tmpl) return null;
+      const frag = tmpl.content.cloneNode(true);
+      const link = frag.querySelector('a');
+      if (link) {
+        link.href = url;
+        const fileName = url.substring(url.lastIndexOf('/') + 1);
+        link.textContent = `Download ${fileName.length > 20 ? fileName.substring(0, 17) + '...' : fileName}`;
+      }
+      return frag;
+    }
+
+    // Fallback Image (.png, .jpg, .jpeg, .webp, .gif, .svg)
+    const tmpl = container.querySelector('#tmpl-emp-ann-attach-img');
+    if (!tmpl) return null;
+    const frag = tmpl.content.cloneNode(true);
+    const img  = frag.querySelector('img');
+    if (img) img.src = url;
+    return frag;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Event Delegation & Handling
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _bindEvents(container, lifecycle) {
+    const list = container.querySelector('#emp-ann-feed-list');
+    if (!list) return;
+
+    list.addEventListener('click', async (e) => {
+      // Mark as read click
+      const readBtn = e.target.closest('.btn-mark-read');
+      if (readBtn) {
+        const id = readBtn.getAttribute('data-id');
+        try {
+          const res = await apiClient.post(`/api/v1/announcements/${id}/read`);
+          if (res?.success) {
+            notificationStore.success('Bulletin marked as read.');
+            await this._fetchAnnouncements();
+            this._renderFeed(container);
+          }
+        } catch (err) {
+          logger.error('StoreEmployeeAnnouncements', 'Error marking announcement as read:', err);
+        }
+        return;
+      }
+
+      // Reaction button click
+      const reactBtn = e.target.closest('.btn-react');
+      if (reactBtn) {
+        const id   = reactBtn.getAttribute('data-id');
+        const type = reactBtn.getAttribute('data-type');
+        try {
+          const res = await apiClient.post(`/api/v1/announcements/${id}/react?type=${type}`);
+          if (res?.success) {
+            await this._fetchAnnouncements();
+            this._renderFeed(container);
+          }
+        } catch (err) {
+          logger.error('StoreEmployeeAnnouncements', 'Error reacting to announcement:', err);
+        }
+      }
+    });
+  }
 }
-export { StoreEmployeeAnnouncements };

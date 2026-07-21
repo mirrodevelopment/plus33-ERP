@@ -36,6 +36,9 @@ export default class ShiftDashboard {
     this.shifts         = [];
     this.assignments    = [];
     this.pendingSwaps   = [];
+    this.awayPermissions = [];  // pending away pass requests from employees
+    this.ongoingAwayPermissions = []; // ongoing away passes from employees
+    this.overtimeRequests = []; // pending overtime requests from employees
     this.storeEmployees = [];   // for the replacement employee picker
     this.baseDate       = new Date();
     this.baseDate.setHours(0, 0, 0, 0);
@@ -43,6 +46,7 @@ export default class ShiftDashboard {
     // Active swap ID tracked across modal open / confirm
     this._activeSwapId    = null;
     this._activeRejectId  = null;
+    this._activeAwayId    = null;  // away permission being approved/denied
   }
 
   // ─── Lifecycle ─────────────────────────────────────────────────────────────
@@ -72,11 +76,14 @@ export default class ShiftDashboard {
 
   async fetchData() {
     try {
-      const [empRes, shiftRes, assignRes, swapRes] = await Promise.all([
+      const [empRes, shiftRes, assignRes, swapRes, awayRes, ongoingAwayRes, otRes] = await Promise.all([
         apiClient.get('/api/v1/shift-assignments/store-employees'),
         apiClient.get('/api/v1/shifts'),
         apiClient.get('/api/v1/shift-assignments'),
         apiClient.get('/api/v1/shift-swaps/store-requests'),
+        apiClient.get('/api/v1/away-permission/pending').catch(() => null),
+        apiClient.get('/api/v1/away-permission/ongoing').catch(() => null),
+        apiClient.get('/api/v1/overtime-requests/pending').catch(() => null)
       ]);
 
       this.employees   = empRes?.success   ? empRes.data   : [];
@@ -86,9 +93,16 @@ export default class ShiftDashboard {
       const swapData      = swapRes?.success ? swapRes.data : {};
       this.pendingSwaps   = Array.isArray(swapData) ? swapData : (swapData.swaps || []);
       this.storeEmployees = swapData.storeEmployees || [];
+
+      this.awayPermissions = awayRes?.success ? (awayRes.data || []) : [];
+      this.ongoingAwayPermissions = ongoingAwayRes?.success ? (ongoingAwayRes.data || []) : [];
+      this.overtimeRequests = otRes?.success ? (otRes.data || []) : [];
     } catch (e) {
       logger.error('ShiftDashboard', 'Error fetching data:', e);
       this.employees = this.shifts = this.assignments = this.pendingSwaps = this.storeEmployees = [];
+      this.awayPermissions = [];
+      this.ongoingAwayPermissions = [];
+      this.overtimeRequests = [];
     }
   }
 
@@ -128,6 +142,8 @@ export default class ShiftDashboard {
     this._populateCalendar(container);
     this._populateSwapsTable(container);
     this._populateApprovalModalSelects(container);
+    this._populateAwayPermissions(container);
+    this._populateOvertimeRequests(container);
   }
 
   _populateHeader(container) {
@@ -151,10 +167,13 @@ export default class ShiftDashboard {
     const shiftSel = container.querySelector('#select-shift');
     if (shiftSel) {
       shiftSel.innerHTML = '<option value="">-- Select Shift --</option>' +
-        this.shifts.filter(s => s.active).map(s =>
-          `<option value="${s.id}">${s.name} (${s.startTime} – ${s.endTime})</option>`
-        ).join('');
+        this.shifts.filter(s => s.active).map(s => {
+          const cap = s.maxEmployees ? ` [Max Staff: ${s.maxEmployees}]` : '';
+          const type = s.shiftType ? ` [${s.shiftType}]` : '';
+          return `<option value="${s.id}">${s.name}${type} (${s.startTime} – ${s.endTime})${cap}</option>`;
+        }).join('');
     }
+
 
     // Date input — default to today, minimum = today
     const dateInput = container.querySelector('#input-start-date');
@@ -287,6 +306,8 @@ export default class ShiftDashboard {
     this._bindRemoveBtns(container, lifecycle);
     this._bindApprovalModal(container, lifecycle);
     this._bindRejectModal(container, lifecycle);
+    this._bindAwayPermissionButtons(container, lifecycle);
+    this._bindOvertimeRequestButtons(container, lifecycle);
   }
 
   /** Quick-assign form submit */
@@ -563,5 +584,356 @@ export default class ShiftDashboard {
     // Re-bind approve/reject swap buttons (the tbody was replaced)
     this._bindApprovalModal(container, lifecycle);
     this._bindRejectModal(container, lifecycle);
+    this._bindAwayPermissionButtons(container, lifecycle);
+    this._bindOvertimeRequestButtons(container, lifecycle);
+  }
+
+  // ─── Away Permission Section ───────────────────────────────────────────────
+
+  /**
+   * Renders the away permission request cards inside #sd-away-permissions-list.
+   * If the container element does not exist in the HTML template, this is a no-op.
+   */
+  _populateAwayPermissions(container) {
+    const list = container.querySelector('#sd-away-permissions-list');
+    const badge = container.querySelector('#sd-away-badge');
+    if (!list) return;
+
+    const count = this.awayPermissions.length;
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+
+    if (count === 0) {
+      list.innerHTML = `
+        <div style="text-align:center; color:var(--text-muted); font-size:0.78rem; font-style:italic; padding:16px;">
+          No pending away pass requests right now.
+        </div>`;
+    } else {
+      list.innerHTML = this.awayPermissions.map(req => {
+        const statusColor = req.status === 'EXTENSION_REQUESTED' ? '#f59e0b' : 'var(--accent-primary)';
+        const tag = req.status === 'EXTENSION_REQUESTED' ? '🔁 Extension Requested' : '⏸ Away Pass Requested';
+        const since = req.requestedAt ? new Date(req.requestedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
+        return `
+          <div class="sd-away-card" data-away-id="${req.id}" style="
+            background:rgba(255,255,255,0.03);
+            border:1px solid var(--border-color);
+            border-left: 3px solid ${statusColor};
+            border-radius:var(--radius-md,8px);
+            padding:12px 14px;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            margin-bottom:8px;
+          ">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.8rem; font-weight:700; color:var(--text-primary);">${req.employeeName || 'Employee'}</span>
+              <span style="font-size:0.68rem; color:${statusColor}; font-weight:600;">${tag}</span>
+            </div>
+            <div style="font-size:0.74rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:2px;">
+              ${req.reason ? `<div><strong>Original Reason:</strong> <em>${req.reason}</em></div>` : ''}
+              ${req.status === 'EXTENSION_REQUESTED' && req.extensionReason ? `<div><strong>Extension Request:</strong> <em style="color:var(--accent-warning, #ff9800);">${req.extensionReason}</em></div>` : ''}
+            </div>
+            <div style="font-size:0.68rem; color:var(--text-muted);">Requested at ${since} · Store: ${req.storeName || '--'}</div>
+            <div style="display:flex; gap:8px; margin-top:4px;">
+              <button type="button" class="btn btn-primary btn-away-approve" data-away-id="${req.id}"
+                style="flex:1; padding:6px 10px; font-size:0.75rem;">
+                ✓ Approve Pass
+              </button>
+              <button type="button" class="btn btn-secondary btn-away-deny" data-away-id="${req.id}"
+                style="flex:1; padding:6px 10px; font-size:0.75rem;">
+                ✕ Deny
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    const ongoingSection = container.querySelector('#sd-ongoing-away-section');
+    const ongoingList = container.querySelector('#sd-ongoing-away-list');
+    if (ongoingSection && ongoingList) {
+      const ongoingCount = this.ongoingAwayPermissions.length;
+      if (ongoingCount > 0) {
+        ongoingSection.style.display = 'block';
+        ongoingList.innerHTML = this.ongoingAwayPermissions.map(req => {
+          const until = req.approvedUntil ? new Date(req.approvedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+          const duration = req.approvedDurationMins || 0;
+          return `
+            <div style="
+              background:rgba(255,255,255,0.03);
+              border:1px solid var(--border-color);
+              border-left:3px solid var(--status-success, #4caf50);
+              border-radius:var(--radius-md,8px);
+              padding:12px 14px;
+              display:flex; flex-direction:column; gap:6px;
+              margin-bottom:8px;
+            ">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.8rem; font-weight:700; color:var(--text-primary);">${req.employeeName || 'Employee'}</span>
+                <span style="font-size:0.65rem; background:rgba(76,175,80,0.12); color:#4caf50; border:1px solid rgba(76,175,80,0.2); padding:2px 6px; border-radius:4px; font-weight:600;">ACTIVE</span>
+              </div>
+              <div style="font-size:0.74rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:2px;">
+                <div><strong>Approved:</strong> ${duration} mins (until ${until})</div>
+                ${req.reason ? `<div><strong>Reason:</strong> <em>${req.reason}</em></div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        ongoingSection.style.display = 'none';
+        ongoingList.innerHTML = '';
+      }
+    }
+  }
+
+  /**
+   * Binds approve/deny buttons on away permission cards.
+   * Approve opens an inline duration-picker popup card.
+   */
+  _bindAwayPermissionButtons(container, lifecycle) {
+    // APPROVE
+    container.querySelectorAll('.btn-away-approve').forEach(btn => {
+      const handler = () => {
+        const awayId = btn.getAttribute('data-away-id');
+        this._showAwayApproveCard(container, lifecycle, awayId);
+      };
+      btn.addEventListener('click', handler);
+      if (lifecycle) lifecycle.onCleanup(() => btn.removeEventListener('click', handler));
+    });
+
+    // DENY
+    container.querySelectorAll('.btn-away-deny').forEach(btn => {
+      const handler = async () => {
+        const awayId = btn.getAttribute('data-away-id');
+        btn.disabled = true;
+        btn.textContent = 'Denying…';
+        try {
+          const res = await apiClient.put(`/api/v1/away-permission/${awayId}/deny`, {});
+          if (res?.success) {
+            notificationStore.success('Away pass denied.');
+            await this._reload(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to deny away pass.');
+            btn.disabled = false;
+            btn.textContent = '✕ Deny';
+          }
+        } catch (e) {
+          notificationStore.danger('Error: ' + e.message);
+          btn.disabled = false;
+          btn.textContent = '✕ Deny';
+        }
+      };
+      btn.addEventListener('click', handler);
+      if (lifecycle) lifecycle.onCleanup(() => btn.removeEventListener('click', handler));
+    });
+  }
+
+  /**
+   * Shows a duration-picker popup card for approving an away pass.
+   * Rendered into a shared overlay element #sd-away-approve-overlay.
+   */
+  _showAwayApproveCard(container, lifecycle, awayId) {
+    // Lazy-create overlay if not present
+    let overlay = container.querySelector('#sd-away-approve-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'sd-away-approve-overlay';
+      overlay.style.cssText = `
+        position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+        display:flex; align-items:center; justify-content:center; z-index:9999;
+      `;
+      container.appendChild(overlay);
+    }
+
+    overlay.innerHTML = `
+      <div style="
+        background:var(--bg-card,#1e1e2e); border:1px solid var(--border-color);
+        border-radius:14px; padding:28px 24px; width:340px; max-width:95vw;
+        display:flex; flex-direction:column; gap:16px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      ">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--text-primary);">⏱ Approve Away Pass</h3>
+          <button id="btn-away-overlay-close" type="button" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;line-height:1;">✕</button>
+        </div>
+        <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.5;">
+          Set how many minutes the employee is allowed away from the store.
+          A <strong>10-minute grace buffer</strong> will be added automatically before auto clock-out triggers.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Duration (minutes)</label>
+          <input id="away-duration-input" type="number" min="5" max="240" value="30" style="
+            background:var(--bg-input,rgba(255,255,255,0.05));
+            border:1px solid var(--border-color); border-radius:8px;
+            color:var(--text-primary); padding:8px 12px; font-size:0.85rem; width:100%; box-sizing:border-box;
+          ">
+          <span style="font-size:0.68rem; color:var(--text-muted);">Employee will have 30 min + 10 min grace = 40 min total before auto clock-out.</span>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button id="btn-away-overlay-confirm" type="button" class="btn btn-primary" style="flex:1; padding:9px;">
+            ✓ Confirm Approval
+          </button>
+          <button id="btn-away-overlay-cancel" type="button" class="btn btn-secondary" style="flex:1; padding:9px;">
+            Cancel
+          </button>
+        </div>
+      </div>
+    `;
+    overlay.style.display = 'flex';
+    if (window.lucide) window.lucide.createIcons();
+
+    const closeOverlay = () => { overlay.style.display = 'none'; };
+
+    // Update grace hint dynamically
+    const durationInput = overlay.querySelector('#away-duration-input');
+    const graceHint = overlay.querySelector('span');
+    const updateHint = () => {
+      const d = parseInt(durationInput?.value || '30');
+      if (graceHint) graceHint.textContent = `Employee will have ${d} min + 10 min grace = ${d + 10} min total before auto clock-out.`;
+    };
+    durationInput?.addEventListener('input', updateHint);
+
+    overlay.querySelector('#btn-away-overlay-close')?.addEventListener('click', closeOverlay);
+    overlay.querySelector('#btn-away-overlay-cancel')?.addEventListener('click', closeOverlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeOverlay(); });
+
+    const confirmBtn = overlay.querySelector('#btn-away-overlay-confirm');
+    confirmBtn?.addEventListener('click', async () => {
+      const durationMins = parseInt(durationInput?.value || '30');
+      if (!durationMins || durationMins < 1) {
+        notificationStore.danger('Please enter a valid duration.');
+        return;
+      }
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Approving…';
+      try {
+        const res = await apiClient.put(`/api/v1/away-permission/${awayId}/approve`, { durationMins });
+        if (res?.success) {
+          closeOverlay();
+          notificationStore.success(`Away pass approved for ${durationMins} minutes (+10 min grace).`);
+          await this._reload(container, lifecycle);
+        } else {
+          notificationStore.danger(res?.message || 'Failed to approve away pass.');
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = '✓ Confirm Approval';
+        }
+      } catch (e) {
+        notificationStore.danger('Error: ' + e.message);
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '✓ Confirm Approval';
+      }
+    });
+  }
+
+  // ─── Overtime Request Section ──────────────────────────────────────────────
+
+  _populateOvertimeRequests(container) {
+    const list = container.querySelector('#sd-ot-requests-list');
+    const badge = container.querySelector('#sd-ot-badge');
+    if (!list) return;
+
+    const count = this.overtimeRequests.length;
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+
+    if (count === 0) {
+      list.innerHTML = `
+        <div style="text-align:center; color:var(--text-muted); font-size:0.78rem; font-style:italic; padding:16px;">
+          No pending overtime requests right now.
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = this.overtimeRequests.map(req => {
+      const dateStr = req.requestedDateDisplay || req.requestedDate || '';
+      return `
+        <div class="sd-ot-card" data-ot-id="${req.id}" style="
+          background:rgba(255,255,255,0.03);
+          border:1px solid var(--border-color);
+          border-left: 3px solid var(--accent-primary);
+          border-radius:var(--radius-md,8px);
+          padding:12px 14px;
+          display:flex;
+          flex-direction:column;
+          gap:8px;
+          margin-bottom:8px;
+        ">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.8rem; font-weight:700; color:var(--text-primary);">${req.employeeName || 'Employee'}</span>
+            <span style="font-size:0.68rem; color:var(--accent-primary); font-weight:600;">⏳ Overtime Requested</span>
+          </div>
+          <div style="font-size:0.74rem; color:var(--text-secondary);">
+            Date: <strong>${dateStr}</strong> &nbsp;·&nbsp; Shift: <strong>${req.shiftName || ''}</strong>
+          </div>
+          <div style="font-size:0.74rem; color:var(--text-secondary);">
+            ${req.reason ? `Reason: <em>${req.reason}</em>` : '<span style="color:var(--text-muted); font-style:italic;">No reason provided</span>'}
+          </div>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button type="button" class="btn btn-primary btn-ot-approve" data-ot-id="${req.id}"
+              style="flex:1; padding:6px 10px; font-size:0.75rem;">
+              ✓ Approve Request
+            </button>
+            <button type="button" class="btn btn-secondary btn-ot-deny" data-ot-id="${req.id}"
+              style="flex:1; padding:6px 10px; font-size:0.75rem;">
+              ✕ Deny
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  _bindOvertimeRequestButtons(container, lifecycle) {
+    container.querySelectorAll('.btn-ot-approve').forEach(btn => {
+      const handler = async () => {
+        btn.disabled = true;
+        btn.textContent = 'Approving…';
+        try {
+          const res = await apiClient.put(`/api/v1/overtime-requests/${btn.getAttribute('data-ot-id')}/approve`, {});
+          if (res?.success) {
+            notificationStore.success('Overtime shift approved.');
+            await this._reload(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to approve overtime request.');
+            btn.disabled = false;
+            btn.textContent = '✓ Approve Request';
+          }
+        } catch (e) {
+          notificationStore.danger('Error: ' + e.message);
+          btn.disabled = false;
+          btn.textContent = '✓ Approve Request';
+        }
+      };
+      btn.addEventListener('click', handler);
+      if (lifecycle) lifecycle.onCleanup(() => btn.removeEventListener('click', handler));
+    });
+
+    container.querySelectorAll('.btn-ot-deny').forEach(btn => {
+      const handler = async () => {
+        btn.disabled = true;
+        btn.textContent = 'Denying…';
+        try {
+          const res = await apiClient.put(`/api/v1/overtime-requests/${btn.getAttribute('data-ot-id')}/deny`, {});
+          if (res?.success) {
+            notificationStore.success('Overtime shift denied.');
+            await this._reload(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to deny request.');
+            btn.disabled = false;
+            btn.textContent = '✕ Deny';
+          }
+        } catch (e) {
+          notificationStore.danger('Error: ' + e.message);
+          btn.disabled = false;
+          btn.textContent = '✕ Deny';
+        }
+      };
+      btn.addEventListener('click', handler);
+      if (lifecycle) lifecycle.onCleanup(() => btn.removeEventListener('click', handler));
+    });
   }
 }
+

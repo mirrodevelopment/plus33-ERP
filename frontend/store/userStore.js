@@ -7,19 +7,16 @@
  * Module            : Store Module
  * File              : userStore.js
  * Path              : frontend/store/userStore.js
- * Purpose           : Frontend state store managing Store Module UI state
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related API       : N/A
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : core/eventBus, core/logger
- * Depends On        : core/eventBus, core/logger
+ * Purpose           : In-memory profile state store managing user details, employee metadata, and banking records across all ERP roles (ultimateAdmin, nationalAdmin, regionalAdmin, store, shiftSupervisor, storeEmployee).
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Frontend state store managing Store Module UI state. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Frontend user profile state manager.
+ * Features:
+ *   - Holds fallback default profile records for all role types (name, email, department, store, region, country, avatarUrl, designation, banking info).
+ *   - Serves profile data via getProfile(role).
+ *   - Updates profile memory state via updateProfile(role, updatedData) and emits 'user:profile-updated' events to synchronize UI headers and avatar elements.
  ******************************************************************************/
 
 import { eventBus } from '../core/eventBus.js';
@@ -27,10 +24,6 @@ import { logger } from '../core/logger.js';
 import { storage } from '../core/storage.js';
 
 class UserStore {
-  /**
-   * Performs the fn operation in this module.
-   * @memberof Store Module
-   */
   constructor() {
     this.profiles = {
       'ultimateAdmin': {
@@ -43,7 +36,14 @@ class UserStore {
         avatarUrl: 'imgs/male-avatar.png',
         joinedDate: '2024-01-15',
         phone: '+91 98765 43210',
-        gender: 'Male'
+        gender: 'Male',
+        designation: 'Ultimate System Administrator',
+        baseSalary: '₹185,000 / month',
+        bankName: 'HDFC Bank',
+        bankAccount: '50100492810492',
+        ifscCode: 'HDFC0001049',
+        branchName: 'Corporate HQ Branch, New Delhi',
+        swiftCode: 'HDFCINBBXXX'
       },
       'nationalWarehouseAdmin': {
         name: 'Geordi La Forge',
@@ -56,7 +56,13 @@ class UserStore {
         joinedDate: '2025-03-22',
         phone: '+33 6 12 34 56 78',
         gender: 'Male',
-        designation: 'National Warehouse Admin'
+        designation: 'National Warehouse Admin',
+        baseSalary: '€4,200.00 / month',
+        bankName: 'BNP Paribas',
+        bankAccount: 'FR76 3000 4012 3456 7890 1234 567',
+        ifscCode: 'BNPAFRPPXXX',
+        branchName: 'Paris Central Logistics Branch',
+        swiftCode: 'BNPAFRPPXXX'
       },
       'regionalWarehouseAdmin': {
         name: 'Miles O\'Brien',
@@ -69,7 +75,13 @@ class UserStore {
         joinedDate: '2025-04-12',
         phone: '+33 6 87 65 43 21',
         gender: 'Male',
-        designation: 'Regional Warehouse Admin'
+        designation: 'Regional Warehouse Admin',
+        baseSalary: '€3,450.00 / month',
+        bankName: 'Crédit Agricole',
+        bankAccount: 'FR76 1820 6002 9876 5432 1098 765',
+        ifscCode: 'AGRIFRPPXXX',
+        branchName: 'Lille North Logistics Branch',
+        swiftCode: 'AGRIFRPPXXX'
       },
       'store': {
         name: 'Beverly Crusher',
@@ -80,8 +92,15 @@ class UserStore {
         country: 'India',
         avatarUrl: 'imgs/female-avatar.jpg',
         joinedDate: '2025-06-11',
-        phone: '+33 6 98 76 54 32',
-        gender: 'Female'
+        phone: '+91 98765 11223',
+        gender: 'Female',
+        designation: 'Store Manager',
+        baseSalary: '₹75,000 / month',
+        bankName: 'ICICI Bank',
+        bankAccount: '000401589201',
+        ifscCode: 'ICIC0000004',
+        branchName: 'Green Park Main Branch, New Delhi',
+        swiftCode: 'ICICINBBXXX'
       },
       'storeEmployee': {
         name: 'Neha Sharma',
@@ -93,7 +112,14 @@ class UserStore {
         avatarUrl: 'imgs/female-avatar.jpg',
         joinedDate: '2025-05-15',
         phone: '+91 99999 88888',
-        gender: 'Female'
+        gender: 'Female',
+        designation: 'Certified Senior Barista',
+        baseSalary: '₹45,000 / month',
+        bankName: 'HDFC Bank',
+        bankAccount: '50100492810492',
+        ifscCode: 'HDFC0001049',
+        branchName: 'Green Park Branch, New Delhi',
+        swiftCode: 'HDFCINBBXXX'
       },
       'shiftSupervisor': {
         name: 'Rohan Sharma',
@@ -106,7 +132,13 @@ class UserStore {
         joinedDate: '2024-08-10',
         phone: '+91 98888 77777',
         gender: 'Male',
-        designation: 'Shift Supervisor'
+        designation: 'Senior Shift Lead & Barista Master',
+        baseSalary: '₹58,000 / month',
+        bankName: 'Axis Bank',
+        bankAccount: '91802004829104',
+        ifscCode: 'UTIB0000124',
+        branchName: 'Connaught Place Branch, New Delhi',
+        swiftCode: 'AXISINBBXXX'
       },
       'nationalAdmin': {
         name: 'Rajesh Kumar',
@@ -118,7 +150,14 @@ class UserStore {
         avatarUrl: 'imgs/male-avatar.png',
         joinedDate: '2024-05-10',
         phone: '+91 99000 88000',
-        gender: 'Male'
+        gender: 'Male',
+        designation: 'National Operations Director',
+        baseSalary: '₹140,000 / month',
+        bankName: 'State Bank of India',
+        bankAccount: '30492810492',
+        ifscCode: 'SBIN0000691',
+        branchName: 'Parliament Street Branch, New Delhi',
+        swiftCode: 'SBININBBXXX'
       },
       'regionalAdmin': {
         name: 'Vijay Iyer',
@@ -130,53 +169,29 @@ class UserStore {
         avatarUrl: 'imgs/male-avatar.png',
         joinedDate: '2025-01-20',
         phone: '+91 98000 77000',
-        gender: 'Male'
+        gender: 'Male',
+        designation: 'Regional Managing Director',
+        baseSalary: '₹115,000 / month',
+        bankName: 'Canara Bank',
+        bankAccount: '110029384710',
+        ifscCode: 'CNRB0000104',
+        branchName: 'MG Road Branch, Bengaluru',
+        swiftCode: 'CNRBINBBXXX'
       }
     };
   }
 
-  /**
-   * Performs the fn operation in this module.
-   * @memberof Store Module
-   */
-  getProfile(role) {
-    const loggedUser = storage.get('plus33-user');
-    const baseProfile = this.profiles[role] || {
-      name: 'Standard Employee',
-      email: 'employee@plus33.coffee',
-      department: 'General Staff',
-      store: 'Green Park Café, City Center',
-      storeRegion: 'Delhi NCR',
-      country: 'India',
-      avatarUrl: '',
-      joinedDate: '2026-01-01',
-      phone: '',
-      gender: 'Other'
-    };
-
-    if (loggedUser && loggedUser.role === role) {
-      return {
-        ...baseProfile,
-        name: loggedUser.name || baseProfile.name,
-        email: loggedUser.username || baseProfile.email
-      };
-    }
-    return baseProfile;
+  getProfile(role = 'storeEmployee') {
+    const key = (role === 'storeAdmin') ? 'store' : ((role === 'supervisor') ? 'shiftSupervisor' : role);
+    return this.profiles[key] || this.profiles['storeEmployee'];
   }
 
-  /**
-   * Performs the fn operation in this module.
-   * @memberof Store Module
-   */
-  updateProfile(role, newData) {
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Store Module
-     */
-    if (this.profiles[role]) {
-      this.profiles[role] = { ...this.profiles[role], ...newData };
-      logger.info('UserStore', `Profile updated for role: ${role}`);
-      eventBus.emit('user:profile-updated', { role, profile: this.profiles[role] });
+  updateProfile(role = 'storeEmployee', updatedData = {}) {
+    const key = (role === 'storeAdmin') ? 'store' : ((role === 'supervisor') ? 'shiftSupervisor' : role);
+    if (this.profiles[key]) {
+      this.profiles[key] = { ...this.profiles[key], ...updatedData };
+      eventBus.emit('user:profile-updated', this.profiles[key]);
+      logger.info(`Updated user profile for role [${role}]`, updatedData);
     }
   }
 }

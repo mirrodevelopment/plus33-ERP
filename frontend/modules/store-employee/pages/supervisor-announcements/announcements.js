@@ -1,414 +1,381 @@
 /******************************************************************************
  * Project           : PLUS33 Coffee ERP
- * Module            : Store Employee Module - Shift Supervisor Sub-Role
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Shift Supervisor — Announcements
  * File              : announcements.js
- * Path              : frontend/modules/store-employee/supervisor-announcements/announcements.js
- * Purpose           : Controller component for Shift Supervisor announcements broadcast UI
- * Version           : 2.0.0
+ * Path              : frontend/modules/store-employee/pages/supervisor-announcements/announcements.js
+ * Purpose           : Controller component for Shift Supervisor broadcast bulletins page
+ * Version           : 5.0.0 (Pure DOM Controller - Multi-Media & Role Color Badges)
  *
- * Related HTML      : frontend/modules/store-employee/supervisor-announcements/announcements.html
- * Related CSS       : frontend/modules/store-employee/supervisor-announcements/announcements.css
- * Related APIs      : GET /api/v1/announcements
+ * Related HTML      : frontend/modules/store-employee/pages/supervisor-announcements/announcements.html
+ * Related CSS       : frontend/modules/store-employee/pages/supervisor-announcements/announcements.css
+ * Related APIs      : GET  /api/v1/announcements
  *                     POST /api/v1/announcements
- *                     DELETE /api/v1/announcements/:id
- *
- * Description
- * ---------------------------------------------------------------------------
- * Refactored to HTML + CSS + JS mixed architecture.
- * HTML structure lives in announcements.html — this file is a controller only.
+ *                     DELETE /api/v1/announcements/{id}
+ *                     POST /api/upload-announcement-attachment
  ******************************************************************************/
 
 import { authStore } from '../../../../store/authStore.js';
-import { userStore } from '../../../../store/userStore.js';
 import { notificationStore } from '../../../../store/notificationStore.js';
 import { logger } from '../../../../core/logger.js';
-import { apiClient } from '../../../../api/client.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
+import { apiClient } from '../../../../api/client.js';
 
-/** Path to the supervisor announcements HTML template */
 const TEMPLATE_URL = 'modules/store-employee/pages/supervisor-announcements/announcements.html';
 
 export default class SupervisorAnnouncements {
 
-  // ---------------------------------------------------------------------------
-  // LIFECYCLE: constructor
-  // ---------------------------------------------------------------------------
-
   constructor() {
     this.user = authStore.getUser();
-    this.profile = userStore.getProfile(this.user?.role) || {};
     this.announcements = [];
   }
 
-  renderAttachment(url) {
-    if (!url) return '';
-    const lower = url.toLowerCase();
-    if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.ogg') || lower.endsWith('.mov')) {
-      return `
-        <div style="margin: 8px 0; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); max-height: 250px; background: #000;">
-          <video src="${url}" controls style="width: 100%; height: auto; max-height: 250px;"></video>
-        </div>
-      `;
-    } else if (lower.endsWith('.pdf')) {
-      return `
-        <div style="margin: 8px 0; padding: var(--spacing-sm); border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm);">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
-            <span style="font-size: 0.78rem; color: var(--text-primary); font-weight: 600;">PDF Document Attachment</span>
-          </div>
-          <a href="${url}" target="_blank" class="btn" style="padding: 4px 10px; font-size: 0.7rem; border-radius: var(--radius-xs); border: 1px solid var(--accent-primary); background: transparent; color: var(--accent-primary); font-weight: 700; text-decoration: none;">Open PDF</a>
-        </div>
-      `;
-    } else {
-      return `
-        <div style="margin: 8px 0; max-height: 180px; overflow: hidden; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-          <img src="${url}" alt="Attachment" style="width: 100%; height: auto; object-fit: cover; max-height: 180px;">
-        </div>
-      `;
-    }
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // Lifecycle
+  // ─────────────────────────────────────────────────────────────────────────
 
-  // ---------------------------------------------------------------------------
-  // LIFECYCLE: mount
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Mount the SupervisorAnnouncements component.
-   * @param {HTMLElement} container
-   * @param {{ onCleanup: Function }} lifecycle
-   */
   async mount(container, lifecycle) {
     logger.info('SupervisorAnnouncements', 'Mounting supervisor announcements view...');
-    
-    // Load CSS
+
     this._loadCss();
-
-    // 1. Inject HTML layout template
-    await this._loadTemplate(container);
-
-    // 2. Fetch announcements from DB
-    await this.fetchAnnouncements();
-
-    // 3. Render layout elements
-    this.render(container);
-
-    // 4. Bind event listeners
-    this.bindEvents(container, lifecycle);
-  }
-
-  async _loadTemplate(container) {
     await htmlLoader.inject(TEMPLATE_URL, container);
-  }
 
-  // ---------------------------------------------------------------------------
-  // DATA TELEMETRY SUB-ROUTINES
-  // ---------------------------------------------------------------------------
+    this._setupPolicyModal(container);
 
-  async fetchAnnouncements() {
-    try {
-      const response = await apiClient.get('/api/v1/announcements');
-      if (response?.success && response.data) {
-        this.announcements = response.data;
-      } else {
-        this.announcements = [];
-      }
-    } catch (e) {
-      logger.error('SupervisorAnnouncements', 'Error reading announcements from database:', e);
-      this.announcements = [];
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // PUBLIC HELPER (Legacy Bridge): loadAndRender
-  // ---------------------------------------------------------------------------
-
-  async loadAndRender(container, lifecycle) {
-    await this.fetchAnnouncements();
-    this.render(container);
-    this.bindEvents(container, lifecycle);
-  }
-
-  // ---------------------------------------------------------------------------
-  // LIFECYCLE: render
-  // ---------------------------------------------------------------------------
-
-  render(container) {
-    // 1. Sync header text count
-    const countEl = container.querySelector('#lbl-broadcast-count');
-    if (countEl) countEl.textContent = String(this.announcements.length);
-
-    // 2. Render Active Broadcast feed list
+    await this._fetchAnnouncements();
     this._renderFeed(container);
+    this._bindEvents(container, lifecycle);
   }
 
-  // ---------------------------------------------------------------------------
-  // LIFECYCLE: bindEvents
-  // ---------------------------------------------------------------------------
-
-  bindEvents(container, lifecycle) {
-    const form = container.querySelector('#form-broadcast-announcement');
-    const deleteButtons = container.querySelectorAll('.btn-delete-announcement');
-
-    // 1. Form submit handler to compose a new broadcast circular
-    if (form) {
-      const handleSubmitBroadcast = async (e) => {
-        e.preventDefault();
-        
-        const titleInput = container.querySelector('#input-ann-title');
-        const prioritySelect = container.querySelector('#select-ann-priority');
-        const contentInput = container.querySelector('#input-ann-content');
-        const fileInput = container.querySelector('#input-ann-image');
-        
-        const title = titleInput.value.trim();
-        const priority = prioritySelect.value;
-        const content = contentInput.value.trim();
-        
-        if (!title || !content) {
-          notificationStore.danger('Title and message content cannot be empty.');
-          return;
-        }
-
-        let imageUrl = '';
-        const file = fileInput && fileInput.files ? fileInput.files[0] : null;
-
-        if (file) {
-          try {
-            notificationStore.info('Uploading attachment file to server...');
-            const response = await fetch('/api/upload-announcement-attachment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': file.type,
-                'X-File-Name': file.name
-              },
-              body: file
-            });
-            const data = await response.json();
-            if (data && data.success && data.url) {
-              imageUrl = data.url;
-            } else {
-              throw new Error(data.message || 'File server upload failed.');
-            }
-          } catch (uploadErr) {
-            logger.error('SupervisorAnnouncements', 'Attachment upload failed:', uploadErr);
-            notificationStore.danger(`File upload failed: ${uploadErr.message}`);
-            return;
-          }
-        }
-
-        try {
-          const payload = { title, content, priority, imageUrl };
-          const response = await apiClient.post('/api/v1/announcements', payload);
-
-          if (response?.success) {
-            notificationStore.success('Announcement broadcasted and saved to database successfully!');
-            form.reset();
-            await this.loadAndRender(container, lifecycle);
-          } else {
-            throw new Error(response.message || 'Database insert failed.');
-          }
-        } catch (err) {
-          logger.error('SupervisorAnnouncements', 'Failed to publish announcement:', err);
-          notificationStore.danger(`Broadcast failed: ${err.message}`);
-        }
-      };
-      form.addEventListener('submit', handleSubmitBroadcast);
-      lifecycle.onCleanup(() => form.removeEventListener('submit', handleSubmitBroadcast));
-    }
-
-    // 2. Delete announcement button handler
-    deleteButtons.forEach(btn => {
-      const handleDelete = () => {
-        const id = btn.getAttribute('data-id');
-        this.showDeleteConfirmation(async () => {
-          try {
-            const response = await apiClient.delete(`/api/v1/announcements/${id}`);
-            if (response?.success) {
-              notificationStore.success('Announcement removed from database.');
-              await this.loadAndRender(container, lifecycle);
-            } else {
-              throw new Error(response.message || 'Database delete failed.');
-            }
-          } catch (err) {
-            logger.error('SupervisorAnnouncements', 'Failed to delete announcement:', err);
-            notificationStore.danger('Failed to delete announcement from database.');
-          }
-        });
-      };
-      btn.addEventListener('click', handleDelete);
-      lifecycle.onCleanup(() => btn.removeEventListener('click', handleDelete));
-    });
+  destroy() {
+    logger.info('SupervisorAnnouncements', 'Announcements page destroyed.');
   }
 
-  showDeleteConfirmation(onConfirm) {
-    const backdrop = document.createElement('div');
-    backdrop.style.position = 'fixed';
-    backdrop.style.top = '0';
-    backdrop.style.left = '0';
-    backdrop.style.width = '100vw';
-    backdrop.style.height = '100vh';
-    backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    backdrop.style.backdropFilter = 'blur(8px)';
-    backdrop.style.display = 'flex';
-    backdrop.style.alignItems = 'center';
-    backdrop.style.justifyContent = 'center';
-    backdrop.style.zIndex = '9999';
-    backdrop.style.animation = 'fadeIn 0.2s ease-out';
-
-    const box = document.createElement('div');
-    box.style.backgroundColor = '#1e1e1e';
-    box.style.border = '1px solid #333';
-    box.style.borderRadius = '12px';
-    box.style.padding = '24px';
-    box.style.maxWidth = '400px';
-    box.style.width = '90%';
-    box.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
-    box.style.color = '#fff';
-    box.style.textAlign = 'center';
-    box.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-    box.style.animation = 'scaleUp 0.2s ease-out';
-
-    box.innerHTML = `
-      <div style="margin-bottom: 16px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <h3 style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; color: #ff6b6b;">Delete Announcement</h3>
-      <p style="margin: 0 0 24px 0; font-size: 0.9rem; color: #aaa; line-height: 1.5;">Are you sure you want to permanently delete this broadcast announcement? This action cannot be undone and will delete all database records and attachments.</p>
-      <div style="display: flex; gap: 12px; justify-content: center;">
-        <button id="confirm-cancel-btn" style="padding: 10px 18px; border-radius: 6px; border: 1px solid #444; background: transparent; color: #ccc; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;">Cancel</button>
-        <button id="confirm-delete-btn" style="padding: 10px 18px; border-radius: 6px; border: none; background: #ff6b6b; color: #fff; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;">Delete Now</button>
-      </div>
-    `;
-
-    backdrop.appendChild(box);
-    document.body.appendChild(backdrop);
-
-    const cancelBtn = box.querySelector('#confirm-cancel-btn');
-    const deleteBtn = box.querySelector('#confirm-delete-btn');
-
-    cancelBtn.onmouseenter = () => {
-      cancelBtn.style.backgroundColor = 'rgba(255,255,255,0.05)';
-      cancelBtn.style.color = '#fff';
-    };
-    cancelBtn.onmouseleave = () => {
-      cancelBtn.style.backgroundColor = 'transparent';
-      cancelBtn.style.color = '#ccc';
-    };
-
-    deleteBtn.onmouseenter = () => {
-      deleteBtn.style.backgroundColor = '#ff5252';
-    };
-    deleteBtn.onmouseleave = () => {
-      deleteBtn.style.backgroundColor = '#ff6b6b';
-    };
-
-    if (!document.getElementById('confirm-modal-animations')) {
-      const style = document.createElement('style');
-      style.id = 'confirm-modal-animations';
-      style.innerHTML = `
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-      `;
-      document.head.appendChild(style);
-    }
-
-    const close = () => {
-      backdrop.style.animation = 'fadeIn 0.15s ease-in reverse';
-      box.style.animation = 'scaleUp 0.15s ease-in reverse';
-      setTimeout(() => {
-        if (backdrop.parentNode) {
-          document.body.removeChild(backdrop);
-        }
-      }, 140);
-    };
-
-    cancelBtn.onclick = () => {
-      close();
-    };
-
-    deleteBtn.onclick = () => {
-      close();
-      onConfirm();
-    };
-
-    backdrop.onclick = (e) => {
-      if (e.target === backdrop) {
-        close();
-      }
-    };
-  }
-
-  // ---------------------------------------------------------------------------
-  // PRIVATE RENDERING SUB-ROUTINES
-  // ---------------------------------------------------------------------------
-
-  _renderFeed(container) {
-    const feedContainer = container.querySelector('#ann-feed-container');
-    const emptyTpl = container.querySelector('#ann-empty-feed-tpl');
-    const cardTpl = container.querySelector('#ann-item-card-tpl');
-
-    if (!feedContainer) return;
-
-    feedContainer.replaceChildren();
-
-    if (this.announcements.length === 0) {
-      if (emptyTpl) {
-        feedContainer.appendChild(emptyTpl.content.cloneNode(true));
-      }
-      return;
-    }
-
-    this.announcements.forEach(ann => {
-      if (!cardTpl) return;
-      const clone = cardTpl.content.cloneNode(true);
-
-      const row = clone.querySelector('.ann-item-row');
-      const badge = clone.querySelector('.ann-priority-badge');
-      const titleEl = clone.querySelector('.ann-title-text');
-      const deleteBtn = clone.querySelector('.btn-delete-announcement');
-      const contentEl = clone.querySelector('.ann-content-para');
-      const publisherEl = clone.querySelector('.publisher-lbl strong');
-      const dateEl = clone.querySelector('.date-lbl strong');
-
-      if (row && ann.priority === 'Critical Alert') {
-        row.className = 'ann-item-row ann-item-row--critical';
-      }
-
-      if (badge) {
-        badge.textContent = ann.priority;
-        if (ann.priority === 'Critical Alert') {
-          badge.className = 'ann-priority-badge ann-priority-badge--critical font-bold';
-        } else if (ann.priority === 'Company Bulletin') {
-          badge.className = 'ann-priority-badge ann-priority-badge--company font-bold';
-        } else {
-          badge.className = 'ann-priority-badge ann-priority-badge--standard font-bold';
-        }
-      }
-
-      if (titleEl) titleEl.textContent = ann.title;
-      if (deleteBtn) deleteBtn.setAttribute('data-id', String(ann.id));
-      if (contentEl) contentEl.textContent = ann.content;
-
-      const attachContainer = clone.querySelector('.ann-attachment-container');
-      if (attachContainer) {
-        attachContainer.innerHTML = this.renderAttachment(ann.imageUrl);
-      }
-
-      if (publisherEl) publisherEl.textContent = ann.publisher + (ann.publisherRole ? ` (${ann.publisherRole})` : '');
-      if (dateEl) dateEl.textContent = ann.date;
-
-      feedContainer.appendChild(clone);
-    });
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // Setup Helpers
+  // ─────────────────────────────────────────────────────────────────────────
 
   _loadCss() {
-    const cssId = 'store-employee-supervisor-announcements-css';
-    if (!document.getElementById(cssId)) {
+    const id = 'supervisor-announcements-css';
+    if (!document.getElementById(id)) {
       const link = document.createElement('link');
-      link.id = cssId;
+      link.id = id;
       link.rel = 'stylesheet';
       link.href = 'modules/store-employee/pages/supervisor-announcements/announcements.css';
       document.head.appendChild(link);
     }
   }
+
+  _setupPolicyModal(container) {
+    const policyBar = container.querySelector('#btn-sup-ann-policy-bar');
+    const modal     = container.querySelector('#modal-sup-ann-policy');
+    const closeBtn  = container.querySelector('#btn-close-sup-policy-modal');
+
+    if (policyBar && modal) {
+      policyBar.addEventListener('click', () => {
+        modal.style.display = 'flex';
+      });
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Data Fetching
+  // ─────────────────────────────────────────────────────────────────────────
+
+  async _fetchAnnouncements() {
+    try {
+      const response = await apiClient.get('/api/v1/announcements');
+      this.announcements = (response?.success && response.data) ? response.data : [];
+    } catch (e) {
+      logger.error('SupervisorAnnouncements', 'Error reading published announcements:', e);
+      this.announcements = [];
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Template Cloning Render Engine
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _renderFeed(container) {
+    const list  = container.querySelector('#sup-ann-feed-list');
+    const count = container.querySelector('#sup-ann-feed-count');
+    if (!list) return;
+
+    if (count) count.textContent = this.announcements.length;
+    list.innerHTML = '';
+
+    if (this.announcements.length === 0) {
+      const emptyTmpl = container.querySelector('#tmpl-sup-ann-empty');
+      if (emptyTmpl) {
+        list.appendChild(emptyTmpl.content.cloneNode(true));
+      }
+      return;
+    }
+
+    const bulletinTmpl = container.querySelector('#tmpl-sup-ann-bulletin');
+    if (!bulletinTmpl) return;
+
+    this.announcements.forEach(ann => {
+      const fragment  = bulletinTmpl.content.cloneNode(true);
+      const cardEl    = fragment.querySelector('.sup-ann-bulletin');
+      const badgeEl   = fragment.querySelector('.sup-ann-bulletin__priority-badge');
+      const roleBadge = fragment.querySelector('.sup-ann-bulletin__role-badge');
+      const titleEl   = fragment.querySelector('.sup-ann-bulletin__title');
+      const btnDel    = fragment.querySelector('.btn-delete-announcement');
+      const bodyEl    = fragment.querySelector('.sup-ann-bulletin__content');
+      const slotEl    = fragment.querySelector('.sup-ann-bulletin__attachment-slot');
+      const pubEl     = fragment.querySelector('.sup-ann-bulletin__publisher');
+      const dateEl    = fragment.querySelector('.sup-ann-bulletin__date');
+
+      // Priority Badge
+      badgeEl.textContent = ann.priority;
+      badgeEl.className = 'sup-ann-bulletin__priority-badge';
+      if (ann.priority === 'Critical Alert') {
+        badgeEl.classList.add('priority-badge--critical');
+      } else if (ann.priority === 'Company Bulletin') {
+        badgeEl.classList.add('priority-badge--bulletin');
+      } else {
+        badgeEl.classList.add('priority-badge--notice');
+      }
+
+      // Publisher Role Badge & Color Theme
+      if (roleBadge && ann.publisherRole) {
+        roleBadge.textContent = ann.publisherRole.replace('_', ' ');
+        const color = ann.publisherColor || '#f97316';
+        roleBadge.style.background = `${color}20`;
+        roleBadge.style.color = color;
+        roleBadge.style.border = `1px solid ${color}40`;
+
+        // Apply role border color theme to bulletin card
+        cardEl.style.borderLeftColor = color;
+      }
+
+      // Title & Body
+      titleEl.textContent = ann.title;
+      bodyEl.textContent  = ann.content;
+
+      // Role Hierarchy Deletion Check: Shift Supervisor (Rank 1) cannot delete superior messages (Rank 2, 3, 4, 5)
+      const userRank = this._getRoleRank('SHIFT_SUPERVISOR');
+      const pubRank  = this._getRoleRank(ann.publisherRole);
+      if (btnDel) {
+        if (userRank >= pubRank) {
+          btnDel.setAttribute('data-id', ann.id);
+        } else {
+          btnDel.remove(); // Remove Delete button if message was published by superior role
+        }
+      }
+
+      // Media attachment rendering
+      if (ann.imageUrl) {
+        const attachNode = this._createAttachmentNode(container, ann.imageUrl, ann.mediaType);
+        if (attachNode) slotEl.appendChild(attachNode);
+      }
+
+      // Metadata footer
+      pubEl.textContent  = `Publisher: ${ann.publisher || 'Admin'} (${ann.publisherRole || 'System'})`;
+      dateEl.textContent = `Date: ${ann.date || ''}${ann.expiresAt ? ` • Expires: ${ann.expiresAt}` : ''}`;
+
+      list.appendChild(fragment);
+    });
+  }
+
+  _getRoleRank(role) {
+    if (!role) return 0;
+    const norm = String(role).toUpperCase().replace(/-/g, '_').replace(/ /g, '_');
+    if (norm.includes('ULTIMATE')) return 5;
+    if (norm.includes('NATIONAL')) return 4;
+    if (norm.includes('REGIONAL')) return 3;
+    if (norm.includes('STORE_ADMIN') || norm === 'STORE') return 2;
+    if (norm.includes('SUPERVISOR')) return 1;
+    return 0;
+  }
+
+  _createAttachmentNode(container, url, mediaType) {
+    if (!url) return null;
+    const lower = url.toLowerCase();
+    const type  = mediaType ? mediaType.toUpperCase() : '';
+
+    // Video (.mp4, .webm, .ogg, .mov)
+    if (type === 'VIDEO' || ['.mp4', '.webm', '.ogg', '.mov'].some(ext => lower.endsWith(ext))) {
+      const tmpl = container.querySelector('#tmpl-sup-ann-attach-video');
+      if (!tmpl) return null;
+      const frag  = tmpl.content.cloneNode(true);
+      const video = frag.querySelector('video');
+      if (video) video.src = url;
+      return frag;
+    }
+
+    // Audio (.mp3, .wav, .aac, .m4a)
+    if (type === 'AUDIO' || ['.mp3', '.wav', '.aac', '.m4a'].some(ext => lower.endsWith(ext))) {
+      const tmpl = container.querySelector('#tmpl-sup-ann-attach-audio');
+      if (!tmpl) return null;
+      const frag  = tmpl.content.cloneNode(true);
+      const audio = frag.querySelector('audio');
+      if (audio) audio.src = url;
+      return frag;
+    }
+
+    // PDF (.pdf)
+    if (type === 'PDF' || lower.endsWith('.pdf')) {
+      const tmpl = container.querySelector('#tmpl-sup-ann-attach-pdf');
+      if (!tmpl) return null;
+      const frag = tmpl.content.cloneNode(true);
+      const link = frag.querySelector('a');
+      if (link) link.href = url;
+      return frag;
+    }
+
+    // Office Documents (.doc, .docx, .xls, .xlsx, .zip)
+    if (type === 'DOCUMENT' || ['.doc', '.docx', '.xls', '.xlsx', '.zip'].some(ext => lower.endsWith(ext))) {
+      const tmpl = container.querySelector('#tmpl-sup-ann-attach-doc');
+      if (!tmpl) return null;
+      const frag = tmpl.content.cloneNode(true);
+      const link = frag.querySelector('a');
+      if (link) {
+        link.href = url;
+        const fileName = url.substring(url.lastIndexOf('/') + 1);
+        link.textContent = `Download ${fileName.length > 20 ? fileName.substring(0, 17) + '...' : fileName}`;
+      }
+      return frag;
+    }
+
+    // Fallback Image (.png, .jpg, .jpeg, .webp, .gif, .svg)
+    const tmpl = container.querySelector('#tmpl-sup-ann-attach-img');
+    if (!tmpl) return null;
+    const frag = tmpl.content.cloneNode(true);
+    const img  = frag.querySelector('img');
+    if (img) img.src = url;
+    return frag;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Event Delegation & Handling
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _bindEvents(container, lifecycle) {
+    this._bindForm(container);
+    this._bindDeleteDelegation(container);
+  }
+
+  _bindForm(container) {
+    const form = container.querySelector('#form-sup-broadcast-announcement');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const titleInput     = container.querySelector('#input-sup-ann-title');
+      const prioritySelect = container.querySelector('#select-sup-ann-priority');
+      const contentInput   = container.querySelector('#input-sup-ann-content');
+      const fileInput      = container.querySelector('#input-sup-ann-file');
+      const submitBtn      = container.querySelector('#btn-sup-broadcast-submit');
+
+      const title    = titleInput.value.trim();
+      const priority = prioritySelect.value;
+      const content  = contentInput.value.trim();
+
+      if (!title || !content) {
+        notificationStore.danger('Title and message content cannot be empty.');
+        return;
+      }
+
+      if (submitBtn) submitBtn.disabled = true;
+
+      let imageUrl = '';
+      const file = fileInput?.files?.[0];
+
+      if (file) {
+        try {
+          notificationStore.info('Uploading attachment file to server...');
+          const uploadRes = await fetch('/api/upload-announcement-attachment', {
+            method: 'POST',
+            headers: { 'Content-Type': file.type, 'X-File-Name': file.name },
+            body: file
+          });
+          const uploadData = await uploadRes.json();
+          if (uploadData?.success && uploadData.url) {
+            imageUrl = uploadData.url;
+          } else {
+            throw new Error(uploadData?.message || 'File server upload failed.');
+          }
+        } catch (uploadErr) {
+          logger.error('SupervisorAnnouncements', 'Error uploading media attachment:', uploadErr);
+          notificationStore.danger('Failed to upload file attachment: ' + uploadErr.message);
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+      }
+
+      try {
+        const payload  = { title, content, priority, imageUrl };
+        const response = await apiClient.post('/api/v1/announcements', payload);
+
+        if (response?.success) {
+          notificationStore.success('Shift bulletin broadcasted successfully!');
+          titleInput.value = '';
+          contentInput.value = '';
+          if (fileInput) fileInput.value = '';
+          prioritySelect.selectedIndex = 0;
+
+          await this._fetchAnnouncements();
+          this._renderFeed(container);
+        } else {
+          notificationStore.danger(response?.message || 'Failed to broadcast announcement.');
+        }
+      } catch (err) {
+        logger.error('SupervisorAnnouncements', 'Error composing shift bulletin:', err);
+        notificationStore.danger('Database error publishing bulletin circular.');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  }
+
+  _bindDeleteDelegation(container) {
+    const list = container.querySelector('#sup-ann-feed-list');
+    if (!list) return;
+
+    list.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.btn-delete-announcement');
+      if (!btn) return;
+
+      const id = btn.getAttribute('data-id');
+      if (!confirm('Are you sure you want to archive/delete this shift bulletin?')) return;
+
+      btn.disabled = true;
+
+      try {
+        const res = await apiClient.delete(`/api/v1/announcements/${id}`);
+        if (res?.success) {
+          notificationStore.success('Bulletin archived & marked as deleted (kept in DB 60 days).');
+          await this._fetchAnnouncements();
+          this._renderFeed(container);
+        } else {
+          notificationStore.danger(res?.message || 'Failed to delete bulletin.');
+          btn.disabled = false;
+        }
+      } catch (err) {
+        logger.error('SupervisorAnnouncements', 'Error deleting shift bulletin:', err);
+        notificationStore.danger('Failed to execute database delete command.');
+        btn.disabled = false;
+      }
+    });
+  }
 }
-export { SupervisorAnnouncements };

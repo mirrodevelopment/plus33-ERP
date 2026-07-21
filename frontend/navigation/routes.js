@@ -7,19 +7,17 @@
  * Module            : Navigation Module
  * File              : routes.js
  * Path              : frontend/navigation/routes.js
- * Purpose           : Client-side hash-based router defining application navigation
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related API       : N/A
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : 
- * Depends On        : 
+ * Purpose           : Static router table mapping client-side hash paths to dynamic page module JS file paths, layout shell names, page titles, authentication flags, and role profile routes across all ERP roles.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Client-side hash-based router defining application navigation. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Static route registry for the client-side router (frontend/routing/router.js).
+ * Details:
+ *   - Defines hash paths for logins, dashboards, modules, shared pages, and role-specific user profiles (#national-profile, #ultimate-profile, #regional-profile, #store-profile, #supervisor-profile, #employee-profile).
+ *   - Maps each hash route to its target page JS module path relative to frontend/.
+ *   - Specifies layout shell required (e.g. 'dashboard' or 'auth').
+ *   - Configures authentication requirement flags (requiresAuth) and default entry point constants (defaultRoute, loginRoute).
  ******************************************************************************/
 
 /**
@@ -38,6 +36,13 @@ export const routes = [
     page: 'modules/ultimate-admin/pages/dashboard/dashboard.js',
     layout: 'dashboard',
     title: 'Enterprise Dashboard',
+    requiresAuth: true
+  },
+  {
+    path: '#ultimate-announcements',
+    page: 'modules/ultimate-admin/pages/announcements/announcements.js',
+    layout: 'dashboard',
+    title: 'Enterprise Broadcast Announcements',
     requiresAuth: true
   },
   {
@@ -127,6 +132,8 @@ export const routes = [
   { path: '#permissions', page: 'modules/ultimate-admin/pages/permissions/permissions.js', layout: 'dashboard', title: 'Roles & Permissions', requiresAuth: true },
   { path: '#settings', page: 'modules/ultimate-admin/pages/settings/settings.js', layout: 'dashboard', title: 'System Settings', requiresAuth: true },
   { path: '#sales', page: 'modules/store-admin/pages/sales/sales.js', layout: 'dashboard', title: 'Sales Overview', requiresAuth: true },
+  { path: '#store-inventory', page: 'modules/store-admin/pages/inventory/inventory.js', layout: 'dashboard', title: 'Inventory Overview', requiresAuth: true },
+  { path: '#store-usage', page: 'modules/store-admin/pages/usage/usage.js', layout: 'dashboard', title: 'Daily Usage Tracker', requiresAuth: true },
   { path: '#supply-chain', page: 'modules/warehouse-admin/pages/supply-chain/supply-chain.js', layout: 'dashboard', title: 'Supply Chain Overview', requiresAuth: true },
   { path: '#workforce', page: 'modules/ultimate-admin/pages/workforce/workforce.js', layout: 'dashboard', title: 'Workforce Overview', requiresAuth: true },
   { path: '#customers', page: 'modules/ultimate-admin/pages/customers/customers.js', layout: 'dashboard', title: 'Customer Overview', requiresAuth: true },
@@ -151,12 +158,35 @@ export const routes = [
   { path: '#supervisor-announcements', page: 'modules/store-employee/pages/supervisor-announcements/announcements.js', layout: 'dashboard', title: 'Broadcast Announcements', requiresAuth: true },
   { path: '#store-announcements', page: 'modules/store-admin/pages/announcements/announcements.js', layout: 'dashboard', title: 'Broadcast Announcements', requiresAuth: true },
   { path: '#regional-announcements', page: 'modules/regional-admin/pages/announcements/announcements.js', layout: 'dashboard', title: 'Broadcast Announcements', requiresAuth: true },
+  { path: '#regional-regions', page: 'modules/regional-admin/pages/regions/regions.js', layout: 'dashboard', title: 'Regions Management', requiresAuth: true },
+  { path: '#regional-stores', page: 'modules/regional-admin/pages/stores/stores.js', layout: 'dashboard', title: 'Stores Management', requiresAuth: true },
+  { path: '#regional-warehouse', page: 'modules/regional-admin/pages/warehouse/warehouse.js', layout: 'dashboard', title: 'Warehouse Overview', requiresAuth: true },
+  { path: '#regional-sales', page: 'modules/regional-admin/pages/sales/sales.js', layout: 'dashboard', title: 'Sales Overview', requiresAuth: true },
+  { path: '#regional-inventory', page: 'modules/regional-admin/pages/inventory/inventory.js', layout: 'dashboard', title: 'Inventory Overview', requiresAuth: true },
+  { path: '#regional-supply-requests', page: 'modules/regional-admin/pages/supply-requests/supply-requests.js', layout: 'dashboard', title: 'Supply Requests', requiresAuth: true },
+  { path: '#regional-employees', page: 'modules/regional-admin/pages/employees/employees.js', layout: 'dashboard', title: 'Employee Overview', requiresAuth: true },
+  { path: '#regional-recruitment', page: 'modules/regional-admin/pages/recruitment/recruitment.js', layout: 'dashboard', title: 'Recruitment', requiresAuth: true },
+  { path: '#regional-training', page: 'modules/regional-admin/pages/training/training.js', layout: 'dashboard', title: 'Training & Development', requiresAuth: true },
+  { path: '#regional-performance', page: 'modules/regional-admin/pages/performance/performance.js', layout: 'dashboard', title: 'Performance', requiresAuth: true },
+  { path: '#regional-vendors', page: 'modules/regional-admin/pages/vendors/vendors.js', layout: 'dashboard', title: 'Vendors', requiresAuth: true },
+  { path: '#regional-purchase', page: 'modules/regional-admin/pages/purchase/purchase.js', layout: 'dashboard', title: 'Purchase Management', requiresAuth: true },
+  { path: '#regional-contracts', page: 'modules/regional-admin/pages/contracts/contracts.js', layout: 'dashboard', title: 'Contracts', requiresAuth: true },
+  { path: '#regional-complaints', page: 'modules/regional-admin/pages/complaints/complaints.js', layout: 'dashboard', title: 'Complaints Management', requiresAuth: true },
+  { path: '#regional-legal', page: 'modules/regional-admin/pages/legal/legal.js', layout: 'dashboard', title: 'Legal Cases', requiresAuth: true },
+  { path: '#regional-audit', page: 'modules/regional-admin/pages/audit/audit.js', layout: 'dashboard', title: 'Audit & Compliance', requiresAuth: true },
+  { path: '#regional-reports', page: 'modules/regional-admin/pages/reports/reports.js', layout: 'dashboard', title: 'Reports', requiresAuth: true },
+  { path: '#regional-analytics', page: 'modules/regional-admin/pages/analytics/analytics.js', layout: 'dashboard', title: 'Analytics', requiresAuth: true },
+  { path: '#regional-settings', page: 'modules/regional-admin/pages/settings/settings.js', layout: 'dashboard', title: 'Regional Settings', requiresAuth: true },
+  { path: '#regional-help', page: 'modules/regional-admin/pages/help/help.js', layout: 'dashboard', title: 'Help & Support', requiresAuth: true },
   { path: '#store-leave', page: 'modules/store-admin/pages/leave/leave.js', layout: 'dashboard', title: 'Leave Management', requiresAuth: true },
   { path: '#store-workforce', page: 'modules/store-admin/pages/workforce/workforce.js', layout: 'dashboard', title: 'Store Workforce Overview', requiresAuth: true },
   { path: '#store-settings', page: 'modules/store-admin/pages/settings/settings.js', layout: 'dashboard', title: 'Store Settings', requiresAuth: true },
   { path: '#documents', page: 'modules/store-employee/pages/documents/documents.js', layout: 'dashboard', title: 'Documents Center', requiresAuth: true },
   { path: '#payslips', page: 'modules/store-employee/pages/payslips/payslips.js', layout: 'dashboard', title: 'Earnings & Payslips', requiresAuth: true },
   { path: '#profile', page: 'shared/profile/profile.js', layout: 'dashboard', title: 'User Profile', requiresAuth: true },
+  { path: '#national-profile', page: 'modules/national-admin/pages/profile/profile.js', layout: 'dashboard', title: 'National Admin Profile', requiresAuth: true },
+  { path: '#ultimate-profile', page: 'modules/ultimate-admin/pages/profile/profile.js', layout: 'dashboard', title: 'Ultimate Admin Profile', requiresAuth: true },
+  { path: '#regional-profile', page: 'modules/regional-admin/pages/profile/profile.js', layout: 'dashboard', title: 'Regional Admin Profile', requiresAuth: true },
   { path: '#store-profile', page: 'modules/store-admin/pages/profile/profile.js', layout: 'dashboard', title: 'Store Admin Profile', requiresAuth: true },
   { path: '#supervisor-profile', page: 'modules/store-employee/pages/profile-supervisor/profile.js', layout: 'dashboard', title: 'Supervisor Profile', requiresAuth: true },
   { path: '#employee-profile', page: 'modules/store-employee/pages/profile-employee/profile.js', layout: 'dashboard', title: 'Employee Profile', requiresAuth: true }

@@ -92,6 +92,42 @@
 
         <hr class="settings-divider">
 
+        <!-- Store Location & Geofencing -->
+        <div class="settings-section-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+          <div>
+            <h3 class="section-title">Store Location & Geofencing</h3>
+            <p class="section-desc">Manage physical GPS coordinates and boundary parameters used for employee check-ins.</p>
+          </div>
+          <button type="button" id="btn-edit-location" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); padding: 0.4rem 0.8rem; border-radius: 4px; color: #ffffff; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.2s;">
+            <i data-lucide="edit-2" aria-hidden="true"></i>
+            <span>Edit Location</span>
+          </button>
+        </div>
+
+        <div class="form-grid-3col">
+          <div class="form-group">
+            <label for="settings-store-latitude" class="form-label">Latitude</label>
+            <input id="settings-store-latitude" type="number" step="any" class="form-input" placeholder="e.g. 48.8566" disabled required>
+          </div>
+          <div class="form-group">
+            <label for="settings-store-longitude" class="form-label">Longitude</label>
+            <input id="settings-store-longitude" type="number" step="any" class="form-input" placeholder="e.g. 2.3522" disabled required>
+          </div>
+          <div class="form-group">
+            <label for="settings-store-geofence" class="form-label">Geofence Radius (Meters)</label>
+            <input id="settings-store-geofence" type="number" class="form-input" min="10" placeholder="e.g. 200" disabled required>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.5rem; margin-bottom: 1.5rem;">
+          <button type="button" id="btn-get-current-location" class="btn btn-secondary btn-sm" style="display: none; align-items: center; gap: 0.5rem; background: rgba(201,164,106,0.15); border: 1px solid rgba(201,164,106,0.3); color: var(--accent-primary, #c9a46a); padding: 0.45rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600;" disabled>
+            <i data-lucide="map-pin" aria-hidden="true"></i>
+            <span>📍 Use Current GPS Location</span>
+          </button>
+        </div>
+
+        <hr class="settings-divider">
+
         <!-- Guest Amenities -->
         <div class="settings-section-header">
           <h3 class="section-title">Guest WiFi Credentials</h3>
@@ -107,6 +143,79 @@
             <label for="settings-wifi-password" class="form-label">WiFi Passphrase</label>
             <input id="settings-wifi-password" type="text" class="form-input" placeholder="Passphrase" required>
           </div>
+        </div>
+
+        <hr class="settings-divider">
+
+        <!-- Store Shift Schedules & Employee Headcount -->
+        <div class="settings-section-header">
+          <h3 class="section-title">Store Shift Schedules & Staff Headcount</h3>
+          <p class="section-desc">Configure operational shifts, timings, minimum required staff, and max employee capacity. Shift Supervisors are automatically notified upon updates.</p>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg);">
+          <h4 style="font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; color: var(--accent-primary); margin-top: 0; margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="plus-circle" style="width:18px; height:18px;"></i>
+            Create New Shift Schedule
+          </h4>
+
+          <div class="form-grid-3col" style="gap: var(--spacing-sm);">
+            <div class="form-group">
+              <label for="shift-preset-select" class="form-label">Shift Category Preset</label>
+              <select id="shift-preset-select" class="form-input">
+                <option value="CUSTOM" selected>⚡ Custom Shift</option>
+                <option value="MORNING">🌅 Morning Shift (06:00 - 14:00)</option>
+                <option value="MID">☀️ Mid-Day Shift (10:00 - 18:00)</option>
+                <option value="LATE"><ctrl42> Late Shift (14:00 - 22:00)</option>
+                <option value="NIGHT">🌙 Night Shift (22:00 - 06:00)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="new-shift-name" class="form-label">Shift Name</label>
+              <input id="new-shift-name" type="text" class="form-input" placeholder="e.g. Morning Opening Shift" required>
+            </div>
+            <div class="form-group">
+              <label for="new-shift-code" class="form-label">Shift Code</label>
+              <input id="new-shift-code" type="text" class="form-input" placeholder="e.g. ST_SHIFT_MRN_01" required>
+            </div>
+          </div>
+
+          <div class="form-grid-3col" style="gap: var(--spacing-sm); margin-top: var(--spacing-sm);">
+            <div class="form-group">
+              <label for="new-shift-start" class="form-label">Start Time</label>
+              <input id="new-shift-start" type="time" class="form-input" value="08:00" required>
+            </div>
+            <div class="form-group">
+              <label for="new-shift-end" class="form-label">End Time</label>
+              <input id="new-shift-end" type="time" class="form-input" value="16:00" required>
+            </div>
+            <div class="form-group">
+              <label for="new-shift-break" class="form-label">Break Duration (Minutes)</label>
+              <input id="new-shift-break" type="number" class="form-input" value="30" min="0" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2col" style="gap: var(--spacing-sm); margin-top: var(--spacing-sm);">
+            <div class="form-group">
+              <label for="new-shift-min-emp" class="form-label">Min Required Employees</label>
+              <input id="new-shift-min-emp" type="number" class="form-input" value="2" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="new-shift-max-emp" class="form-label">Max Allowed Staff Capacity</label>
+              <input id="new-shift-max-emp" type="number" class="form-input" value="6" min="1" required>
+            </div>
+          </div>
+
+          <div style="margin-top: var(--spacing-md); text-align: right;">
+            <button id="btn-add-shift-submit" type="button" class="btn btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              <span>Add Shift Schedule</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="ops-shifts-config-container" class="shifts-config-grid" style="margin-bottom: var(--spacing-lg);">
+          <!-- Dynamic shift cards loaded from API -->
         </div>
 
         <hr class="settings-divider">
@@ -137,13 +246,14 @@
     <div id="tab-shifts" class="settings-tab-pane">
       <div class="settings-section-header">
         <h3 class="section-title">Franchise Shift Schedules</h3>
-        <p class="section-desc">Define standard operating start/end times and break minutes for employee shifts.</p>
+        <p class="section-desc">Define standard operating start/end times, break minutes, and staff headcount limits for employee shifts.</p>
       </div>
 
       <div id="shifts-config-container" class="shifts-config-grid">
         <!-- Dynamic shift rows loaded from API -->
       </div>
     </div>
+
 
     <!-- === TAB 3: HOLIDAY CALENDAR === -->
     <div id="tab-holidays" class="settings-tab-pane">

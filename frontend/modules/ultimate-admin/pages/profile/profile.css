@@ -1,0 +1,135 @@
+﻿/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Ultimate Admin Module
+ * File              : profile.css
+ * Path              : frontend/modules/ultimate-admin/pages/profile/profile.css
+ * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Ultimate Admin Module
+ * Version           : 1.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
+ ******************************************************************************/
+/* ============================================================
+   PLUS33 Coffee ERP | Ultimate Admin Profile Styles
+   Module  : Ultimate Admin — My Profile
+   File    : profile.css
+   Path    : frontend/modules/ultimate-admin/pages/profile/profile.css
+   Accent Color: Purple/Fuchsia #d946ef
+   ============================================================ */
+
+.ult-profile-page { display:flex; flex-direction:column; gap:20px; padding:24px; max-width:1400px; margin:0 auto; color:#f4f4f5; font-family:inherit; }
+
+/* Hero */
+.ult-profile-hero { position:relative; border-radius:16px; background:rgba(18,18,20,0.8); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.08); box-shadow:0 12px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05); overflow:hidden; padding:28px; }
+.ult-profile-hero__bg { position:absolute; top:0; left:0; right:0; height:100%; background:radial-gradient(circle at 80% 20%,rgba(217,70,239,0.2) 0%,transparent 55%),radial-gradient(circle at 10% 80%,rgba(168,85,247,0.12) 0%,transparent 50%),radial-gradient(circle at 50% 50%,rgba(99,102,241,0.05) 0%,transparent 70%); pointer-events:none; }
+.ult-profile-hero__content { position:relative; z-index:1; display:flex; flex-wrap:wrap; align-items:center; gap:24px; }
+
+/* Avatar */
+.ult-profile-avatar-wrapper { position:relative; flex-shrink:0; cursor:pointer; }
+.ult-profile-avatar { position:relative; width:96px; height:96px; border-radius:50%; overflow:hidden; border:3px solid rgba(217,70,239,0.5); box-shadow:0 0 28px rgba(217,70,239,0.35); background:#18181b; }
+.ult-profile-avatar__img { width:100%; height:100%; object-fit:cover; }
+.ult-profile-avatar__overlay { position:absolute; inset:0; background:rgba(0,0,0,0.65); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:#d946ef; font-size:0.65rem; font-weight:700; text-transform:uppercase; opacity:0; transition:opacity 0.2s; }
+.ult-profile-avatar:hover .ult-profile-avatar__overlay { opacity:1; }
+.ult-profile-avatar__pencil { position:absolute; bottom:0; right:0; width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#d946ef,#9333ea); border:2px solid #121214; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.8rem; cursor:pointer; box-shadow:0 2px 10px rgba(217,70,239,0.5); transition:transform 0.2s; }
+.ult-profile-avatar__pencil:hover { transform:scale(1.2); }
+.ult-profile-status-dot { position:absolute; bottom:4px; right:4px; width:16px; height:16px; border-radius:50%; background:linear-gradient(135deg,#d946ef,#a855f7); border:3px solid #121214; box-shadow:0 0 10px rgba(217,70,239,0.7); }
+
+/* Meta */
+.ult-profile-hero__meta { flex:1; min-width:260px; }
+.ult-profile-hero__title-row { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:4px; }
+.ult-profile-hero__name { font-size:1.4rem; font-weight:800; color:#fff; margin:0; letter-spacing:-0.02em; }
+.ult-role-badge { font-size:0.62rem; font-weight:800; padding:4px 10px; border-radius:6px; background:rgba(217,70,239,0.15); color:#d946ef; border:1px solid rgba(217,70,239,0.4); letter-spacing:0.5px; }
+.ult-enterprise-badge { font-size:0.62rem; font-weight:800; padding:4px 10px; border-radius:6px; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3); }
+.ult-profile-hero__email { font-size:0.85rem; color:#a1a1aa; margin:0 0 10px; }
+.ult-profile-hero__tags { display:flex; flex-wrap:wrap; gap:8px; }
+.ult-tag-pill { display:flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:600; padding:3px 9px; border-radius:6px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#d4d4d8; }
+
+/* Stats */
+.ult-profile-hero__stats { display:flex; gap:12px; flex-wrap:wrap; }
+.ult-stat-card { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 18px; min-width:100px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
+.ult-stat-card--accent { background:rgba(217,70,239,0.1); border-color:rgba(217,70,239,0.3); }
+.ult-stat-card__val { font-size:1.2rem; font-weight:800; color:#fff; }
+.ult-stat-card--accent .ult-stat-card__val { color:#d946ef; }
+.ult-stat-card__lbl { font-size:0.63rem; font-weight:600; color:#a1a1aa; text-transform:uppercase; margin-top:2px; }
+
+/* Row 1 */
+.ult-profile-row-1 { display:grid; grid-template-columns:1.2fr 0.8fr; gap:20px; }
+@media (max-width:960px) { .ult-profile-row-1 { grid-template-columns:1fr; } }
+
+/* Card */
+.ult-profile-card { border-radius:16px; background:rgba(18,18,20,0.75); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.08); box-shadow:0 8px 24px rgba(0,0,0,0.3); padding:22px; }
+.ult-profile-card__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06); }
+.ult-profile-card__icon { width:36px; height:36px; border-radius:10px; background:rgba(217,70,239,0.15); border:1px solid rgba(217,70,239,0.3); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.ult-profile-card__title { font-size:0.98rem; font-weight:800; color:#fff; margin:0; }
+.ult-profile-card__sub { font-size:0.68rem; color:#a1a1aa; }
+
+/* Form */
+.ult-profile-form { display:flex; flex-direction:column; gap:14px; }
+.ult-form-row { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.ult-form-row--3 { grid-template-columns:repeat(3,1fr); }
+@media (max-width:640px) { .ult-form-row, .ult-form-row--3 { grid-template-columns:1fr; } }
+.ult-form-group { display:flex; flex-direction:column; gap:5px; }
+.ult-form-label { font-size:0.7rem; font-weight:700; color:#a1a1aa; text-transform:uppercase; letter-spacing:0.4px; }
+.ult-form-input-wrap { display:flex; align-items:center; gap:8px; background:rgba(24,24,27,0.8); border:1px solid rgba(255,255,255,0.1); padding:8px 12px; border-radius:8px; transition:all 0.2s; }
+.ult-form-input-wrap:focus-within { border-color:#d946ef; box-shadow:0 0 0 3px rgba(217,70,239,0.15); }
+.ult-form-icon { font-size:0.9rem; color:#d946ef; flex-shrink:0; }
+.ult-form-input { background:transparent; border:none; color:#fff; font-size:0.85rem; width:100%; outline:none; }
+.ult-form-input:disabled { color:#a1a1aa; cursor:not-allowed; }
+.ult-form-input option { background:#18181b; color:#fff; }
+.ult-banking-header { display:flex; align-items:center; justify-content:space-between; margin-top:4px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.08); font-size:0.72rem; font-weight:800; color:#d946ef; text-transform:uppercase; letter-spacing:0.4px; }
+.ult-banking-country { font-size:0.65rem; font-weight:800; color:#a1a1aa; }
+.ult-form-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:6px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); }
+
+/* Buttons */
+.ult-profile-btn-sec { padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#d4d4d8; font-size:0.74rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.ult-profile-btn-sec:hover { background:rgba(217,70,239,0.15); border-color:rgba(217,70,239,0.4); color:#d946ef; }
+.ult-btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; border-radius:8px; background:linear-gradient(135deg,#d946ef 0%,#9333ea 100%); border:none; color:#fff; font-size:0.82rem; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(217,70,239,0.45); transition:all 0.2s; }
+.ult-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(217,70,239,0.6); }
+.ult-btn-primary.full-width { width:100%; margin-top:8px; }
+.ult-btn-ghost { padding:10px 16px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:#a1a1aa; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+.ult-btn-ghost:hover { color:#fff; background:rgba(255,255,255,0.05); }
+
+/* Row 2 Feature Cards */
+.ult-profile-row-2 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+@media (max-width:1100px) { .ult-profile-row-2 { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:600px) { .ult-profile-row-2 { grid-template-columns:1fr; } }
+
+.ult-feature-card { border-radius:14px; padding:18px; display:flex; flex-direction:column; justify-content:space-between; gap:14px; box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+.ult-feature-card--purple { background:radial-gradient(circle at 80% 20%,rgba(217,70,239,0.2) 0%,rgba(18,18,20,0.85) 70%); border:1px solid rgba(217,70,239,0.35); }
+.ult-feature-card--amber  { background:radial-gradient(circle at 80% 20%,rgba(245,158,11,0.15) 0%,rgba(18,18,20,0.85) 70%); border:1px solid rgba(245,158,11,0.3); }
+.ult-feature-card--cyan   { background:radial-gradient(circle at 80% 20%,rgba(6,182,212,0.15) 0%,rgba(18,18,20,0.85) 70%); border:1px solid rgba(6,182,212,0.3); }
+.ult-feature-card--indigo { background:radial-gradient(circle at 80% 20%,rgba(99,102,241,0.15) 0%,rgba(18,18,20,0.85) 70%); border:1px solid rgba(99,102,241,0.3); }
+
+.ult-feature-card__header { display:flex; align-items:center; gap:10px; }
+.ult-feature-card__icon { font-size:1.3rem; }
+.ult-feature-card__title { font-size:0.88rem; font-weight:800; color:#fff; margin:0; }
+.ult-feature-card__sub { font-size:0.65rem; }
+.ult-feature-card__body { display:flex; flex-direction:column; gap:8px; }
+.ult-feature-card__row { display:flex; flex-direction:column; gap:1px; }
+.ult-feature-card__lbl { font-size:0.63rem; color:#a1a1aa; text-transform:uppercase; }
+.ult-feature-card__val { color:#fff; font-weight:700; font-size:0.82rem; }
+.ult-feature-card__btn { padding:8px; border-radius:8px; font-size:0.75rem; font-weight:800; cursor:pointer; border:1px solid; transition:opacity 0.2s; }
+.ult-feature-card__btn:hover { opacity:0.8; }
+.ult-feature-card__btn--purple { background:rgba(217,70,239,0.15); border-color:rgba(217,70,239,0.4); color:#d946ef; }
+.ult-feature-card__btn--amber  { background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.4); color:#f59e0b; }
+.ult-feature-card__btn--cyan   { background:rgba(6,182,212,0.15); border-color:rgba(6,182,212,0.4); color:#06b6d4; }
+.ult-feature-card__btn--indigo { background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.4); color:#6366f1; }
+
+/* Row 3 Doc Hub */
+.ult-profile-doc-hub { border-radius:16px; background:rgba(18,18,20,0.75); border:1px solid rgba(255,255,255,0.08); padding:22px; box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+
+/* Row 4 Utility Footer */
+.ult-profile-row-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+@media (max-width:1100px) { .ult-profile-row-4 { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:600px) { .ult-profile-row-4 { grid-template-columns:1fr; } }
+.ult-utility-tile { border-radius:12px; background:rgba(24,24,27,0.6); border:1px solid rgba(255,255,255,0.06); padding:14px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:all 0.2s; }
+.ult-utility-tile:hover { background:rgba(217,70,239,0.1); border-color:rgba(217,70,239,0.3); }
+.ult-utility-tile__icon { font-size:1.3rem; flex-shrink:0; }
+.ult-utility-tile__title { font-size:0.82rem; color:#fff; display:block; font-weight:700; }
+.ult-utility-tile__sub { font-size:0.68rem; color:#a1a1aa; }
+

@@ -5,25 +5,38 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.jwt
  * File              : JwtService.java
- * Purpose           : Business logic service layer for Security Module operations
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: JwtController
- * Related Service   : JwtService
- * Related Repository: JwtRepository
- * Related Entity    : Jwt
- * Related DTO       : N/A
- * Related Mapper    : JwtMapper
- * Related DB Table  : jwts
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : JwtController, JwtServiceImpl
+ * Path              : src/main/java/com/plus33/erp/security/jwt/JwtService.java
+ * Purpose           : Generates signed HMAC-SHA256 JWT access tokens and provides
+ *                     token expiry duration for the PLUS33 ERP authentication flow.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Business service for Security Module. Implements JwtService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ * Spring @Service component responsible for JWT token generation used by
+ * AuthController.login() after successful credential verification.
+ *
+ * generateToken(UserDetails):
+ *   Builds a JwtClaimsSet with the following claims:
+ *     issuer    — "plus33-erp" (identifies this ERP as token issuer)
+ *     issuedAt  — current Instant
+ *     expiresAt — current Instant + expirationMinutes (configurable via
+ *                 app.jwt.expiration-minutes, default 60)
+ *     subject   — the user's email address (from UserDetails.getUsername())
+ *     authorities — list of granted authority strings (ROLE_* + permissions)
+ *   Signs with MacAlgorithm.HS256 using the shared JwtEncoder bean
+ *   configured with the HMAC secret from application properties.
+ *
+ * getExpirationSeconds():
+ *   Converts expirationMinutes to seconds. Returned inside TokenResponse
+ *   so the frontend SPA can manage session expiry timers.
+ *
+ * Does not validate or decode tokens. Token decoding is performed by
+ * JwtDecoder (configured in JwtConfig) and used by JwtAuthFilter.
+ *
+ * Dependencies:
+ *   - JwtEncoder (security.config.JwtConfig) — HMAC signing key encoder
+ *   - app.jwt.expiration-minutes (application.properties) — token validity
  ******************************************************************************/
 package com.plus33.erp.security.jwt;
 

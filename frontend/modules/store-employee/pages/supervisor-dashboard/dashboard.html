@@ -120,6 +120,72 @@
 
   </div>
 
+  <!-- ===== AWAY PASS REQUESTS CARD ===== -->
+  <div id="sup-away-permissions-section" class="card glass" style="margin-top: 0;">
+    <div class="card-header-split">
+      <h3 class="card-split-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right:6px; vertical-align:middle;">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        Away Pass Requests
+        <span id="sup-away-badge" style="
+          display:none; align-items:center; justify-content:center;
+          background:#f59e0b; color:#000; border-radius:50%;
+          width:18px; height:18px; font-size:0.65rem; font-weight:700;
+          margin-left:6px; vertical-align:middle;
+        ">0</span>
+      </h3>
+      <i data-lucide="map-pin" class="card-split-icon" aria-hidden="true" style="color:#f59e0b;"></i>
+    </div>
+    <p style="font-size:0.75rem; color:var(--text-muted); margin:4px 0 12px 0;">
+      Employees out of the store geofence will appear here. Approve with a custom time limit (+ 10-min auto grace buffer).
+    </p>
+    <div id="sup-away-permissions-list">
+      <!-- Populated by JS -->
+    </div>
+    
+    <!-- Ongoing Active Away Passes -->
+    <div id="sup-ongoing-away-section" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; display: none;">
+      <h4 style="margin: 0 0 8px 0; font-size: 0.8rem; font-weight: 600; color: var(--status-success, #4caf50); display: flex; align-items: center; gap: 4px;">
+        <i data-lucide="door-open" style="width: 14px; height: 14px;"></i> Ongoing Away Passes
+      </h4>
+      <div id="sup-ongoing-away-list">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== OVERTIME SHIFT REQUESTS CARD ===== -->
+  <div id="sup-overtime-requests-section" class="card glass" style="margin-top: 0;">
+    <div class="card-header-split">
+      <h3 class="card-split-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right:6px; vertical-align:middle;">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Overtime Shift Requests
+        <span id="sup-overtime-badge" style="
+          display:none; align-items:center; justify-content:center;
+          background:var(--accent-primary); color:#000; border-radius:50%;
+          width:18px; height:18px; font-size:0.65rem; font-weight:700;
+          margin-left:6px; vertical-align:middle;
+        ">0</span>
+      </h3>
+      <i data-lucide="clock" class="card-split-icon" aria-hidden="true" style="color:var(--accent-primary);"></i>
+    </div>
+    <p style="font-size:0.75rem; color:var(--text-muted); margin:4px 0 12px 0;">
+      Pending overtime shift request submissions from baristas covering rest days or store capacity needs.
+    </p>
+    <div id="sup-overtime-requests-list">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
   <!-- ===== REJECT MODAL PROMPT ===== -->
   <div id="reject-modal" class="modal-overlay-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="card glass modal-content-panel animate-slide-up">

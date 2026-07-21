@@ -37,6 +37,7 @@ import com.plus33.erp.workforce.repository.PayrollRunItemRepository;
 import com.plus33.erp.workforce.repository.PayrollRunRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.format.DateTimeFormatter;
 
 /**
  * <b>PLUS33 Coffee ERP -- Workforce Module</b>
@@ -99,10 +100,16 @@ public class EmployeeSelfServiceImpl implements EmployeeSelfService {
                 .orElseThrow(() -> new ResourceNotFoundException("Payslip item not found for employee: " + employeeId));
 
         String fullName = (emp.getFirstName() != null ? emp.getFirstName() : "") + " " + (emp.getLastName() != null ? emp.getLastName() : "");
+        String paidAtStr = run.getPaidAt() != null ? run.getPaidAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+        String statusStr = run.getStatus() != null ? run.getStatus().name() : "DRAFT";
         return new PayslipResponse(
+                run.getId(),
                 emp.getId(),
                 fullName.trim(),
+                emp.getEmployeeCode(),
                 run.getRunNumber(),
+                paidAtStr,
+                statusStr,
                 item.getGrossPay(),
                 item.getNetPay(),
                 item.getTotalDeductions(),
@@ -116,7 +123,10 @@ public class EmployeeSelfServiceImpl implements EmployeeSelfService {
                 item.getBenefitSnapshot(),
                 item.getTaxSnapshot(),
                 item.getEmployerContributionSnapshot(),
-                item.getPayrollAudit()
+                item.getPayrollAudit(),
+                emp.getBankName(),
+                emp.getBankAccountNumber(),
+                emp.getIfscNumber()
         );
     }
 
@@ -126,16 +136,26 @@ public class EmployeeSelfServiceImpl implements EmployeeSelfService {
         Employee emp = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + employeeId));
         String fullName = (emp.getFirstName() != null ? emp.getFirstName() : "") + " " + (emp.getLastName() != null ? emp.getLastName() : "");
+        String empCode = emp.getEmployeeCode() != null ? emp.getEmployeeCode() : "N/A";
 
         java.util.List<PayrollRunItem> items = payrollRunItemRepository.findByEmployeeId(employeeId);
         java.util.List<PayslipResponse> list = new java.util.ArrayList<>();
         for (PayrollRunItem item : items) {
             PayrollRun run = payrollRunRepository.findById(item.getPayrollRunId()).orElse(null);
-            String runNum = run != null ? run.getRunNumber() : "RUN-UNKNOWN";
+            String runNum  = run != null ? run.getRunNumber() : "RUN-UNKNOWN";
+            String paidAt  = (run != null && run.getPaidAt() != null)
+                    ? run.getPaidAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+            String status  = (run != null && run.getStatus() != null)
+                    ? run.getStatus().name() : "DRAFT";
+            Long runId     = run != null ? run.getId() : null;
             list.add(new PayslipResponse(
+                    runId,
                     emp.getId(),
                     fullName.trim(),
+                    empCode,
                     runNum,
+                    paidAt,
+                    status,
                     item.getGrossPay(),
                     item.getNetPay(),
                     item.getTotalDeductions(),
@@ -149,9 +169,19 @@ public class EmployeeSelfServiceImpl implements EmployeeSelfService {
                     item.getBenefitSnapshot(),
                     item.getTaxSnapshot(),
                     item.getEmployerContributionSnapshot(),
-                    item.getPayrollAudit()
+                    item.getPayrollAudit(),
+                    emp.getBankName(),
+                    emp.getBankAccountNumber(),
+                    emp.getIfscNumber()
             ));
         }
+        // Sort most recent first (paidAt desc, fall back to runNumber desc)
+        list.sort((a, b) -> {
+            if (a.paidAt() == null && b.paidAt() == null) return 0;
+            if (a.paidAt() == null) return 1;
+            if (b.paidAt() == null) return -1;
+            return b.paidAt().compareTo(a.paidAt());
+        });
         return list;
     }
 }

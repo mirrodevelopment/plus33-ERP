@@ -79,5 +79,8 @@ public record ProductResponse(
         LocalDateTime createdAt,
 
         @Schema(description = "Last modification date time", example = "2026-06-20T12:30:00")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @Schema(description = "Online image URL of the product", example = "https://...")
+        String imageUrl
 ) {}

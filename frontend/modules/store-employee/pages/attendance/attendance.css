@@ -438,3 +438,380 @@
 .btn-submit-discrepancy {
   margin-top: 4px;
 }
+
+/* ==========================================
+   MONTHLY CALENDAR GRID & CONTROLS
+   ========================================== */
+
+.calendar-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.calendar-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.btn-calendar-nav {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-calendar-nav:hover {
+  background: var(--accent-primary);
+  color: #000;
+  border-color: var(--accent-primary);
+}
+
+.btn-calendar-nav i {
+  width: 16px;
+  height: 16px;
+}
+
+.calendar-month-year-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 100px;
+  text-align: center;
+}
+
+.calendar-grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-day-headers {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.calendar-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.calendar-day-cell {
+  aspect-ratio: 1.1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  min-height: 52px;
+}
+
+.calendar-day-number {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.calendar-day-cell.current-month .calendar-day-number {
+  color: var(--text-primary);
+}
+
+.calendar-day-cell.pad {
+  opacity: 0.25;
+}
+
+.calendar-day-hours {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--accent-primary);
+  text-align: right;
+  margin-top: auto;
+}
+
+/* Day status highlights */
+.calendar-day-cell.status-present {
+  background: rgba(130, 163, 125, 0.08);
+  border-color: rgba(130, 163, 125, 0.3);
+}
+.calendar-day-cell.status-present .calendar-day-number {
+  color: var(--status-success, #82a37d) !important;
+}
+
+.calendar-day-cell.status-absent {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.calendar-day-cell.status-absent .calendar-day-number {
+  color: var(--status-danger, #ff6b6b) !important;
+}
+
+.calendar-day-cell.status-leave {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.calendar-day-cell.status-leave .calendar-day-number {
+  color: #3b82f6 !important;
+}
+
+.calendar-day-cell.status-weekly-off {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-day-cell.status-half-day {
+  background: linear-gradient(135deg, rgba(130, 163, 125, 0.08) 50%, rgba(59, 130, 246, 0.08) 50%);
+  border-color: rgba(130, 163, 125, 0.3);
+}
+.calendar-day-cell.status-half-day .calendar-day-number {
+  color: var(--status-success, #82a37d) !important;
+}
+
+.calendar-day-cell.status-holiday {
+  background: rgba(201, 164, 106, 0.08);
+  border-color: rgba(201, 164, 106, 0.3);
+}
+.calendar-day-cell.status-holiday .calendar-day-number {
+  color: var(--accent-primary, #c9a46a) !important;
+}
+
+/* ==========================================
+   ATTENDANCE POLICY BANNER & MODAL
+   ========================================== */
+
+.policy-banner-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.policy-banner-wrapper:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.policy-banner-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.policy-icon-box {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.policy-icon-box i {
+  width: 20px;
+  height: 20px;
+}
+
+.policy-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.policy-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.policy-chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.policy-banner-wrapper:hover .policy-chevron {
+  transform: translateX(4px);
+  color: var(--accent-primary);
+}
+
+/* Modal Overlay & Card */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 600px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: slideUp 0.25s ease-out;
+}
+
+.modal-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.modal-title-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--accent-primary);
+}
+
+.modal-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+  max-height: 70vh;
+  overflow-y: auto;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.policy-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.section-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+.badge-gold { background: rgba(201, 164, 106, 0.15); color: var(--accent-primary); border: 1px solid rgba(201, 164, 106, 0.3); }
+.badge-green { background: rgba(130, 163, 125, 0.15); color: var(--status-success); border: 1px solid rgba(130, 163, 125, 0.3); }
+
+.policy-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.policy-list li {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.policy-list li strong {
+  color: var(--text-primary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+

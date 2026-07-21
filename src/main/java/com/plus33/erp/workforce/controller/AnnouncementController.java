@@ -1,12 +1,12 @@
 package com.plus33.erp.workforce.controller;
 
 import com.plus33.erp.common.dto.ApiResponse;
-import com.plus33.erp.workforce.entity.Announcement;
+import com.plus33.erp.workforce.entity.BroadcastAnnouncement;
 import com.plus33.erp.workforce.entity.AnnouncementRead;
 import com.plus33.erp.workforce.entity.AnnouncementReaction;
 import com.plus33.erp.workforce.dto.AnnouncementRequest;
 import com.plus33.erp.workforce.dto.AnnouncementResponse;
-import com.plus33.erp.workforce.repository.AnnouncementRepository;
+import com.plus33.erp.workforce.repository.BroadcastAnnouncementRepository;
 import com.plus33.erp.workforce.repository.AnnouncementReadRepository;
 import com.plus33.erp.workforce.repository.AnnouncementReactionRepository;
 import com.plus33.erp.security.repository.UserRepository;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/announcements")
 public class AnnouncementController {
 
-    private final AnnouncementRepository announcementRepository;
+    private final BroadcastAnnouncementRepository broadcastAnnouncementRepository;
     private final AnnouncementReadRepository announcementReadRepository;
     private final AnnouncementReactionRepository announcementReactionRepository;
     private final UserRepository userRepository;
@@ -33,13 +33,13 @@ public class AnnouncementController {
     private final com.plus33.erp.workforce.repository.UserStoreRepository userStoreRepository;
 
     public AnnouncementController(
-            AnnouncementRepository announcementRepository,
+            BroadcastAnnouncementRepository broadcastAnnouncementRepository,
             AnnouncementReadRepository announcementReadRepository,
             AnnouncementReactionRepository announcementReactionRepository,
             UserRepository userRepository,
             com.plus33.erp.workforce.repository.UserRegionRepository userRegionRepository,
             com.plus33.erp.workforce.repository.UserStoreRepository userStoreRepository) {
-        this.announcementRepository = announcementRepository;
+        this.broadcastAnnouncementRepository = broadcastAnnouncementRepository;
         this.announcementReadRepository = announcementReadRepository;
         this.announcementReactionRepository = announcementReactionRepository;
         this.userRepository = userRepository;
@@ -49,19 +49,37 @@ public class AnnouncementController {
 
     @GetMapping
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public ResponseEntity<ApiResponse<List<AnnouncementResponse>>> getAnnouncements(Principal principal) {
+    public ResponseEntity<ApiResponse<List<AnnouncementResponse>>> getAnnouncements(
+            @RequestParam(required = false, defaultValue = "false") boolean includeDeleted,
+            Principal principal) {
         String email = principal != null ? principal.getName() : "anonymous";
-        List<Announcement> announcements = announcementRepository.findAll();
-        
-        // Target filtering based on user scope
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean isUltimateAdmin = false;
         if (principal != null) {
             Optional<User> userOpt = userRepository.findByEmail(email);
             if (userOpt.isPresent()) {
+                isUltimateAdmin = userOpt.get().getRoles().stream()
+                        .anyMatch(r -> "ULTIMATE_ADMIN".equalsIgnoreCase(r.getCode()));
+            }
+        }
+
+        List<BroadcastAnnouncement> announcements;
+        if (includeDeleted && isUltimateAdmin) {
+            announcements = broadcastAnnouncementRepository.findAllByOrderByCreatedAtDesc();
+        } else {
+            announcements = broadcastAnnouncementRepository.findByIsDeletedFalseAndExpiresAtAfterOrderByCreatedAtDesc(now);
+        }
+
+        // Scope target filtering
+        if (principal != null && !isUltimateAdmin) {
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isPresent()) {
                 User u = userOpt.get();
-                boolean isSuperAdmin = u.getRoles().stream()
-                    .anyMatch(r -> "ULTIMATE_ADMIN".equalsIgnoreCase(r.getCode()) || "NATIONAL_ADMIN".equalsIgnoreCase(r.getCode()));
-                
-                if (!isSuperAdmin) {
+                boolean isNationalAdmin = u.getRoles().stream()
+                        .anyMatch(r -> "NATIONAL_ADMIN".equalsIgnoreCase(r.getCode()));
+
+                if (!isNationalAdmin) {
                     Set<Long> userRegionIds = new HashSet<>();
                     for (com.plus33.erp.workforce.entity.UserRegion ur : userRegionRepository.findByIdUserId(u.getId())) {
                         if (ur.getRegion() != null) {
@@ -71,7 +89,7 @@ public class AnnouncementController {
                             }
                         }
                     }
-                    
+
                     Set<Long> userStoreIds = new HashSet<>();
                     List<com.plus33.erp.workforce.entity.UserStore> userStores = userStoreRepository.findByIdUserId(u.getId());
                     for (com.plus33.erp.workforce.entity.UserStore us : userStores) {
@@ -85,7 +103,7 @@ public class AnnouncementController {
                             }
                         }
                     }
-                    
+
                     announcements = announcements.stream().filter(ann -> {
                         if (ann.getTargetRegionId() == null && ann.getTargetStoreId() == null) {
                             return true;
@@ -102,58 +120,29 @@ public class AnnouncementController {
             }
         }
 
-        // Sort descending by creation date
-        announcements.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
- 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a");
+
         List<AnnouncementResponse> responses = announcements.stream().map(ann -> {
             boolean read = false;
             if (principal != null) {
                 read = announcementReadRepository.findByAnnouncementIdAndUsername(ann.getId(), email).isPresent();
             }
- 
+
             List<AnnouncementReaction> reactions = announcementReactionRepository.findByAnnouncementId(ann.getId());
             Map<String, Integer> reactionCounts = new HashMap<>();
             reactionCounts.put("thumbsUp", 0);
             reactionCounts.put("heart", 0);
             reactionCounts.put("lightbulb", 0);
             reactionCounts.put("coffee", 0);
- 
+
             for (AnnouncementReaction reaction : reactions) {
                 String type = reaction.getReactionType();
                 reactionCounts.put(type, reactionCounts.getOrDefault(type, 0) + 1);
             }
- 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a");
+
             String dateStr = ann.getCreatedAt().format(formatter);
- 
-            // Resolve publisher role dynamically
-            String publisherRole = "Management";
-            String pub = ann.getPublisher();
-            if (pub != null && !pub.trim().isEmpty() && !pub.equalsIgnoreCase("Management") && !pub.equalsIgnoreCase("System")) {
-                List<User> users = userRepository.findByFullName(pub.trim());
-                if (users != null && !users.isEmpty()) {
-                    User user = users.get(0);
-                    if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-                        com.plus33.erp.security.entity.Role r = user.getRoles().iterator().next();
-                        String rCode = r.getCode();
-                        if ("ULTIMATE_ADMIN".equalsIgnoreCase(rCode)) {
-                            publisherRole = "System Admin";
-                        } else if ("NATIONAL_ADMIN".equalsIgnoreCase(rCode)) {
-                            publisherRole = "National Admin";
-                        } else if ("REGIONAL_ADMIN".equalsIgnoreCase(rCode)) {
-                            publisherRole = "Regional Admin";
-                        } else if ("STORE_ADMIN".equalsIgnoreCase(rCode)) {
-                            publisherRole = "Store Admin";
-                        } else if ("SHIFT_SUPERVISOR".equalsIgnoreCase(rCode)) {
-                            publisherRole = "Shift Supervisor";
-                        } else if ("SENIOR_EMPLOYEE".equalsIgnoreCase(rCode) || "STORE_EMPLOYEE".equalsIgnoreCase(rCode)) {
-                            publisherRole = "Store Employee";
-                        } else {
-                            publisherRole = r.getName();
-                        }
-                    }
-                }
-            }
+            String expStr = ann.getExpiresAt() != null ? ann.getExpiresAt().format(formatter) : null;
+            String delStr = ann.getDeletedAt() != null ? ann.getDeletedAt().format(formatter) : null;
 
             return new AnnouncementResponse(
                 ann.getId(),
@@ -161,9 +150,14 @@ public class AnnouncementController {
                 ann.getContent(),
                 ann.getPriority(),
                 ann.getPublisher(),
-                publisherRole,
+                ann.getPublisherRole(),
+                ann.getPublisherColor(),
+                ann.getMediaType(),
                 dateStr,
                 ann.getCreatedAt().toString(),
+                expStr,
+                delStr,
+                Boolean.TRUE.equals(ann.getIsDeleted()),
                 read,
                 reactionCounts,
                 ann.getImageUrl(),
@@ -171,57 +165,64 @@ public class AnnouncementController {
                 ann.getTargetStoreId()
             );
         }).collect(Collectors.toList());
- 
+
         return ResponseEntity.ok(ApiResponse.success("Announcements retrieved successfully", responses));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Announcement>> createAnnouncement(
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<ApiResponse<BroadcastAnnouncement>> createAnnouncement(
             @Valid @RequestBody AnnouncementRequest request, Principal principal) {
         String email = principal != null ? principal.getName() : "System";
-        
-        // Retrieve user info for publisher name and determine target region/store
+
         String publisherName = "Management";
+        String publisherRole = "STORE_ADMIN";
         Long targetRegionId = null;
         Long targetStoreId = null;
+
         if (principal != null) {
             Optional<User> userOpt = userRepository.findByEmail(email);
             if (userOpt.isPresent()) {
                 User u = userOpt.get();
                 publisherName = u.getFirstName() + " " + u.getLastName();
-                
+
+                if (u.getRoles() != null && !u.getRoles().isEmpty()) {
+                    String roleCode = u.getRoles().iterator().next().getCode();
+                    publisherRole = roleCode != null ? roleCode.toUpperCase() : "STORE_ADMIN";
+                }
+
                 boolean isRegionalAdmin = u.getRoles().stream()
-                    .anyMatch(r -> "REGIONAL_ADMIN".equalsIgnoreCase(r.getCode()));
+                        .anyMatch(r -> "REGIONAL_ADMIN".equalsIgnoreCase(r.getCode()));
                 boolean isNationalAdmin = u.getRoles().stream()
-                    .anyMatch(r -> "NATIONAL_ADMIN".equalsIgnoreCase(r.getCode()));
+                        .anyMatch(r -> "NATIONAL_ADMIN".equalsIgnoreCase(r.getCode()));
                 boolean isStoreRole = u.getRoles().stream()
-                    .anyMatch(r -> "STORE_ADMIN".equalsIgnoreCase(r.getCode()) || "STORE".equalsIgnoreCase(r.getCode()) || "SHIFT_SUPERVISOR".equalsIgnoreCase(r.getCode()));
-                
+                        .anyMatch(r -> "STORE_ADMIN".equalsIgnoreCase(r.getCode()) || "STORE".equalsIgnoreCase(r.getCode()) || "SHIFT_SUPERVISOR".equalsIgnoreCase(r.getCode()));
+
                 if (isRegionalAdmin || isNationalAdmin) {
                     List<com.plus33.erp.workforce.entity.UserRegion> urList = userRegionRepository.findByIdUserId(u.getId());
-                    if (urList != null && !urList.isEmpty() && urList.get(0).getRegion() != null) {
-                        targetRegionId = urList.get(0).getRegion().getId();
+                    if (urList != null && !urList.isEmpty() && urList.get(0).getId() != null) {
+                        targetRegionId = urList.get(0).getId().getRegionId();
                     }
                 } else if (isStoreRole) {
                     List<com.plus33.erp.workforce.entity.UserStore> usList = userStoreRepository.findByIdUserId(u.getId());
-                    if (usList != null && !usList.isEmpty() && usList.get(0).getStore() != null) {
-                        targetStoreId = usList.get(0).getStore().getId();
+                    if (usList != null && !usList.isEmpty() && usList.get(0).getId() != null) {
+                        targetStoreId = usList.get(0).getId().getStoreId();
                     }
                 }
             }
         }
 
-        Announcement ann = new Announcement();
+        BroadcastAnnouncement ann = new BroadcastAnnouncement();
         ann.setTitle(request.title());
         ann.setContent(request.content());
         ann.setPriority(request.priority());
         ann.setPublisher(publisherName);
-        ann.setCreatedAt(LocalDateTime.now());
+        ann.setPublisherRole(publisherRole);
         ann.setImageUrl(request.imageUrl());
         ann.setTargetRegionId(targetRegionId);
         ann.setTargetStoreId(targetStoreId);
 
-        Announcement saved = announcementRepository.save(ann);
+        BroadcastAnnouncement saved = broadcastAnnouncementRepository.save(ann);
         return ResponseEntity.ok(ApiResponse.success("Announcement broadcasted successfully", saved));
     }
 
@@ -252,12 +253,10 @@ public class AnnouncementController {
         }
         String email = principal.getName();
 
-        // Validate type
         if (!Arrays.asList("thumbsUp", "heart", "lightbulb", "coffee").contains(type)) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Invalid reaction type"));
         }
 
-        // Toggle reaction: if exists, delete it; else, create it
         List<AnnouncementReaction> existing = announcementReactionRepository.findByAnnouncementIdAndUsername(id, email);
         Optional<AnnouncementReaction> specificType = existing.stream()
                 .filter(r -> r.getReactionType().equals(type))
@@ -277,28 +276,55 @@ public class AnnouncementController {
         return ResponseEntity.ok(ApiResponse.success("Reaction updated successfully", null));
     }
 
+    private int getRoleRank(String roleCode) {
+        if (roleCode == null) return 0;
+        String normalized = roleCode.toUpperCase().replace("-", "_").replace(" ", "_");
+        if (normalized.contains("ULTIMATE")) return 5;
+        if (normalized.contains("NATIONAL")) return 4;
+        if (normalized.contains("REGIONAL")) return 3;
+        if (normalized.contains("STORE_ADMIN") || normalized.equals("STORE")) return 2;
+        if (normalized.contains("SUPERVISOR")) return 1;
+        return 0;
+    }
+
+    /**
+     * Soft-delete endpoint: Sets is_deleted = true and deleted_at = NOW().
+     * Enforces role rank hierarchy: Lower-level roles CANNOT delete announcements published by superior roles.
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteAnnouncement(@PathVariable Long id) {
-        Optional<Announcement> annOpt = announcementRepository.findById(id);
-        if (annOpt.isPresent()) {
-            Announcement ann = annOpt.get();
-            String imageUrl = ann.getImageUrl();
-            if (imageUrl != null && !imageUrl.trim().isEmpty()) {
-                try {
-                    String cleanPath = imageUrl;
-                    if (cleanPath.startsWith("/")) {
-                        cleanPath = cleanPath.substring(1);
-                    }
-                    java.nio.file.Path filePath = java.nio.file.Paths.get("frontend", cleanPath);
-                    if (java.nio.file.Files.exists(filePath)) {
-                        java.nio.file.Files.delete(filePath);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Failed to delete attachment file: " + e.getMessage());
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<ApiResponse<Void>> deleteAnnouncement(@PathVariable Long id, Principal principal) {
+        Optional<BroadcastAnnouncement> annOpt = broadcastAnnouncementRepository.findById(id);
+        if (annOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(ApiResponse.error("Announcement not found"));
+        }
+
+        BroadcastAnnouncement ann = annOpt.get();
+
+        if (principal != null) {
+            String email = principal.getName();
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isPresent()) {
+                User u = userOpt.get();
+                String currentUserRoleCode = (u.getRoles() != null && !u.getRoles().isEmpty())
+                        ? u.getRoles().iterator().next().getCode()
+                        : "STORE_ADMIN";
+
+                int currentUserRank = getRoleRank(currentUserRoleCode);
+                int publisherRank = getRoleRank(ann.getPublisherRole());
+
+                if (currentUserRank < publisherRank) {
+                    return ResponseEntity.status(403).body(
+                        ApiResponse.error("Access Denied: You do not have permission to delete an announcement published by a superior role (" + ann.getPublisherRole() + ")")
+                    );
                 }
             }
-            announcementRepository.delete(ann);
         }
-        return ResponseEntity.ok(ApiResponse.success("Announcement deleted successfully", null));
+
+        ann.setIsDeleted(true);
+        ann.setDeletedAt(LocalDateTime.now());
+        broadcastAnnouncementRepository.save(ann);
+
+        return ResponseEntity.ok(ApiResponse.success("Announcement archived and marked as deleted", null));
     }
 }

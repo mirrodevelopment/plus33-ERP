@@ -64,4 +64,17 @@ public interface InventoryAnalyticsService {
     List<AnalyticsHealthResponse> getHealth();
 
     void refreshAllViews();
+
+    List<java.util.Map<String, Object>> getStoreLedger(Long storeId);
+
+    List<java.util.Map<String, Object>> getStoreMonthlyTrend(Long storeId);
+
+    List<java.util.Map<String, Object>> getProductsCatalog();
+
+    void addProductStock(Long storeId, Long productId, java.math.BigDecimal quantity, String imageUrl);
+
+    void logDailyUsage(Long storeId, Long productId, java.math.BigDecimal quantity, java.time.LocalDate usageDate, String notes);
+
+    List<java.util.Map<String, Object>> getDailyUsageHistory(Long storeId);
 }
+

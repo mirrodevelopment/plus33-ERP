@@ -5,25 +5,41 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.service
  * File              : UserDetailsServiceImpl.java
- * Purpose           : Business logic service layer for Security Module operations
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: UserDetailsController
- * Related Service   : UserDetailsServiceImpl
- * Related Repository: UserRepository
- * Related Entity    : UserDetails
- * Related DTO       : N/A
- * Related Mapper    : UserDetailsMapper
- * Related DB Table  : user_detailss
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : UserDetailsController, UserDetailsServiceImplImpl
+ * Path              : src/main/java/com/plus33/erp/security/service/UserDetailsServiceImpl.java
+ * Purpose           : Loads user credentials and granted authorities from the database
+ *                     to fulfil Spring Security's authentication contract during login
+ *                     and permission-based access control across all ERP endpoints.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Business service for Security Module. Implements UserDetailsService. Encapsulates business rules, @Transactional operations, validations, and event publishing.
+ * Spring @Service implementing UserDetailsService — the mandatory contract
+ * that Spring Security's DaoAuthenticationProvider calls during login to
+ * resolve a user principal by identifier (email in this ERP).
+ *
+ * loadUserByUsername(email):
+ *   1. Looks up the User entity by email via UserRepository.
+ *      Throws UsernameNotFoundException if not found (triggers 401).
+ *   2. Builds a Set<GrantedAuthority> by flattening each assigned Role:
+ *        - Adds "ROLE_{role.code}" as a SimpleGrantedAuthority (e.g.
+ *          ROLE_storeEmployee, ROLE_nationalAdmin, ROLE_ultimateAdmin).
+ *        - Adds each Permission.code from the role's permission set
+ *          as individual GrantedAuthority entries for @PreAuthorize checks.
+ *   3. Returns a Spring Security User built from email, BCrypt password,
+ *      authority set, and the user's active flag (disabled if false).
+ *
+ * This method is called during:
+ *   a) Login flow — DaoAuthenticationProvider calls it to load and verify
+ *      credentials, then passes principal to JwtService.generateToken().
+ *   b) Token generation — UserDetails authorities are embedded as JWT claims.
+ *
+ * Does NOT handle session management (stateless architecture).
+ * Does NOT own password encoding — encoding is done in AuthController.
+ *
+ * Dependencies:
+ *   - UserRepository (security.repository) — user + roles + permissions load
+ *   - Role, Permission (security.entity) — RBAC hierarchy
  ******************************************************************************/
 package com.plus33.erp.security.service;
 

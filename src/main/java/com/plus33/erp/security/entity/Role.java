@@ -5,25 +5,34 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.entity
  * File              : Role.java
- * Purpose           : JPA Entity representing a persistent database record in Security Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: RoleController
- * Related Service   : RoleService, RoleServiceImpl
- * Related Repository: RoleRepository
- * Related Entity    : Role
- * Related DTO       : N/A
- * Related Mapper    : RoleMapper
- * Related DB Table  : roles
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : RoleRepository, RoleMapper
+ * Path              : src/main/java/com/plus33/erp/security/entity/Role.java
+ * Purpose           : JPA entity mapping the 'roles' table — defines named ERP
+ *                     roles (e.g. ultimateAdmin, nationalAdmin, storeEmployee) each
+ *                     carrying a set of granular Permission records for RBAC enforcement.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * JPA Entity mapped to 'roles'. Defines persistent domain object for Security Module with validation, relationship mappings, and lifecycle callbacks.
+ * RBAC (Role-Based Access Control) entity for PLUS33 Coffee ERP. Each User
+ * is assigned one or more Roles via the user_roles join table. Each Role
+ * grants a set of Permissions via role_permissions join table.
+ *
+ * Columns:
+ *   id          — auto-incremented primary key.
+ *   code        — unique string code identifying the role (e.g. "storeEmployee",
+ *                 "nationalAdmin", "ultimateAdmin"). Used by UserDetailsServiceImpl
+ *                 to build "ROLE_{code}" GrantedAuthority strings embedded in JWT.
+ *   name        — human-readable label (max 100 chars).
+ *   description — freeform text describing the role's organizational responsibility.
+ *   createdAt   — set on insert, not updatable.
+ *   permissions — LAZY ManyToMany to Permission via role_permissions join table.
+ *                 Permission.code strings become individual GrantedAuthority entries
+ *                 loaded by UserDetailsServiceImpl for fine-grained @PreAuthorize.
+ *
+ * Used by: UserDetailsServiceImpl (authority construction), User (assignment),
+ *          RoleRepository (read-only queries for role code lookup).
+ * Does not own business logic — pure RBAC data model.
  ******************************************************************************/
 package com.plus33.erp.security.entity;
 

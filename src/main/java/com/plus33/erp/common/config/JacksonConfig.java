@@ -5,25 +5,23 @@
  * Developer         : Sivasurya
  *
  * Module            : Common Module
- * Package           : com.plus33.erp.common.config
  * File              : JacksonConfig.java
- * Purpose           : Spring Configuration bean for Common Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: JacksonConfigController
- * Related Service   : JacksonConfigService, JacksonConfigServiceImpl
- * Related Repository: JacksonConfigRepository
- * Related Entity    : JacksonConfig
- * Related DTO       : N/A
- * Related Mapper    : JacksonConfigMapper
- * Related DB Table  : jackson_configs
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Common Module components
+ * Path              : src/main/java/com/plus33/erp/common/config/JacksonConfig.java
+ * Purpose           : Configures the Jackson ObjectMapper bean with JavaTimeModule to
+ *                     ensure proper ISO-8601 JSON serialization and deserialization of
+ *                     Java 8 date/time types (LocalDateTime, LocalDate) across all REST APIs.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Common Module within the PLUS33 Coffee ERP platform.
+ * Spring @Configuration class providing custom JSON serialization behavior.
+ * Registers JavaTimeModule with Jackson's ObjectMapper to handle JSR-310 types
+ * (such as LocalDateTime used in ApiResponse, ErrorResponse, and entities).
+ *
+ * Primary Bean:
+ *   objectMapper() — instantiates and configures a Spring-managed ObjectMapper
+ *   instance with JavaTimeModule registered. Prevents serialization errors when
+ *   converting Java 8 temporal objects to JSON format.
  ******************************************************************************/
 package com.plus33.erp.common.config;
 

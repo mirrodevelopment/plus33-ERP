@@ -7,19 +7,18 @@
  * Module            : Routing Module
  * File              : router.js
  * Path              : frontend/routing/router.js
- * Purpose           : Client-side hash-based router defining application navigation
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related API       : N/A
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : navigation/routes, store/authStore, store/permissionStore, core/logger, core/lifecycle
- * Depends On        : navigation/routes, store/authStore, store/permissionStore, core/logger, core/lifecycle
+ * Purpose           : Client-side hash-based router for the SPA frontend; manages route matching, authentication guards, permission validation, dynamic page module imports, layout shell lifecycle, and error page rendering (404, 403, 500).
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Client-side hash-based router defining application navigation. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Core client-side router component for PLUS33 Coffee ERP.
+ * Responsibilities:
+ *   - Listens to window hashchange and load events to evaluate current location.
+ *   - Automatically redirects generic #dashboard and #profile hashes to role-specific dashboard and profile page routes based on user role from authStore.
+ *   - Enforces authentication requirement (requiresAuth) and role/permission checks (permissionStore) before loading target pages.
+ *   - Destroys previous page lifecycle hooks and mounts new page component dynamically via dynamic import().
+ *   - Renders 404 Not Found, 403 Access Denied, and 500 Interface Exception error overlays.
  ******************************************************************************/
 
 import { routes, defaultRoute, loginRoute } from '../navigation/routes.js';
@@ -79,11 +78,16 @@ class Router {
     if (hash === '#profile') {
       if (authStore.isLoggedIn()) {
         const role = authStore.getRole();
-        if (role === 'store') hash = '#store-profile';
-        else if (role === 'shiftSupervisor') hash = '#supervisor-profile';
-        else if (role === 'storeEmployee') hash = '#employee-profile';
-        window.location.hash = hash;
-        return;
+        let targetProfile = null;
+        if (role === 'store' || role === 'storeAdmin') targetProfile = '#store-profile';
+        else if (role === 'shiftSupervisor' || role === 'supervisor') targetProfile = '#supervisor-profile';
+        else if (role === 'storeEmployee') targetProfile = '#employee-profile';
+        else if (role === 'regionalAdmin') targetProfile = '#regional-profile';
+        
+        if (targetProfile && targetProfile !== hash) {
+          window.location.hash = targetProfile;
+          return;
+        }
       }
     }
     logger.debug('Router', `Routing to hash: ${hash}`);

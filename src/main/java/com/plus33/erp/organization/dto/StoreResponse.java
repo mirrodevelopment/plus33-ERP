@@ -97,5 +97,14 @@ public record StoreResponse(
         Double stockValue,
 
         @Schema(description = "Store type", example = "COMPACT_CAFE")
-        String type
+        String type,
+
+        @Schema(description = "GPS Latitude", example = "48.8566")
+        java.math.BigDecimal latitude,
+
+        @Schema(description = "GPS Longitude", example = "2.3522")
+        java.math.BigDecimal longitude,
+
+        @Schema(description = "Geofence radius in meters", example = "200")
+        Integer geofenceRadiusMeters
 ) {}

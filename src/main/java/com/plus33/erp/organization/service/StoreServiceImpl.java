@@ -382,7 +382,10 @@ public class StoreServiceImpl implements StoreService {
             response.updatedAt(),
             empCount != null ? empCount : 0,
             stockValue != null ? stockValue : 0.0,
-            response.type()
+            response.type(),
+            response.latitude(),
+            response.longitude(),
+            response.geofenceRadiusMeters()
         );
     }
 

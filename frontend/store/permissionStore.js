@@ -7,19 +7,16 @@
  * Module            : Store Module
  * File              : permissionStore.js
  * Path              : frontend/store/permissionStore.js
- * Purpose           : Frontend state store managing Store Module UI state
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related API       : N/A
- * Related CSS       : theme/variables.css, theme/coffee-dark.css
- * Related HTML      : index.html
- * Imports           : authStore, core/logger
- * Depends On        : authStore, core/logger
+ * Purpose           : RBAC permission evaluator component; checks current user session permissions and roles from authStore to authorize navigation routes and UI controls.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Frontend state store managing Store Module UI state. Part of the PLUS33 Coffee ERP vanilla JS SPA with hash-based
- * routing, JWT authentication, and a premium glassmorphism design system.
+ * Frontend RBAC access evaluation component.
+ * Features:
+ *   - Evaluates permission strings via hasPermission(permission) against active user permissions list.
+ *   - Grants automatic wildcard clearance for ultimateAdmin role or '*' authority.
+ *   - Used by client-side router (router.js) and navigation menus (menus.js) to enforce route protection.
  ******************************************************************************/
 
 import { authStore } from './authStore.js';

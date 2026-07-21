@@ -5,25 +5,41 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.entity
  * File              : User.java
- * Purpose           : JPA Entity representing a persistent database record in Security Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: UserController
- * Related Service   : UserService, UserServiceImpl
- * Related Repository: UserRepository
- * Related Entity    : User
- * Related DTO       : N/A
- * Related Mapper    : UserMapper
- * Related DB Table  : users
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : UserRepository, UserMapper
+ * Path              : src/main/java/com/plus33/erp/security/entity/User.java
+ * Purpose           : JPA entity mapping the 'users' table — stores login credentials,
+ *                     display names, activation state, avatar URL, and role assignments
+ *                     for every ERP platform user across all roles.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * JPA Entity mapped to 'users'. Defines persistent domain object for Security Module with validation, relationship mappings, and lifecycle callbacks.
+ * Core identity entity for PLUS33 Coffee ERP. Every person who can log into
+ * the system has a User record. Mapped to the PostgreSQL 'users' table.
+ *
+ * Columns:
+ *   id          — auto-incremented primary key (IDENTITY strategy).
+ *   email       — unique, non-null. Used as the authentication principal
+ *                 (username) for JWT token subject and UserDetailsServiceImpl.
+ *   password    — BCrypt-encoded, non-null. Verified by PasswordEncoder in
+ *                 DaoAuthenticationProvider during login.
+ *   firstName   — non-null, max 100 chars. Shown in profile pages and
+ *                 returned by GET /api/v1/auth/me.
+ *   lastName    — nullable, max 100 chars.
+ *   active      — boolean flag controlling whether the user can authenticate.
+ *                 Mapped to UserDetails.disabled() in UserDetailsServiceImpl.
+ *   createdAt   — set on @PrePersist, not updatable.
+ *   updatedAt   — refreshed on @PreUpdate.
+ *   avatarUrl   — nullable, max 500 chars. Stores relative path to uploaded
+ *                 or default avatar image served to the frontend profile pages.
+ *   roles       — ManyToMany relationship via user_roles join table.
+ *                 Each Role contains a code and a set of Permissions. Loaded
+ *                 LAZILY. Flattened into GrantedAuthority list by
+ *                 UserDetailsServiceImpl for JWT claims and @PreAuthorize.
+ *
+ * Used by: AuthController (profile retrieval/update), UserDetailsServiceImpl
+ *          (credential loading), UserRepository (persistence operations).
+ * Does not store employee-specific payroll or HR data (see Employee entity).
  ******************************************************************************/
 package com.plus33.erp.security.entity;
 

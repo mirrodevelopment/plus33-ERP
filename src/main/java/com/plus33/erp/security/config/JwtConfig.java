@@ -5,25 +5,37 @@
  * Developer         : Sivasurya
  *
  * Module            : Security Module
- * Package           : com.plus33.erp.security.config
  * File              : JwtConfig.java
- * Purpose           : Spring Configuration bean for Security Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: JwtConfigController
- * Related Service   : JwtConfigService, JwtConfigServiceImpl
- * Related Repository: JwtConfigRepository
- * Related Entity    : JwtConfig
- * Related DTO       : N/A
- * Related Mapper    : JwtConfigMapper
- * Related DB Table  : jwt_configs
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Security Module components
+ * Path              : src/main/java/com/plus33/erp/security/config/JwtConfig.java
+ * Purpose           : Provides the JwtEncoder and JwtDecoder Spring beans backed by
+ *                     a shared HMAC-SHA256 symmetric secret key for JWT signing
+ *                     and verification throughout the ERP platform.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Security Module within the PLUS33 Coffee ERP platform.
+ * Spring @Configuration class that wires the JWT cryptographic infrastructure
+ * for PLUS33 Coffee ERP using the Nimbus JOSE library.
+ *
+ * Secret Key:
+ *   Read from the 'jwt.secret' application property (application.properties).
+ *   Converted to a SecretKeySpec with HmacSHA256 algorithm.
+ *   The same key is used for both signing (encoder) and verification (decoder),
+ *   implementing a symmetric HMAC approach.
+ *
+ * jwtEncoder():
+ *   Returns a NimbusJwtEncoder backed by ImmutableSecret<OctetSequenceKey>.
+ *   Used exclusively by JwtService.generateToken() to produce signed JWTs
+ *   after successful login.
+ *
+ * jwtDecoder():
+ *   Returns a NimbusJwtDecoder configured with the same SecretKeySpec.
+ *   Used by JwtAuthFilter.doFilterInternal() to decode and verify Bearer tokens
+ *   on every authenticated API request, and by SecurityConfig as its
+ *   OAuth2 resource server JWT decoder.
+ *
+ * Changing jwt.secret invalidates all existing tokens immediately (no revocation
+ * list). Used by: JwtService (encoding), JwtAuthFilter (decoding), SecurityConfig.
  ******************************************************************************/
 package com.plus33.erp.security.config;
 

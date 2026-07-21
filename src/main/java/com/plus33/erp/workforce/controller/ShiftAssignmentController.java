@@ -197,6 +197,20 @@ public class ShiftAssignmentController {
             return ResponseEntity.badRequest().body(ApiResponse.error("Employee not found"));
         }
 
+        Shift shift = shiftOpt.get();
+        if (shift.getMaxEmployees() != null && shift.getMaxEmployees() > 0) {
+            long existingAssignments = employeeShiftRepository.findAll().stream()
+                    .filter(es -> es.getId().getShiftId().equals(shiftId)
+                            && !es.getId().getEffectiveFrom().isAfter(endDate)
+                            && (es.getEffectiveTo() == null || !es.getEffectiveTo().isBefore(startDate)))
+                    .count();
+            if (existingAssignments >= shift.getMaxEmployees()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error(
+                        String.format("Shift '%s' has reached its maximum capacity limit of %d employees.", shift.getName(), shift.getMaxEmployees())));
+            }
+        }
+
+
         // Check for overlap — employee cannot have any shift on this day
         List<EmployeeShift> overlapping = employeeShiftRepository.findOverlapping(employeeId, startDate, endDate);
         if (!overlapping.isEmpty()) {

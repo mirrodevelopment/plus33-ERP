@@ -30,9 +30,13 @@ package com.plus33.erp.workforce.dto;
 import java.math.BigDecimal;
 
 public record PayslipResponse(
+        Long runId,
         Long employeeId,
         String employeeName,
+        String employeeCode,
         String runNumber,
+        String paidAt,
+        String status,
         BigDecimal grossPay,
         BigDecimal netPay,
         BigDecimal deductions,
@@ -46,5 +50,8 @@ public record PayslipResponse(
         String benefitSnapshot,
         String taxSnapshot,
         String employerContributionSnapshot,
-        String payrollAudit
+        String payrollAudit,
+        String bankName,
+        String bankAccountNumber,
+        String ifscNumber
 ) {}

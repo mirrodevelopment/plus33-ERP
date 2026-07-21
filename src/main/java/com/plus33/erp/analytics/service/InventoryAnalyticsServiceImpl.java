@@ -437,4 +437,109 @@ public class InventoryAnalyticsServiceImpl implements InventoryAnalyticsService 
             return defaultValue;
         }
     }
+
+    @Override
+    public List<java.util.Map<String, Object>> getStoreLedger(Long storeId) {
+      String sql = "SELECT iv.id, p.sku, p.name, pc.name AS category, iv.quantity AS qty, " +
+                   "iv.reserved_quantity AS reserved, uom.code AS uom, p.reorder_level AS \"reorderLevel\", " +
+                   "p.image_url AS \"imageUrl\" " +
+                   "FROM inventory_stock iv " +
+                   "JOIN products p ON p.id = iv.product_id " +
+                   "JOIN product_categories pc ON pc.id = p.category_id " +
+                   "JOIN units_of_measure uom ON uom.id = p.unit_id " +
+                   "WHERE iv.store_id = ? " +
+                   "ORDER BY iv.id ASC";
+      return jdbcTemplate.queryForList(sql, storeId);
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getStoreMonthlyTrend(Long storeId) {
+        String sql = "SELECT m.year_number AS year, m.month_number AS \"monthNumber\", m.month_name AS \"monthName\", m.product_category AS category, " +
+                     "COALESCE(m.total_in, 0) AS \"totalIn\", COALESCE(m.total_out, 0) AS \"totalOut\", " +
+                     "COALESCE(m.total_value, 0) AS \"totalValue\", COALESCE(m.avg_closing_stock, 0) AS \"closingStock\" " +
+                     "FROM mv_inventory_monthly m " +
+                     "JOIN dim_location dl ON dl.location_name = m.location_name AND dl.location_type = m.location_type " +
+                     "WHERE dl.location_id = ? AND dl.location_type = 'STORE' " +
+                     "ORDER BY m.year_number ASC, m.month_number ASC";
+        return jdbcTemplate.queryForList(sql, storeId);
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getProductsCatalog() {
+        String sql = "SELECT p.id, p.sku, p.name, pc.name AS category, p.image_url AS \"imageUrl\" " +
+                     "FROM products p " +
+                     "JOIN product_categories pc ON pc.id = p.category_id " +
+                     "WHERE p.active = true " +
+                     "ORDER BY p.name ASC";
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    @Override
+    @Transactional
+    public void addProductStock(Long storeId, Long productId, java.math.BigDecimal quantity, String imageUrl) {
+        // 1. Update product's image URL if provided
+        String updateProductSql = "UPDATE products SET image_url = ?, updated_at = NOW() WHERE id = ?";
+        jdbcTemplate.update(updateProductSql, imageUrl, productId);
+
+        // 2. Adjust or initialize stock if quantity is provided
+        if (quantity != null) {
+            String checkSql = "SELECT id, quantity FROM inventory_stock WHERE store_id = ? AND product_id = ?";
+            List<java.util.Map<String, Object>> rows = jdbcTemplate.queryForList(checkSql, storeId, productId);
+            
+            if (!rows.isEmpty()) {
+                Long id = ((Number) rows.get(0).get("id")).longValue();
+                java.math.BigDecimal currentQty = (java.math.BigDecimal) rows.get(0).get("quantity");
+                java.math.BigDecimal newQty = (currentQty != null ? currentQty : java.math.BigDecimal.ZERO).add(quantity);
+                
+                String updateSql = "UPDATE inventory_stock SET quantity = ?, reserved_quantity = 0.00, version = version + 1 WHERE id = ?";
+                jdbcTemplate.update(updateSql, newQty, id);
+            } else {
+                String insertSql = "INSERT INTO inventory_stock (store_id, product_id, quantity, reserved_quantity, version) VALUES (?, ?, ?, 0.00, 1)";
+                jdbcTemplate.update(insertSql, storeId, productId, quantity);
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void logDailyUsage(Long storeId, Long productId, java.math.BigDecimal quantity, java.time.LocalDate usageDate, String notes) {
+        if (quantity == null || quantity.compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Usage quantity must be a non-negative number.");
+        }
+
+        // 1. Deduct quantity from inventory_stock table
+        String checkSql = "SELECT id, quantity FROM inventory_stock WHERE store_id = ? AND product_id = ?";
+        List<java.util.Map<String, Object>> rows = jdbcTemplate.queryForList(checkSql, storeId, productId);
+        
+        if (!rows.isEmpty()) {
+            Long id = ((Number) rows.get(0).get("id")).longValue();
+            java.math.BigDecimal currentQty = (java.math.BigDecimal) rows.get(0).get("quantity");
+            java.math.BigDecimal newQty = (currentQty != null ? currentQty : java.math.BigDecimal.ZERO).subtract(quantity);
+            
+            String updateSql = "UPDATE inventory_stock SET quantity = ?, version = version + 1 WHERE id = ?";
+            jdbcTemplate.update(updateSql, newQty, id);
+        } else {
+            // If no stock record exists, initialize stock at negative logged usage quantity
+            java.math.BigDecimal newQty = java.math.BigDecimal.ZERO.subtract(quantity);
+            String insertSql = "INSERT INTO inventory_stock (store_id, product_id, quantity, reserved_quantity, version) VALUES (?, ?, ?, 0.00, 1)";
+            jdbcTemplate.update(insertSql, storeId, productId, newQty);
+        }
+
+        // 2. Insert record into daily_inventory_usages log table
+        String insertLogSql = "INSERT INTO daily_inventory_usages (store_id, product_id, quantity, usage_date, notes) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(insertLogSql, storeId, productId, quantity, usageDate, notes);
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getDailyUsageHistory(Long storeId) {
+        String sql = "SELECT du.id, du.product_id AS \"productId\", p.sku AS \"sku\", p.name AS \"name\", " +
+                     "p.image_url AS \"imageUrl\", c.name AS \"category\", du.quantity AS \"qty\", " +
+                     "du.usage_date AS \"usageDate\", du.notes AS \"notes\" " +
+                     "FROM daily_inventory_usages du " +
+                     "JOIN products p ON du.product_id = p.id " +
+                     "LEFT JOIN product_categories c ON p.category_id = c.id " +
+                     "WHERE du.store_id = ? " +
+                     "ORDER BY du.usage_date DESC, du.id DESC";
+        return jdbcTemplate.queryForList(sql, storeId);
+    }
 }

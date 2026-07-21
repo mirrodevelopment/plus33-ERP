@@ -157,13 +157,23 @@
         <div class="duty-shift-details-box">
           <div class="detail-block">
             <span class="detail-label">Shift Schedule</span>
-            <div class="detail-title">Morning Shift</div>
-            <div class="detail-subtitle">08:00 AM - 04:00 PM</div>
+            <div class="detail-title" id="timecard-shift-name">Morning Shift</div>
+            <div class="detail-subtitle" id="timecard-shift-hours">08:00 AM - 04:00 PM</div>
           </div>
-          <div class="detail-block">
+          <div class="detail-block" id="shift-break-block">
             <span class="detail-label">Next Shift Break</span>
-            <div class="detail-title color-primary">12:00 PM - 12:30 PM</div>
-            <div class="detail-subtitle">Lunch Break (Paid)</div>
+            <div class="detail-title color-primary" id="timecard-break-name">12:00 PM - 12:30 PM</div>
+            <div class="detail-subtitle" id="timecard-break-hours">Lunch Break (Paid)</div>
+          </div>
+          <div class="detail-block" id="shift-elapsed-block" style="display:none;">
+            <span class="detail-label">Time Logged In</span>
+            <div class="detail-title" style="color: var(--status-success, #82a37d); font-weight: 800;" id="shift-elapsed-value">00:00:00</div>
+            <div class="detail-subtitle" id="shift-elapsed-label">worked today</div>
+          </div>
+          <div class="detail-block" id="shift-countdown-block" style="display:none;">
+            <span class="detail-label">Time Remaining</span>
+            <div class="detail-title" id="shift-countdown-value">--:--:--</div>
+            <div class="detail-subtitle" id="shift-countdown-label">until shift ends</div>
           </div>
         </div>
 
@@ -173,6 +183,88 @@
           </button>
           <button class="btn btn-danger btn-clock" id="btn-clock-out" type="button">
             <i data-lucide="square" aria-hidden="true"></i> Clock Out
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== AWAY PASS CARD ===== -->
+      <div class="card glass away-pass-card" id="away-pass-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Away Pass Manager</h3>
+          <i data-lucide="door-open" class="card-split-icon" aria-hidden="true"></i>
+        </div>
+        
+        <!-- Case 1: Not clocked in -->
+        <div id="away-pass-not-clocked">
+          <p class="welcome-subtitle" style="font-size: 0.8rem; margin: 0; color: var(--text-muted);">
+            You must be clocked in to request or use an away pass.
+          </p>
+        </div>
+
+        <!-- Case 2: Clocked in - show request form or status -->
+        <div id="away-pass-container" style="display: none;">
+          <!-- Active Pass Info / Timer -->
+          <div id="away-pass-active-info" class="duty-shift-details-box" style="display: none; margin-bottom: var(--spacing-sm);">
+            <div class="detail-block">
+              <span class="detail-label">Away Status</span>
+              <div class="detail-title" id="away-pass-status-text" style="font-weight: 800; color: var(--accent-primary);">Pending</div>
+              <div class="detail-subtitle" id="away-pass-status-detail">Approved until --:--</div>
+            </div>
+            <div class="detail-block" id="away-pass-timer-block" style="display: none;">
+              <span class="detail-label">Time Remaining</span>
+              <div class="detail-title" id="away-pass-timer-value" style="color: var(--accent-warning); font-weight: 800;">--:--</div>
+              <div class="detail-subtitle">before auto clock-out</div>
+            </div>
+          </div>
+
+          <!-- Request Form (visible when no active/pending request) -->
+          <div id="away-pass-request-form" style="display: none;">
+            <div class="form-group" style="margin-bottom: var(--spacing-sm);">
+              <label for="away-pass-reason-select" class="form-label">Reason for Leaving Geofence</label>
+              <select id="away-pass-reason-select" class="form-select">
+                <option value="Lunch break" selected>Lunch break</option>
+                <option value="Restroom break">Restroom break</option>
+                <option value="Trash disposal">Trash disposal</option>
+                <option value="Bank/Post Office errand">Bank/Post Office errand</option>
+                <option value="custom">Custom reason...</option>
+              </select>
+            </div>
+            
+            <div class="form-group" id="away-pass-custom-reason-group" style="display: none; margin-bottom: var(--spacing-sm);">
+              <label for="away-pass-reason" class="form-label">Custom Reason Details</label>
+              <input type="text" id="away-pass-reason" class="form-input" placeholder="Type your custom reason here...">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: var(--spacing-sm);">
+              <label for="away-pass-start-time-select" class="form-label">Start Time Selection</label>
+              <select id="away-pass-start-time-select" class="form-select">
+                <option value="now" selected>Now</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: var(--spacing-sm);">
+              <label for="away-pass-duration-select" class="form-label">Estimated Duration Needed</label>
+              <select id="away-pass-duration-select" class="form-select">
+                <option value="15">15 minutes</option>
+                <option value="30" selected>30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60">1 hour (60 mins)</option>
+                <option value="120">2 hours (120 mins)</option>
+              </select>
+            </div>
+            
+            <button class="btn btn-primary" id="btn-submit-away-pass" type="button" style="width: 100%;">
+              Request Away Pass
+            </button>
+          </div>
+
+          <!-- Extension Button (visible when approved or extension-requested) -->
+          <button class="btn btn-warning" id="btn-extend-away-pass" type="button" style="display: none; width: 100%;">
+            Request Time Extension
+          </button>
+          <!-- Return / End Pass Button -->
+          <button class="btn btn-success" id="btn-return-away-pass" type="button" style="display: none; width: 100%; margin-top: 8px;">
+            Return / End Away Pass
           </button>
         </div>
       </div>

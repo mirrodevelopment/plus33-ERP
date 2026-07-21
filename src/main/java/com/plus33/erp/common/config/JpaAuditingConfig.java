@@ -5,25 +5,21 @@
  * Developer         : Sivasurya
  *
  * Module            : Common Module
- * Package           : com.plus33.erp.common.config
  * File              : JpaAuditingConfig.java
- * Purpose           : Spring Configuration bean for Common Module
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: JpaAuditingConfigController
- * Related Service   : JpaAuditingConfigService, JpaAuditingConfigServiceImpl
- * Related Repository: JpaAuditingConfigRepository
- * Related Entity    : JpaAuditingConfig
- * Related DTO       : N/A
- * Related Mapper    : JpaAuditingConfigMapper
- * Related DB Table  : jpa_auditing_configs
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Common Module components
+ * Path              : src/main/java/com/plus33/erp/common/config/JpaAuditingConfig.java
+ * Purpose           : Enables Spring Data JPA entity auditing and wires the custom
+ *                     AuditorAware bean (auditorProvider) to track entity creation and modification.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Common Module within the PLUS33 Coffee ERP platform.
+ * Spring @Configuration class that enables automatic audit metadata population
+ * across all JPA entities extending AuditableEntity.
+ *
+ * Configuration:
+ *   @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
+ *   Tells Spring Data JPA to use the SecurityAuditorAware bean named "auditorProvider"
+ *   to resolve the current auditor ID for @CreatedBy and @LastModifiedBy annotations.
  ******************************************************************************/
 package com.plus33.erp.common.config;
 

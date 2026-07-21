@@ -10,6 +10,7 @@ import com.plus33.erp.workforce.entity.CountryWorkPolicy;
 import com.plus33.erp.workforce.entity.Employee;
 import com.plus33.erp.workforce.repository.EmployeeRepository;
 import com.plus33.erp.workforce.service.AttendanceService;
+import com.plus33.erp.workforce.service.AttendanceServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,14 +26,17 @@ import java.util.Map;
 public class AttendanceController {
 
     private final AttendanceService attendanceService;
+    private final AttendanceServiceImpl attendanceServiceImpl;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
 
     public AttendanceController(
             AttendanceService attendanceService,
+            AttendanceServiceImpl attendanceServiceImpl,
             EmployeeRepository employeeRepository,
             UserRepository userRepository) {
         this.attendanceService = attendanceService;
+        this.attendanceServiceImpl = attendanceServiceImpl;
         this.employeeRepository = employeeRepository;
         this.userRepository = userRepository;
     }
@@ -190,9 +194,35 @@ public class AttendanceController {
 
     @GetMapping("/api/v1/country-work-policy")
     public ResponseEntity<ApiResponse<CountryWorkPolicy>> getCountryWorkPolicy(
-            @RequestParam(value = "countryCode", defaultValue = "FR") String countryCode) {
+            @RequestParam(value = "countryCode", required = false) String countryCode) {
         CountryWorkPolicy p = attendanceService.getCountryWorkPolicy(countryCode);
         return ResponseEntity.ok(ApiResponse.success(p));
+    }
+
+    /**
+     * Called by the frontend every 5 minutes while the employee is clocked in.
+     * Handles geofence monitoring, away pass checking, auto clock-out, and grace period detection.
+     *
+     * <p>Body: {@code { "gps": "lat,lng", "networkRestored": true }}</p>
+     * <ul>
+     *   <li>{@code networkRestored=true} — sent after reconnection; the backend checks current location only,
+     *       no penalty applied for offline gap.</li>
+     * </ul>
+     *
+     * <p>Response {@code action} values: OK | WARNING | AWAY_PASS_ACTIVE | IN_GRACE_PERIOD | AUTO_CLOCKED_OUT | NOT_CLOCKED_IN</p>
+     */
+    @PostMapping("/api/v1/attendance/ping-location")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> pingLocation(
+            @RequestBody(required = false) Map<String, Object> body,
+            Principal principal, HttpServletRequest request) {
+        Employee employee = resolveEmployee(principal);
+        String gps = body != null && body.get("gps") != null ? body.get("gps").toString() : null;
+        boolean networkRestored = body != null && Boolean.TRUE.equals(body.get("networkRestored"));
+        String ip = request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+
+        Map<String, Object> result = attendanceServiceImpl.pingLocation(employee, gps, networkRestored, ip, userAgent);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     private Employee resolveEmployee(Principal principal) {

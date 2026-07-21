@@ -5,25 +5,36 @@
  * Developer         : Sivasurya
  *
  * Module            : Common Module
- * Package           : com.plus33.erp.common.audit
  * File              : SecurityAuditorAware.java
- * Purpose           : Component of Common Module within the PLUS33 Coffee ERP platform
- * Version           : 0.0.1-SNAPSHOT
- *
- * Related Controller: SecurityAuditorAwareController
- * Related Service   : SecurityAuditorAwareService, SecurityAuditorAwareServiceImpl
- * Related Repository: SecurityAuditorAwareRepository
- * Related Entity    : SecurityAuditorAware
- * Related DTO       : N/A
- * Related Mapper    : SecurityAuditorAwareMapper
- * Related DB Table  : security_auditor_awares
- * Related REST APIs : N/A
- * Depends On        : None
- * Used By           : Common Module components
+ * Path              : src/main/java/com/plus33/erp/common/audit/SecurityAuditorAware.java
+ * Purpose           : Supplies the currently authenticated user's ID to Spring Data JPA
+ *                     auditing so that createdBy and updatedBy fields in AuditableEntity
+ *                     subclasses are automatically populated on every persist/merge.
+ * Version           : 1.0.0
  *
  * Description
  * ---------------------------------------------------------------------------
- * Component of Common Module within the PLUS33 Coffee ERP platform.
+ * Spring @Component implementing AuditorAware<Long> — the hook Spring Data JPA
+ * calls during @CreatedBy and @LastModifiedBy field population for entities
+ * that extend AuditableEntity.
+ *
+ * getCurrentAuditor():
+ *   1. Reads the current Authentication from SecurityContextHolder.
+ *   2. Returns Optional.empty() if authentication is null or not authenticated
+ *      (e.g. system-triggered background jobs or anonymous requests).
+ *   3. If the principal is a String, attempts to parse it as Long user ID.
+ *      Returns Optional.empty() on NumberFormatException (e.g. email principals
+ *      that are not numeric IDs).
+ *   4. Returns Optional.empty() for any non-String principal type.
+ *
+ * Registration:
+ *   The bean is named "auditorProvider" and referenced by @EnableJpaAuditing
+ *   in JpaAuditingConfig via auditorAwareRef = "auditorProvider".
+ *
+ * Note: In the current implementation, the JWT principal is the user's email
+ * string (not a numeric ID), so getCurrentAuditor() typically returns
+ * Optional.empty() unless the email string happens to be numeric. The
+ * createdBy/updatedBy fields may remain null for most operations.
  ******************************************************************************/
 package com.plus33.erp.common.audit;
 

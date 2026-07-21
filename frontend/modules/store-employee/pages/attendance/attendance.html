@@ -38,47 +38,47 @@
   <!-- ===== 4 KPI STATS ROW ===== -->
   <div class="kpi-grid-row" role="region" aria-label="Attendance monthly metrics">
     
-    <!-- KPI 1: Hours Logged -->
-    <div class="kpi-block-card">
-      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold">
-        <i data-lucide="clock" aria-hidden="true"></i>
-      </div>
-      <div class="kpi-meta-details">
-        <div class="kpi-value" id="kpi-logged-hours">—</div>
-        <div class="kpi-label">Hours Logged (Month)</div>
-      </div>
-    </div>
-
-    <!-- KPI 2: Shifts Attended -->
+    <!-- KPI 1: Worked Days -->
     <div class="kpi-block-card">
       <div class="kpi-icon-wrapper kpi-icon-wrapper--blue">
         <i data-lucide="user-check" aria-hidden="true"></i>
       </div>
       <div class="kpi-meta-details">
-        <div class="kpi-value" id="kpi-shifts-attended">—</div>
-        <div class="kpi-label">Shifts Attended</div>
+        <div class="kpi-value" id="kpi-worked-days">—</div>
+        <div class="kpi-label">Total Worked Days</div>
       </div>
     </div>
 
-    <!-- KPI 3: Attendance Rate -->
+    <!-- KPI 2: Worked Hours -->
+    <div class="kpi-block-card">
+      <div class="kpi-icon-wrapper kpi-icon-wrapper--gold">
+        <i data-lucide="clock" aria-hidden="true"></i>
+      </div>
+      <div class="kpi-meta-details">
+        <div class="kpi-value" id="kpi-worked-hours">—</div>
+        <div class="kpi-label">Total Worked Hours</div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Casual Leave Left -->
     <div class="kpi-block-card">
       <div class="kpi-icon-wrapper kpi-icon-wrapper--green">
-        <i data-lucide="activity" aria-hidden="true"></i>
+        <i data-lucide="umbrella" aria-hidden="true"></i>
       </div>
       <div class="kpi-meta-details">
-        <div class="kpi-value" id="kpi-attendance-rate">—</div>
-        <div class="kpi-label">Attendance Rate</div>
+        <div class="kpi-value" id="kpi-casual-leave-left">—</div>
+        <div class="kpi-label">Casual Leave Left</div>
       </div>
     </div>
 
-    <!-- KPI 4: Late Arrivals -->
+    <!-- KPI 4: Casual Leave Used -->
     <div class="kpi-block-card">
       <div class="kpi-icon-wrapper kpi-icon-wrapper--red">
-        <i data-lucide="alert-circle" aria-hidden="true"></i>
+        <i data-lucide="umbrella" aria-hidden="true"></i>
       </div>
       <div class="kpi-meta-details">
-        <div class="kpi-value color-danger" id="kpi-late-arrivals">—</div>
-        <div class="kpi-label">Late Arrivals Logged</div>
+        <div class="kpi-value" id="kpi-casual-leave-used">—</div>
+        <div class="kpi-label">Casual Leave Used</div>
       </div>
     </div>
 
@@ -122,6 +122,41 @@
           </button>
           <button class="btn btn-punch-out" id="btn-att-clock-out" type="button">
             <i data-lucide="square" aria-hidden="true"></i> Clock Out
+          </button>
+        </div>
+      </div>
+
+      <!-- Calendar Card -->
+      <div class="card glass calendar-card">
+        <div class="card-header-split">
+          <h3 class="card-split-title">Attendance History Grid</h3>
+          <div class="calendar-nav-controls" id="calendar-nav-controls" style="display: none;">
+            <button id="btn-calendar-prev" class="btn-calendar-nav" type="button"><i data-lucide="chevron-left"></i></button>
+            <span id="calendar-month-year" class="calendar-month-year-label">—</span>
+            <button id="btn-calendar-next" class="btn-calendar-nav" type="button"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="calendar-grid-wrapper">
+          <div class="calendar-day-headers">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+          <div id="attendance-calendar-grid" class="calendar-days-grid">
+            <!-- Populated dynamically by JS -->
+          </div>
+        </div>
+
+        <div class="calendar-footer-row" style="display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: var(--spacing-sm); margin-top: var(--spacing-xs);">
+          <div class="calendar-legend" style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm); font-size: 0.65rem; font-weight: 600; color: var(--text-muted);">
+            <div class="legend-item" style="display: flex; align-items: center; gap: 4px;"><span class="legend-dot status-present" style="width: 8px; height: 8px; border-radius: 50%; background: var(--status-success, #82a37d);"></span> Present</div>
+            <div class="legend-item" style="display: flex; align-items: center; gap: 4px;"><span class="legend-dot status-absent" style="width: 8px; height: 8px; border-radius: 50%; background: var(--status-danger, #ff6b6b);"></span> Absent</div>
+            <div class="legend-item" style="display: flex; align-items: center; gap: 4px;"><span class="legend-dot status-leave" style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span> Leave</div>
+            <div class="legend-item" style="display: flex; align-items: center; gap: 4px;"><span class="legend-dot status-half-day-legend" style="width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--status-success, #82a37d) 50%, #3b82f6 50%);"></span> Half Day</div>
+            <div class="legend-item" style="display: flex; align-items: center; gap: 4px;"><span class="legend-dot status-weekly-off" style="width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.3);"></span> Day Off</div>
+            <div class="legend-item" style="display: flex; align-items: center; gap: 4px;"><span class="legend-dot status-holiday" style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-primary, #c9a46a);"></span> Holiday</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btn-toggle-calendar" type="button" style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 0.72rem; padding: 6px 12px; border-radius: var(--radius-sm);">
+            <i data-lucide="chevrons-down" style="width: 14px; height: 14px;"></i> Expand Monthly View
           </button>
         </div>
       </div>
@@ -196,6 +231,65 @@
     </div>
 
   </div>
+
+  <!-- ===== ATTENDANCE POLICY BANNER ===== -->
+  <div class="policy-banner-wrapper" id="btn-open-policy">
+    <div class="policy-banner-left">
+      <div class="policy-icon-box">
+        <i data-lucide="book-open"></i>
+      </div>
+      <div class="policy-text-details">
+        <h4 class="policy-title">Attendance Policy</h4>
+        <span class="policy-subtitle">View leave rules, guidelines, clock-in rules & discrepancy correction workflows</span>
+      </div>
+    </div>
+    <i data-lucide="chevron-right" class="policy-chevron"></i>
+  </div>
+
+<!-- ===== POLICY MODAL ===== -->
+<div class="modal-overlay" id="policy-modal" style="display: none;" role="dialog" aria-modal="true">
+  <div class="modal-card glass">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <i data-lucide="book-open" class="modal-title-icon"></i>
+        <h3 class="modal-title">Attendance & Timecard Rules</h3>
+      </div>
+      <button class="modal-close-btn" id="btn-close-policy-modal" type="button">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body policy-modal-content">
+      <section class="policy-section">
+        <h4 class="section-title"><span class="section-badge badge-blue">1</span> Shift Clocking Rules</h4>
+        <ul class="policy-list">
+          <li><strong>Punctuality</strong>: Baristas should clock in within a <span id="policy-grace-period">—</span> minute grace period prior to their schedule. Repeated late arrivals are automatically flagged.</li>
+          <li><strong>Multiple Clock-ins</strong>: If you need to leave the workspace and return, you can clock out and clock back in. The system will record the away time as a break, keeping your total worked minutes correct.</li>
+        </ul>
+      </section>
+
+      <section class="policy-section">
+        <h4 class="section-title"><span class="section-badge badge-gold">2</span> Work Hours & Overtime Rules</h4>
+        <ul class="policy-list">
+          <li><strong>Weekly Required Hours</strong>: <span id="policy-required-hours">—</span> hours/week.</li>
+          <li><strong>Overtime Threshold</strong>: Starts after <span id="policy-ot-threshold">—</span> hours/week.</li>
+          <li><strong>Overtime Pay Rate</strong>: Overtime hours are compensated at <span id="policy-ot-rate">—</span>x base hourly rate.</li>
+          <li><strong>Night Shift Premium</strong>: compensated at <span id="policy-night-rate">—</span>x base hourly rate for hours worked between <span id="policy-night-start">—</span> and <span id="policy-night-end">—</span>.</li>
+          <li><strong>Holiday Premium</strong>: public holidays are compensated at <span id="policy-holiday-rate">—</span>x base hourly rate.</li>
+        </ul>
+      </section>
+
+      <section class="policy-section">
+        <h4 class="section-title"><span class="section-badge badge-green">3</span> Discrepancy Corrections</h4>
+        <ul class="policy-list">
+          <li><strong>Submissions</strong>: If you forget to punch in or out, file a correction request immediately using the form on the right.</li>
+          <li><strong>Flexible Time Parser</strong>: You can type times in 24-hour format (e.g. <code>16:30</code>) or 12-hour format with AM/PM (e.g. <code>04:30 PM</code>).</li>
+          <li><strong>Approval</strong>: Submitted corrections remain <code>PENDING</code> until approved by a Store Manager.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
 
 </div>
 
