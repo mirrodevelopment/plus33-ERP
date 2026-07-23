@@ -1230,7 +1230,7 @@
 
 .approvals-hub-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-lg, 1.5rem);
   margin-top: 0.5rem;
 }

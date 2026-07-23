@@ -184,6 +184,22 @@
           <button class="btn btn-danger btn-clock" id="btn-clock-out" type="button">
             <i data-lucide="square" aria-hidden="true"></i> Clock Out
           </button>
+          <button class="btn btn-warning btn-clock" id="btn-request-overtime" type="button" style="display: none;">
+            <i data-lucide="plus" aria-hidden="true"></i> Request Overtime
+          </button>
+        </div>
+
+        <!-- Live Location Widget -->
+        <div class="live-location-widget" style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.08);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span class="detail-label" style="margin:0;">Live Location Status</span>
+            <button type="button" class="btn btn-ghost" id="btn-fetch-live-location" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">
+              <span>🔄 Fetch Coordinates</span>
+            </button>
+          </div>
+          <div id="live-location-display" style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+            No coordinates fetched. Click the button to check GPS signal.
+          </div>
         </div>
       </div>
 

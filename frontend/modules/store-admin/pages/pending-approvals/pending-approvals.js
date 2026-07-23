@@ -590,6 +590,8 @@ export default class StoreAdminPendingApprovals {
       if (item.rawId) {
         if (item.category === 'LEAVE') {
           await apiClient.put(`/leaves/${item.rawId}/approve`, { status: 'APPROVED' });
+        } else if (item.category === 'OVERTIME') {
+          await apiClient.put(`/api/v1/overtime-requests/${item.rawId}/approve`, {});
         }
       }
     } catch (e) {
@@ -647,6 +649,8 @@ export default class StoreAdminPendingApprovals {
       if (item.rawId) {
         if (item.category === 'LEAVE') {
           await apiClient.put(`/leaves/${item.rawId}/reject`, { rejectionReason: reason });
+        } else if (item.category === 'OVERTIME') {
+          await apiClient.put(`/api/v1/overtime-requests/${item.rawId}/deny`, {});
         }
       }
     } catch (e) {

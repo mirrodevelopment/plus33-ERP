@@ -427,11 +427,29 @@ public class AttendanceServiceImpl implements AttendanceService {
     public Attendance checkIn(Employee employee, String gps, String device, String ip, String userAgent) {
         LocalDate today = LocalDate.now();
 
-        // ── Guard 1: Shift must be explicitly allocated for today ──────────────
+        // ── Guard 1: Resolve or auto-assign shift for today ──────────────────
         Optional<EmployeeShift> shiftOpt = employeeShiftRepository.findActiveShiftForEmployeeOnDate(employee.getId(), today);
         if (shiftOpt.isEmpty()) {
-            // Use structured error code so the frontend can show the "Rest Day" popup card
-            throw new BusinessException("NO_SHIFT_TODAY: You have no shift scheduled for today. Contact your supervisor to request overtime.");
+            Shift defaultShift = shiftRepository.findByCode("SHIFT_MORN")
+                    .orElseGet(() -> {
+                        Shift morn = new Shift();
+                        morn.setCode("SHIFT_MORN");
+                        morn.setName("Morning Shift");
+                        morn.setCompany(employee.getCompany());
+                        morn.setStartTime(LocalTime.of(6, 0));
+                        morn.setEndTime(LocalTime.of(14, 0));
+                        morn.setBreakMinutes(30);
+                        morn.setOvernight(false);
+                        morn.setActive(true);
+                        morn.setCreatedAt(LocalDateTime.now());
+                        morn.setUpdatedAt(LocalDateTime.now());
+                        return shiftRepository.save(morn);
+                    });
+
+            EmployeeShift.EmployeeShiftId shiftId = new EmployeeShift.EmployeeShiftId(employee.getId(), defaultShift.getId(), today);
+            EmployeeShift es = new EmployeeShift(shiftId, employee, defaultShift, today);
+            employeeShiftRepository.save(es);
+            shiftOpt = Optional.of(es);
         }
 
         // ── Guard 2: Employee must be within store's geofence radius ───────────

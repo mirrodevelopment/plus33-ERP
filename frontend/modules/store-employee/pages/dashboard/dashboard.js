@@ -263,26 +263,60 @@ export default class StoreEmployeeDashboard {
     // Disable buttons according to clocked in state
     const clockInBtn = container.querySelector('#btn-clock-in');
     const clockOutBtn = container.querySelector('#btn-clock-out');
+    const requestOtBtn = container.querySelector('#btn-request-overtime');
+
+    // Clock In and Clock Out buttons are always visible and interactive
     if (clockInBtn) {
+      clockInBtn.style.display = 'inline-flex';
       clockInBtn.disabled = this.state.clockedIn;
       clockInBtn.style.opacity = this.state.clockedIn ? '0.4' : '1';
       clockInBtn.style.cursor = this.state.clockedIn ? 'not-allowed' : 'pointer';
     }
     if (clockOutBtn) {
+      clockOutBtn.style.display = 'inline-flex';
       clockOutBtn.disabled = !this.state.clockedIn;
       clockOutBtn.style.opacity = !this.state.clockedIn ? '0.4' : '1';
       clockOutBtn.style.cursor = !this.state.clockedIn ? 'not-allowed' : 'pointer';
+    }
+
+    if (this.state.shiftScheduled) {
+      if (requestOtBtn) {
+        requestOtBtn.style.display = 'none';
+      }
+    } else {
+      if (requestOtBtn) {
+        requestOtBtn.style.display = 'inline-flex';
+        if (this.state.todayPendingOt) {
+          requestOtBtn.disabled = true;
+          requestOtBtn.style.opacity = '0.5';
+          requestOtBtn.style.cursor = 'not-allowed';
+          requestOtBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin" aria-hidden="true"></i> Request Pending...';
+        } else {
+          requestOtBtn.disabled = false;
+          requestOtBtn.style.opacity = '1';
+          requestOtBtn.style.cursor = 'pointer';
+          requestOtBtn.innerHTML = '<i data-lucide="plus" aria-hidden="true"></i> Request Overtime';
+        }
+      }
     }
 
     // Render today's shift details on the timecard
     const timecardShiftName = container.querySelector('#timecard-shift-name');
     const timecardShiftHours = container.querySelector('#timecard-shift-hours');
     if (timecardShiftName) {
-      timecardShiftName.textContent = this.state.shiftName || 'Day Off';
+      if (this.state.shiftScheduled) {
+        timecardShiftName.textContent = this.state.shiftName || 'Day Off';
+      } else if (this.state.todayPendingOt) {
+        timecardShiftName.textContent = 'Overtime Pending';
+      } else {
+        timecardShiftName.textContent = 'Day Off';
+      }
     }
     if (timecardShiftHours) {
       if (this.state.shiftScheduled && this.state.shiftStartTime && this.state.shiftEndTime) {
         timecardShiftHours.textContent = `${this.formatTime12(this.state.shiftStartTime)} - ${this.formatTime12(this.state.shiftEndTime)}`;
+      } else if (this.state.todayPendingOt) {
+        timecardShiftHours.textContent = 'Waiting for Store Admin Approval';
       } else {
         timecardShiftHours.textContent = 'Rest Day';
       }
@@ -432,7 +466,142 @@ export default class StoreEmployeeDashboard {
         }
       };
       clockInBtn.addEventListener('click', handleClockIn);
-      lifecycle.onCleanup(() => clockInBtn.removeEventListener('click', handleClockIn));
+    }
+
+    const btnFetchLocation = container.querySelector('#btn-fetch-live-location');
+    if (btnFetchLocation) {
+      const handleFetchLocation = () => {
+        btnFetchLocation.disabled = true;
+        const textSpan = btnFetchLocation.querySelector('span');
+        if (textSpan) textSpan.textContent = '🔄 Fetching...';
+
+        const display = container.querySelector('#live-location-display');
+        if (display) {
+          display.style.color = 'var(--text-muted)';
+          display.textContent = 'Contacting GPS hardware...';
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const coords = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+            if (display) {
+              display.style.color = '#34d399'; // green success
+              display.textContent = `📍 GPS Active: ${coords}`;
+            }
+            if (textSpan) textSpan.textContent = 'Fetch Coordinates';
+            btnFetchLocation.disabled = false;
+            notificationStore.success('Successfully retrieved fresh live GPS coordinates.');
+          },
+          (err) => {
+            let msg = 'Failed to get location.';
+            if (err.code === 1) msg = 'Location permission denied. Please allow GPS access.';
+            else if (err.code === 2) msg = 'Position unavailable. Check your device GPS signal.';
+            else if (err.code === 3) msg = 'Timeout fetching location.';
+
+            if (display) {
+              display.style.color = '#f87171'; // red warning
+              display.textContent = `⚠️ Error: ${msg}`;
+            }
+            if (textSpan) textSpan.textContent = 'Fetch Coordinates';
+            btnFetchLocation.disabled = false;
+            notificationStore.danger(msg);
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      };
+      btnFetchLocation.addEventListener('click', handleFetchLocation);
+      lifecycle.onCleanup(() => btnFetchLocation.removeEventListener('click', handleFetchLocation));
+    }
+
+    const requestOtBtn = container.querySelector('#btn-request-overtime');
+    if (requestOtBtn) {
+      const handleRequestOt = async () => {
+        requestOtBtn.disabled = true;
+        try {
+          const res = await apiClient.get('/api/v1/shifts');
+          if (!res?.success || !Array.isArray(res.data)) {
+            notificationStore.danger('Failed to retrieve shift types. Please try again.');
+            requestOtBtn.disabled = false;
+            return;
+          }
+          const activeShifts = res.data.filter(s => s.active);
+          if (activeShifts.length === 0) {
+            notificationStore.danger('No active shifts configured in system.');
+            requestOtBtn.disabled = false;
+            return;
+          }
+
+          // Build modal content
+          const modalHtml = `
+            <div class="modal-form-wrapper" style="padding: 24px; color: var(--text-primary);">
+              <h3 class="modal-title" style="margin-bottom: 8px; font-weight: 800;">Request Rest Day Overtime Shift</h3>
+              <p class="modal-subtitle" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+                Select the shift you want to work today and provide a reason for the Store Admin.
+              </p>
+              <form id="form-ot-request">
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label class="form-label" style="display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Shift Type</label>
+                  <select id="ot-shift-select" class="form-input" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff;" required>
+                    ${activeShifts.map(s => `<option value="${s.id}">${s.name} (${s.startTime.substring(0, 5)} - ${s.endTime.substring(0, 5)})</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                  <label class="form-label" style="display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Reason for Request</label>
+                  <textarea id="ot-reason-input" class="form-textarea" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; resize: none;" placeholder="Provide a detailed reason..." required></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                  <button type="button" class="btn btn-secondary btn-close-modal" style="padding: 10px 16px; border-radius: 8px; font-size: 0.85rem;">Cancel</button>
+                  <button type="submit" class="btn btn-warning" style="padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; background: var(--accent-primary); border: none; color: #000;">Submit Request</button>
+                </div>
+              </form>
+            </div>
+          `;
+
+          showModal(modalHtml);
+
+          // Form submit listener
+          const form = modalContent.querySelector('#form-ot-request');
+          if (form) {
+            form.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const submitBtn = form.querySelector('button[type="submit"]');
+              if (submitBtn) submitBtn.disabled = true;
+
+              const shiftId = parseInt(form.querySelector('#ot-shift-select').value, 10);
+              const reason = form.querySelector('#ot-reason-input').value.trim();
+              const todayStr = new Date().toLocaleDateString('sv').substring(0, 10);
+
+              try {
+                const submitRes = await apiClient.post('/api/v1/overtime-requests', {
+                  requestedDate: todayStr,
+                  shiftId,
+                  reason
+                });
+
+                if (submitRes?.success) {
+                  notificationStore.success('Overtime request submitted for store admin approval.');
+                  hideModal();
+                  await this._loadAttendanceData(container);
+                  this._render(container);
+                  this._bindEvents(container, lifecycle);
+                } else {
+                  notificationStore.danger(submitRes?.message || 'Failed to submit overtime request.');
+                  if (submitBtn) submitBtn.disabled = false;
+                }
+              } catch (submitErr) {
+                notificationStore.danger('Error submitting overtime request: ' + submitErr.message);
+                if (submitBtn) submitBtn.disabled = false;
+              }
+            });
+          }
+        } catch (err) {
+          notificationStore.danger('Error preparing overtime request form: ' + err.message);
+        } finally {
+          requestOtBtn.disabled = false;
+        }
+      };
+      requestOtBtn.addEventListener('click', handleRequestOt);
+      lifecycle.onCleanup(() => requestOtBtn.removeEventListener('click', handleRequestOt));
     }
 
     if (clockOutBtn) {
@@ -1360,6 +1529,21 @@ export default class StoreEmployeeDashboard {
           geofenceMonitor.stop();
           this._geofenceActive = false;
         }
+      }
+
+      // Fetch overtime requests to check for pending status today
+      this.state.todayPendingOt = null;
+      try {
+        const otRes = await apiClient.get('/api/v1/overtime-requests/my');
+        if (otRes?.success && Array.isArray(otRes.data)) {
+          const todayStr = new Date().toLocaleDateString('sv').substring(0, 10);
+          const pendingToday = otRes.data.find(r => r.requestedDate === todayStr && r.status === 'PENDING');
+          if (pendingToday) {
+            this.state.todayPendingOt = pendingToday;
+          }
+        }
+      } catch (err) {
+        logger.warn('StoreEmployeeDashboard', 'Error loading overtime requests', err);
       }
       
       const historyRes = await apiClient.get('/api/v1/attendance/history');

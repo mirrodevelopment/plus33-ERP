@@ -1,8 +1,8 @@
 ================================================================================
   PLUS33 Coffee ERP - Visual Table Schemas & Live Sample Datasets
 ================================================================================
-Total Tables in Database: 754
-Total Live Records: 9953
+Total Tables in Database: 771
+Total Live Records: 10050
 ================================================================================
 
 Database Table Summary, Counts, and Purposes:
@@ -10,7 +10,7 @@ Database Table Summary, Counts, and Purposes:
 | Table Name                               | Row Count   | Table Purpose                                                                  |
 +------------------------------------------+-------------+--------------------------------------------------------------------------------+
 | advance_shipping_notices                 | 0           | Holds standard module data records.                                            |
-| analytics_refresh_log                    | 15          | Holds standard module data records.                                            |
+| analytics_refresh_log                    | 16          | Holds standard module data records.                                            |
 | announcement_reactions                   | 0           | Holds standard module data records.                                            |
 | announcement_reads                       | 0           | Holds standard module data records.                                            |
 | announcements                            | 0           | Holds standard module data records.                                            |
@@ -23,6 +23,7 @@ Database Table Summary, Counts, and Purposes:
 | attendance_breaks                        | 0           | Holds standard module data records.                                            |
 | attendance_corrections                   | 0           | Holds standard module data records.                                            |
 | attendance_sync_logs                     | 0           | Holds standard module data records.                                            |
+| away_permission_requests                 | 3           | Holds standard module data records.                                            |
 | bank_account_signatories                 | 0           | Holds standard module data records.                                            |
 | bank_accounts                            | 0           | Holds standard module data records.                                            |
 | bank_branches                            | 0           | Holds standard module data records.                                            |
@@ -116,6 +117,7 @@ Database Table Summary, Counts, and Purposes:
 | bom_headers                              | 0           | Holds standard module data records.                                            |
 | bom_lines                                | 0           | Holds standard module data records.                                            |
 | bom_substitutes                          | 0           | Holds standard module data records.                                            |
+| broadcast_announcements                  | 7           | Holds standard module data records.                                            |
 | budget_approvals                         | 0           | Holds standard module data records.                                            |
 | budget_audit_logs                        | 0           | Holds standard module data records.                                            |
 | budget_consumptions                      | 0           | Holds standard module data records.                                            |
@@ -151,6 +153,7 @@ Database Table Summary, Counts, and Purposes:
 | cost_centers                             | 0           | Holds standard module data records.                                            |
 | cost_roll_up_snapshots                   | 0           | Holds standard module data records.                                            |
 | country_benefit_policies                 | 0           | Holds standard module data records.                                            |
+| country_document_types                   | 96          | Holds standard module data records.                                            |
 | country_leave_policies                   | 45          | Holds standard module data records.                                            |
 | country_work_policies                    | 0           | Holds standard module data records.                                            |
 | credit_drawdowns                         | 0           | Holds standard module data records.                                            |
@@ -178,6 +181,7 @@ Database Table Summary, Counts, and Purposes:
 | cycle_count_plans                        | 0           | Holds standard module data records.                                            |
 | cycle_count_results                      | 0           | Holds standard module data records.                                            |
 | cycle_count_tasks                        | 0           | Holds standard module data records.                                            |
+| daily_inventory_usages                   | 3           | Holds standard module data records.                                            |
 | dashboard_configs                        | 0           | Holds standard module data records.                                            |
 | delivery_routes                          | 0           | Holds standard module data records.                                            |
 | departments                              | 0           | Holds standard module data records.                                            |
@@ -197,6 +201,7 @@ Database Table Summary, Counts, and Purposes:
 | dock_schedules                           | 0           | Holds standard module data records.                                            |
 | document_references                      | 0           | Holds standard module data records.                                            |
 | einvoice_compliance_logs                 | 0           | Holds standard module data records.                                            |
+| employee_leave_balance_history           | 5           | Holds standard module data records.                                            |
 | employee_leave_balances                  | 4320        | Holds standard module data records.                                            |
 | employee_leave_transactions              | 0           | Holds standard module data records.                                            |
 | employee_leave_year_summary              | 0           | Holds standard module data records.                                            |
@@ -204,10 +209,13 @@ Database Table Summary, Counts, and Purposes:
 | employee_payrolls                        | 0           | Transactional ledger storing final payroll computations, base salary paym...   |
 | employee_salary_structure_items          | 0           | Holds standard module data records.                                            |
 | employee_salary_structures               | 0           | Holds standard module data records.                                            |
+| employee_shift_swaps                     | 5           | Holds standard module data records.                                            |
 | employee_shifts                          | 0           | Junction table tracking shift schedules assignments for employees on part...   |
+| employee_upload_documents                | 3           | Holds standard module data records.                                            |
 | employees                                | 390         | Comprehensive master profiles of all workforce members, storing names, em...   |
 | engineering_change_lines                 | 0           | Holds standard module data records.                                            |
 | engineering_change_orders                | 0           | Holds standard module data records.                                            |
+| entity_policy_group_mappings             | 0           | Holds standard module data records.                                            |
 | equipment_assets                         | 0           | Holds standard module data records.                                            |
 | esm_analytics_snapshots                  | 0           | Holds standard module data records.                                            |
 | esm_billing_records                      | 0           | Holds standard module data records.                                            |
@@ -260,7 +268,7 @@ Database Table Summary, Counts, and Purposes:
 | fixed_asset_utilization                  | 0           | Holds standard module data records.                                            |
 | fixed_asset_work_orders                  | 0           | Holds standard module data records.                                            |
 | fixed_assets                             | 0           | Holds standard module data records.                                            |
-| flyway_schema_history                    | 349         | Holds standard module data records.                                            |
+| flyway_schema_history                    | 380         | Holds standard module data records.                                            |
 | forecast_accuracy_logs                   | 0           | Holds standard module data records.                                            |
 | fx_deal_settlements                      | 0           | Holds standard module data records.                                            |
 | fx_deals                                 | 0           | Holds standard module data records.                                            |
@@ -273,8 +281,8 @@ Database Table Summary, Counts, and Purposes:
 | grc_audit_engagements                    | 6           | Holds standard module data records.                                            |
 | grc_audit_finding_responses              | 0           | Holds standard module data records.                                            |
 | grc_audit_findings                       | 0           | Holds standard module data records.                                            |
-| grc_audit_programs                       | 1           | Holds standard module data records.                                            |
-| grc_audit_universe                       | 1           | Holds standard module data records.                                            |
+| grc_audit_programs                       | 41          | Holds standard module data records.                                            |
+| grc_audit_universe                       | 41          | Holds standard module data records.                                            |
 | grc_cap_tasks                            | 0           | Holds standard module data records.                                            |
 | grc_compliance_controls                  | 0           | Holds standard module data records.                                            |
 | grc_compliance_evidence                  | 0           | Holds standard module data records.                                            |
@@ -327,6 +335,8 @@ Database Table Summary, Counts, and Purposes:
 | hcm_talent_pools                         | 0           | Holds standard module data records.                                            |
 | hedge_effectiveness_tests                | 0           | Holds standard module data records.                                            |
 | holiday_calendar                         | 0           | Holds standard module data records.                                            |
+| holiday_calendars                        | 3           | Holds standard module data records.                                            |
+| holidays                                 | 5           | Holds standard module data records.                                            |
 | in_house_bank_accounts                   | 0           | Holds standard module data records.                                            |
 | integration_connector                    | 0           | Holds standard module data records.                                            |
 | integration_connector_execution          | 0           | Holds standard module data records.                                            |
@@ -372,8 +382,12 @@ Database Table Summary, Counts, and Purposes:
 | leave_audit_log                          | 0           | Holds standard module data records.                                            |
 | leave_blackout_dates                     | 0           | Holds standard module data records.                                            |
 | leave_documents                          | 0           | Holds standard module data records.                                            |
+| leave_pay_rules                          | 3           | Holds standard module data records.                                            |
+| leave_policy_change_log                  | 3           | Holds standard module data records.                                            |
+| leave_policy_groups                      | 3           | Holds standard module data records.                                            |
+| leave_policy_rules                       | 25          | Holds standard module data records.                                            |
 | leave_types                              | 12          | Catalog of leave categories (e.g. Annual, Sick, Unpaid, Bereavement).          |
-| location_stock                           | 231         | Holds standard module data records.                                            |
+| location_stock                           | 0           | Holds standard module data records.                                            |
 | lot_genealogy                            | 0           | Holds standard module data records.                                            |
 | machines                                 | 0           | Holds standard module data records.                                            |
 | manufacturing_batch_genealogy            | 0           | Holds standard module data records.                                            |
@@ -405,6 +419,7 @@ Database Table Summary, Counts, and Purposes:
 | mv_withholding_tax_raw                   | 0           | Holds standard module data records.                                            |
 | notification_templates                   | 0           | Holds standard module data records.                                            |
 | offline_event_queue                      | 0           | Holds standard module data records.                                            |
+| overtime_requests                        | 5           | Holds standard module data records.                                            |
 | overtime_rules                           | 0           | Holds standard module data records.                                            |
 | payment_allocations                      | 0           | Maps payment cash amounts against outstanding supplier invoices.  -------...   |
 | payment_batches                          | 0           | Holds standard module data records.                                            |
@@ -701,9 +716,10 @@ Database Table Summary, Counts, and Purposes:
 | stock_movements                          | 0           | Immutable audit log recording every single stock entry, transfer, deducti...   |
 | stock_transfer_items                     | 0           | Holds standard module data records.                                            |
 | stock_transfers                          | 0           | Holds standard module data records.                                            |
+| store_documents                          | 5           | Holds standard module data records.                                            |
 | stores                                   | 12          | Models physical retail retail shops, coffee bars, or outlets that pull st...   |
 | supplier_invoice_items                   | 0           | Line item costs matched directly to Purchase Order items to verify bill a...   |
-| supplier_invoices                        | 30          | Accounts Payable invoices matching supplier bills to received POs.             |
+| supplier_invoices                        | 31          | Accounts Payable invoices matching supplier bills to received POs.             |
 | suppliers                                | 1           | Database of vendor companies from whom raw inventory, machinery, or servi...   |
 | tax_adjustment_entries                   | 0           | Holds standard module data records.                                            |
 | tax_audit_logs                           | 0           | Holds standard module data records.                                            |
@@ -749,17 +765,18 @@ Database Table Summary, Counts, and Purposes:
 | warehouse_edges                          | 0           | Holds standard module data records.                                            |
 | warehouse_event_store                    | 0           | Holds standard module data records.                                            |
 | warehouse_labor_logs                     | 0           | Holds standard module data records.                                            |
-| warehouse_locations                      | 3           | Holds standard module data records.                                            |
+| warehouse_locations                      | 15          | Holds standard module data records.                                            |
 | warehouse_nodes                          | 0           | Holds standard module data records.                                            |
 | warehouse_retention_policies             | 0           | Holds standard module data records.                                            |
 | warehouse_rules                          | 0           | Holds standard module data records.                                            |
 | warehouse_saga_states                    | 0           | Holds standard module data records.                                            |
 | warehouse_tasks                          | 0           | Holds standard module data records.                                            |
 | warehouse_workflows                      | 0           | Holds standard module data records.                                            |
-| warehouse_zones                          | 3           | Holds standard module data records.                                            |
-| warehouses                               | 3           | Models bulk physical warehousing units responsible for holding inventory,...   |
+| warehouse_zones                          | 15          | Holds standard module data records.                                            |
+| warehouses                               | 15          | Models bulk physical warehousing units responsible for holding inventory,...   |
 | waste_records                            | 0           | Logs daily waste (e.g., spilled milk, burned beans, damaged cakes) to acc...   |
 | waves                                    | 0           | Holds standard module data records.                                            |
+| weekly_off_rules                         | 5           | Holds standard module data records.                                            |
 | weekly_product_demand_summary            | 0           | Holds standard module data records.                                            |
 | work_centers                             | 0           | Holds standard module data records.                                            |
 | yard_locations                           | 0           | Holds standard module data records.                                            |
@@ -775,15 +792,15 @@ Table: advance_shipping_notices
 
 
 Table: analytics_refresh_log
-+--------------------------------+-------------------------------+----------------------------+--------------------------+
-| view_name [varchar]            | last_refreshed_at [timestamp] | refresh_duration_ms [int8] | refresh_status [varchar] |
-+--------------------------------+-------------------------------+----------------------------+--------------------------+
-| mv_inventory_turnover          | 2026-07-14 14:52:00           | 259                        | SUCCESS                  |
-| mv_inventory_abc_xyz           | 2026-07-14 14:55:00           | 32                         | SUCCESS                  |
-| mv_inventory_aging_expiry      | 2026-07-14 15:05:00           | 514                        | SUCCESS                  |
-| mv_inventory_traceability_me.. | 2026-07-14 15:12:00           | 763                        | SUCCESS                  |
-| mv_inventory_replenishment_m.. | 2026-07-14 15:14:01           | 1348                       | SUCCESS                  |
-+--------------------------------+-------------------------------+----------------------------+--------------------------+
++------------------------+-------------------------------+----------------------------+--------------------------+
+| view_name [varchar]    | last_refreshed_at [timestamp] | refresh_duration_ms [int8] | refresh_status [varchar] |
++------------------------+-------------------------------+----------------------------+--------------------------+
+| mv_sales_daily         | 2026-07-23 12:30:27           | 21                         | SUCCESS                  |
+| mv_inventory_levels    | 2026-07-23 12:30:27           | 19                         | SUCCESS                  |
+| mv_attendance_daily    | 2026-07-23 12:30:27           | 33                         | SUCCESS                  |
+| mv_financial_summary   | 2026-07-23 12:30:27           | 44                         | SUCCESS                  |
+| mv_inventory_slow_dead | 2026-07-21 19:20:53           | 14                         | SUCCESS                  |
++------------------------+-------------------------------+----------------------------+--------------------------+
 
 
 Table: announcement_reactions
@@ -803,11 +820,11 @@ Table: announcement_reads
 
 
 Table: announcements
-+-----------+-----------------+----------------+--------------------+---------------------+------------------------+
-| id [int8] | title [varchar] | content [text] | priority [varchar] | publisher [varchar] | created_at [timestamp] |
-+-----------+-----------------+----------------+--------------------+---------------------+------------------------+
-|                                             No active records found.                                             |
-+-----------+-----------------+----------------+--------------------+---------------------+------------------------+
++-----------+-----------------+----------------+--------------------+---------------------+------------------------+---------------------+-------------------------+------------------------+
+| id [int8] | title [varchar] | content [text] | priority [varchar] | publisher [varchar] | created_at [timestamp] | image_url [varchar] | target_region_id [int8] | target_store_id [int8] |
++-----------+-----------------+----------------+--------------------+---------------------+------------------------+---------------------+-------------------------+------------------------+
+|                                                                                 No active records found.                                                                                  |
++-----------+-----------------+----------------+--------------------+---------------------+------------------------+---------------------+-------------------------+------------------------+
 
 
 Table: appointment_slots
@@ -880,6 +897,16 @@ Table: attendance_sync_logs
 +-----------+-------------------+--------------------+------------------+-----------------------------+------------------------+--------------------------+------------------------+
 |                                                                             No active records found.                                                                             |
 +-----------+-------------------+--------------------+------------------+-----------------------------+------------------------+--------------------------+------------------------+
+
+
+Table: away_permission_requests
++-----------+--------------------+-----------------+----------------------+--------------------------+-------------------------+--------------------+------------------+--------------------------------+-------------------------------+----------------------------+--------------------------+------------------------------------+--------------------------------+--------------------------+------------------------+------------------------+
+| id [int8] | employee_id [int8] | store_id [int8] | attendance_id [int8] | requested_at [timestamp] | resolved_at [timestamp] | resolved_by [int8] | status [varchar] | reason [text]                  | approved_duration_mins [int4] | approved_until [timestamp] | grace_buffer_mins [int4] | extension_requested_at [timestamp] | extension_reason [text]        | parent_request_id [int8] | created_at [timestamp] | updated_at [timestamp] |
++-----------+--------------------+-----------------+----------------------+--------------------------+-------------------------+--------------------+------------------+--------------------------------+-------------------------------+----------------------------+--------------------------+------------------------------------+--------------------------------+--------------------------+------------------------+------------------------+
+| 3         | 218                | 15              | NULL                 | 2026-07-18 12:47:24      | 2026-07-18 13:09:11     | 218                | DENIED           | Lunch break (Requested Durat.. | 45                            | 2026-07-18 13:41:41        | 10                       | 2026-07-18 13:08:57                | Extension requested from emp.. | NULL                     | 2026-07-18 12:47:24    | 2026-07-18 13:09:11    |
+| 4         | 218                | 15              | NULL                 | 2026-07-18 13:09:17      | 2026-07-18 13:15:15     | 218                | RETURNED         | Lunch break (Start: Now) (Re.. | 30                            | 2026-07-18 13:39:23        | 10                       | NULL                               | NULL                           | NULL                     | 2026-07-18 13:09:17    | 2026-07-18 13:15:15    |
+| 5         | 218                | 15              | NULL                 | 2026-07-18 13:15:39      | 2026-07-18 13:15:52     | 218                | APPROVED         | Lunch break (Start: Now) (Re.. | 30                            | 2026-07-18 13:45:52        | 10                       | NULL                               | NULL                           | NULL                     | 2026-07-18 13:15:39    | 2026-07-18 13:15:52    |
++-----------+--------------------+-----------------+----------------------+--------------------------+-------------------------+--------------------+------------------+--------------------------------+-------------------------------+----------------------------+--------------------------+------------------------------------+--------------------------------+--------------------------+------------------------+------------------------+
 
 
 Table: bank_account_signatories
@@ -1626,6 +1653,18 @@ Table: bom_substitutes
 +-----------+--------------------+------------------------------+-------------------------------+----------------+-----------------+-----------------------+---------------------+------------------------+
 
 
+Table: broadcast_announcements
++-----------+--------------------------------+--------------------------------+--------------------+------------------------------+--------------------------+---------------------------+--------------------------------+----------------------+-------------------------+------------------------+------------------------+------------------------+------------------------+-------------------+
+| id [int8] | title [varchar]                | content [text]                 | priority [varchar] | publisher [varchar]          | publisher_role [varchar] | publisher_color [varchar] | image_url [varchar]            | media_type [varchar] | target_region_id [int8] | target_store_id [int8] | created_at [timestamp] | expires_at [timestamp] | deleted_at [timestamp] | is_deleted [bool] |
++-----------+--------------------------------+--------------------------------+--------------------+------------------------------+--------------------------+---------------------------+--------------------------------+----------------------+-------------------------+------------------------+------------------------+------------------------+------------------------+-------------------+
+| 1         | seee                           | eeeeeeeeeeeeeeee               | Standard Notice    | giri                         | REGIONAL_ADMIN           | #06b6d4                   | user_uploads/announcements/4.. | IMAGE                | NULL                    | NULL                   | 2026-07-16 18:52:07    | 2026-07-31 18:52:07    | NULL                   | false             |
+| 2         | doiwiuef                       | asfwesgdsrtrgszfgrgf           | Standard Notice    | Jean Dupont                  | REGIONAL_ADMIN           | #06b6d4                   | user_uploads/announcements/a.. | VIDEO                | NULL                    | NULL                   | 2026-07-16 19:21:01    | 2026-07-31 19:21:01    | NULL                   | false             |
+| 3         | Test Regional Bulletin         | This is a test broadcast ann.. | Standard Notice    | Regional Admin Ile-de-France | REGIONAL_ADMIN           | #06b6d4                   |                                | IMAGE                | 13                      | NULL                   | 2026-07-21 12:11:53    | 2026-08-05 12:11:53    | NULL                   | false             |
+| 4         | Regional Safety Audio Briefing | Please listen to the attache.. | Critical Alert     | Regional Admin Ile-de-France | REGIONAL_ADMIN           | #06b6d4                   | user_uploads/announcements/s.. | AUDIO                | 13                      | NULL                   | 2026-07-21 12:21:39    | 2026-08-05 12:21:39    | 2026-07-21 12:21:39    | true              |
+| 5         | Regional Safety Audio Briefing | Please listen to the attache.. | Critical Alert     | Regional Admin Ile-de-France | REGIONAL_ADMIN           | #06b6d4                   | user_uploads/announcements/s.. | AUDIO                | 13                      | NULL                   | 2026-07-21 12:22:00    | 2026-08-05 12:22:00    | 2026-07-21 12:22:00    | true              |
++-----------+--------------------------------+--------------------------------+--------------------+------------------------------+--------------------------+---------------------------+--------------------------------+----------------------+-------------------------+------------------------+------------------------+------------------------+------------------------+-------------------+
+
+
 Table: budget_approvals
 +-----------+------------------+----------------------+---------------------+------------------+-----------------------------+-------------------------+-------------------+
 | id [int8] | budget_id [int8] | approval_step [int4] | role_code [varchar] | status [varchar] | approver_username [varchar] | approved_at [timestamp] | remarks [varchar] |
@@ -1844,11 +1883,11 @@ Table: chart_of_accounts
 
 
 Table: companies
-+-----------+----------------+----------------+----------------------+------------------------+---------------+------------------------+------------------------+--------------------------------+------------------------------+---------------------------+
-| id [int8] | code [varchar] | name [varchar] | legal_name [varchar] | country_code [varchar] | active [bool] | created_at [timestamp] | updated_at [timestamp] | fiscal_year_start_month [int4] | fiscal_year_start_day [int4] | treasury_entity_id [int8] |
-+-----------+----------------+----------------+----------------------+------------------------+---------------+------------------------+------------------------+--------------------------------+------------------------------+---------------------------+
-| 3         | PLUS33_COFFEE  | PLUS33 Coffee  | PLUS33 Coffee SAS    | FR                     | true          | 2026-07-07 16:15:51    | 2026-07-07 16:15:51    | 1                              | 1                            | NULL                      |
-+-----------+----------------+----------------+----------------------+------------------------+---------------+------------------------+------------------------+--------------------------------+------------------------------+---------------------------+
++-----------+----------------+----------------+----------------------+------------------------+---------------+------------------------+------------------------+--------------------------------+------------------------------+---------------------------+-----------------------------------+
+| id [int8] | code [varchar] | name [varchar] | legal_name [varchar] | country_code [varchar] | active [bool] | created_at [timestamp] | updated_at [timestamp] | fiscal_year_start_month [int4] | fiscal_year_start_day [int4] | treasury_entity_id [int8] | leave_policy_group_code [varchar] |
++-----------+----------------+----------------+----------------------+------------------------+---------------+------------------------+------------------------+--------------------------------+------------------------------+---------------------------+-----------------------------------+
+| 3         | PLUS33_COFFEE  | PLUS33 Coffee  | PLUS33 Coffee SAS    | FR                     | true          | 2026-07-07 16:15:51    | 2026-07-07 16:15:51    | 1                              | 1                            | NULL                      | NULL                              |
++-----------+----------------+----------------+----------------------+------------------------+---------------+------------------------+------------------------+--------------------------------+------------------------------+---------------------------+-----------------------------------+
 
 
 Table: company_leave_policy_overrides
@@ -1905,6 +1944,18 @@ Table: country_benefit_policies
 +-----------+------------------------+----------------------------+-----------------------------+---------------------------------+-----------------------------------+----------------------------+-----------------------------+---------------------------------+-----------------------------------+-----------------------------------------+------------------------------------------+----------------------------------+----------------------------------------+------------------------+------------------------+
 |                                                                                                                                                                                                                                                No active records found.                                                                                                                                                                                                                                                 |
 +-----------+------------------------+----------------------------+-----------------------------+---------------------------------+-----------------------------------+----------------------------+-----------------------------+---------------------------------+-----------------------------------+-----------------------------------------+------------------------------------------+----------------------------------+----------------------------------------+------------------------+------------------------+
+
+
+Table: country_document_types
++-----------+------------------------+--------------------+--------------------------+-------------------------+-------------------+----------------------------+--------------------------------+--------------------+----------------------+-----------------+------------------------+
+| id [int8] | country_code [varchar] | category [varchar] | category_label [varchar] | category_icon [varchar] | doc_key [varchar] | doc_title [varchar]        | doc_description [varchar]      | is_required [bool] | category_sort [int4] | doc_sort [int4] | created_at [timestamp] |
++-----------+------------------------+--------------------+--------------------------+-------------------------+-------------------+----------------------------+--------------------------------+--------------------+----------------------+-----------------+------------------------+
+| 1         | IN                     | personal           | Personal Documents       | user                    | personalPhoto     | Passport Photo             | Passport size official colou.. | true               | 1                    | 1               | 2026-07-16 16:33:58    |
+| 2         | IN                     | personal           | Personal Documents       | user                    | personalAadhaar   | Aadhaar Card               | Government issued 12-digit A.. | true               | 1                    | 2               | 2026-07-16 16:33:58    |
+| 3         | IN                     | personal           | Personal Documents       | user                    | personalPassport  | Passport                   | Valid Indian passport – fron.. | false              | 1                    | 3               | 2026-07-16 16:33:58    |
+| 4         | IN                     | personal           | Personal Documents       | user                    | personalVoterId   | Voter ID / Driving License | Voter ID card or valid state.. | false              | 1                    | 4               | 2026-07-16 16:33:58    |
+| 5         | IN                     | address            | Address Documents        | home                    | addressAadhaar    | Aadhaar Address Proof      | Aadhaar card showing current.. | true               | 2                    | 1               | 2026-07-16 16:33:58    |
++-----------+------------------------+--------------------+--------------------------+-------------------------+-------------------+----------------------------+--------------------------------+--------------------+----------------------+-----------------+------------------------+
 
 
 Table: country_leave_policies
@@ -2127,6 +2178,16 @@ Table: cycle_count_tasks
 +-----------+----------------+-------------------+--------------------+-------------------+----------------------+-------------------------+---------------------------+----------------+------------------+--------------------+-------------------------+------------------------+--------------------------+-----------------------+----------------------+------------------------+------------------------+
 
 
+Table: daily_inventory_usages
++-----------+-----------------+-------------------+--------------------+-------------------+--------------------------------+------------------------+
+| id [int4] | store_id [int4] | product_id [int4] | quantity [numeric] | usage_date [date] | notes [varchar]                | created_at [timestamp] |
++-----------+-----------------+-------------------+--------------------+-------------------+--------------------------------+------------------------+
+| 1         | 15              | 714               | 2.500000           | 2026-07-18        | Log consumption of 2.5 boxes.. | 2026-07-18 16:45:16    |
+| 2         | 15              | 714               | 6.000000           | 2026-07-18        | uuuuuu                         | 2026-07-18 16:46:13    |
+| 3         | 15              | 714               | 124.000000         | 2026-07-21        | wsfaf                          | 2026-07-21 19:20:53    |
++-----------+-----------------+-------------------+--------------------+-------------------+--------------------------------+------------------------+
+
+
 Table: dashboard_configs
 +-----------+-------------------+--------------------------+--------------------------+---------------------+---------------+---------------------------------+-------------------------------+------------------------+------------------------+
 | id [int8] | company_id [int8] | dashboard_code [varchar] | dashboard_name [varchar] | role_code [varchar] | active [bool] | refresh_interval_minutes [int4] | last_refreshed_at [timestamp] | created_at [timestamp] | updated_at [timestamp] |
@@ -2279,15 +2340,27 @@ Table: einvoice_compliance_logs
 +-----------+-------------------+-------------------------+--------------------+-------------------------+--------------------+--------------------------+------------------+----------------------+---------------------------+-------------------------+
 
 
+Table: employee_leave_balance_history
++-----------+--------------------+----------------------+-------------+----------------------+-------------------+------------------+------------------------------+----------------+-------------------+-------------------+-------------------------+--------------------+-------------------+------------------------------+------------------------+
+| id [int8] | employee_id [int8] | leave_type_id [int8] | year [int4] | snapshot_date [date] | opening [numeric] | earned [numeric] | manual_adjustments [numeric] | used [numeric] | pending [numeric] | expired [numeric] | carry_forward [numeric] | encashed [numeric] | closing [numeric] | notes [text]                 | created_at [timestamp] |
++-----------+--------------------+----------------------+-------------+----------------------+-------------------+------------------+------------------------------+----------------+-------------------+-------------------+-------------------------+--------------------+-------------------+------------------------------+------------------------+
+| 1         | 207                | 18                   | 2026        | 2026-01-11           | 1750.50           | 1750.50          | 1750.50                      | 1750.50        | 1750.50           | 1750.50           | 1750.50                 | 1750.50            | 1750.50           | Seed record #1 — Plus33 ERP. | 2026-01-16 08:00:00    |
+| 2         | 211                | 19                   | 2026        | 2026-01-21           | 2501.00           | 2501.00          | 2501.00                      | 2501.00        | 2501.00           | 2501.00           | 2501.00                 | 2501.00            | 2501.00           | Seed record #2 — Plus33 ERP. | 2026-01-31 08:00:00    |
+| 3         | 212                | 20                   | 2026        | 2026-01-31           | 3251.50           | 3251.50          | 3251.50                      | 3251.50        | 3251.50           | 3251.50           | 3251.50                 | 3251.50            | 3251.50           | Seed record #3 — Plus33 ERP. | 2026-02-15 08:00:00    |
+| 4         | 213                | 21                   | 2026        | 2026-02-10           | 4002.00           | 4002.00          | 4002.00                      | 4002.00        | 4002.00           | 4002.00           | 4002.00                 | 4002.00            | 4002.00           | Seed record #4 — Plus33 ERP. | 2026-03-02 08:00:00    |
+| 5         | 216                | 22                   | 2026        | 2026-02-20           | 4752.50           | 4752.50          | 4752.50                      | 4752.50        | 4752.50           | 4752.50           | 4752.50                 | 4752.50            | 4752.50           | Seed record #5 — Plus33 ERP. | 2026-03-17 08:00:00    |
++-----------+--------------------+----------------------+-------------+----------------------+-------------------+------------------+------------------------------+----------------+-------------------+-------------------+-------------------------+--------------------+-------------------+------------------------------+------------------------+
+
+
 Table: employee_leave_balances
 +-----------+--------------------+----------------------+-------------+---------------------------+-------------------+-------------------------+----------------+-------------------+-------------------------+---------------------------+------------------------+------------------------+------------------------+
 | id [int8] | employee_id [int8] | leave_type_id [int8] | year [int4] | opening_balance [numeric] | accrued [numeric] | carry_forward [numeric] | used [numeric] | pending [numeric] | encashed_days [numeric] | encashed_amount [numeric] | encashment_date [date] | created_at [timestamp] | updated_at [timestamp] |
 +-----------+--------------------+----------------------+-------------+---------------------------+-------------------+-------------------------+----------------+-------------------+-------------------------+---------------------------+------------------------+------------------------+------------------------+
+| 14486     | 218                | 18                   | 2026        | 25.00                     | 0.00              | 0.00                    | 2.00           | 0.00              | 0.00                    | 0.00                      | NULL                   | 2026-07-09 12:40:48    | 2026-07-22 19:49:43    |
+| 14846     | 218                | 21                   | 2026        | 0.00                      | 0.00              | 0.00                    | 1.00           | 0.00              | 0.00                    | 0.00                      | NULL                   | 2026-07-09 12:40:48    | 2026-07-22 19:48:24    |
 | 12961     | 963                | 18                   | 2026        | 18.00                     | 0.00              | 0.00                    | 0.00           | 0.00              | 0.00                    | 0.00                      | NULL                   | 2026-07-09 12:40:48    | 2026-07-09 12:40:48    |
 | 12962     | 962                | 18                   | 2026        | 18.00                     | 0.00              | 0.00                    | 0.00           | 0.00              | 0.00                    | 0.00                      | NULL                   | 2026-07-09 12:40:48    | 2026-07-09 12:40:48    |
 | 12963     | 961                | 18                   | 2026        | 18.00                     | 0.00              | 0.00                    | 0.00           | 0.00              | 0.00                    | 0.00                      | NULL                   | 2026-07-09 12:40:48    | 2026-07-09 12:40:48    |
-| 12964     | 960                | 18                   | 2026        | 18.00                     | 0.00              | 0.00                    | 0.00           | 0.00              | 0.00                    | 0.00                      | NULL                   | 2026-07-09 12:40:48    | 2026-07-09 12:40:48    |
-| 12965     | 959                | 18                   | 2026        | 18.00                     | 0.00              | 0.00                    | 0.00           | 0.00              | 0.00                    | 0.00                      | NULL                   | 2026-07-09 12:40:48    | 2026-07-09 12:40:48    |
 +-----------+--------------------+----------------------+-------------+---------------------------+-------------------+-------------------------+----------------+-------------------+-------------------------+---------------------------+------------------------+------------------------+------------------------+
 
 
@@ -2339,6 +2412,18 @@ Table: employee_salary_structures
 +-----------+-------------------+--------------------+----------------+-----------------------+---------------------+-------------------------+------------------+------------------------+------------------------+
 
 
+Table: employee_shift_swaps
++-----------+--------------------+-------------------+-------------------------+---------------------------+-------------------+--------------------------------+----------------------------------+------------------------+-----------------------+----------------------+--------------------------+--------------------------------+
+| id [int8] | employee_id [int8] | shift_date [date] | current_shift_id [int8] | preferred_shift_id [int8] | status [varchar]  | rejection_reason [varchar]     | admin_rejection_reason [varchar] | created_at [timestamp] | preferred_date [date] | approved_date [date] | approved_shift_id [int8] | replacement_employee_id [int8] |
++-----------+--------------------+-------------------+-------------------------+---------------------------+-------------------+--------------------------------+----------------------------------+------------------------+-----------------------+----------------------+--------------------------+--------------------------------+
+| 3         | 218                | 2026-07-18        | 10                      | 9                         | APPROVED          | Insufficient staffing cover .. | NULL                             | 2026-07-17 12:45:42    | NULL                  | NULL                 | NULL                     | NULL                           |
+| 6         | 218                | 2026-07-23        | 10                      | 9                         | APPROVED          | NULL                           | NULL                             | 2026-07-21 19:16:40    | 2026-07-24            | 2026-07-24           | 9                        | 214                            |
+| 4         | 218                | 2026-07-18        | 10                      | 9                         | REJECTED          | summa                          | NULL                             | 2026-07-17 12:45:42    | NULL                  | NULL                 | NULL                     | NULL                           |
+| 7         | 218                | 2026-07-22        | 9                       | 10                        | APPROVED          | sdsds                          | NULL                             | 2026-07-21 19:18:52    | 2026-07-23            | 2026-07-23           | 10                       | 214                            |
+| 5         | 218                | 2026-07-19        | 10                      | 9                         | REJECTED_BY_ADMIN | summa                          | skdfhjkasfdkjaskjfsn d           | 2026-07-17 13:22:35    | NULL                  | NULL                 | NULL                     | NULL                           |
++-----------+--------------------+-------------------+-------------------------+---------------------------+-------------------+--------------------------------+----------------------------------+------------------------+-----------------------+----------------------+--------------------------+--------------------------------+
+
+
 Table: employee_shifts
 +--------------------+-----------------+-----------------------+---------------------+
 | employee_id [int8] | shift_id [int8] | effective_from [date] | effective_to [date] |
@@ -2347,16 +2432,26 @@ Table: employee_shifts
 +--------------------+-----------------+-----------------------+---------------------+
 
 
+Table: employee_upload_documents
++-----------+--------------------+-------------------------+-------------------------+--------------------------------+-------------------------+-----------------+
+| id [int8] | employee_id [int8] | document_type [varchar] | document_name [varchar] | file_path [varchar]            | uploaded_at [timestamp] | approved [bool] |
++-----------+--------------------+-------------------------+-------------------------+--------------------------------+-------------------------+-----------------+
+| 5         | 218                | panCard                 | store-admin.png         | user_uploads/documents/PAN C.. | 2026-07-15 17:24:02     | true            |
+| 7         | 218                | workPermit              | employee-dasbord.png    | user_uploads/documents/Work .. | 2026-07-15 17:27:13     | true            |
+| 6         | 218                | aadhaarCard             | ultimate-admin.png      | user_uploads/documents/Aadha.. | 2026-07-15 17:27:08     | true            |
++-----------+--------------------+-------------------------+-------------------------+--------------------------------+-------------------------+-----------------+
+
+
 Table: employees
-+-----------+-------------------------+----------------+-------------------+----------------------+---------------------+--------------------------------+-----------------+-----------------------+----------------------+---------------------------+------------------+------------------+---------------+------------------------+------------------------+
-| id [int8] | employee_code [varchar] | user_id [int8] | company_id [int8] | first_name [varchar] | last_name [varchar] | email [varchar]                | phone [varchar] | designation [varchar] | department [varchar] | employment_type [varchar] | hire_date [date] | status [varchar] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+-------------------------+----------------+-------------------+----------------------+---------------------+--------------------------------+-----------------+-----------------------+----------------------+---------------------------+------------------+------------------+---------------+------------------------+------------------------+
-| 207       | EMP-0001                | 207            | 3                 | Ultimate             | Admin               | ultimate123@plus33.com         | NULL            | Ultimate Admin        | Administration       | PERMANENT                 | 2024-01-15       | ACTIVE           | true          | 2026-07-07 16:16:10    | 2026-07-07 16:16:10    |
-| 211       | EMP-REG-01              | 211            | 3                 | Amit                 | Sharma              | regional_eu@plus33.com         | NULL            | Regional Admin        | Administration       | PERMANENT                 | 2024-01-15       | ACTIVE           | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    |
-| 212       | EMP-REG-02              | 212            | 3                 | Fatima               | Al-Mansoori         | regional_dxb@plus33.com        | NULL            | Regional Admin        | Administration       | PERMANENT                 | 2024-01-15       | ACTIVE           | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    |
-| 213       | EMP-REG-03              | 213            | 3                 | Rajesh               | Kumar               | regional_ind@plus33.com        | NULL            | Regional Admin        | Administration       | PERMANENT                 | 2024-01-15       | ACTIVE           | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    |
-| 214       | EMP-ST_FR_REG_1_01-217  | 217            | 3                 | Admin                | ST_FR_REG_1_01      | admin_st_fr_reg_1_01@plus33... | +1234567890     | Store Manager         | Operations           | FULL_TIME                 | 2026-01-01       | ACTIVE           | true          | 2026-07-08 15:42:39    | 2026-07-08 15:42:39    |
-+-----------+-------------------------+----------------+-------------------+----------------------+---------------------+--------------------------------+-----------------+-----------------------+----------------------+---------------------------+------------------+------------------+---------------+------------------------+------------------------+
++-----------+-------------------------+----------------+-------------------+----------------------+---------------------+--------------------------------+-----------------+-----------------------+----------------------+---------------------------+------------------+------------------+---------------+------------------------+------------------------+-----------------------------------+---------------------+-------------------------------+-----------------------+
+| id [int8] | employee_code [varchar] | user_id [int8] | company_id [int8] | first_name [varchar] | last_name [varchar] | email [varchar]                | phone [varchar] | designation [varchar] | department [varchar] | employment_type [varchar] | hire_date [date] | status [varchar] | active [bool] | created_at [timestamp] | updated_at [timestamp] | emergency_contact_phone [varchar] | bank_name [varchar] | bank_account_number [varchar] | ifsc_number [varchar] |
++-----------+-------------------------+----------------+-------------------+----------------------+---------------------+--------------------------------+-----------------+-----------------------+----------------------+---------------------------+------------------+------------------+---------------+------------------------+------------------------+-----------------------------------+---------------------+-------------------------------+-----------------------+
+| 207       | EMP-0001                | 207            | 3                 | Ultimate             | Admin               | ultimate123@plus33.com         | NULL            | Ultimate Admin        | Administration       | PERMANENT                 | 2024-01-15       | ACTIVE           | true          | 2026-07-07 16:16:10    | 2026-07-07 16:16:10    | NULL                              | NULL                | NULL                          | NULL                  |
+| 211       | EMP-REG-01              | 211            | 3                 | Amit                 | Sharma              | regional_eu@plus33.com         | NULL            | Regional Admin        | Administration       | PERMANENT                 | 2024-01-15       | ACTIVE           | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    | NULL                              | NULL                | NULL                          | NULL                  |
+| 212       | EMP-REG-02              | 212            | 3                 | Fatima               | Al-Mansoori         | regional_dxb@plus33.com        | NULL            | Regional Admin        | Administration       | PERMANENT                 | 2024-01-15       | ACTIVE           | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    | NULL                              | NULL                | NULL                          | NULL                  |
+| 213       | EMP-REG-03              | 213            | 3                 | Rajesh               | Kumar               | regional_ind@plus33.com        | NULL            | Regional Admin        | Administration       | PERMANENT                 | 2024-01-15       | ACTIVE           | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    | NULL                              | NULL                | NULL                          | NULL                  |
+| 216       | EMP-ST_FR_REG_1_01-219  | 219            | 3                 | Supervisor2          | ST_FR_REG_1_01      | sup2_st_fr_reg_1_01@plus33.com | +1234567890     | Shift Supervisor      | Operations           | FULL_TIME                 | 2026-01-01       | ACTIVE           | true          | 2026-07-08 15:42:39    | 2026-07-08 15:42:39    | NULL                              | NULL                | NULL                          | NULL                  |
++-----------+-------------------------+----------------+-------------------+----------------------+---------------------+--------------------------------+-----------------+-----------------------+----------------------+---------------------------+------------------+------------------+---------------+------------------------+------------------------+-----------------------------------+---------------------+-------------------------------+-----------------------+
 
 
 Table: engineering_change_lines
@@ -2373,6 +2468,14 @@ Table: engineering_change_orders
 +-----------+-------------------+----------------------+-----------------+--------------------+------------------+------------------+--------------------+-----------------------+---------------------+--------------------+--------------------+-------------------------+-------------------------+----------------------------+------------------------+------------------------+
 |                                                                                                                                                                             No active records found.                                                                                                                                                                              |
 +-----------+-------------------+----------------------+-----------------+--------------------+------------------+------------------+--------------------+-----------------------+---------------------+--------------------+--------------------+-------------------------+-------------------------+----------------------------+------------------------+------------------------+
+
+
+Table: entity_policy_group_mappings
++-----------+-----------------------+------------------+------------------------+-----------------------+---------------------+------------------------+------------------------+
+| id [int8] | entity_type [varchar] | entity_id [int8] | policy_group_id [int8] | effective_from [date] | effective_to [date] | created_at [timestamp] | updated_at [timestamp] |
++-----------+-----------------------+------------------+------------------------+-----------------------+---------------------+------------------------+------------------------+
+|                                                                           No active records found.                                                                            |
++-----------+-----------------------+------------------+------------------------+-----------------------+---------------------+------------------------+------------------------+
 
 
 Table: equipment_assets
@@ -2879,11 +2982,11 @@ Table: grc_audit_engagements
 +-----------+-------------------+--------------------------+-----------------------------+------------------------+------------------+------------------------+-------------------+-----------------+
 | id [int8] | program_id [int8] | audit_universe_id [int8] | engagement_number [varchar] | title [varchar]        | status [varchar] | lead_auditor_id [int8] | start_date [date] | end_date [date] |
 +-----------+-------------------+--------------------------+-----------------------------+------------------------+------------------+------------------------+-------------------+-----------------+
-| 1         | 1                 | 1                        | AUD-2026-1                  | Q1 Compliance Review 1 | COMPLETED        | 207                    | 2026-02-10        | 2026-02-20      |
-| 2         | 1                 | 1                        | AUD-2026-2                  | Q2 Compliance Review 2 | COMPLETED        | 207                    | 2026-03-10        | 2026-03-20      |
-| 3         | 1                 | 1                        | AUD-2026-3                  | Q3 Compliance Review 3 | COMPLETED        | 207                    | 2026-04-10        | 2026-04-20      |
-| 4         | 1                 | 1                        | AUD-2026-4                  | Q4 Compliance Review 4 | CLOSED           | 207                    | 2026-05-10        | 2026-05-20      |
-| 5         | 1                 | 1                        | AUD-2026-5                  | Q5 Compliance Review 5 | CLOSED           | 207                    | 2026-06-10        | 2026-06-20      |
+| 83        | 42                | 42                       | AUD-2026-1                  | Q1 Compliance Review 1 | COMPLETED        | 207                    | 2026-02-23        | 2026-03-05      |
+| 84        | 42                | 42                       | AUD-2026-2                  | Q2 Compliance Review 2 | COMPLETED        | 207                    | 2026-03-23        | 2026-04-02      |
+| 85        | 42                | 42                       | AUD-2026-3                  | Q3 Compliance Review 3 | COMPLETED        | 207                    | 2026-04-23        | 2026-05-03      |
+| 86        | 42                | 42                       | AUD-2026-4                  | Q4 Compliance Review 4 | CLOSED           | 207                    | 2026-05-23        | 2026-06-02      |
+| 87        | 42                | 42                       | AUD-2026-5                  | Q5 Compliance Review 5 | CLOSED           | 207                    | 2026-06-23        | 2026-07-03      |
 +-----------+-------------------+--------------------------+-----------------------------+------------------------+------------------+------------------------+-------------------+-----------------+
 
 
@@ -2904,19 +3007,27 @@ Table: grc_audit_findings
 
 
 Table: grc_audit_programs
-+-----------+-------------------+--------------------------------+--------------------+------------------+------------------------+
-| id [int8] | company_id [int8] | program_name [varchar]         | fiscal_year [int4] | status [varchar] | created_at [timestamp] |
-+-----------+-------------------+--------------------------------+--------------------+------------------+------------------------+
-| 1         | 3                 | Annual Financial and Securit.. | 2026               | ACTIVE           | 2026-07-10 17:44:36    |
-+-----------+-------------------+--------------------------------+--------------------+------------------+------------------------+
++-----------+-------------------+------------------------+--------------------+------------------+------------------------+
+| id [int8] | company_id [int8] | program_name [varchar] | fiscal_year [int4] | status [varchar] | created_at [timestamp] |
++-----------+-------------------+------------------------+--------------------+------------------+------------------------+
+| 42        | 1                 | FY2026 Audit Plan      | 2026               | PLANNED          | 2026-07-23 12:27:16    |
+| 43        | 1                 | Q1 Audit Plan          | 2026               | PLANNED          | 2026-07-23 12:27:16    |
+| 44        | 1                 | HR Audit               | 2026               | PLANNED          | 2026-07-23 12:27:16    |
+| 45        | 1                 | IT Audit               | 2026               | PLANNED          | 2026-07-23 12:27:16    |
+| 46        | 1                 | Finance Audit          | 2026               | PLANNED          | 2026-07-23 12:27:16    |
++-----------+-------------------+------------------------+--------------------+------------------+------------------------+
 
 
 Table: grc_audit_universe
-+-----------+-------------------+--------------------------+-----------------------+----------------------+---------------------+
-| id [int8] | company_id [int8] | entity_name [varchar]    | entity_type [varchar] | risk_score [numeric] | last_audited [date] |
-+-----------+-------------------+--------------------------+-----------------------+----------------------+---------------------+
-| 1         | 3                 | Enterprise IT Operations | IT                    | 95.00                | NULL                |
-+-----------+-------------------+--------------------------+-----------------------+----------------------+---------------------+
++-----------+-------------------+-----------------------+-----------------------+----------------------+---------------------+
+| id [int8] | company_id [int8] | entity_name [varchar] | entity_type [varchar] | risk_score [numeric] | last_audited [date] |
++-----------+-------------------+-----------------------+-----------------------+----------------------+---------------------+
+| 42        | 1                 | Finance Department    | DEPARTMENT            | 7.50                 | NULL                |
+| 43        | 1                 | Procurement           | DEPARTMENT            | 8.00                 | NULL                |
+| 44        | 1                 | HR                    | DEPARTMENT            | 6.00                 | NULL                |
+| 45        | 1                 | IT                    | DEPARTMENT            | 9.00                 | NULL                |
+| 46        | 1                 | Finance               | DEPARTMENT            | 8.00                 | NULL                |
++-----------+-------------------+-----------------------+-----------------------+----------------------+---------------------+
 
 
 Table: grc_cap_tasks
@@ -2979,9 +3090,9 @@ Table: grc_control_library
 +-----------+-------------------+------------------------+----------------------+--------------------------------+------------------+-----------------+
 | id [int8] | company_id [int8] | control_code [varchar] | name [varchar]       | description [text]             | status [varchar] | owner_id [int8] |
 +-----------+-------------------+------------------------+----------------------+--------------------------------+------------------+-----------------+
-| 4         | 3                 | CTRL-SEC-01            | Data Access Control  | Restricts unauthorized acces.. | ACTIVE           | 207             |
-| 5         | 3                 | CTRL-FIN-02            | Dual Authorization   | Enforces purchase orders abo.. | ACTIVE           | 207             |
-| 6         | 3                 | CTRL-OPS-03            | Food Safety Controls | Ensures daily temperature lo.. | ACTIVE           | 207             |
+| 47        | 3                 | CTRL-SEC-01            | Data Access Control  | Restricts unauthorized acces.. | ACTIVE           | 207             |
+| 48        | 3                 | CTRL-FIN-02            | Dual Authorization   | Enforces purchase orders abo.. | ACTIVE           | 207             |
+| 49        | 3                 | CTRL-OPS-03            | Food Safety Controls | Ensures daily temperature lo.. | ACTIVE           | 207             |
 +-----------+-------------------+------------------------+----------------------+--------------------------------+------------------+-----------------+
 
 
@@ -2997,9 +3108,9 @@ Table: grc_control_test_plans
 +-----------+---------------------------+--------------------------------+---------------------+-----------------------+
 | id [int8] | control_library_id [int8] | test_name [varchar]            | frequency [varchar] | next_test_date [date] |
 +-----------+---------------------------+--------------------------------+---------------------+-----------------------+
-| 4         | 4                         | Monthly database access log .. | MONTHLY             | 2026-08-10            |
-| 5         | 5                         | Dual auth audit sample testing | MONTHLY             | 2026-08-10            |
-| 6         | 6                         | Weekly store food safety rec.. | MONTHLY             | 2026-08-10            |
+| 12        | 47                        | Monthly database access log .. | MONTHLY             | 2026-08-23            |
+| 13        | 48                        | Dual auth audit sample testing | MONTHLY             | 2026-08-23            |
+| 14        | 49                        | Weekly store food safety rec.. | MONTHLY             | 2026-08-23            |
 +-----------+---------------------------+--------------------------------+---------------------+-----------------------+
 
 
@@ -3007,11 +3118,11 @@ Table: grc_control_test_results
 +-----------+---------------------+------------------+---------------------+-----------------------+--------------------------------+
 | id [int8] | test_plan_id [int8] | result [varchar] | tested_by_id [int8] | tested_at [timestamp] | notes [text]                   |
 +-----------+---------------------+------------------+---------------------+-----------------------+--------------------------------+
-| 11        | 4                   | PASSED           | 207                 | 2026-07-09 00:00:00   | Control check successfully v.. |
-| 12        | 5                   | PASSED           | 207                 | 2026-07-06 00:00:00   | Control check successfully v.. |
-| 13        | 4                   | PASSED           | 207                 | 2026-07-03 00:00:00   | Control check successfully v.. |
-| 14        | 5                   | PASSED           | 207                 | 2026-06-30 00:00:00   | Control check successfully v.. |
-| 15        | 4                   | PASSED           | 207                 | 2026-06-27 00:00:00   | Control check successfully v.. |
+| 45        | 12                  | PASSED           | 207                 | 2026-07-22 00:00:00   | Control check successfully v.. |
+| 46        | 13                  | PASSED           | 207                 | 2026-07-19 00:00:00   | Control check successfully v.. |
+| 47        | 12                  | PASSED           | 207                 | 2026-07-16 00:00:00   | Control check successfully v.. |
+| 48        | 13                  | PASSED           | 207                 | 2026-07-13 00:00:00   | Control check successfully v.. |
+| 49        | 12                  | PASSED           | 207                 | 2026-07-10 00:00:00   | Control check successfully v.. |
 +-----------+---------------------+------------------+---------------------+-----------------------+--------------------------------+
 
 
@@ -3019,9 +3130,9 @@ Table: grc_corrective_action_plans
 +-----------+-----------------+--------------------------------+-----------------+-----------------+------------------+-----------------------+
 | id [int8] | issue_id [int8] | description [text]             | owner_id [int8] | due_date [date] | status [varchar] | closed_at [timestamp] |
 +-----------+-----------------+--------------------------------+-----------------+-----------------+------------------+-----------------------+
-| 1         | 1               | Install automated temperatur.. | 207             | 2026-07-07      | OPEN             | NULL                  |
-| 2         | 2               | Implement multi-factor authe.. | 207             | 2026-07-30      | OPEN             | NULL                  |
-| 3         | 1               | Conduct staff training on GR.. | 207             | 2026-06-30      | CLOSED           | NULL                  |
+| 46        | 69              | Install automated temperatur.. | 207             | 2026-07-20      | OPEN             | NULL                  |
+| 47        | 70              | Implement multi-factor authe.. | 207             | 2026-08-12      | OPEN             | NULL                  |
+| 48        | 69              | Conduct staff training on GR.. | 207             | 2026-07-13      | CLOSED           | NULL                  |
 +-----------+-----------------+--------------------------------+-----------------+-----------------+------------------+-----------------------+
 
 
@@ -3029,8 +3140,8 @@ Table: grc_enterprise_issues
 +-----------+-------------------+------------------------+--------------------------------+------------------+------------------+--------------------+-----------------+-----------------+------------------------+
 | id [int8] | company_id [int8] | issue_number [varchar] | title [varchar]                | source [varchar] | status [varchar] | severity [varchar] | owner_id [int8] | due_date [date] | created_at [timestamp] |
 +-----------+-------------------+------------------------+--------------------------------+------------------+------------------+--------------------+-----------------+-----------------+------------------------+
-| 1         | 3                 | ISSUE-01               | Missing daily storage temper.. | CONTROL_TEST     | OPEN             | MEDIUM             | 207             | 2026-07-05      | 2026-07-10 17:44:36    |
-| 2         | 3                 | ISSUE-02               | Unauthorized access request .. | AUDIT            | OPEN             | HIGH               | 207             | 2026-07-25      | 2026-07-10 17:44:36    |
+| 69        | 3                 | ISSUE-01               | Missing daily storage temper.. | CONTROL_TEST     | OPEN             | MEDIUM             | 207             | 2026-07-18      | 2026-07-23 12:31:20    |
+| 70        | 3                 | ISSUE-02               | Unauthorized access request .. | AUDIT            | OPEN             | HIGH               | 207             | 2026-08-07      | 2026-07-23 12:31:20    |
 +-----------+-------------------+------------------------+--------------------------------+------------------+------------------+--------------------+-----------------+-----------------+------------------------+
 
 
@@ -3344,6 +3455,28 @@ Table: holiday_calendar
 +-----------+------------------------+------------------+------------------------+---------------------+---------------------+---------------------+-----------------------+------------------------+------------------------+
 |                                                                                                  No active records found.                                                                                                  |
 +-----------+------------------------+------------------+------------------------+---------------------+---------------------+---------------------+-----------------------+------------------------+------------------------+
+
+
+Table: holiday_calendars
++-----------+------------------------+-------------+----------------+---------------+------------------------+------------------------+
+| id [int8] | policy_group_id [int8] | year [int4] | name [varchar] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
++-----------+------------------------+-------------+----------------+---------------+------------------------+------------------------+
+| 1         | 1                      | 2026        | Arabica        | false         | 2026-01-16 08:00:00    | 2026-01-21 08:00:00    |
+| 2         | 2                      | 2026        | Robusta        | true          | 2026-01-31 08:00:00    | 2026-02-05 08:00:00    |
+| 3         | 3                      | 2026        | Espresso       | false         | 2026-02-15 08:00:00    | 2026-02-20 08:00:00    |
++-----------+------------------------+-------------+----------------+---------------+------------------------+------------------------+
+
+
+Table: holidays
++-----------+--------------------+------------------------+---------------------+-----------------------+------------------------+------------------------+
+| id [int8] | calendar_id [int8] | holiday_name [varchar] | holiday_date [date] | is_working_day [bool] | created_at [timestamp] | updated_at [timestamp] |
++-----------+--------------------+------------------------+---------------------+-----------------------+------------------------+------------------------+
+| 1         | 1                  | Arabica                | 2026-01-11          | false                 | 2026-01-16 08:00:00    | 2026-01-21 08:00:00    |
+| 2         | 2                  | Robusta                | 2026-01-21          | true                  | 2026-01-31 08:00:00    | 2026-02-05 08:00:00    |
+| 3         | 3                  | Espresso               | 2026-01-31          | false                 | 2026-02-15 08:00:00    | 2026-02-20 08:00:00    |
+| 4         | 1                  | HouseBlend             | 2026-02-10          | true                  | 2026-03-02 08:00:00    | 2026-03-07 08:00:00    |
+| 5         | 2                  | Origin                 | 2026-02-20          | false                 | 2026-03-17 08:00:00    | 2026-03-22 08:00:00    |
++-----------+--------------------+------------------------+---------------------+-----------------------+------------------------+------------------------+
 
 
 Table: in_house_bank_accounts
@@ -3706,6 +3839,48 @@ Table: leave_documents
 +-----------+-----------------+---------------------+---------------------+---------------------+--------------------+-------------------------+-----------------+--------------------+-------------------------+
 
 
+Table: leave_pay_rules
++-----------+-----------------------+----------------------+-----------------+---------------+--------------------------+------------------------+
+| id [int8] | policy_rule_id [int8] | tier_label [varchar] | day_from [int4] | day_to [int4] | pay_percentage [numeric] | created_at [timestamp] |
++-----------+-----------------------+----------------------+-----------------+---------------+--------------------------+------------------------+
+| 1         | 19                    | Full Pay             | 1               | 15            | 100.00                   | 2026-07-22 14:38:48    |
+| 2         | 19                    | Half Pay             | 16              | 45            | 50.00                    | 2026-07-22 14:38:48    |
+| 3         | 19                    | Unpaid               | 46              | 90            | 0.00                     | 2026-07-22 14:38:48    |
++-----------+-----------------------+----------------------+-----------------+---------------+--------------------------+------------------------+
+
+
+Table: leave_policy_change_log
++-----------+------------------------+----------------------+-------------------------+------------------+------------------+---------------------------+------------------------+--------------------------------+----------------------+
+| id [int8] | policy_group_id [int8] | leave_type_id [int8] | field_changed [varchar] | old_value [text] | new_value [text] | changed_by_user_id [int8] | changed_at [timestamp] | reason [text]                  | ip_address [varchar] |
++-----------+------------------------+----------------------+-------------------------+------------------+------------------+---------------------------+------------------------+--------------------------------+----------------------+
+| 1         | 2                      | 18                   | defaultEntitlement      | 30.00            | 32               | 1185                      | 2026-07-22 18:34:23    | Increasing default entitleme.. | 127.0.0.1            |
+| 2         | 2                      | 18                   | monthlyAccrual          | 2.50             | 2.5              | 1185                      | 2026-07-22 18:34:23    | Increasing default entitleme.. | 127.0.0.1            |
+| 3         | 2                      | 18                   | carryForwardLimit       | 5.00             | 5                | 1185                      | 2026-07-22 18:34:23    | Increasing default entitleme.. | 127.0.0.1            |
++-----------+------------------------+----------------------+-------------------------+------------------+------------------+---------------------------+------------------------+--------------------------------+----------------------+
+
+
+Table: leave_policy_groups
++-----------+----------------+-----------------------+--------------------------------+--------------------------------+-------------------------+--------------------------+---------------+------------------------+------------------------+
+| id [int8] | code [varchar] | name [varchar]        | description [text]             | working_days [varchar]         | hours_per_day [numeric] | hours_per_week [numeric] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
++-----------+----------------+-----------------------+--------------------------------+--------------------------------+-------------------------+--------------------------+---------------+------------------------+------------------------+
+| 1         | INDIA          | India Policy          | Applies to all India-based c.. | MONDAY,TUESDAY,WEDNESDAY,THU.. | 8.00                    | 48.00                    | true          | 2026-07-22 14:38:48    | 2026-07-22 14:38:48    |
+| 2         | EU             | European Union Policy | Applies to all EU-based comp.. | MONDAY,TUESDAY,WEDNESDAY,THU.. | 7.00                    | 35.00                    | true          | 2026-07-22 14:38:48    | 2026-07-22 14:38:48    |
+| 3         | UAE            | UAE Policy            | Applies to all UAE-based com.. | MONDAY,TUESDAY,WEDNESDAY,THU.. | 8.00                    | 48.00                    | true          | 2026-07-22 14:38:48    | 2026-07-22 14:38:48    |
++-----------+----------------+-----------------------+--------------------------------+--------------------------------+-------------------------+--------------------------+---------------+------------------------+------------------------+
+
+
+Table: leave_policy_rules
++-----------+------------------------+----------------------+-------------------------------+---------------------------+----------------------------+-----------------------------+---------------------+------------------------+-------------------------------------+-----------------------+------------------------------+------------------------------+-------------------------------+------------------------------------+---------------------------+-----------------------------------+------------------------------------------+--------------------------+-------------------------+----------------+---------------------+-----------------------+----------------+-----------------------+---------------------+------------------------+------------------------+
+| id [int8] | policy_group_id [int8] | leave_type_id [int8] | default_entitlement [numeric] | monthly_accrual [numeric] | entitlement_unit [varchar] | max_consecutive_days [int4] | max_per_year [int4] | min_notice_days [int4] | document_required_after_days [int4] | allow_half_day [bool] | minimum_leave_unit [numeric] | carry_forward_allowed [bool] | carry_forward_limit [numeric] | carry_forward_expiry_months [int4] | encashment_allowed [bool] | maximum_encashment_days [numeric] | minimum_balance_for_encashment [numeric] | approval_level [varchar] | approval_mode [varchar] | is_paid [bool] | is_protected [bool] | lifetime_limit [int4] | version [int4] | effective_from [date] | effective_to [date] | created_at [timestamp] | updated_at [timestamp] |
++-----------+------------------------+----------------------+-------------------------------+---------------------------+----------------------------+-----------------------------+---------------------+------------------------+-------------------------------------+-----------------------+------------------------------+------------------------------+-------------------------------+------------------------------------+---------------------------+-----------------------------------+------------------------------------------+--------------------------+-------------------------+----------------+---------------------+-----------------------+----------------+-----------------------+---------------------+------------------------+------------------------+
+| 1         | 1                      | 18                   | 18.00                         | 1.50                      | WORKING_DAYS               | NULL                        | 18                  | 7                      | 0                                   | true                  | 0.50                         | true                         | 10.00                         | 6                                  | true                      | 10.00                             | 5.00                                     | STORE_ADMIN              | MANAGER_APPROVAL        | true           | false               | NULL                  | 1              | 2025-01-01            | NULL                | 2026-07-22 14:38:48    | 2026-07-22 14:38:48    |
+| 2         | 1                      | 19                   | 12.00                         | NULL                      | WORKING_DAYS               | NULL                        | 12                  | 0                      | 2                                   | true                  | 0.50                         | false                        | NULL                          | NULL                               | false                     | NULL                              | NULL                                     | SHIFT_SUPERVISOR         | MANAGER_APPROVAL        | true           | false               | NULL                  | 1              | 2025-01-01            | NULL                | 2026-07-22 14:38:48    | 2026-07-22 14:38:48    |
+| 3         | 1                      | 20                   | 12.00                         | NULL                      | WORKING_DAYS               | NULL                        | 12                  | 0                      | 0                                   | true                  | 0.50                         | false                        | NULL                          | NULL                               | false                     | NULL                              | NULL                                     | SHIFT_SUPERVISOR         | MANAGER_APPROVAL        | true           | false               | NULL                  | 1              | 2025-01-01            | NULL                | 2026-07-22 14:38:48    | 2026-07-22 14:38:48    |
+| 4         | 1                      | 21                   | NULL                          | NULL                      | WORKING_DAYS               | NULL                        | NULL                | 0                      | 0                                   | true                  | 0.50                         | false                        | NULL                          | NULL                               | false                     | NULL                              | NULL                                     | STORE_ADMIN              | MANAGER_APPROVAL        | false          | false               | NULL                  | 1              | 2025-01-01            | NULL                | 2026-07-22 14:38:48    | 2026-07-22 14:38:48    |
+| 5         | 1                      | 22                   | 182.00                        | NULL                      | CALENDAR_DAYS              | NULL                        | NULL                | 0                      | 0                                   | true                  | 1.00                         | false                        | NULL                          | NULL                               | false                     | NULL                              | NULL                                     | AUTO_APPROVED            | SYSTEM_APPROVAL         | true           | true                | NULL                  | 1              | 2025-01-01            | NULL                | 2026-07-22 14:38:48    | 2026-07-22 14:38:48    |
++-----------+------------------------+----------------------+-------------------------------+---------------------------+----------------------------+-----------------------------+---------------------+------------------------+-------------------------------------+-----------------------+------------------------------+------------------------------+-------------------------------+------------------------------------+---------------------------+-----------------------------------+------------------------------------------+--------------------------+-------------------------+----------------+---------------------+-----------------------+----------------+-----------------------+---------------------+------------------------+------------------------+
+
+
 Table: leave_types
 +-----------+----------------+-----------------+-------------+---------------------+----------------------+---------------+------------------------+------------------------+--------------------------+------------------+--------------------------+---------------------------+-----------------------------+------------------------+
 | id [int8] | code [varchar] | name [varchar]  | paid [bool] | annual_limit [int4] | carry_forward [bool] | active [bool] | created_at [timestamp] | updated_at [timestamp] | approval_level [varchar] | protected [bool] | requires_document [bool] | monthly_accrual [numeric] | max_consecutive_days [int4] | min_notice_days [int4] |
@@ -3719,15 +3894,11 @@ Table: leave_types
 
 
 Table: location_stock
-+-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+
-| id [int8] | company_id [int8] | location_id [int8] | product_id [int8] | lot_number [varchar] | serial_number [varchar] | quantity [numeric] | reserved_quantity [numeric] | available_quantity [numeric] | expiry_date [date] | manufacture_date [date] | receipt_date [date] | unit_cost [numeric] | abc_class [varchar] | version [int8] | created_at [timestamp] | updated_at [timestamp] | owner_company_id [int8] |
-+-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+
-| 1         | 3                 | 1                  | 524               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
-| 2         | 3                 | 1                  | 525               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
-| 3         | 3                 | 1                  | 526               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
-| 4         | 3                 | 1                  | 527               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
-| 5         | 3                 | 1                  | 528               | LOT-STD-001          | NULL                    | 500.000000         | 0.000000                    | 500.000000                   | 2027-12-31         | 2026-07-01              | 2026-07-14          | 1.500000            | A                   | 0              | 2026-07-14 15:05:55    | 2026-07-14 15:05:55    | NULL                    |
-+-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+
++-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+--------------------+
+| id [int8] | company_id [int8] | location_id [int8] | product_id [int8] | lot_number [varchar] | serial_number [varchar] | quantity [numeric] | reserved_quantity [numeric] | available_quantity [numeric] | expiry_date [date] | manufacture_date [date] | receipt_date [date] | unit_cost [numeric] | abc_class [varchar] | version [int8] | created_at [timestamp] | updated_at [timestamp] | owner_company_id [int8] | supplier_id [int8] |
++-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+--------------------+
+|                                                                                                                                                                                                           No active records found.                                                                                                                                                                                                           |
++-----------+-------------------+--------------------+-------------------+----------------------+-------------------------+--------------------+-----------------------------+------------------------------+--------------------+-------------------------+---------------------+---------------------+---------------------+----------------+------------------------+------------------------+-------------------------+--------------------+
 
 
 Table: lot_genealogy
@@ -3976,6 +4147,18 @@ Table: offline_event_queue
 +-----------+-------------------+---------------------+----------------------+---------------------+------------------+-----------------------+-----------------------+----------------------+
 |                                                                                  No active records found.                                                                                  |
 +-----------+-------------------+---------------------+----------------------+---------------------+------------------+-----------------------+-----------------------+----------------------+
+
+
+Table: overtime_requests
++-----------+--------------------+-----------------+-----------------------+-----------------+------------------+------------------+-------------------------+--------------------+------------------------+------------------------+
+| id [int8] | employee_id [int8] | store_id [int8] | requested_date [date] | shift_id [int8] | reason [varchar] | status [varchar] | resolved_at [timestamp] | resolved_by [int8] | created_at [timestamp] | updated_at [timestamp] |
++-----------+--------------------+-----------------+-----------------------+-----------------+------------------+------------------+-------------------------+--------------------+------------------------+------------------------+
+| 1         | 207                | 12              | 2026-01-11            | 9               | Routine entry #1 | ACTIVE           | 2026-01-16 08:00:00     | 207                | 2026-01-16 08:00:00    | 2026-01-21 08:00:00    |
+| 2         | 211                | 14              | 2026-01-21            | 10              | Routine entry #2 | PENDING          | 2026-01-31 08:00:00     | 211                | 2026-01-31 08:00:00    | 2026-02-05 08:00:00    |
+| 3         | 212                | 13              | 2026-01-31            | 11              | Routine entry #3 | DONE             | 2026-02-15 08:00:00     | 212                | 2026-02-15 08:00:00    | 2026-02-20 08:00:00    |
+| 4         | 213                | 15              | 2026-02-10            | 9               | Routine entry #4 | APPROVED         | 2026-03-02 08:00:00     | 213                | 2026-03-02 08:00:00    | 2026-03-07 08:00:00    |
+| 5         | 216                | 18              | 2026-02-20            | 10              | Routine entry #5 | CLOSED           | 2026-03-17 08:00:00     | 214                | 2026-03-17 08:00:00    | 2026-03-22 08:00:00    |
++-----------+--------------------+-----------------+-----------------------+-----------------+------------------+------------------+-------------------------+--------------------+------------------------+------------------------+
 
 
 Table: overtime_rules
@@ -5803,15 +5986,15 @@ Table: production_scrap
 
 
 Table: products
-+-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
-| id [int8] | sku [varchar] | name [varchar]     | category_id [int8] | unit_id [int8] | product_type [varchar] | reorder_level [numeric] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
-| 524       | ING-BEA-ARA   | Arabica Beans      | 102                | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
-| 525       | ING-BEA-ROB   | Robusta Beans      | 102                | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
-| 526       | ING-BEA-ESP   | Espresso Blend     | 102                | 12             | RAW_MATERIAL           | 30.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
-| 527       | ING-BEA-HOU   | House Blend        | 102                | 12             | RAW_MATERIAL           | 25.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
-| 528       | ING-BEA-DEC   | Decaf Coffee Beans | 102                | 12             | RAW_MATERIAL           | 10.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    |
-+-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+
++-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+---------------------+
+| id [int8] | sku [varchar] | name [varchar]     | category_id [int8] | unit_id [int8] | product_type [varchar] | reorder_level [numeric] | active [bool] | created_at [timestamp] | updated_at [timestamp] | image_url [varchar] |
++-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+---------------------+
+| 524       | ING-BEA-ARA   | Arabica Beans      | 102                | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    | NULL                |
+| 525       | ING-BEA-ROB   | Robusta Beans      | 102                | 12             | RAW_MATERIAL           | 20.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    | NULL                |
+| 526       | ING-BEA-ESP   | Espresso Blend     | 102                | 12             | RAW_MATERIAL           | 30.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    | NULL                |
+| 527       | ING-BEA-HOU   | House Blend        | 102                | 12             | RAW_MATERIAL           | 25.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    | NULL                |
+| 528       | ING-BEA-DEC   | Decaf Coffee Beans | 102                | 12             | RAW_MATERIAL           | 10.00                   | true          | 2026-07-14 14:55:44    | 2026-07-14 14:55:44    | NULL                |
++-----------+---------------+--------------------+--------------------+----------------+------------------------+-------------------------+---------------+------------------------+------------------------+---------------------+
 
 
 Table: project_analytics_snapshots
@@ -6211,11 +6394,11 @@ Table: serial_genealogy
 
 
 Table: shifts
-+-----------+----------------+----------------+-------------------+-------------------+-----------------+----------------------+------------------+---------------+------------------------+------------------------+
-| id [int8] | code [varchar] | name [varchar] | company_id [int8] | start_time [time] | end_time [time] | break_minutes [int4] | overnight [bool] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+----------------+----------------+-------------------+-------------------+-----------------+----------------------+------------------+---------------+------------------------+------------------------+
-|                                                                                             No active records found.                                                                                              |
-+-----------+----------------+----------------+-------------------+-------------------+-----------------+----------------------+------------------+---------------+------------------------+------------------------+
++-----------+----------------+----------------+-------------------+-------------------+-----------------+----------------------+------------------+---------------+------------------------+------------------------+----------------------+----------------------+----------------------+
+| id [int8] | code [varchar] | name [varchar] | company_id [int8] | start_time [time] | end_time [time] | break_minutes [int4] | overnight [bool] | active [bool] | created_at [timestamp] | updated_at [timestamp] | shift_type [varchar] | min_employees [int4] | max_employees [int4] |
++-----------+----------------+----------------+-------------------+-------------------+-----------------+----------------------+------------------+---------------+------------------------+------------------------+----------------------+----------------------+----------------------+
+|                                                                                                                                No active records found.                                                                                                                                |
++-----------+----------------+----------------+-------------------+-------------------+-----------------+----------------------+------------------+---------------+------------------------+------------------------+----------------------+----------------------+----------------------+
 
 
 Table: shipment_lines
@@ -6370,16 +6553,28 @@ Table: stock_transfers
 +-----------+---------------------------+----------------------------+------------------------+---------------------------------+-----------------------------+---------------------+------------------+--------------------------+--------------------+-------------------------+--------------------------+
 
 
+Table: store_documents
++-----------+-----------------+-------------------------+-------------------------+---------------------+-------------------------+
+| id [int8] | store_id [int8] | document_type [varchar] | document_name [varchar] | file_path [varchar] | uploaded_at [timestamp] |
++-----------+-----------------+-------------------------+-------------------------+---------------------+-------------------------+
+| 1         | 12              | DEBIT                   | Arabica                 | /doc/1.pdf          | 2026-01-16 08:00:00     |
+| 2         | 14              | CREDIT                  | Robusta                 | /doc/2.pdf          | 2026-01-31 08:00:00     |
+| 3         | 13              | TRANSFER                | Espresso                | /doc/3.pdf          | 2026-02-15 08:00:00     |
+| 4         | 15              | ADJUSTMENT              | HouseBlend              | /doc/4.pdf          | 2026-03-02 08:00:00     |
+| 5         | 18              | REVERSAL                | Origin                  | /doc/5.pdf          | 2026-03-17 08:00:00     |
++-----------+-----------------+-------------------------+-------------------------+---------------------+-------------------------+
+
+
 Table: stores
-+-----------+----------------+--------------------------------+--------------------------------+-----------------+--------------------------------+--------------------+---------------------+------------------+---------------------+---------------+------------------------+------------------------+
-| id [int8] | code [varchar] | name [varchar]                 | address [varchar]              | phone [varchar] | email [varchar]                | timezone [varchar] | opening_date [date] | region_id [int8] | warehouse_id [int8] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+----------------+--------------------------------+--------------------------------+-----------------+--------------------------------+--------------------+---------------------+------------------+---------------------+---------------+------------------------+------------------------+
-| 12        | ST_EU_01       | Paris Flagship Store           | NULL                           | NULL            | NULL                           | Europe/Paris       | NULL                | 10               | 4                   | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
-| 14        | ST_IND_01      | Mumbai Hub Store               | NULL                           | NULL            | NULL                           | Asia/Kolkata       | NULL                | 11               | 6                   | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
-| 13        | ST_DXB_01      | Dubai Mall Store               | NULL                           | NULL            | NULL                           | Asia/Dubai         | NULL                | 12               | 5                   | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
-| 15        | ST_FR_REG_1_01 | Ile-de-France Store 01         | Main Street, Ile-de-France     | +12345678900    | store_st_fr_reg_1_01@plus33... | Europe/Paris       | 2026-07-08          | 13               | 4                   | true          | 2026-07-08 15:11:50    | 2026-07-08 15:11:50    |
-| 18        | ST_FR_REG_2_01 | Provence-Alpes-Cote d'Azur S.. | Main Street, Provence-Alpes-.. | +12345678910    | store_st_fr_reg_2_01@plus33... | Europe/Paris       | 2026-07-08          | 14               | 4                   | true          | 2026-07-08 15:11:50    | 2026-07-08 15:11:50    |
-+-----------+----------------+--------------------------------+--------------------------------+-----------------+--------------------------------+--------------------+---------------------+------------------+---------------------+---------------+------------------------+------------------------+
++-----------+----------------+--------------------------------+--------------------------------+-----------------+--------------------------------+--------------------+---------------------+------------------+---------------------+---------------+------------------------+------------------------+----------------+--------------------+---------------------+-------------------------------+-----------------------------------+---------------------------+---------------------+-------------------------+----------------------------+------------------------+--------------------------------+----------------------+------------------------+------------------------+
+| id [int8] | code [varchar] | name [varchar]                 | address [varchar]              | phone [varchar] | email [varchar]                | timezone [varchar] | opening_date [date] | region_id [int8] | warehouse_id [int8] | active [bool] | created_at [timestamp] | updated_at [timestamp] | type [varchar] | latitude [numeric] | longitude [numeric] | geofence_radius_meters [int4] | leave_policy_group_code [varchar] | operating_hours [varchar] | wifi_ssid [varchar] | wifi_password [varchar] | low_stock_threshold [int4] | sales_target [numeric] | receipt_footer [text]          | admin_name [varchar] | admin_number [varchar] | admin_mobile [varchar] |
++-----------+----------------+--------------------------------+--------------------------------+-----------------+--------------------------------+--------------------+---------------------+------------------+---------------------+---------------+------------------------+------------------------+----------------+--------------------+---------------------+-------------------------------+-----------------------------------+---------------------------+---------------------+-------------------------+----------------------------+------------------------+--------------------------------+----------------------+------------------------+------------------------+
+| 12        | ST_EU_01       | Paris Flagship Store           | NULL                           | NULL            | NULL                           | Europe/Paris       | NULL                | 10               | 4                   | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    | COMPACT_CAFE   | NULL               | NULL                | 200                           | NULL                              | 08:00 - 22:00             | PLUS33-Guest        | CoffeeBreak             | 50                         | 10000.00               | Thank you for visiting PLUS3.. | giri                 | EMP10245               | +919999999999          |
+| 14        | ST_IND_01      | Mumbai Hub Store               | NULL                           | NULL            | NULL                           | Asia/Kolkata       | NULL                | 11               | 6                   | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    | COMPACT_CAFE   | NULL               | NULL                | 200                           | NULL                              | 08:00 - 22:00             | PLUS33-Guest        | CoffeeBreak             | 50                         | 10000.00               | Thank you for visiting PLUS3.. | giri                 | EMP10245               | +919999999999          |
+| 13        | ST_DXB_01      | Dubai Mall Store               | NULL                           | NULL            | NULL                           | Asia/Dubai         | NULL                | 12               | 5                   | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    | COMPACT_CAFE   | NULL               | NULL                | 200                           | NULL                              | 08:00 - 22:00             | PLUS33-Guest        | CoffeeBreak             | 50                         | 10000.00               | Thank you for visiting PLUS3.. | giri                 | EMP10245               | +919999999999          |
+| 15        | ST_FR_REG_1_01 | Ile-de-France Store 01         | Main Street, Ile-de-France     | +12345678900    | store_st_fr_reg_1_01@plus33... | Europe/Paris       | 2026-07-08          | 13               | 4                   | true          | 2026-07-08 15:11:50    | 2026-07-18 17:03:17    | COMPACT_CAFE   | 48.85661200        | 2.35223400          | 150                           | NULL                              | 08:00 - 22:00             | PLUS33-Guest        | CoffeeBreak             | 50                         | 10000.00               | Thank you for visiting PLUS3.. | giri                 | EMP10245               | +919999999999          |
+| 18        | ST_FR_REG_2_01 | Provence-Alpes-Cote d'Azur S.. | Main Street, Provence-Alpes-.. | +12345678910    | store_st_fr_reg_2_01@plus33... | Europe/Paris       | 2026-07-08          | 14               | 4                   | true          | 2026-07-08 15:11:50    | 2026-07-08 15:11:50    | COMPACT_CAFE   | NULL               | NULL                | 200                           | NULL                              | 08:00 - 22:00             | PLUS33-Guest        | CoffeeBreak             | 50                         | 10000.00               | Thank you for visiting PLUS3.. | giri                 | EMP10245               | +919999999999          |
++-----------+----------------+--------------------------------+--------------------------------+-----------------+--------------------------------+--------------------+---------------------+------------------+---------------------+---------------+------------------------+------------------------+----------------+--------------------+---------------------+-------------------------------+-----------------------------------+---------------------------+---------------------+-------------------------+----------------------------+------------------------+--------------------------------+----------------------+------------------------+------------------------+
 
 
 Table: supplier_invoice_items
@@ -6394,11 +6589,11 @@ Table: supplier_invoices
 +-----------+-------------------+--------------------+--------------------------+--------------------------+---------------------+-----------------+------------------------+------------------+-------------------------+------------------------+------------------------+---------------------------+----------------------+---------------------------+-----------------------+-------------------------------+-------------------------+----------------+-----------------------+
 | id [int8] | company_id [int8] | supplier_id [int8] | purchase_order_id [int8] | invoice_number [varchar] | invoice_date [date] | due_date [date] | total_amount [numeric] | status [varchar] | currency_code [varchar] | created_at [timestamp] | updated_at [timestamp] | subtotal_amount [numeric] | tax_amount [numeric] | discount_amount [numeric] | paid_amount [numeric] | outstanding_balance [numeric] | journal_entry_id [int8] | version [int8] | payment_run_id [int8] |
 +-----------+-------------------+--------------------+--------------------------+--------------------------+---------------------+-----------------+------------------------+------------------+-------------------------+------------------------+------------------------+---------------------------+----------------------+---------------------------+-----------------------+-------------------------------+-------------------------+----------------+-----------------------+
-| 32        | 3                 | 31                 | NULL                     | INV-SUPP-20260711        | 2026-07-11          | NULL            | 3292.00                | PAID             | EUR                     | 2026-07-11 15:32:38    | 2026-07-11 15:32:38    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
-| 33        | 3                 | 31                 | NULL                     | INV-SUPP-20260710        | 2026-07-10          | NULL            | 3458.00                | PAID             | EUR                     | 2026-07-11 15:32:38    | 2026-07-11 15:32:38    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
-| 34        | 3                 | 31                 | NULL                     | INV-SUPP-20260709        | 2026-07-09          | NULL            | 3065.00                | PAID             | EUR                     | 2026-07-11 15:32:38    | 2026-07-11 15:32:38    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
-| 35        | 3                 | 31                 | NULL                     | INV-SUPP-20260708        | 2026-07-08          | NULL            | 3410.00                | PAID             | EUR                     | 2026-07-11 15:32:38    | 2026-07-11 15:32:38    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
-| 36        | 3                 | 31                 | NULL                     | INV-SUPP-20260707        | 2026-07-07          | NULL            | 3499.00                | PAID             | EUR                     | 2026-07-11 15:32:38    | 2026-07-11 15:32:38    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
+| 65        | 3                 | 31                 | 9999                     | R-04004                  | 2026-02-10          | 2026-02-10      | 4002.00                | APPROVED         | INR                     | 2026-03-02 08:00:00    | 2026-03-07 08:00:00    | 4002.00                   | 4002.00              | 4002.00                   | 4002.00               | 4002.00                       | NULL                    | 400            | NULL                  |
+| 67        | 3                 | 31                 | NULL                     | INV-SUPP-20260723        | 2026-07-23          | NULL            | 3292.00                | PAID             | EUR                     | 2026-07-23 12:31:20    | 2026-07-23 12:31:20    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
+| 68        | 3                 | 31                 | NULL                     | INV-SUPP-20260722        | 2026-07-22          | NULL            | 3458.00                | PAID             | EUR                     | 2026-07-23 12:31:20    | 2026-07-23 12:31:20    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
+| 69        | 3                 | 31                 | NULL                     | INV-SUPP-20260721        | 2026-07-21          | NULL            | 3065.00                | PAID             | EUR                     | 2026-07-23 12:31:20    | 2026-07-23 12:31:20    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
+| 70        | 3                 | 31                 | NULL                     | INV-SUPP-20260720        | 2026-07-20          | NULL            | 3410.00                | PAID             | EUR                     | 2026-07-23 12:31:20    | 2026-07-23 12:31:20    | 0.00                      | 0.00                 | 0.00                      | 0.00                  | 0.00                          | NULL                    | 0              | NULL                  |
 +-----------+-------------------+--------------------+--------------------------+--------------------------+---------------------+-----------------+------------------------+------------------+-------------------------+------------------------+------------------------+---------------------------+----------------------+---------------------------+-----------------------+-------------------------------+-------------------------+----------------+-----------------------+
 
 
@@ -6747,15 +6942,15 @@ Table: user_warehouses
 
 
 Table: users
-+-----------+------------------------------+--------------------------------+----------------------+---------------------+---------------+------------------------+------------------------+
-| id [int8] | email [varchar]              | password [varchar]             | first_name [varchar] | last_name [varchar] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+------------------------------+--------------------------------+----------------------+---------------------+---------------+------------------------+------------------------+
-| 207       | ultimate123@plus33.com       | $2a$10$CEvzjS0qbP22egOndJtyH.. | Ultimate             | Admin               | true          | 2026-07-07 16:16:10    | 2026-07-07 16:16:10    |
-| 211       | regional_eu@plus33.com       | $2a$10$CEvzjS0qbP22egOndJtyH.. | Amit                 | Sharma              | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    |
-| 212       | regional_dxb@plus33.com      | $2a$10$CEvzjS0qbP22egOndJtyH.. | Fatima               | Al-Mansoori         | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    |
-| 213       | regional_ind@plus33.com      | $2a$10$CEvzjS0qbP22egOndJtyH.. | Rajesh               | Kumar               | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    |
-| 214       | regional_north_fr@plus33.com | $2a$10$CEvzjS0qbP22egOndJtyH.. | Jean                 | Dupont              | true          | 2026-07-07 18:11:51    | 2026-07-07 18:11:51    |
-+-----------+------------------------------+--------------------------------+----------------------+---------------------+---------------+------------------------+------------------------+
++-----------+------------------------------+--------------------------------+----------------------+---------------------+---------------+------------------------+------------------------+----------------------+
+| id [int8] | email [varchar]              | password [varchar]             | first_name [varchar] | last_name [varchar] | active [bool] | created_at [timestamp] | updated_at [timestamp] | avatar_url [varchar] |
++-----------+------------------------------+--------------------------------+----------------------+---------------------+---------------+------------------------+------------------------+----------------------+
+| 207       | ultimate123@plus33.com       | $2a$10$CEvzjS0qbP22egOndJtyH.. | Ultimate             | Admin               | true          | 2026-07-07 16:16:10    | 2026-07-07 16:16:10    | NULL                 |
+| 211       | regional_eu@plus33.com       | $2a$10$CEvzjS0qbP22egOndJtyH.. | Amit                 | Sharma              | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    | NULL                 |
+| 212       | regional_dxb@plus33.com      | $2a$10$CEvzjS0qbP22egOndJtyH.. | Fatima               | Al-Mansoori         | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    | NULL                 |
+| 213       | regional_ind@plus33.com      | $2a$10$CEvzjS0qbP22egOndJtyH.. | Rajesh               | Kumar               | true          | 2026-07-07 17:38:04    | 2026-07-07 17:38:04    | NULL                 |
+| 214       | regional_north_fr@plus33.com | $2a$10$CEvzjS0qbP22egOndJtyH.. | Jean                 | Dupont              | true          | 2026-07-07 18:11:51    | 2026-07-07 18:11:51    | NULL                 |
++-----------+------------------------------+--------------------------------+----------------------+---------------------+---------------+------------------------+------------------------+----------------------+
 
 
 Table: warehouse_edges
@@ -6789,6 +6984,8 @@ Table: warehouse_locations
 | 1         | 3                 | 4                   | 1              | LOC-STD-01              | NULL            | NULL           | NULL            | NULL          | STANDARD                | 10                   | NULL                    | NULL                    | 1                  | C                        | true          | true               | true                 | false               | false               | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
 | 2         | 3                 | 5                   | 2              | LOC-STD-01              | NULL            | NULL           | NULL            | NULL          | STANDARD                | 10                   | NULL                    | NULL                    | 1                  | C                        | true          | true               | true                 | false               | false               | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
 | 3         | 3                 | 6                   | 3              | LOC-STD-01              | NULL            | NULL           | NULL            | NULL          | STANDARD                | 10                   | NULL                    | NULL                    | 1                  | C                        | true          | true               | true                 | false               | false               | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
+| 4         | 3                 | 19                  | 4              | LOC-STD-01              | NULL            | NULL           | NULL            | NULL          | BULK                    | 0                    | NULL                    | NULL                    | 1                  | C                        | true          | true               | true                 | false               | false               | 2026-07-14 16:38:37    | 2026-07-14 16:38:37    |
+| 5         | 3                 | 20                  | 5              | LOC-STD-01              | NULL            | NULL           | NULL            | NULL          | BULK                    | 0                    | NULL                    | NULL                    | 1                  | C                        | true          | true               | true                 | false               | false               | 2026-07-14 16:38:37    | 2026-07-14 16:38:37    |
 +-----------+-------------------+---------------------+----------------+-------------------------+-----------------+----------------+-----------------+---------------+-------------------------+----------------------+-------------------------+-------------------------+--------------------+--------------------------+---------------+--------------------+----------------------+---------------------+---------------------+------------------------+------------------------+
 
 
@@ -6841,23 +7038,27 @@ Table: warehouse_workflows
 
 
 Table: warehouse_zones
-+-----------+-------------------+---------------------+----------------+-------------------+---------------------+-----------------------+---------------+----------------------+------------------------+------------------------+
-| id [int8] | company_id [int8] | warehouse_id [int8] | code [varchar] | name [varchar]    | zone_type [varchar] | description [varchar] | active [bool] | sort_sequence [int4] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+-------------------+---------------------+----------------+-------------------+---------------------+-----------------------+---------------+----------------------+------------------------+------------------------+
-| 1         | 3                 | 4                   | ZONE-MAIN      | Main Storage Zone | BULK                | NULL                  | true          | 10                   | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 2         | 3                 | 5                   | ZONE-MAIN      | Main Storage Zone | BULK                | NULL                  | true          | 10                   | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-| 3         | 3                 | 6                   | ZONE-MAIN      | Main Storage Zone | BULK                | NULL                  | true          | 10                   | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
-+-----------+-------------------+---------------------+----------------+-------------------+---------------------+-----------------------+---------------+----------------------+------------------------+------------------------+
++-----------+-------------------+---------------------+----------------+-----------------------+---------------------+-----------------------+---------------+----------------------+------------------------+------------------------+
+| id [int8] | company_id [int8] | warehouse_id [int8] | code [varchar] | name [varchar]        | zone_type [varchar] | description [varchar] | active [bool] | sort_sequence [int4] | created_at [timestamp] | updated_at [timestamp] |
++-----------+-------------------+---------------------+----------------+-----------------------+---------------------+-----------------------+---------------+----------------------+------------------------+------------------------+
+| 1         | 3                 | 4                   | ZONE-MAIN      | Main Storage Zone     | BULK                | NULL                  | true          | 10                   | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
+| 2         | 3                 | 5                   | ZONE-MAIN      | Main Storage Zone     | BULK                | NULL                  | true          | 10                   | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
+| 3         | 3                 | 6                   | ZONE-MAIN      | Main Storage Zone     | BULK                | NULL                  | true          | 10                   | 2026-07-07 17:20:40    | 2026-07-07 17:20:40    |
+| 4         | 3                 | 19                  | ZONE-STD       | Standard Storage Zone | BULK                | NULL                  | true          | 10                   | 2026-07-14 16:38:37    | 2026-07-14 16:38:37    |
+| 5         | 3                 | 20                  | ZONE-STD       | Standard Storage Zone | BULK                | NULL                  | true          | 10                   | 2026-07-14 16:38:37    | 2026-07-14 16:38:37    |
++-----------+-------------------+---------------------+----------------+-----------------------+---------------------+-----------------------+---------------+----------------------+------------------------+------------------------+
 
 
 Table: warehouses
-+-----------+----------------+-------------------------+-------------------+-----------------+-----------------+--------------------+---------------------+------------------+---------------+------------------------+------------------------+
-| id [int8] | code [varchar] | name [varchar]          | address [varchar] | phone [varchar] | email [varchar] | timezone [varchar] | opening_date [date] | region_id [int8] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
-+-----------+----------------+-------------------------+-------------------+-----------------+-----------------+--------------------+---------------------+------------------+---------------+------------------------+------------------------+
-| 4         | WH_EU_01       | EU Central Warehouse    | NULL              | NULL            | NULL            | Europe/Paris       | NULL                | 10               | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
-| 6         | WH_IND_01      | India Central Warehouse | NULL              | NULL            | NULL            | Asia/Kolkata       | NULL                | 11               | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
-| 5         | WH_DXB_01      | Dubai Central Warehouse | NULL              | NULL            | NULL            | Asia/Dubai         | NULL                | 12               | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
-+-----------+----------------+-------------------------+-------------------+-----------------+-----------------+--------------------+---------------------+------------------+---------------+------------------------+------------------------+
++-----------+----------------+---------------------------+----------------------------+-----------------+-------------------------------+--------------------+---------------------+------------------+---------------+------------------------+------------------------+
+| id [int8] | code [varchar] | name [varchar]            | address [varchar]          | phone [varchar] | email [varchar]               | timezone [varchar] | opening_date [date] | region_id [int8] | active [bool] | created_at [timestamp] | updated_at [timestamp] |
++-----------+----------------+---------------------------+----------------------------+-----------------+-------------------------------+--------------------+---------------------+------------------+---------------+------------------------+------------------------+
+| 4         | WH_EU_01       | EU Central Warehouse      | NULL                       | NULL            | NULL                          | Europe/Paris       | NULL                | 10               | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
+| 6         | WH_IND_01      | India Central Warehouse   | NULL                       | NULL            | NULL                          | Asia/Kolkata       | NULL                | 11               | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
+| 5         | WH_DXB_01      | Dubai Central Warehouse   | NULL                       | NULL            | NULL                          | Asia/Dubai         | NULL                | 12               | true          | 2026-07-07 17:02:16    | 2026-07-07 17:02:16    |
+| 19        | WH_FR_NAT      | France National Warehouse | 10 Rue de la Nation, Paris | +33-1-00-00-01  | france.nat.wh@plus33coffee.fr | Europe/Paris       | 2026-07-01          | 7                | true          | 2026-07-14 16:38:37    | 2026-07-14 16:38:37    |
+| 20        | WH_AE_NAT      | UAE National Warehouse    | Sheikh Zayed Road, Dubai   | +971-4-00-00-01 | uae.nat.wh@plus33coffee.fr    | Asia/Dubai         | 2026-07-01          | 8                | true          | 2026-07-14 16:38:37    | 2026-07-14 16:38:37    |
++-----------+----------------+---------------------------+----------------------------+-----------------+-------------------------------+--------------------+---------------------+------------------+---------------+------------------------+------------------------+
 
 
 Table: waste_records
@@ -6874,6 +7075,18 @@ Table: waves
 +-----------+-------------------+---------------------+-----------------------+---------------------+------------------+----------------------------+-----------------+---------------------+--------------+-------------------+-------------------------+--------------------------+------------------------+------------------------+
 |                                                                                                                                                      No active records found.                                                                                                                                                       |
 +-----------+-------------------+---------------------+-----------------------+---------------------+------------------+----------------------------+-----------------+---------------------+--------------+-------------------+-------------------------+--------------------------+------------------------+------------------------+
+
+
+Table: weekly_off_rules
++-----------+------------------------+-----------------------+------------------------+
+| id [int8] | policy_group_id [int8] | day_of_week [varchar] | created_at [timestamp] |
++-----------+------------------------+-----------------------+------------------------+
+| 2         | 3                      | SUNDAY                | 2026-07-22 14:38:48    |
+| 3         | 2                      | SATURDAY              | 2026-07-22 14:38:48    |
+| 4         | 2                      | SUNDAY                | 2026-07-22 14:38:48    |
+| 7         | 1                      | WEDNESDAY             | 2026-07-22 17:52:41    |
+| 8         | 1                      | SUNDAY                | 2026-07-22 17:52:41    |
++-----------+------------------------+-----------------------+------------------------+
 
 
 Table: weekly_product_demand_summary

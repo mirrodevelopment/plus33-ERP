@@ -56,6 +56,7 @@ export default class StoreAdminDashboard {
     this.pendingLeaves = [];
     this.awayPermissions = [];
     this.ongoingAwayPermissions = [];
+    this.pendingOvertime = [];
     
     // Downtown schedule telemetry presets
     this.scheduleRoster = [
@@ -140,11 +141,12 @@ export default class StoreAdminDashboard {
         this.employees = [];
       }
 
-      // Fetch pending leaves, away permissions, and ongoing away permissions for approvals card
-      const [pendingRes, awayRes, ongoingAwayRes] = await Promise.all([
+      // Fetch pending leaves, away permissions, ongoing away permissions, and pending overtime requests for approvals card
+      const [pendingRes, awayRes, ongoingAwayRes, pendingOtRes] = await Promise.all([
         apiClient.get('/leaves/pending').catch(() => null),
         apiClient.get('/api/v1/away-permission/pending').catch(() => null),
-        apiClient.get('/api/v1/away-permission/ongoing').catch(() => null)
+        apiClient.get('/api/v1/away-permission/ongoing').catch(() => null),
+        apiClient.get('/api/v1/overtime-requests/pending').catch(() => null)
       ]);
       if (pendingRes?.success) {
         this.pendingLeaves = pendingRes.data?.pending || [];
@@ -153,6 +155,7 @@ export default class StoreAdminDashboard {
       }
       this.awayPermissions = awayRes?.success ? (awayRes.data || []) : [];
       this.ongoingAwayPermissions = ongoingAwayRes?.success ? (ongoingAwayRes.data || []) : [];
+      this.pendingOvertime = pendingOtRes?.success ? (pendingOtRes.data || []) : [];
     } catch (err) {
       logger.error('StoreAdminDashboard', 'Failed to fetch backend metrics overview', err);
     }
@@ -759,6 +762,48 @@ export default class StoreAdminDashboard {
       }
     }
 
+    // 1.5. Render Overtime Requests
+    const overtimeList = container.querySelector('#sa-pending-overtime-list');
+    if (overtimeList) {
+      overtimeList.replaceChildren();
+      if (this.pendingOvertime.length === 0) {
+        overtimeList.innerHTML = `
+          <div class="empty-approvals-banner" style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.8rem;">
+            <i data-lucide="check-square" style="width: 24px; height: 24px; margin-bottom: 8px; color: var(--accent-warning); display: block; margin-left: auto; margin-right: auto;"></i>
+            <div>All overtime processed</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">No pending overtime requests.</div>
+          </div>
+        `;
+      } else {
+        this.pendingOvertime.forEach(req => {
+          const item = document.createElement('div');
+          item.className = 'approval-item-card';
+          item.style.cssText = 'background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;';
+          
+          item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">${req.employeeName || 'Employee'}</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">${req.shiftName || 'Shift'}</div>
+              </div>
+              <span style="font-size: 0.65rem; background: rgba(245,158,11,0.12); color: var(--accent-warning); border: 1px solid rgba(245,158,11,0.2); padding: 2px 6px; border-radius: 4px; font-weight: 600;">PENDING</span>
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary);">
+              <strong>Requested Date:</strong> ${req.requestedDateDisplay || req.requestedDate || ''}
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary);">
+              <strong>Reason:</strong> <em>${req.reason || 'No reason provided'}</em>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <button type="button" class="btn btn-primary btn-sa-ot-approve" data-id="${req.id}" style="flex: 1; padding: 6px; font-size: 0.74rem;">✓ Approve</button>
+              <button type="button" class="btn btn-danger btn-sa-ot-reject" data-id="${req.id}" style="flex: 1; padding: 6px; font-size: 0.74rem;">✕ Deny</button>
+            </div>
+          `;
+          overtimeList.appendChild(item);
+        });
+      }
+    }
+
     // 2. Render Away Passes
     if (awayList) {
       awayList.replaceChildren();
@@ -938,6 +983,54 @@ export default class StoreAdminDashboard {
       modalSubmit.addEventListener('click', handleConfirmReject);
       lifecycle.onCleanup(() => modalSubmit.removeEventListener('click', handleConfirmReject));
     }
+
+    // 1.5. Approve Overtime Request
+    const otApproveBtns = container.querySelectorAll('.btn-sa-ot-approve');
+    otApproveBtns.forEach(btn => {
+      const otId = btn.getAttribute('data-id');
+      const handleApprove = async () => {
+        btn.disabled = true;
+        try {
+          const res = await apiClient.put(`/api/v1/overtime-requests/${otId}/approve`, {});
+          if (res?.success) {
+            notificationStore.success('Overtime request approved successfully.');
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to approve overtime request.');
+            btn.disabled = false;
+          }
+        } catch (err) {
+          notificationStore.danger('Error approving overtime: ' + err.message);
+          btn.disabled = false;
+        }
+      };
+      btn.addEventListener('click', handleApprove);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handleApprove));
+    });
+
+    // 1.6. Deny Overtime Request
+    const otRejectBtns = container.querySelectorAll('.btn-sa-ot-reject');
+    otRejectBtns.forEach(btn => {
+      const otId = btn.getAttribute('data-id');
+      const handleReject = async () => {
+        btn.disabled = true;
+        try {
+          const res = await apiClient.put(`/api/v1/overtime-requests/${otId}/deny`, {});
+          if (res?.success) {
+            notificationStore.success('Overtime request denied.');
+            await this.loadAndRender(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to deny overtime request.');
+            btn.disabled = false;
+          }
+        } catch (err) {
+          notificationStore.danger('Error denying overtime: ' + err.message);
+          btn.disabled = false;
+        }
+      };
+      btn.addEventListener('click', handleReject);
+      lifecycle.onCleanup(() => btn.removeEventListener('click', handleReject));
+    });
 
     // 3. Approve Away Pass
     const awayApproveBtns = container.querySelectorAll('.btn-sa-away-approve');

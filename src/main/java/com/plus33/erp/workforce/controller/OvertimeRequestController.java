@@ -92,8 +92,8 @@ public class OvertimeRequestController {
         String reason = (String) payload.get("reason");
 
         LocalDate today = LocalDate.now();
-        if (!requestedDate.isAfter(today)) {
-            return ResponseEntity.badRequest().body(ApiResponse.error("Overtime requests must be submitted for future dates."));
+        if (requestedDate.isBefore(today)) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Overtime requests cannot be submitted for past dates."));
         }
 
         // Validate shift exists

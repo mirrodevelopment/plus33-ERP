@@ -77,12 +77,69 @@ public class ShiftController {
         }
     }
 
+    private void ensureDefaultShifts() {
+        if (shiftRepository.count() == 0) {
+            Company company = companyRepository.findAll().stream().findFirst()
+                    .orElseGet(() -> {
+                        Company c = new Company();
+                        c.setCode("PLUS33_COFFEE");
+                        c.setName("PLUS33 Coffee");
+                        c.setLegalName("PLUS33 Coffee SAS");
+                        c.setCountryCode("FR");
+                        c.setActive(true);
+                        c.setCreatedAt(LocalDateTime.now());
+                        c.setUpdatedAt(LocalDateTime.now());
+                        return companyRepository.save(c);
+                    });
+
+            Shift morn = new Shift();
+            morn.setCode("SHIFT_MORN");
+            morn.setName("Morning Shift");
+            morn.setCompany(company);
+            morn.setStartTime(LocalTime.of(6, 0));
+            morn.setEndTime(LocalTime.of(14, 0));
+            morn.setBreakMinutes(30);
+            morn.setOvernight(false);
+            morn.setActive(true);
+            morn.setCreatedAt(LocalDateTime.now());
+            morn.setUpdatedAt(LocalDateTime.now());
+            shiftRepository.save(morn);
+
+            Shift aft = new Shift();
+            aft.setCode("SHIFT_AFT");
+            aft.setName("Afternoon Shift");
+            aft.setCompany(company);
+            aft.setStartTime(LocalTime.of(14, 0));
+            aft.setEndTime(LocalTime.of(22, 0));
+            aft.setBreakMinutes(30);
+            aft.setOvernight(false);
+            aft.setActive(true);
+            aft.setCreatedAt(LocalDateTime.now());
+            aft.setUpdatedAt(LocalDateTime.now());
+            shiftRepository.save(aft);
+
+            Shift nght = new Shift();
+            nght.setCode("SHIFT_NGHT");
+            nght.setName("Night Shift");
+            nght.setCompany(company);
+            nght.setStartTime(LocalTime.of(22, 0));
+            nght.setEndTime(LocalTime.of(6, 0));
+            nght.setBreakMinutes(30);
+            nght.setOvernight(true);
+            nght.setActive(true);
+            nght.setCreatedAt(LocalDateTime.now());
+            nght.setUpdatedAt(LocalDateTime.now());
+            shiftRepository.save(nght);
+        }
+    }
+
     /**
      * GET /api/v1/shifts
      * Returns a list of all configured shifts.
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getShifts() {
+        ensureDefaultShifts();
         List<Shift> shifts = shiftRepository.findAll();
         List<Map<String, Object>> result = new ArrayList<>();
         
