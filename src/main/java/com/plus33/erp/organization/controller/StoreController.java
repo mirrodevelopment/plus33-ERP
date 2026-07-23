@@ -276,4 +276,51 @@ public class StoreController {
         result.put("message", "Store location saved. This will remain active until you update it again.");
         return ResponseEntity.ok(ApiResponse.success(result));
     }
+
+    @PostMapping(value = "/{id}/documents", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('STORE_UPDATE')")
+    @Operation(summary = "Upload store document", description = "Uploads a compliance/licensing document for the store.")
+    public ResponseEntity<ApiResponse<com.plus33.erp.organization.dto.StoreDocumentResponse>> uploadStoreDocument(
+            @PathVariable Long id,
+            @RequestParam("documentType") String documentType,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BusinessException("Uploaded file is empty.");
+        }
+        if (file.getSize() > 10 * 1024 * 1024) { // 10MB limit
+            throw new BusinessException("File size exceeds the 10MB limit.");
+        }
+
+        try {
+            java.nio.file.Path uploadDir = java.nio.file.Paths.get("storage/documents");
+            if (!java.nio.file.Files.exists(uploadDir)) {
+                java.nio.file.Files.createDirectories(uploadDir);
+            }
+
+            String originalName = file.getOriginalFilename();
+            String extension = "";
+            if (originalName != null && originalName.contains(".")) {
+                extension = originalName.substring(originalName.lastIndexOf("."));
+            }
+            String uniqueName = java.util.UUID.randomUUID().toString() + extension;
+            java.nio.file.Path targetPath = uploadDir.resolve(uniqueName);
+            java.nio.file.Files.copy(file.getInputStream(), targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+            String relativePath = "storage/documents/" + uniqueName;
+            com.plus33.erp.organization.dto.StoreDocumentResponse doc = storeService.uploadDocument(id, documentType, originalName, relativePath);
+            return ResponseEntity.ok(ApiResponse.success("Document uploaded successfully", doc));
+        } catch (java.io.IOException e) {
+            throw new BusinessException("Failed to save uploaded file: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}/documents/{docId}")
+    @PreAuthorize("hasAuthority('STORE_UPDATE')")
+    @Operation(summary = "Delete store document", description = "Deletes a compliance/licensing document by its ID.")
+    public ResponseEntity<ApiResponse<Void>> deleteStoreDocument(
+            @PathVariable Long id,
+            @PathVariable Long docId) {
+        storeService.deleteDocument(id, docId);
+        return ResponseEntity.ok(ApiResponse.success("Document deleted successfully", null));
+    }
 }

@@ -87,5 +87,14 @@ public record StoreRequest(
         Boolean active,
 
         @Schema(description = "Store type", example = "COMPACT_CAFE")
-        String type
+        String type,
+
+        @Schema(description = "Store Admin Name", example = "giri")
+        String adminName,
+
+        @Schema(description = "Store Admin Number", example = "EMP10245")
+        String adminNumber,
+
+        @Schema(description = "Store Admin Mobile Contact", example = "+919999999999")
+        String adminMobile
 ) {}

@@ -124,6 +124,7 @@ export const routes = [
   },
   
   // Newly Registered Placeholder Navigation Routes
+  { path: '#leave-policy-admin', page: 'modules/national-admin/pages/leave-policy/leave-policy.js', layout: 'dashboard', title: 'Leave Policy Management', requiresAuth: true },
   { path: '#national-management', page: 'modules/ultimate-admin/pages/national/national.js', layout: 'dashboard', title: 'National Management', requiresAuth: true },
   { path: '#regions', page: 'modules/ultimate-admin/pages/regions/regions.js', layout: 'dashboard', title: 'Regions Management', requiresAuth: true },
   { path: '#stores', page: 'modules/ultimate-admin/pages/stores/stores.js', layout: 'dashboard', title: 'Stores Management', requiresAuth: true },
@@ -152,8 +153,8 @@ export const routes = [
   { path: '#attendance', page: 'modules/store-employee/pages/attendance/attendance.js', layout: 'dashboard', title: 'Attendance Logs', requiresAuth: true },
   { path: '#training', page: 'modules/store-employee/pages/training/training.js', layout: 'dashboard', title: 'Training & Certifications', requiresAuth: true },
   { path: '#performance', page: 'modules/store-employee/pages/performance/performance.js', layout: 'dashboard', title: 'Performance Metrics', requiresAuth: true },
-  { path: '#leave', page: 'modules/store-employee/pages/leave/leave.js', layout: 'dashboard', title: 'Time Off Requests', requiresAuth: true },
-  { path: '#supervisor-leaves', page: 'modules/store-employee/pages/supervisor-leaves/leaves.js', layout: 'dashboard', title: 'Barista Time Off Requests', requiresAuth: true },
+  { path: '#leave', page: 'modules/store-employee/pages/leave/leave.js', layout: 'dashboard', title: 'Apply Leave', requiresAuth: true },
+  { path: '#supervisor-leaves', page: 'modules/store-employee/pages/supervisor-leaves/leaves.js', layout: 'dashboard', title: 'Leave Management', requiresAuth: true },
   { path: '#announcements', page: 'modules/store-employee/pages/announcements/announcements.js', layout: 'dashboard', title: 'Announcements Board', requiresAuth: true },
   { path: '#supervisor-announcements', page: 'modules/store-employee/pages/supervisor-announcements/announcements.js', layout: 'dashboard', title: 'Broadcast Announcements', requiresAuth: true },
   { path: '#store-announcements', page: 'modules/store-admin/pages/announcements/announcements.js', layout: 'dashboard', title: 'Broadcast Announcements', requiresAuth: true },
@@ -181,6 +182,7 @@ export const routes = [
   { path: '#store-leave', page: 'modules/store-admin/pages/leave/leave.js', layout: 'dashboard', title: 'Leave Management', requiresAuth: true },
   { path: '#store-workforce', page: 'modules/store-admin/pages/workforce/workforce.js', layout: 'dashboard', title: 'Store Workforce Overview', requiresAuth: true },
   { path: '#store-settings', page: 'modules/store-admin/pages/settings/settings.js', layout: 'dashboard', title: 'Store Settings', requiresAuth: true },
+  { path: '#store-pending-approvals', page: 'modules/store-admin/pages/pending-approvals/pending-approvals.js', layout: 'dashboard', title: 'Store Pending Approvals Hub', requiresAuth: true },
   { path: '#documents', page: 'modules/store-employee/pages/documents/documents.js', layout: 'dashboard', title: 'Documents Center', requiresAuth: true },
   { path: '#payslips', page: 'modules/store-employee/pages/payslips/payslips.js', layout: 'dashboard', title: 'Earnings & Payslips', requiresAuth: true },
   { path: '#profile', page: 'shared/profile/profile.js', layout: 'dashboard', title: 'User Profile', requiresAuth: true },
@@ -189,7 +191,8 @@ export const routes = [
   { path: '#regional-profile', page: 'modules/regional-admin/pages/profile/profile.js', layout: 'dashboard', title: 'Regional Admin Profile', requiresAuth: true },
   { path: '#store-profile', page: 'modules/store-admin/pages/profile/profile.js', layout: 'dashboard', title: 'Store Admin Profile', requiresAuth: true },
   { path: '#supervisor-profile', page: 'modules/store-employee/pages/profile-supervisor/profile.js', layout: 'dashboard', title: 'Supervisor Profile', requiresAuth: true },
-  { path: '#employee-profile', page: 'modules/store-employee/pages/profile-employee/profile.js', layout: 'dashboard', title: 'Employee Profile', requiresAuth: true }
+  { path: '#employee-profile', page: 'modules/store-employee/pages/profile-employee/profile.js', layout: 'dashboard', title: 'Employee Profile', requiresAuth: true },
+  { path: '#leave-policy-booklet', page: 'shared/leave-policy-booklet/booklet.js', layout: 'dashboard', title: 'Leave Policy Booklet', requiresAuth: true }
 ];
 
 export const defaultRoute = '#dashboard';

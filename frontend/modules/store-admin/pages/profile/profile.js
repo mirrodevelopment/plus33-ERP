@@ -67,6 +67,16 @@ export default class StoreAdminProfilePage {
       if (response && response.success && response.data) {
         this.profile = response.data;
         userStore.updateProfile(this.user?.role, response.data);
+        if (response.data.storeId) {
+          try {
+            const storeRes = await apiClient.get(`/api/v1/stores/${response.data.storeId}`);
+            if (storeRes && storeRes.success && storeRes.data) {
+              this.storeInfo = storeRes.data;
+            }
+          } catch (err) {
+            logger.error('StoreAdminProfile', 'Error loading store detailed info:', err);
+          }
+        }
       }
     } catch (e) { logger.error('StoreAdminProfile', 'Error loading profile:', e); }
   }
@@ -131,6 +141,24 @@ export default class StoreAdminProfilePage {
     Object.entries(fields).forEach(([sel, val]) => { const el = container.querySelector(sel); if (el) el.value = val; });
     const genderSelect = container.querySelector('#input-store-gender');
     if (genderSelect) genderSelect.value = p.gender || 'Female';
+
+    // Store Profile Details card data
+    const si = this.storeInfo || {};
+    const setField = (sel, val) => {
+      const el = container.querySelector(sel);
+      if (el) el.value = val || '—';
+    };
+    setField('#input-store-profile-name', si.name);
+    setField('#input-store-profile-code', si.code);
+    setField('#input-store-profile-type', si.type);
+    setField('#input-store-profile-timezone', si.timezone);
+    setField('#input-store-profile-address', si.address);
+    setField('#input-store-profile-region', (si.regionCode || '') + (si.countryCode ? ' (' + si.countryCode + ')' : ''));
+    setField('#input-store-profile-phone', si.phone);
+    setField('#input-store-profile-email', si.email);
+    setField('#input-store-profile-admin-name', si.adminName);
+    setField('#input-store-profile-admin-code', si.adminNumber);
+    setField('#input-store-profile-admin-mobile', si.adminMobile);
 
     // Feature card data
     const fcName = container.querySelector('#fc-store-name'); if (fcName) fcName.textContent = storeName || '—';

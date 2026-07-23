@@ -9,9 +9,49 @@ REM ---------------------------------------------------
 REM [0/4] Kill old processes on ports 8080 and 3000
 REM ---------------------------------------------------
 echo [0/4] Killing old processes on ports 8080 and 3000...
-powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8080,3000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | Sort-Object -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }"
-echo   Waiting for ports to clear...
-ping 127.0.0.1 -n 3 >nul
+
+for /f "usebackq tokens=*" %%L in (`powershell -NoProfile -Command "$procs = Get-NetTCPConnection -LocalPort 8080,3000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | Sort-Object -Unique; if (-not $procs) { Write-Output 'NONE' } else { foreach ($p in $procs) { try { $n = (Get-Process -Id $p -ErrorAction Stop).ProcessName } catch { $n = 'unknown' }; Write-Output ('KILLED PID ' + $p + ' (' + $n + ')'); Stop-Process -Id $p -Force -ErrorAction SilentlyContinue } }"`) do (
+    if "%%L"=="NONE" (
+        echo   No old process found on ports 8080/3000.
+    ) else (
+        echo   %%L
+    )
+)
+
+REM Give processes a moment to die, then verify the ports are actually free.
+REM Retry the kill + wait loop instead of trusting a single fixed delay.
+set /a clear_attempts=0
+set /a clear_max=10
+
+:wait_ports_clear
+set "port_busy="
+for %%P in (8080 3000) do (
+    powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort %%P -ErrorAction SilentlyContinue) { exit 1 } else { exit 0 }" >nul 2>nul
+    if errorlevel 1 set "port_busy=1"
+)
+
+if defined port_busy (
+    set /a clear_attempts+=1
+    if !clear_attempts! geq !clear_max! (
+        echo.
+        echo   Ports still busy after !clear_max! attempts, forcing kill of all java.exe...
+        taskkill /F /IM java.exe >nul 2>&1
+        if errorlevel 1 (
+            echo   No matching java.exe processes were running.
+        ) else (
+            echo   Killed all running java.exe processes.
+        )
+        ping 127.0.0.1 -n 3 >nul
+        goto ports_cleared
+    )
+    <nul set /p =.
+    ping 127.0.0.1 -n 2 >nul
+    goto wait_ports_clear
+)
+
+:ports_cleared
+echo.
+echo   Ports 8080 and 3000 are clear.
 
 REM ---------------------------------------------------
 REM [1/4] Compile backend if needed
@@ -49,7 +89,8 @@ REM ---------------------------------------------------
 REM [3/4] Start backend
 REM ---------------------------------------------------
 echo [3/4] Starting Spring Boot Backend (Port 8080)...
-start "PLUS33 Backend" /D "%~dp0" cmd /k "java -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Dspring.jmx.enabled=false -Dspring.main.lazy-initialization=true -Dspring.main.banner-mode=off "-Dspring.config.location=file:target/classes/application.properties" -cp target/classes;target/dependency/* com.plus33.erp.Plus33ErpApplication"
+
+start "PLUS33 Backend" /D "%~dp0" cmd /k "java -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Dspring.jmx.enabled=false -Dspring.main.lazy-initialization=true -Dspring.main.banner-mode=off -Dspring.config.location=file:target/classes/application.properties -cp target/classes;target/dependency/* com.plus33.erp.Plus33ErpApplication"
 
 REM ---------------------------------------------------
 REM [4/4] Compile + start frontend
@@ -73,8 +114,8 @@ set /a attempts=0
 set /a max_attempts=60
 
 :wait_backend
-powershell -NoProfile -Command "try { $null = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction Stop; exit 0 } catch { exit 1 }" >nul 2>&1
-if %errorlevel% equ 0 goto backend_ready
+powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>nul
+if !errorlevel! equ 0 goto backend_ready
 
 set /a attempts+=1
 if !attempts! geq !max_attempts! (
@@ -85,7 +126,7 @@ if !attempts! geq !max_attempts! (
     exit /b 1
 )
 <nul set /p =.
-ping 127.0.0.1 -n 2 >nul
+ping 127.0.0.1 -n 3 >nul
 goto wait_backend
 
 :backend_ready
@@ -101,8 +142,8 @@ set /a attempts=0
 set /a max_attempts=30
 
 :wait_frontend
-powershell -NoProfile -Command "try { $null = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction Stop; exit 0 } catch { exit 1 }" >nul 2>&1
-if %errorlevel% equ 0 goto frontend_ready
+powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>nul
+if !errorlevel! equ 0 goto frontend_ready
 
 set /a attempts+=1
 if !attempts! geq !max_attempts! (
@@ -113,7 +154,7 @@ if !attempts! geq !max_attempts! (
     exit /b 1
 )
 <nul set /p =.
-ping 127.0.0.1 -n 2 >nul
+ping 127.0.0.1 -n 3 >nul
 goto wait_frontend
 
 :frontend_ready

@@ -1,0 +1,57 @@
+16:34:01.788 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to System property 'spring.devtools.restart.enabled' being set to false
+2026-07-22T16:34:02.906+05:30  INFO 15928 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : Starting Plus33ErpApplication using Java 17.0.17 with PID 15928 (D:\plus33\plus33-erp\target\classes started by admin in D:\plus33\plus33-erp)
+2026-07-22T16:34:02.913+05:30  INFO 15928 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-07-22T16:34:03.075+05:30  INFO 15928 --- [plus33-erp] [           main] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-07-22T16:35:06.459+05:30  INFO 15928 --- [plus33-erp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-22T16:35:15.957+05:30  INFO 15928 --- [plus33-erp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 9468 ms. Found 156 JPA repository interfaces.
+2026-07-22T16:35:28.079+05:30  INFO 15928 --- [plus33-erp] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-07-22T16:35:28.113+05:30  INFO 15928 --- [plus33-erp] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-22T16:35:28.113+05:30  INFO 15928 --- [plus33-erp] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-07-22T16:35:28.256+05:30  INFO 15928 --- [plus33-erp] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 85179 ms
+2026-07-22T16:35:29.113+05:30  INFO 15928 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-22T16:35:29.565+05:30  INFO 15928 --- [plus33-erp] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@151f1734
+2026-07-22T16:35:29.569+05:30  INFO 15928 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-22T16:35:29.641+05:30  INFO 15928 --- [plus33-erp] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5432/plus33_erp (PostgreSQL 17.10)
+2026-07-22T16:35:30.090+05:30  INFO 15928 --- [plus33-erp] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 432
+2026-07-22T16:35:30.093+05:30 ERROR 15928 --- [plus33-erp] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" has version 432, but no migration could be resolved in the configured locations !
+2026-07-22T16:35:30.105+05:30  INFO 15928 --- [plus33-erp] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-07-22T16:35:30.623+05:30  INFO 15928 --- [plus33-erp] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-22T16:35:30.770+05:30  INFO 15928 --- [plus33-erp] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.23.Final
+2026-07-22T16:35:31.984+05:30  INFO 15928 --- [plus33-erp] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-22T16:35:32.166+05:30  INFO 15928 --- [plus33-erp] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/plus33_erp]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 17.10
+	Default catalog/schema: plus33_erp/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-22T16:35:53.846+05:30  INFO 15928 --- [plus33-erp] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-22T16:35:54.374+05:30  INFO 15928 --- [plus33-erp] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-22T16:35:54.533+05:30  WARN 15928 --- [plus33-erp] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'fixedAssetDepreciationScheduler' defined in file [D:\plus33\plus33-erp\target\classes\com\plus33\erp\finance\assets\service\FixedAssetDepreciationScheduler.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'fixedAssetServiceImpl' defined in file [D:\plus33\plus33-erp\target\classes\com\plus33\erp\finance\assets\service\FixedAssetServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: No qualifying bean of type 'com.plus33.erp.organization.repository.CompanyRepository' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2026-07-22T16:35:54.533+05:30  INFO 15928 --- [plus33-erp] [           main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-22T16:35:54.539+05:30  INFO 15928 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-07-22T16:35:54.545+05:30  INFO 15928 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-07-22T16:35:54.549+05:30  INFO 15928 --- [plus33-erp] [           main] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-07-22T16:35:54.580+05:30  INFO 15928 --- [plus33-erp] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-07-22T16:35:54.671+05:30 ERROR 15928 --- [plus33-erp] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in com.plus33.erp.finance.assets.service.FixedAssetServiceImpl required a bean of type 'com.plus33.erp.organization.repository.CompanyRepository' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.plus33.erp.organization.repository.CompanyRepository' in your configuration.
+

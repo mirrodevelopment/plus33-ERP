@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 /******************************************************************************
  * Project           : PLUS33 Coffee ERP
  * Developed By      : Haulo
@@ -136,6 +136,47 @@
         <button type="submit" id="btn-store-update-password" class="store-btn-primary full-width">🔒 Update Security Credentials</button>
       </form>
     </div>
+
+    <!-- Store Profile Details Card -->
+    <div class="store-profile-card">
+      <div class="store-profile-card__header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="store-profile-card__icon">🏪</div>
+          <div>
+            <h3 class="store-profile-card__title">Store Profile &amp; Location</h3>
+            <span class="store-profile-card__sub">Assigned store metadata &amp; administrative info</span>
+          </div>
+        </div>
+      </div>
+      <form class="store-profile-form" style="pointer-events: none;">
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Store Name</label><div class="store-form-input-wrap"><span class="store-form-icon">🏪</span><input type="text" id="input-store-profile-name" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Store ID / Code</label><div class="store-form-input-wrap"><span class="store-form-icon">🪪</span><input type="text" id="input-store-profile-code" disabled class="store-form-input"></div></div>
+        </div>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Store Type</label><div class="store-form-input-wrap"><span class="store-form-icon">☕</span><input type="text" id="input-store-profile-type" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Timezone</label><div class="store-form-input-wrap"><span class="store-form-icon">🌐</span><input type="text" id="input-store-profile-timezone" disabled class="store-form-input"></div></div>
+        </div>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Address</label><div class="store-form-input-wrap"><span class="store-form-icon">📍</span><input type="text" id="input-store-profile-address" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Region &amp; Country</label><div class="store-form-input-wrap"><span class="store-form-icon">🌍</span><input type="text" id="input-store-profile-region" disabled class="store-form-input"></div></div>
+        </div>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Contact Phone</label><div class="store-form-input-wrap"><span class="store-form-icon">📞</span><input type="text" id="input-store-profile-phone" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Contact Email</label><div class="store-form-input-wrap"><span class="store-form-icon">✉️</span><input type="text" id="input-store-profile-email" disabled class="store-form-input"></div></div>
+        </div>
+        <div class="store-banking-header">
+          <span>👑 Administrative Store Contact</span>
+        </div>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Admin Name</label><div class="store-form-input-wrap"><span class="store-form-icon">👤</span><input type="text" id="input-store-profile-admin-name" disabled class="store-form-input"></div></div>
+          <div class="store-form-group"><label class="store-form-label">Admin Code</label><div class="store-form-input-wrap"><span class="store-form-icon">🪪</span><input type="text" id="input-store-profile-admin-code" disabled class="store-form-input"></div></div>
+        </div>
+        <div class="store-form-row">
+          <div class="store-form-group"><label class="store-form-label">Admin Mobile</label><div class="store-form-input-wrap"><span class="store-form-icon">📞</span><input type="text" id="input-store-profile-admin-mobile" disabled class="store-form-input"></div></div>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- ROW 2: 4 Feature Cards -->
@@ -154,7 +195,7 @@
         <div class="store-feature-card__row"><span class="store-feature-card__lbl">Compliance Standard</span><strong class="store-feature-card__val">Store Manager Onboarding</strong></div>
         <div class="store-feature-card__row"><span class="store-feature-card__lbl">Verification Status</span><strong id="fc-store-doc-status" style="color:#f59e0b;">Pending Review</strong></div>
       </div>
-      <button type="button" onclick="document.querySelector('.doc-hub-grid-wrapper')?.scrollIntoView({behavior:'smooth'});" class="store-feature-card__btn store-feature-card__btn--amber">Go to Verification Hub</button>
+      <button type="button" onclick="window.location.hash='#store-pending-approvals'" class="store-feature-card__btn store-feature-card__btn--amber">Go to Verification Hub</button>
     </div>
     <div class="store-feature-card store-feature-card--cyan">
       <div class="store-feature-card__header"><span class="store-feature-card__icon">👥</span><div><h4 class="store-feature-card__title">Workforce Summary</h4><span class="store-feature-card__sub" style="color:#06b6d4;">Team Overview</span></div></div>

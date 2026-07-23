@@ -1,50 +1,77 @@
 <!--
- ******************************************************************************
+ * *****************************************************************************
  * Project           : PLUS33 Coffee ERP
  * Module            : Store Employee — Supervisor Leaves
  * File              : leaves.html
  * Path              : frontend/modules/store-employee/supervisor-leaves/leaves.html
- * Purpose           : HTML template for Shift Supervisor leave approvals hub UI
- * Version           : 2.0.0
- *
- * Related JS        : leaves.js
- * Related CSS       : leaves.css
- *
- * Description
- * ---------------------------------------------------------------------------
- * Structural layout of pending requests feeds lists, cancellation requests lists,
- * reject comment popup modals, and loading indicator slots.
- * No inline styles, no inline javascript event handlers.
- ******************************************************************************
+ * Purpose           : HTML template for Shift Supervisor leave approvals hub UI matching mockup
+ * Version           : 3.0.0
+ * *****************************************************************************
 -->
 
 <div class="supervisor-leaves-workspace animate-fade-in">
 
   <!-- ===== PAGE HEADER ===== -->
-  <div class="card glass header-banner-card">
-    <div class="welcome-details">
-      <h2 class="welcome-title">Time Off Requests</h2>
-      <p class="welcome-subtitle">
-        Barista Approvals Hub &nbsp;·&nbsp; <span class="highlight-val">Supervisor Dashboard</span>
-      </p>
+  <div class="card glass header-banner-card-new">
+    <div class="header-banner-left">
+      <div class="header-banner-icon-badge">
+        <i data-lucide="clock"></i>
+      </div>
+      <div class="welcome-details">
+        <h2 class="welcome-title-new">Pending Barista Time Off Requests</h2>
+        <p class="welcome-subtitle-new">Review and approve or reject pending time off requests</p>
+      </div>
     </div>
     
-    <div class="header-status-pill" role="status" aria-live="polite">
-      <span class="live-dot" aria-hidden="true">●</span> Active
+    <div class="header-banner-right">
+      <div class="pending-stat-box">
+        <div class="pending-stat-icon">
+          <i data-lucide="hourglass"></i>
+        </div>
+        <div class="pending-stat-details">
+          <span class="pending-stat-number" id="lbl-pending-count-stat">0</span>
+          <span class="pending-stat-label">Pending Requests</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- ===== REQUESTS FEED CONTAINER ===== -->
-  <div class="card glass approvals-main-card">
-    <div class="card-header-split">
-      <h3 class="card-split-title">Pending Barista Time Off Requests Awaiting Your Approval</h3>
-      <span class="pending-count-badge font-bold" id="lbl-pending-count">0 Pending</span>
+  <!-- ===== FILTER TOOLBAR ===== -->
+  <div class="toolbar-row">
+    <div class="toolbar-left-group">
+      <select class="form-select toolbar-select" id="select-status-filter">
+        <option value="ALL">All Status</option>
+        <option value="PENDING">Pending</option>
+        <option value="APPROVED">Approved</option>
+        <option value="REJECTED">Rejected</option>
+      </select>
+      
+      <div class="datepicker-badge">
+        <i data-lucide="calendar"></i>
+        <span id="lbl-date-range-filter">Jul 21, 2026 - Jul 27, 2026</span>
+      </div>
     </div>
+    
+    <div class="toolbar-right-group">
+      <select class="form-select toolbar-select" id="select-sort-filter">
+        <option value="NEWEST">Sort by: Newest First</option>
+        <option value="OLDEST">Sort by: Oldest First</option>
+      </select>
+      
+      <div class="layout-toggle-buttons">
+        <button type="button" class="btn-layout-toggle active" id="btn-grid-layout" title="Grid View">
+          <i data-lucide="layout-grid"></i>
+        </button>
+        <button type="button" class="btn-layout-toggle" id="btn-list-layout" title="List View">
+          <i data-lucide="list"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
-    <!-- Dynamic list grid loader mount point -->
-    <div class="requests-grid-wrapper" id="requests-grid-container">
-      <!-- Injected dynamically by JS/Controller -->
-    </div>
+  <!-- ===== REQUESTS FEED GRID CONTAINER ===== -->
+  <div class="requests-grid-container-new" id="requests-grid-container">
+    <!-- Dynamic list grid cards -->
   </div>
 
   <!-- ===== REJECTION MODAL DIALOG OVERLAY ===== -->
@@ -68,7 +95,6 @@
 
 </div>
 
-
 <!-- ===== LOADING TEMPLATE ===== -->
 <template id="leaves-loading-tpl">
   <div class="loading-state-box">
@@ -76,7 +102,6 @@
     <span class="loading-text font-bold">Loading time off requests...</span>
   </div>
 </template>
-
 
 <!-- ===== EMPTY LIST TEMPLATE ===== -->
 <template id="leaves-empty-list-tpl">
@@ -87,50 +112,115 @@
   </div>
 </template>
 
-
 <!-- ===== LEAVE APPLICATION REQUEST CARD TEMPLATE ===== -->
 <template id="leave-request-card-tpl">
-  <div class="leave-approval-card card glass">
-    <div class="card-header-row">
-      <strong class="employee-name-lbl"></strong>
-      <span class="leave-type-badge font-bold"></span>
+  <div class="leave-approval-card-new card glass">
+    <!-- Header: Avatar, Info, Category Badge -->
+    <div class="card-header-row-new">
+      <div class="card-header-left-new">
+        <div class="avatar-circle-new">
+          <span class="avatar-text-new"></span>
+        </div>
+        <div class="employee-details-new">
+          <strong class="employee-email-lbl"></strong>
+          <span class="employee-role-lbl">Barista</span>
+        </div>
+      </div>
+      <span class="leave-type-badge-new font-bold"></span>
     </div>
 
-    <div class="request-details-body text-muted">
-      <div class="duration-detail"><strong>Duration:</strong> <span class="duration-val"></span></div>
-      <div class="reason-detail"></div>
-      <div class="medical-cert-warning font-bold">
-        <i data-lucide="alert-circle" aria-hidden="true"></i> Medical Certificate Required
+    <!-- Details block (3 columns) -->
+    <div class="request-details-grid-new">
+      <div class="detail-column-new">
+        <div class="detail-label-new">
+          <i data-lucide="calendar"></i> DURATION
+        </div>
+        <div class="detail-value-bold-new duration-days-val"></div>
+        <div class="detail-value-sub-new duration-dates-val"></div>
+      </div>
+      
+      <div class="detail-column-new">
+        <div class="detail-label-new">
+          <i data-lucide="clock"></i> REQUESTED ON
+        </div>
+        <div class="detail-value-bold-new requested-date-val"></div>
+        <div class="detail-value-sub-new requested-time-val"></div>
+      </div>
+      
+      <div class="detail-column-new">
+        <div class="detail-label-new">
+          <i data-lucide="user"></i> REASON
+        </div>
+        <div class="detail-value-quote-new reason-text-val"></div>
       </div>
     </div>
 
-    <div class="comment-input-row">
-      <input type="text" class="supervisor-comment-input form-input" placeholder="Optional approval comment...">
+    <!-- Comment and Warning section -->
+    <div class="medical-cert-warning font-bold" style="display:none;margin-bottom:12px;">
+      <i data-lucide="alert-circle" aria-hidden="true"></i> Medical Certificate Required
     </div>
 
-    <div class="action-buttons-row">
-      <button class="btn btn-approve btn-approve-leave" type="button">Approve</button>
-      <button class="btn btn-reject btn-reject-leave" type="button">Reject</button>
+    <div class="comment-input-row-new">
+      <input type="text" class="supervisor-comment-input-new form-input" placeholder="Optional approval comment...">
+    </div>
+
+    <!-- Actions row -->
+    <div class="action-buttons-row-new">
+      <button class="btn-approve-new btn-approve-leave" type="button">
+        <i data-lucide="check"></i> Approve
+      </button>
+      <button class="btn-reject-new btn-reject-leave" type="button">
+        <i data-lucide="x"></i> Reject
+      </button>
     </div>
   </div>
 </template>
 
-
 <!-- ===== CANCELLATION REQUEST CARD TEMPLATE ===== -->
 <template id="cancellation-request-card-tpl">
-  <div class="leave-approval-card card glass cancellation-style">
-    <div class="card-header-row">
-      <strong class="employee-name-lbl"></strong>
-      <span class="leave-type-badge font-bold"></span>
+  <div class="leave-approval-card-new card glass cancellation-style">
+    <div class="card-header-row-new">
+      <div class="card-header-left-new">
+        <div class="avatar-circle-new">
+          <span class="avatar-text-new"></span>
+        </div>
+        <div class="employee-details-new">
+          <strong class="employee-email-lbl"></strong>
+          <span class="employee-role-lbl">Barista</span>
+        </div>
+      </div>
+      <span class="leave-type-badge-new font-bold cancellation">CANCELLATION</span>
     </div>
 
-    <div class="request-details-body text-muted">
-      <div class="duration-detail"><strong>Duration:</strong> <span class="duration-val"></span></div>
-      <div class="reason-detail"></div>
+    <div class="request-details-grid-new">
+      <div class="detail-column-new">
+        <div class="detail-label-new">
+          <i data-lucide="calendar"></i> DURATION
+        </div>
+        <div class="detail-value-bold-new duration-days-val"></div>
+        <div class="detail-value-sub-new duration-dates-val"></div>
+      </div>
+      
+      <div class="detail-column-new">
+        <div class="detail-label-new">
+          <i data-lucide="clock"></i> REQUESTED ON
+        </div>
+        <div class="detail-value-bold-new requested-date-val"></div>
+        <div class="detail-value-sub-new requested-time-val"></div>
+      </div>
+      
+      <div class="detail-column-new">
+        <div class="detail-label-new">
+          <i data-lucide="user"></i> REASON
+        </div>
+        <div class="detail-value-quote-new reason-text-val"></div>
+      </div>
     </div>
 
-    <div class="action-buttons-row">
-      <button class="btn btn-approve-cancel" type="button">Approve Cancellation</button>
+    <div class="action-buttons-row-new">
+      <button class="btn-approve-new btn-approve-cancel" type="button">
+        <i data-lucide="check"></i> Approve Cancellation
+      </button>
     </div>
   </div>
 </template>

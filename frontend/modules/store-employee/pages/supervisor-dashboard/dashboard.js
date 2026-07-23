@@ -147,12 +147,32 @@ export default class ShiftSupervisorDashboard {
         apiClient.get('/api/v1/away-permission/ongoing').catch(() => null),
         apiClient.get('/api/v1/overtime-requests/pending').catch(() => null)
       ]);
-      if (pendingRes?.success) {
+      if (pendingRes?.success && pendingRes.data) {
         this.pendingLeaves = pendingRes.data?.pending || [];
         this.cancellationRequests = pendingRes.data?.cancellationRequests || [];
       } else {
-        logger.error('ShiftSupervisorDashboard', 'Failed to fetch pending leaves');
+        this.pendingLeaves = [];
+        this.cancellationRequests = [];
       }
+
+      const sharedLeaves = JSON.parse(localStorage.getItem('shared_pending_leaves') || '[]');
+      const existingIds = new Set(this.pendingLeaves.map(l => String(l.id)));
+      sharedLeaves.forEach(s => {
+        if (s.category === 'LEAVE' && s.status === 'PENDING' && !existingIds.has(String(s.id))) {
+          this.pendingLeaves.unshift({
+            id: s.id,
+            employeeName: s.requester?.name || s.employeeName || 'Store Employee',
+            leaveTypeCode: s.leaveType || 'ANNUAL',
+            totalDays: s.daysCount || s.totalDays || 1,
+            startDate: s.startDate,
+            endDate: s.endDate,
+            reason: s.remarks || s.reason || 'Leave application',
+            hasDocument: s.hasDocument || false,
+            requiresDocument: s.requiresDocument || false,
+            isProtected: false
+          });
+        }
+      });
       this.awayPermissions = awayRes?.success ? (awayRes.data || []) : [];
       this.ongoingAwayPermissions = ongoingAwayRes?.success ? (ongoingAwayRes.data || []) : [];
       this.overtimeRequests = otRes?.success ? (otRes.data || []) : [];
@@ -244,6 +264,29 @@ export default class ShiftSupervisorDashboard {
           const response = await apiClient.put(`/leaves/${leaveId}/approve`, { comment });
           if (response?.success) {
             notificationStore.success('Time-off application approved successfully.');
+
+            // Clear from shared_pending_leaves
+            const sharedLeaves = JSON.parse(localStorage.getItem('shared_pending_leaves') || '[]');
+            const idx = sharedLeaves.findIndex(s => String(s.id) === String(leaveId));
+            if (idx !== -1) {
+              sharedLeaves.splice(idx, 1);
+              localStorage.setItem('shared_pending_leaves', JSON.stringify(sharedLeaves));
+            }
+
+            // Update status to APPROVED in user_leaves_* localStorage arrays
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.startsWith('user_leaves_')) {
+                const list = JSON.parse(localStorage.getItem(key) || '[]');
+                const foundIdx = list.findIndex(l => String(l.id) === String(leaveId));
+                if (foundIdx !== -1) {
+                  list[foundIdx].status = 'APPROVED';
+                  localStorage.setItem(key, JSON.stringify(list));
+                }
+              }
+            }
+
+            eventBus.emit('leave:updated', { leaveId, decision: 'APPROVED' });
             await this.loadAndRender(container, lifecycle);
           } else {
             notificationStore.danger(response?.message || 'Failed to approve leave request.');
@@ -291,6 +334,32 @@ export default class ShiftSupervisorDashboard {
           const response = await apiClient.put(`/leaves/${leaveId}/reject`, { rejectionReason: reason });
           if (response?.success) {
             notificationStore.success('Time-off application rejected.');
+
+            // Clear from shared_pending_leaves
+            const sharedLeaves = JSON.parse(localStorage.getItem('shared_pending_leaves') || '[]');
+            const idx = sharedLeaves.findIndex(s => String(s.id) === String(leaveId));
+            if (idx !== -1) {
+              sharedLeaves.splice(idx, 1);
+              localStorage.setItem('shared_pending_leaves', JSON.stringify(sharedLeaves));
+            }
+
+            // Update status to REJECTED in user_leaves_* localStorage arrays
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.startsWith('user_leaves_')) {
+                const list = JSON.parse(localStorage.getItem(key) || '[]');
+                const foundIdx = list.findIndex(l => String(l.id) === String(leaveId));
+                if (foundIdx !== -1) {
+                  list[foundIdx].status = 'REJECTED';
+                  list[foundIdx].rejectedBySupervisor = true;
+                  list[foundIdx].rejectionReason = reason;
+                  localStorage.setItem(key, JSON.stringify(list));
+                }
+              }
+            }
+
+            eventBus.emit('leave:updated', { leaveId, decision: 'REJECTED' });
+
             if (modal) {
               modal.style.display = 'none';
               modal.setAttribute('aria-hidden', 'true');

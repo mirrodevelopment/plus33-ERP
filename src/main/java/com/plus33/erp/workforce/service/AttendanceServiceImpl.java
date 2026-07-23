@@ -32,7 +32,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final EmployeeShiftRepository employeeShiftRepository;
     private final ShiftRepository shiftRepository;
     private final EmployeeLeaveRepository employeeLeaveRepository;
-    private final HolidayCalendarRepository holidayCalendarRepository;
+    private final HolidayRepository holidayRepository;
     private final UserRepository userRepository;
     private final UserStoreRepository userStoreRepository;
     private final LeaveServiceImpl leaveService;
@@ -49,7 +49,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             EmployeeShiftRepository employeeShiftRepository,
             ShiftRepository shiftRepository,
             EmployeeLeaveRepository employeeLeaveRepository,
-            HolidayCalendarRepository holidayCalendarRepository,
+            HolidayRepository holidayRepository,
             UserRepository userRepository,
             UserStoreRepository userStoreRepository,
             LeaveServiceImpl leaveService,
@@ -64,7 +64,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         this.employeeShiftRepository = employeeShiftRepository;
         this.shiftRepository = shiftRepository;
         this.employeeLeaveRepository = employeeLeaveRepository;
-        this.holidayCalendarRepository = holidayCalendarRepository;
+        this.holidayRepository = holidayRepository;
         this.userRepository = userRepository;
         this.userStoreRepository = userStoreRepository;
         this.leaveService = leaveService;
@@ -190,7 +190,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
 
         // Holidays this month
-        long holidayCount = holidayCalendarRepository.findByCountryCodeAndHolidayDateBetween(countryCode, startOfMonth, endOfMonth).size();
+        long holidayCount = holidayRepository.findByCountryCodeAndHolidayDateBetween(countryCode, startOfMonth, endOfMonth).size();
 
         // Weekend days this month
         long weeklyOff = 0;
@@ -206,7 +206,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             final LocalDate dateIter = d;
             boolean hasAtt = currentMonthRecords.stream().anyMatch(r -> r.getAttendanceDate().equals(dateIter) && !r.getStatus().equals("ABSENT"));
             boolean isWeekend = d.getDayOfWeek().getValue() >= 6;
-            boolean isHoliday = holidayCalendarRepository.existsByCountryCodeAndHolidayDate(countryCode, d);
+            boolean isHoliday = holidayRepository.existsByCountryCodeAndHolidayDate(countryCode, d);
             boolean isOnLeave = leaves.stream().anyMatch(l -> !dateIter.isBefore(l.getStartDate()) && !dateIter.isAfter(l.getEndDate()));
 
             if (!hasAtt && !isWeekend && !isHoliday && !isOnLeave) {
@@ -267,7 +267,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         List<Attendance> monthlyRecords = attendanceRepository.findByEmployeeId(employee.getId());
         List<EmployeeLeave> leaves = employeeLeaveRepository.findOverlapping(employee.getId(), startOfMonth, endOfMonth);
         String countryCode = resolveCountryCode(employee);
-        List<HolidayCalendar> holidays = holidayCalendarRepository.findByCountryCodeAndHolidayDateBetween(countryCode, startOfMonth, endOfMonth);
+        List<Holiday> holidays = holidayRepository.findByCountryCodeAndHolidayDateBetween(countryCode, startOfMonth, endOfMonth);
 
         List<Map<String, Object>> calendar = new ArrayList<>();
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.US);
@@ -434,9 +434,12 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new BusinessException("NO_SHIFT_TODAY: You have no shift scheduled for today. Contact your supervisor to request overtime.");
         }
 
-        // ── Guard 2: Employee must be within 30 m of their store ───────────────
+        // ── Guard 2: Employee must be within store's geofence radius ───────────
         Store employeeStore = resolveEmployeeStore(employee);
-        assertWithinGeofence(gps, employeeStore, 30);
+        int radius = (employeeStore != null && employeeStore.getGeofenceRadiusMeters() != null)
+                ? employeeStore.getGeofenceRadiusMeters()
+                : 30;
+        assertWithinGeofence(gps, employeeStore, radius);
 
         Optional<Attendance> attOpt = attendanceRepository.findByEmployeeIdAndAttendanceDate(employee.getId(), today);
         if (attOpt.isPresent() && attOpt.get().getCheckInTime() != null) {

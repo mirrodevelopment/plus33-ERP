@@ -85,20 +85,20 @@ public class StoreServiceImpl implements StoreService {
     private final WarehouseRepository warehouseRepository;
     private final OrganizationMapper organizationMapper;
     private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
-    private final com.plus33.erp.organization.repository.StoreSettingRepository storeSettingRepository;
+    private final com.plus33.erp.organization.repository.StoreDocumentRepository storeDocumentRepository;
 
     public StoreServiceImpl(StoreRepository storeRepository,
                             RegionRepository regionRepository,
                             WarehouseRepository warehouseRepository,
                             OrganizationMapper organizationMapper,
                             org.springframework.jdbc.core.JdbcTemplate jdbcTemplate,
-                            com.plus33.erp.organization.repository.StoreSettingRepository storeSettingRepository) {
+                            com.plus33.erp.organization.repository.StoreDocumentRepository storeDocumentRepository) {
         this.storeRepository = storeRepository;
         this.regionRepository = regionRepository;
         this.warehouseRepository = warehouseRepository;
         this.organizationMapper = organizationMapper;
         this.jdbcTemplate = jdbcTemplate;
-        this.storeSettingRepository = storeSettingRepository;
+        this.storeDocumentRepository = storeDocumentRepository;
     }
 
     /**
@@ -385,7 +385,12 @@ public class StoreServiceImpl implements StoreService {
             response.type(),
             response.latitude(),
             response.longitude(),
-            response.geofenceRadiusMeters()
+            response.geofenceRadiusMeters(),
+            response.countryCode(),
+            response.documents(),
+            response.adminName(),
+            response.adminNumber(),
+            response.adminMobile()
         );
     }
 
@@ -393,15 +398,7 @@ public class StoreServiceImpl implements StoreService {
     public com.plus33.erp.organization.dto.StoreSettingResponse getStoreSettings(Long storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + storeId));
-        
-        com.plus33.erp.organization.entity.StoreSetting setting = storeSettingRepository.findByStoreId(storeId)
-                .orElseGet(() -> {
-                    com.plus33.erp.organization.entity.StoreSetting newSetting = new com.plus33.erp.organization.entity.StoreSetting();
-                    newSetting.setStore(store);
-                    return storeSettingRepository.save(newSetting);
-                });
-        
-        return organizationMapper.toResponse(setting);
+        return organizationMapper.toSettingResponse(store);
     }
 
     @Override
@@ -409,16 +406,57 @@ public class StoreServiceImpl implements StoreService {
     public com.plus33.erp.organization.dto.StoreSettingResponse updateStoreSettings(Long storeId, com.plus33.erp.organization.dto.StoreSettingRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + storeId));
+        organizationMapper.updateStoreSettingsFromRequest(request, store);
+        Store saved = storeRepository.save(store);
+        return organizationMapper.toSettingResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public com.plus33.erp.organization.dto.StoreDocumentResponse uploadDocument(Long storeId, String documentType, String documentName, String filePath) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + storeId));
         
-        com.plus33.erp.organization.entity.StoreSetting setting = storeSettingRepository.findByStoreId(storeId)
-                .orElseGet(() -> {
-                    com.plus33.erp.organization.entity.StoreSetting newSetting = new com.plus33.erp.organization.entity.StoreSetting();
-                    newSetting.setStore(store);
-                    return newSetting;
-                });
+        com.plus33.erp.organization.entity.StoreDocument doc = new com.plus33.erp.organization.entity.StoreDocument();
+        doc.setStore(store);
+        doc.setDocumentType(documentType);
+        doc.setDocumentName(documentName);
+        doc.setFilePath(filePath);
         
-        organizationMapper.updateEntity(request, setting);
-        com.plus33.erp.organization.entity.StoreSetting saved = storeSettingRepository.save(setting);
-        return organizationMapper.toResponse(saved);
+        com.plus33.erp.organization.entity.StoreDocument saved = storeDocumentRepository.save(doc);
+        return new com.plus33.erp.organization.dto.StoreDocumentResponse(
+                saved.getId(),
+                saved.getDocumentType(),
+                saved.getDocumentName(),
+                saved.getFilePath(),
+                saved.getUploadedAt()
+        );
+    }
+
+    @Override
+    @Transactional
+    public void deleteDocument(Long storeId, Long documentId) {
+        com.plus33.erp.organization.entity.StoreDocument doc = storeDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Document not found with ID: " + documentId));
+        if (!doc.getStore().getId().equals(storeId)) {
+            throw new BusinessException("Document does not belong to store " + storeId);
+        }
+        storeDocumentRepository.delete(doc);
+    }
+
+    @Override
+    public List<com.plus33.erp.organization.dto.StoreDocumentResponse> getDocuments(Long storeId) {
+        if (!storeRepository.existsById(storeId)) {
+            throw new ResourceNotFoundException("Store not found with ID: " + storeId);
+        }
+        return storeDocumentRepository.findByStoreId(storeId).stream()
+                .map(d -> new com.plus33.erp.organization.dto.StoreDocumentResponse(
+                        d.getId(),
+                        d.getDocumentType(),
+                        d.getDocumentName(),
+                        d.getFilePath(),
+                        d.getUploadedAt()
+                ))
+                .toList();
     }
 }

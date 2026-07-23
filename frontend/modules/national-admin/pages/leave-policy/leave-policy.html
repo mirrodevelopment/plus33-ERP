@@ -1,0 +1,434 @@
+<!--
+ ******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : National Admin — Leave Policy Management
+ * File              : leave-policy.html
+ * Path              : frontend/modules/national-admin/pages/leave-policy/leave-policy.html
+ * Purpose           : HTML template for administrative Leave Policy Management UI
+ * Version           : 1.0.0
+ ******************************************************************************
+-->
+
+<div class="leave-policy-workspace">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header policy-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">
+        <i data-lucide="sliders" aria-hidden="true"></i>
+        <span>Administration</span>
+      </div>
+      <h1 class="page-title">Leave Policy Management</h1>
+      <p class="page-subtitle">Configure leave policy groups, versioned entitlement rules, pay tiers, holidays, and weekly off schedules.</p>
+    </div>
+    
+    <!-- Policy Group Select Dropdown -->
+    <div class="policy-group-selector-card">
+      <label for="select-policy-group" class="form-label">Active Policy Group</label>
+      <select id="select-policy-group" class="form-select font-semibold">
+        <!-- Loaded dynamically -->
+      </select>
+    </div>
+  </div>
+
+  <!-- ===== SPLIT LAYOUT: LEFT NAV, RIGHT PANELS ===== -->
+  <div class="policy-split-layout">
+    
+    <!-- Left Navigation Panel -->
+    <div class="card glass policy-nav-panel" role="tablist" aria-label="Policy categories">
+      <button class="policy-tab-btn active" data-tab="general" role="tab" aria-selected="true" tabindex="0" type="button">
+        <i data-lucide="info" aria-hidden="true"></i>
+        <span>General Configuration</span>
+      </button>
+      <button class="policy-tab-btn" data-tab="rules" role="tab" aria-selected="false" tabindex="-1" type="button">
+        <i data-lucide="scroll" aria-hidden="true"></i>
+        <span>Entitlement Rules</span>
+      </button>
+      <button class="policy-tab-btn" data-tab="pay" role="tab" aria-selected="false" tabindex="-1" type="button">
+        <i data-lucide="dollar-sign" aria-hidden="true"></i>
+        <span>Salary Pay Tiers</span>
+      </button>
+      <button class="policy-tab-btn" data-tab="calendar" role="tab" aria-selected="false" tabindex="-1" type="button">
+        <i data-lucide="calendar" aria-hidden="true"></i>
+        <span>Holiday Calendar</span>
+      </button>
+      <button class="policy-tab-btn" data-tab="weekly-off" role="tab" aria-selected="false" tabindex="-1" type="button">
+        <i data-lucide="check-square" aria-hidden="true"></i>
+        <span>Weekly Off Rules</span>
+      </button>
+    </div>
+
+    <!-- Right Settings Panel Mount -->
+    <div class="card glass policy-content-panel" id="policy-panel-mount">
+      <!-- Injected dynamically by leave-policy.js -->
+    </div>
+
+  </div><!-- /policy-split-layout -->
+
+</div><!-- /leave-policy-workspace -->
+
+
+<!-- ===== TEMPLATE: GENERAL TAB ===== -->
+<template id="tpl-policy-general">
+  <div class="animate-slide-up panel-container">
+    <div class="panel-section-header">
+      <h3 class="panel-title">General Group Setup</h3>
+      <span class="panel-subtitle">Metadata, active state and standard working week definitions for the selected group.</span>
+    </div>
+
+    <form id="form-policy-general" class="policy-form">
+      <div class="form-group">
+        <label class="form-label">Policy Group Code</label>
+        <input type="text" id="group-code" class="form-input" readonly disabled>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Group Name</label>
+        <input type="text" id="group-name" class="form-input" readonly disabled>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="group-desc" class="form-textarea" rows="3" readonly disabled></textarea>
+      </div>
+
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label class="form-label">Standard Hours Per Day</label>
+          <input type="number" id="group-hours-day" class="form-input" readonly disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Standard Hours Per Week</label>
+          <input type="number" id="group-hours-week" class="form-input" readonly disabled>
+        </div>
+      </div>
+    </form>
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: LEAVE RULES TAB ===== -->
+<template id="tpl-policy-rules">
+  <div class="animate-slide-up panel-container">
+    <div class="panel-section-header">
+      <h3 class="panel-title">Entitlement Rules</h3>
+      <span class="panel-subtitle">Manage base allocations, carry-forward logic, half-day limits, and approval workflows.</span>
+    </div>
+
+    <div class="rules-selection-row">
+      <label for="select-rule-leavetype" class="form-label font-bold">Select Leave Type:</label>
+      <select id="select-rule-leavetype" class="form-select font-semibold">
+        <!-- Options loaded dynamically -->
+      </select>
+    </div>
+
+    <form id="form-policy-rule" class="policy-form hide">
+      <input type="hidden" id="rule-id">
+      
+      <div class="form-grid-3col">
+        <div class="form-group">
+          <label for="rule-default-entitlement" class="form-label">Default Entitlement (Days)</label>
+          <input type="number" step="0.5" id="rule-default-entitlement" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="rule-monthly-accrual" class="form-label">Monthly Accrual (Days)</label>
+          <input type="number" step="0.01" id="rule-monthly-accrual" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="rule-min-leave-unit" class="form-label">Minimum Leave Unit</label>
+          <input type="number" step="0.1" id="rule-min-leave-unit" class="form-input" required>
+        </div>
+      </div>
+
+      <div class="form-grid-3col">
+        <div class="form-group">
+          <label for="rule-max-consecutive" class="form-label">Max Consecutive Days</label>
+          <input type="number" id="rule-max-consecutive" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="rule-max-year" class="form-label">Max Days Per Year</label>
+          <input type="number" id="rule-max-year" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="rule-min-notice" class="form-label">Min Notice Days</label>
+          <input type="number" id="rule-min-notice" class="form-input" required>
+        </div>
+      </div>
+
+      <div class="form-grid-2col">
+        <div class="form-group">
+          <label for="rule-doc-required-days" class="form-label">Document Required After (Days)</label>
+          <input type="number" id="rule-doc-required-days" class="form-input" required>
+          <small class="form-help">Enter 0 to require documents on every application.</small>
+        </div>
+        <div class="form-group">
+          <label for="rule-lifetime-limit" class="form-label">Lifetime Limit (Total occurrences)</label>
+          <input type="number" id="rule-lifetime-limit" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-section-divider">Carry-Forward & Encashment Settings</div>
+      <div class="form-grid-2col">
+        <div class="form-card-box">
+          <div class="checkbox-label-row">
+            <input type="checkbox" id="rule-carry-forward-allowed">
+            <label for="rule-carry-forward-allowed" class="checkbox-title">Allow Carry-Forward</label>
+          </div>
+          <div class="form-group mt-2">
+            <label for="rule-carry-forward-limit" class="form-label">Carry-Forward Max Limit</label>
+            <input type="number" step="0.5" id="rule-carry-forward-limit" class="form-input">
+          </div>
+          <div class="form-group mt-2">
+            <label for="rule-carry-forward-expiry" class="form-label">Expiry Period (Months)</label>
+            <input type="number" id="rule-carry-forward-expiry" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-card-box">
+          <div class="checkbox-label-row">
+            <input type="checkbox" id="rule-encashment-allowed">
+            <label for="rule-encashment-allowed" class="checkbox-title">Allow Encashment</label>
+          </div>
+          <div class="form-group mt-2">
+            <label for="rule-encashment-limit" class="form-label">Maximum Encashment Days</label>
+            <input type="number" step="0.5" id="rule-encashment-limit" class="form-input">
+          </div>
+          <div class="form-group mt-2">
+            <label for="rule-encashment-min-bal" class="form-label">Minimum Required Balance</label>
+            <input type="number" step="0.5" id="rule-encashment-min-bal" class="form-input">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section-divider">Workflow & Rules Versioning</div>
+      <div class="form-grid-3col">
+        <div class="form-group">
+          <label for="rule-approval-level" class="form-label">Approval Level</label>
+          <select id="rule-approval-level" class="form-select">
+            <option value="SHIFT_SUPERVISOR">Shift Supervisor</option>
+            <option value="STORE_ADMIN">Store Admin</option>
+            <option value="REGIONAL_ADMIN">Regional Admin</option>
+            <option value="HR">HR / Corporate</option>
+            <option value="AUTO_APPROVED">Auto Approved</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="rule-effective-from" class="form-label">Effective From</label>
+          <input type="date" id="rule-effective-from" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label for="rule-effective-to" class="form-label">Effective To</label>
+          <input type="date" id="rule-effective-to" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-grid-2col mt-4">
+        <div class="checkbox-container flex items-center gap-2">
+          <input type="checkbox" id="rule-allow-half-day">
+          <label for="rule-allow-half-day" class="checkbox-text">Allow Half-Day Applications</label>
+        </div>
+        <div class="checkbox-container flex items-center gap-2">
+          <input type="checkbox" id="rule-is-paid">
+          <label for="rule-is-paid" class="checkbox-text">Is Paid Leave</label>
+        </div>
+      </div>
+
+      <!-- Audit Reason Prompt -->
+      <div class="form-group mt-4">
+        <label for="rule-audit-reason" class="form-label text-amber-500 font-bold">Reason for Modification (Audit Trail)</label>
+        <input type="text" id="rule-audit-reason" class="form-input" placeholder="e.g. Annual alignment with UAE Labour Law Article 29" required>
+      </div>
+
+      <div class="form-actions mt-6">
+        <button type="submit" id="btn-save-rule" class="btn btn-primary btn-submit">
+          <i data-lucide="check" aria-hidden="true"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: PAY TIERS TAB ===== -->
+<template id="tpl-policy-pay">
+  <div class="animate-slide-up panel-container">
+    <div class="panel-section-header">
+      <h3 class="panel-title">Tiered Pay Schedules</h3>
+      <span class="panel-subtitle">Configure progressive salary payout ratios. E.g. Sick Leave full pay, half pay and unpaid tiers.</span>
+    </div>
+
+    <div class="rules-selection-row">
+      <label for="select-pay-rule" class="form-label font-bold">Select Active Policy Rule:</label>
+      <select id="select-pay-rule" class="form-select font-semibold">
+        <!-- Loaded dynamically -->
+      </select>
+    </div>
+
+    <div id="pay-tiers-workspace" class="hide mt-4">
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th>Tier Label</th>
+            <th>Days Range</th>
+            <th>Pay Percentage</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="pay-tiers-tbody">
+          <!-- Loaded dynamically -->
+        </tbody>
+      </table>
+
+      <!-- Add New Pay Tier Form -->
+      <div class="form-card-box mt-6">
+        <h4 class="box-title text-accent">Add Payout Tier</h4>
+        <form id="form-add-paytier" class="form-grid-4col items-end mt-2">
+          <div class="form-group">
+            <label for="paytier-label" class="form-label">Tier Label</label>
+            <input type="text" id="paytier-label" class="form-input" placeholder="e.g. Half Pay" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Day Range (From - To)</label>
+            <div class="range-inputs flex items-center gap-1">
+              <input type="number" id="paytier-from" class="form-input" placeholder="From" min="1" required>
+              <span>-</span>
+              <input type="number" id="paytier-to" class="form-input" placeholder="Open">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="paytier-pct" class="form-label">Pay Percentage (%)</label>
+            <input type="number" id="paytier-pct" class="form-input" min="0" max="100" required>
+          </div>
+          <div class="form-actions-cell">
+            <button type="submit" class="btn btn-accent btn-sm h-10 w-full">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              <span>Add Tier</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: HOLIDAY CALENDAR TAB ===== -->
+<template id="tpl-policy-calendar">
+  <div class="animate-slide-up panel-container">
+    <div class="panel-section-header">
+      <h3 class="panel-title">Public Holiday Calendars</h3>
+      <span class="panel-subtitle">Maintain annual lists of national and corporate holidays per policy group.</span>
+    </div>
+
+    <div class="form-grid-2col items-end">
+      <div class="form-group">
+        <label for="select-calendar-year" class="form-label font-bold">Calendar Year</label>
+        <select id="select-calendar-year" class="form-select font-semibold">
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+          <option value="2027">2027</option>
+        </select>
+      </div>
+      <button type="button" id="btn-create-calendar" class="btn btn-outline h-10 mb-0.5">
+        <i data-lucide="calendar-plus" aria-hidden="true"></i>
+        <span>Create New Calendar</span>
+      </button>
+    </div>
+
+    <div id="holidays-workspace" class="mt-6 hide">
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th>Holiday Name</th>
+            <th>Date</th>
+            <th>Day Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="holidays-tbody">
+          <!-- Loaded dynamically -->
+        </tbody>
+      </table>
+
+      <!-- Add Holiday Form -->
+      <div class="form-card-box mt-6">
+        <h4 class="box-title text-accent">Add Holiday Date</h4>
+        <form id="form-add-holiday" class="form-grid-3col items-end mt-2">
+          <div class="form-group">
+            <label for="holiday-name-input" class="form-label">Holiday Name</label>
+            <input type="text" id="holiday-name-input" class="form-input" placeholder="e.g. Independence Day" required>
+          </div>
+          <div class="form-group">
+            <label for="holiday-date-input" class="form-label">Holiday Date</label>
+            <input type="date" id="holiday-date-input" class="form-input" required>
+          </div>
+          <div class="checkbox-container pb-2">
+            <input type="checkbox" id="holiday-working-checkbox">
+            <label for="holiday-working-checkbox" class="checkbox-text ml-1">Is Working Day</label>
+          </div>
+          <div class="form-actions-cell col-span-3 mt-2 flex justify-end">
+            <button type="submit" class="btn btn-accent btn-sm">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              <span>Add Date</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<!-- ===== TEMPLATE: WEEKLY OFF TAB ===== -->
+<template id="tpl-policy-weekly-off">
+  <div class="animate-slide-up panel-container">
+    <div class="panel-section-header">
+      <h3 class="panel-title">Weekly Off Rules</h3>
+      <span class="panel-subtitle">Configure rest days for attendance calculations (Must select at least one rest day).</span>
+    </div>
+
+    <form id="form-weekly-off" class="policy-form mt-4">
+      <div class="weekly-off-checklist grid grid-cols-2 gap-4 max-w-md">
+        <!-- Checkboxes for all days of the week -->
+        <div class="checkbox-item flex items-center gap-2 padding-md card bg-card-secondary border">
+          <input type="checkbox" id="weeklyoff-monday" value="MONDAY">
+          <label for="weeklyoff-monday" class="checkbox-text font-bold">Monday</label>
+        </div>
+        <div class="checkbox-item flex items-center gap-2 padding-md card bg-card-secondary border">
+          <input type="checkbox" id="weeklyoff-tuesday" value="TUESDAY">
+          <label for="weeklyoff-tuesday" class="checkbox-text font-bold">Tuesday</label>
+        </div>
+        <div class="checkbox-item flex items-center gap-2 padding-md card bg-card-secondary border">
+          <input type="checkbox" id="weeklyoff-wednesday" value="WEDNESDAY">
+          <label for="weeklyoff-wednesday" class="checkbox-text font-bold">Wednesday</label>
+        </div>
+        <div class="checkbox-item flex items-center gap-2 padding-md card bg-card-secondary border">
+          <input type="checkbox" id="weeklyoff-thursday" value="THURSDAY">
+          <label for="weeklyoff-thursday" class="checkbox-text font-bold">Thursday</label>
+        </div>
+        <div class="checkbox-item flex items-center gap-2 padding-md card bg-card-secondary border">
+          <input type="checkbox" id="weeklyoff-friday" value="FRIDAY">
+          <label for="weeklyoff-friday" class="checkbox-text font-bold">Friday</label>
+        </div>
+        <div class="checkbox-item flex items-center gap-2 padding-md card bg-card-secondary border">
+          <input type="checkbox" id="weeklyoff-saturday" value="SATURDAY">
+          <label for="weeklyoff-saturday" class="checkbox-text font-bold">Saturday</label>
+        </div>
+        <div class="checkbox-item flex items-center gap-2 padding-md card bg-card-secondary border">
+          <input type="checkbox" id="weeklyoff-sunday" value="SUNDAY">
+          <label for="weeklyoff-sunday" class="checkbox-text font-bold">Sunday</label>
+        </div>
+      </div>
+
+      <div class="form-actions mt-6">
+        <button type="submit" class="btn btn-primary btn-submit">
+          <i data-lucide="check" aria-hidden="true"></i>
+          <span>Save Weekly Off</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</template>

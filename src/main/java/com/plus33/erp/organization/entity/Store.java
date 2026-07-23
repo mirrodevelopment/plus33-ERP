@@ -108,6 +108,36 @@ public class Store {
     @Column(name = "geofence_radius_meters")
     private Integer geofenceRadiusMeters = 200;
 
+    @Column(name = "operating_hours", nullable = false, length = 100)
+    private String operatingHours = "08:00 - 22:00";
+
+    @Column(name = "wifi_ssid", nullable = false, length = 100)
+    private String wifiSsid = "PLUS33-Guest";
+
+    @Column(name = "wifi_password", nullable = false, length = 100)
+    private String wifiPassword = "CoffeeBreak";
+
+    @Column(name = "low_stock_threshold", nullable = false)
+    private Integer lowStockThreshold = 50;
+
+    @Column(name = "sales_target", nullable = false, precision = 12, scale = 2)
+    private java.math.BigDecimal salesTarget = new java.math.BigDecimal("10000.00");
+
+    @Column(name = "receipt_footer", nullable = false, columnDefinition = "TEXT")
+    private String receiptFooter = "Thank you for visiting PLUS33 Coffee!";
+
+    @Column(name = "admin_name", nullable = false, length = 100)
+    private String adminName = "giri";
+
+    @Column(name = "admin_number", nullable = false, length = 50)
+    private String adminNumber = "EMP10245";
+
+    @Column(name = "admin_mobile", nullable = false, length = 30)
+    private String adminMobile = "+919999999999";
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<StoreDocument> documents = new java.util.ArrayList<>();
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

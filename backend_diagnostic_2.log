@@ -1,0 +1,44 @@
+16:08:13.782 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to System property 'spring.devtools.restart.enabled' being set to false
+2026-07-22T16:08:15.596+05:30  INFO 10200 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : Starting Plus33ErpApplication using Java 17.0.17 with PID 10200 (D:\plus33\plus33-erp\target\classes started by admin in D:\plus33\plus33-erp)
+2026-07-22T16:08:15.611+05:30  INFO 10200 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-07-22T16:08:15.828+05:30  INFO 10200 --- [plus33-erp] [           main] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-07-22T16:08:30.420+05:30  INFO 10200 --- [plus33-erp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-22T16:08:30.669+05:30  INFO 10200 --- [plus33-erp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 211 ms. Found 0 JPA repository interfaces.
+2026-07-22T16:08:31.618+05:30  WARN 10200 --- [plus33-erp] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: java.lang.IllegalStateException: Failed to introspect Class [com.plus33.erp.agent.core.AgentOrchestrator] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@c387f44]
+2026-07-22T16:08:31.659+05:30  INFO 10200 --- [plus33-erp] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-07-22T16:08:31.698+05:30 ERROR 10200 --- [plus33-erp] [           main] o.s.boot.SpringApplication               : Application run failed
+
+java.lang.IllegalStateException: Failed to introspect Class [com.plus33.erp.agent.core.AgentOrchestrator] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@c387f44]
+	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:483) ~[spring-core-7.0.8.jar:7.0.8]
+	at org.springframework.util.ReflectionUtils.doWithMethods(ReflectionUtils.java:360) ~[spring-core-7.0.8.jar:7.0.8]
+	at org.springframework.core.MethodIntrospector.selectMethods(MethodIntrospector.java:74) ~[spring-core-7.0.8.jar:7.0.8]
+	at org.springframework.boot.autoconfigure.task.ScheduledBeanLazyInitializationExcludeFilter.hasScheduledTask(ScheduledBeanLazyInitializationExcludeFilter.java:63) ~[spring-boot-autoconfigure-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.autoconfigure.task.ScheduledBeanLazyInitializationExcludeFilter.isExcluded(ScheduledBeanLazyInitializationExcludeFilter.java:56) ~[spring-boot-autoconfigure-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.LazyInitializationBeanFactoryPostProcessor.isExcluded(LazyInitializationBeanFactoryPostProcessor.java:102) ~[spring-boot-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.LazyInitializationBeanFactoryPostProcessor.postProcess(LazyInitializationBeanFactoryPostProcessor.java:84) ~[spring-boot-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.LazyInitializationBeanFactoryPostProcessor.postProcessBeanFactory(LazyInitializationBeanFactoryPostProcessor.java:62) ~[spring-boot-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:363) ~[spring-context-7.0.8.jar:7.0.8]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:154) ~[spring-context-7.0.8.jar:7.0.8]
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:795) ~[spring-context-7.0.8.jar:7.0.8]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:603) ~[spring-context-7.0.8.jar:7.0.8]
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143) ~[spring-boot-web-server-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365) ~[spring-boot-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-4.0.8-SNAPSHOT.jar:4.0.8-SNAPSHOT]
+	at com.plus33.erp.Plus33ErpApplication.main(Plus33ErpApplication.java:32) ~[classes/:na]
+Caused by: java.lang.NoClassDefFoundError: com/plus33/erp/platform/entity/PlatformAgentSession
+	at java.base/java.lang.Class.getDeclaredMethods0(Native Method) ~[na:na]
+	at java.base/java.lang.Class.privateGetDeclaredMethods(Class.java:3404) ~[na:na]
+	at java.base/java.lang.Class.getDeclaredMethods(Class.java:2506) ~[na:na]
+	at org.springframework.util.ReflectionUtils.getDeclaredMethods(ReflectionUtils.java:465) ~[spring-core-7.0.8.jar:7.0.8]
+	... 18 common frames omitted
+Caused by: java.lang.ClassNotFoundException: com.plus33.erp.platform.entity.PlatformAgentSession
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641) ~[na:na]
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188) ~[na:na]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[na:na]
+	... 22 common frames omitted
+

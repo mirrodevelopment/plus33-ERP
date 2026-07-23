@@ -1,0 +1,605 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Admin Module — Pending Approvals
+ * File              : pending-approvals.css
+ * Path              : frontend/modules/store-admin/pages/pending-approvals/pending-approvals.css
+ * Purpose           : High-end glassmorphic CSS styling with premium white ambient glows for active mode cards, filter pills, search inputs, and interactive controls.
+ * Version           : 5.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Production CSS matching reference UI layout with white ambient glow aesthetics:
+ *   - Luminous white ambient glows (`box-shadow: 0 0 20px rgba(255, 255, 255, 0.25)`).
+ *   - White glowing active tab cards & icon halos.
+ *   - White glowing active category filter pills.
+ *   - Outlined category box badges with icons & custom HSL colors.
+ *   - Attachment chips with red PDF / amber file icon, filename, and file size tag.
+ *   - Urgency pill badges with dot indicators (• HIGH in red, • MEDIUM in amber, • LOW in green).
+ *   - Actions column: Glass blue Details button & glass red Reject icon button.
+ ******************************************************************************/
+
+/* ========================================================================= */
+/* PAGE CONTAINERS & ANIMATION                                               */
+/* ========================================================================= */
+
+.pending-approvals-page {
+  padding: var(--spacing-lg);
+  max-width: 1500px;
+  margin: 0 auto;
+  color: var(--text-primary);
+  animation: fadeInPage 0.35s ease-out;
+}
+
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pending-approvals-page .text-gradient {
+  color: #ffffff;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
+}
+
+.live-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulseGreen 1.8s infinite;
+  display: inline-block;
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* ========================================================================= */
+/* TOP MODE TAB CARDS WITH WHITE GLOW                                        */
+/* ========================================================================= */
+
+.mode-tabs-container {
+  display: flex;
+  align-items: center;
+}
+
+.tab-card {
+  background: rgba(22, 22, 26, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  min-width: 280px;
+}
+
+.tab-card:hover {
+  background: rgba(32, 32, 38, 0.85);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.12);
+}
+
+.tab-card.active {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.25), 0 8px 24px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+.tab-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.25s ease;
+}
+
+.tab-card.active .tab-card-icon {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.tab-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tab-card.active .tab-card-title {
+  color: #ffffff;
+}
+
+.tab-card-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.badge-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+/* ========================================================================= */
+/* SEARCH & FILTER CONTROLS WITH WHITE GLOW                                  */
+/* ========================================================================= */
+
+.search-filter-group {
+  display: flex;
+  align-items: center;
+}
+
+.search-box {
+  position: relative;
+  width: 320px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding-left: 40px !important;
+  font-size: 0.82rem !important;
+  background: rgba(12, 12, 16, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  color: var(--text-primary) !important;
+  height: 42px !important;
+  transition: all 0.2s ease !important;
+}
+
+.search-input:focus {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.25) !important;
+  outline: none !important;
+}
+
+.btn-filter-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(12, 12, 16, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-filter-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* ========================================================================= */
+/* CATEGORY FILTER PILLS WITH WHITE GLOW                                     */
+/* ========================================================================= */
+
+.main-workspace-card {
+  background: rgba(18, 18, 22, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+}
+
+.category-pills-row {
+  background: rgba(12, 12, 15, 0.4);
+}
+
+.pill-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.pill-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pill-btn.active {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.3) !important;
+}
+
+.pill-badge {
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 8px;
+}
+
+.pill-btn.active .pill-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.2);
+}
+
+/* ========================================================================= */
+/* DATA TABLE STYLING                                                        */
+/* ========================================================================= */
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8rem;
+}
+
+.data-table th {
+  padding: 14px 16px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.7px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 12, 15, 0.8);
+}
+
+.data-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Requester Avatar Card */
+.requester-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-sm {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.avatar-md {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.requester-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+
+.requester-subtext {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Outlined Category Box Badges */
+.badge-category-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+  max-width: 140px;
+}
+
+.badge-category-box.document { background: rgba(59, 130, 246, 0.08); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+.badge-category-box.leave { background: rgba(16, 185, 129, 0.08); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.badge-category-box.leave-cancel { background: rgba(239, 68, 68, 0.08); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+.badge-category-box.away-pass { background: rgba(139, 92, 246, 0.08); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+.badge-category-box.shift-swap { background: rgba(20, 184, 166, 0.08); color: #2dd4bf; border: 1px solid rgba(20, 184, 166, 0.3); }
+.badge-category-box.overtime { background: rgba(236, 72, 153, 0.08); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+.badge-category-box.stock-waste { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+.badge-category-box.expense { background: rgba(245, 158, 11, 0.08); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+/* Attachment Chip */
+.attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.attachment-chip .file-name {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.attachment-chip .file-size {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.icon-file-pdf { color: #ef4444; }
+.icon-file-img { color: #f59e0b; }
+
+/* Urgency Pill with Dot */
+.badge-urgency-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 14px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.badge-urgency-dot .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.badge-urgency-dot.high {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+.badge-urgency-dot.high .dot { background: #ef4444; }
+
+.badge-urgency-dot.medium {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.badge-urgency-dot.medium .dot { background: #f59e0b; }
+
+.badge-urgency-dot.low {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.badge-urgency-dot.low .dot { background: #10b981; }
+
+/* ========================================================================= */
+/* ACTIONS BUTTONS WITH WHITE GLOW                                           */
+/* ========================================================================= */
+
+.action-btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn-action-details {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-action-details:hover {
+  background: rgba(59, 130, 246, 0.25) !important;
+  color: #93c5fd !important;
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+}
+
+.btn-action-reject {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  border-radius: 8px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-action-reject:hover {
+  background: rgba(239, 68, 68, 0.28) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+}
+
+.btn-action-approve {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #ffffff !important;
+  border: 1px solid #10b981 !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
+}
+
+.btn-action-approve:hover {
+  background: linear-gradient(135deg, #34d399, #10b981) !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
+}
+
+/* ========================================================================= */
+/* TABLE FOOTER PAGINATION BAR                                               */
+/* ========================================================================= */
+
+.table-footer-bar {
+  background: rgba(12, 12, 15, 0.6);
+}
+
+.btn-page-nav {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-page-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-page-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-page-num.active {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.25);
+}
+
+.rows-select {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+}
+
+/* ========================================================================= */
+/* MODALS                                                                    */
+/* ========================================================================= */
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInPage 0.2s ease-out;
+}
+
+.modal-card {
+  background: rgba(20, 20, 24, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.form-input {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px !important;
+  color: var(--text-primary) !important;
+  padding: 10px 12px !important;
+  font-size: 0.82rem !important;
+  width: 100% !important;
+}
+
+.form-input:focus {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.25) !important;
+}

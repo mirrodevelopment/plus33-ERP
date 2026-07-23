@@ -306,6 +306,17 @@ export default class StoreEmployeeAttendance {
         clockInBtn.disabled = true;
         let gps = null;
         try {
+          gps = await new Promise((resolve) => {
+            if (!navigator.geolocation) { resolve(null); return; }
+            navigator.geolocation.getCurrentPosition(
+              p => resolve(`${p.coords.latitude},${p.coords.longitude}`),
+              () => resolve(null),
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+          });
+        } catch (_) { gps = null; }
+
+        try {
           const res = await apiClient.request('/attendance/check-in', {
             method: 'POST',
             body: JSON.stringify({ gps, device: navigator.userAgent })

@@ -99,7 +99,7 @@ public class PayrollProcessingServiceImpl implements PayrollProcessingService {
     private final AttendanceRepository attendanceRepository;
     private final AttendanceBreakRepository attendanceBreakRepository;
     private final EmployeeLeaveRepository employeeLeaveRepository;
-    private final HolidayCalendarRepository holidayCalendarRepository;
+    private final HolidayRepository holidayRepository;
     private final PayrollPeriodRepository payrollPeriodRepository;
     private final UserStoreRepository userStoreRepository;
 
@@ -118,7 +118,7 @@ public class PayrollProcessingServiceImpl implements PayrollProcessingService {
                                          AttendanceRepository attendanceRepository,
                                          AttendanceBreakRepository attendanceBreakRepository,
                                          EmployeeLeaveRepository employeeLeaveRepository,
-                                         HolidayCalendarRepository holidayCalendarRepository,
+                                         HolidayRepository holidayRepository,
                                          PayrollPeriodRepository payrollPeriodRepository,
                                          UserStoreRepository userStoreRepository) {
         this.payrollRunRepository = payrollRunRepository;
@@ -136,7 +136,7 @@ public class PayrollProcessingServiceImpl implements PayrollProcessingService {
         this.attendanceRepository = attendanceRepository;
         this.attendanceBreakRepository = attendanceBreakRepository;
         this.employeeLeaveRepository = employeeLeaveRepository;
-        this.holidayCalendarRepository = holidayCalendarRepository;
+        this.holidayRepository = holidayRepository;
         this.payrollPeriodRepository = payrollPeriodRepository;
         this.userStoreRepository = userStoreRepository;
     }
@@ -262,7 +262,7 @@ public class PayrollProcessingServiceImpl implements PayrollProcessingService {
                 }
             }
 
-            List<HolidayCalendar> holidays = holidayCalendarRepository.findByCountryCodeAndHolidayDateBetween(countryCode, start, end);
+            List<Holiday> holidays = holidayRepository.findByCountryCodeAndHolidayDateBetween(countryCode, start, end);
 
             int totalDaysCount = 0;
             int presentDays = 0;

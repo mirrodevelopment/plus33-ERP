@@ -70,7 +70,7 @@ public class OrganizationControllerIntegrationTest {
         // 3. Create a store in TEST_REGION_2 referencing the warehouse in UAE_REGION
         StoreRequest storeRequest = new StoreRequest(
                 "TEST_STORE_ERR_" + System.nanoTime(), "Test Store Error", "Address", "Phone", "Email", "Asia/Dubai",
-                null, region2Id, warehouse.getId(), true, "COMPACT_CAFE");
+                null, region2Id, warehouse.getId(), true, "COMPACT_CAFE", "giri", "EMP10245", "+919999999999");
 
         mockMvc.perform(post("/api/v1/stores")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,7 +124,7 @@ public class OrganizationControllerIntegrationTest {
         // 2. Create a store in UAE_REGION referencing the inactive warehouse
         StoreRequest storeRequest = new StoreRequest(
                 "TEST_STORE_ERR2_" + System.nanoTime(), "Test Store Error 2", "Address", "Phone", "Email", "Asia/Dubai",
-                null, region.getId(), inactiveWhId, true, "COMPACT_CAFE");
+                null, region.getId(), inactiveWhId, true, "COMPACT_CAFE", "giri", "EMP10245", "+919999999999");
 
         mockMvc.perform(post("/api/v1/stores")
                         .contentType(MediaType.APPLICATION_JSON)

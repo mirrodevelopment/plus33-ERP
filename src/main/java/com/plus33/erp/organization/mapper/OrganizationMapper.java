@@ -108,11 +108,18 @@ public interface OrganizationMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "region", ignore = true)
     @Mapping(target = "warehouse", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "latitude", ignore = true)
     @Mapping(target = "longitude", ignore = true)
     @Mapping(target = "geofenceRadiusMeters", ignore = true)
+    @Mapping(target = "operatingHours", ignore = true)
+    @Mapping(target = "wifiSsid", ignore = true)
+    @Mapping(target = "wifiPassword", ignore = true)
+    @Mapping(target = "lowStockThreshold", ignore = true)
+    @Mapping(target = "salesTarget", ignore = true)
+    @Mapping(target = "receiptFooter", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "documents", ignore = true)
     Store toEntity(StoreRequest request);
 
     @Mapping(target = "regionId", source = "region.id")
@@ -121,6 +128,8 @@ public interface OrganizationMapper {
     @Mapping(target = "warehouseCode", source = "warehouse.code")
     @Mapping(target = "employeeCount", ignore = true)
     @Mapping(target = "stockValue", ignore = true)
+    @Mapping(target = "countryCode", source = "region.company.countryCode")
+    @Mapping(target = "documents", source = "documents")
     StoreResponse toResponse(Store entity);
 
     @Mapping(target = "id", ignore = true)
@@ -131,21 +140,39 @@ public interface OrganizationMapper {
     @Mapping(target = "latitude", ignore = true)
     @Mapping(target = "longitude", ignore = true)
     @Mapping(target = "geofenceRadiusMeters", ignore = true)
+    @Mapping(target = "operatingHours", ignore = true)
+    @Mapping(target = "wifiSsid", ignore = true)
+    @Mapping(target = "wifiPassword", ignore = true)
+    @Mapping(target = "lowStockThreshold", ignore = true)
+    @Mapping(target = "salesTarget", ignore = true)
+    @Mapping(target = "receiptFooter", ignore = true)
+    @Mapping(target = "documents", ignore = true)
     void updateEntity(StoreRequest request, @MappingTarget Store entity);
 
-    // --- StoreSetting Mappings ---
-    @Mapping(target = "storeId", source = "store.id")
-    StoreSettingResponse toResponse(StoreSetting entity);
+    // --- StoreSetting Mappings (Consolidated settings compatibility) ---
+    @Mapping(target = "storeId", source = "id")
+    StoreSettingResponse toSettingResponse(Store entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "store", ignore = true)
+    @Mapping(target = "code", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "address", ignore = true)
+    @Mapping(target = "phone", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "timezone", ignore = true)
+    @Mapping(target = "openingDate", ignore = true)
+    @Mapping(target = "region", ignore = true)
+    @Mapping(target = "warehouse", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "type", ignore = true)
+    @Mapping(target = "latitude", ignore = true)
+    @Mapping(target = "longitude", ignore = true)
+    @Mapping(target = "geofenceRadiusMeters", ignore = true)
+    @Mapping(target = "adminName", ignore = true)
+    @Mapping(target = "adminNumber", ignore = true)
+    @Mapping(target = "adminMobile", ignore = true)
+    @Mapping(target = "documents", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    StoreSetting toEntity(StoreSettingRequest request);
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "store", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    void updateEntity(StoreSettingRequest request, @MappingTarget StoreSetting entity);
+    void updateStoreSettingsFromRequest(StoreSettingRequest request, @MappingTarget Store entity);
 }

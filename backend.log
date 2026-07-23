@@ -1,0 +1,55 @@
+15:39:25.585 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to System property 'spring.devtools.restart.enabled' being set to false
+2026-07-22T15:39:26.580+05:30  INFO 10076 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : Starting Plus33ErpApplication using Java 17.0.17 with PID 10076 (D:\plus33\plus33-erp\target\classes started by admin in D:\plus33\plus33-erp)
+2026-07-22T15:39:26.584+05:30  INFO 10076 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-07-22T15:39:26.728+05:30  INFO 10076 --- [plus33-erp] [           main] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-07-22T15:39:33.723+05:30  INFO 10076 --- [plus33-erp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-22T15:39:39.632+05:30  INFO 10076 --- [plus33-erp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 5892 ms. Found 596 JPA repository interfaces.
+2026-07-22T15:39:45.415+05:30  INFO 10076 --- [plus33-erp] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-07-22T15:39:45.449+05:30  INFO 10076 --- [plus33-erp] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-22T15:39:45.450+05:30  INFO 10076 --- [plus33-erp] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-07-22T15:39:45.599+05:30  INFO 10076 --- [plus33-erp] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 18869 ms
+2026-07-22T15:39:47.307+05:30  INFO 10076 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-22T15:39:47.804+05:30  INFO 10076 --- [plus33-erp] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1d160161
+2026-07-22T15:39:47.808+05:30  INFO 10076 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-22T15:39:47.948+05:30  INFO 10076 --- [plus33-erp] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5432/plus33_erp (PostgreSQL 17.10)
+2026-07-22T15:39:49.021+05:30  INFO 10076 --- [plus33-erp] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 432
+2026-07-22T15:39:49.028+05:30  INFO 10076 --- [plus33-erp] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-07-22T15:39:49.838+05:30  INFO 10076 --- [plus33-erp] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-22T15:39:50.019+05:30  INFO 10076 --- [plus33-erp] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.23.Final
+2026-07-22T15:39:51.169+05:30  INFO 10076 --- [plus33-erp] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-22T15:39:51.393+05:30  INFO 10076 --- [plus33-erp] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/plus33_erp]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 17.10
+	Default catalog/schema: plus33_erp/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-22T15:40:11.314+05:30  INFO 10076 --- [plus33-erp] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-22T15:40:13.062+05:30  INFO 10076 --- [plus33-erp] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-22T15:40:13.857+05:30  INFO 10076 --- [plus33-erp] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-22T15:41:08.096+05:30  WARN 10076 --- [plus33-erp] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-07-22T15:41:08.180+05:30  INFO 10076 --- [plus33-erp] [           main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-22T15:41:08.183+05:30  INFO 10076 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-07-22T15:41:08.198+05:30  INFO 10076 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-07-22T15:41:08.241+05:30  INFO 10076 --- [plus33-erp] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-07-22T15:41:08.262+05:30 ERROR 10076 --- [plus33-erp] [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+

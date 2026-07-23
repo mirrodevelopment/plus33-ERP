@@ -14,7 +14,9 @@ public interface EmployeeLeaveRepository extends JpaRepository<EmployeeLeave, Lo
 
     List<EmployeeLeave> findByStatus(String status);
 
-    @Query("SELECT el FROM EmployeeLeave el WHERE el.leaveType.approvalLevel = :level AND el.status = 'PENDING'")
+    @Query("SELECT el FROM EmployeeLeave el WHERE el.status = 'PENDING' AND " +
+           "(el.approverRole = :level OR " +
+           "(el.approverRole IN ('SUPERVISOR', 'STORE_ADMIN') AND :level IN ('SUPERVISOR', 'STORE_ADMIN')))")
     List<EmployeeLeave> findPendingByApprovalLevel(@Param("level") String level);
 
     @Query("SELECT el FROM EmployeeLeave el " +
@@ -39,8 +41,9 @@ public interface EmployeeLeaveRepository extends JpaRepository<EmployeeLeave, Lo
     long countPendingByEmployeeAndType(@Param("empId") Long employeeId, @Param("typeId") Long leaveTypeId);
 
     @Query("SELECT el FROM EmployeeLeave el " +
-           "WHERE el.cancellationRequested = TRUE AND el.status = 'APPROVED' " +
-           "AND el.leaveType.approvalLevel = :level")
+           "WHERE el.cancellationRequested = TRUE AND el.status = 'APPROVED' AND " +
+           "(el.approverRole = :level OR " +
+           "(el.approverRole IN ('SUPERVISOR', 'STORE_ADMIN') AND :level IN ('SUPERVISOR', 'STORE_ADMIN')))")
     List<EmployeeLeave> findCancellationRequests(@Param("level") String level);
 
     @Query("SELECT el FROM EmployeeLeave el " +

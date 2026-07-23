@@ -56,4 +56,8 @@ public interface StoreService {
     
     com.plus33.erp.organization.dto.StoreSettingResponse getStoreSettings(Long storeId);
     com.plus33.erp.organization.dto.StoreSettingResponse updateStoreSettings(Long storeId, com.plus33.erp.organization.dto.StoreSettingRequest request);
+
+    com.plus33.erp.organization.dto.StoreDocumentResponse uploadDocument(Long storeId, String documentType, String documentName, String filePath);
+    void deleteDocument(Long storeId, Long documentId);
+    java.util.List<com.plus33.erp.organization.dto.StoreDocumentResponse> getDocuments(Long storeId);
 }

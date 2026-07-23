@@ -35,6 +35,8 @@ export default class StoreEmployeeSchedule {
   constructor() {
     this.user = authStore.getUser();
     this.profile = userStore.getProfile(this.user?.role) || {};
+    this.systemShifts = [];
+    this.currentAwayPass = null;
 
     this.loadState();
   }

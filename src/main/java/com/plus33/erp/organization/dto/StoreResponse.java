@@ -106,5 +106,20 @@ public record StoreResponse(
         java.math.BigDecimal longitude,
 
         @Schema(description = "Geofence radius in meters", example = "200")
-        Integer geofenceRadiusMeters
+        Integer geofenceRadiusMeters,
+
+        @Schema(description = "Nation / Country Code of the store", example = "FR")
+        String countryCode,
+
+        @Schema(description = "Attached store compliance and licensing documents")
+        java.util.List<StoreDocumentResponse> documents,
+
+        @Schema(description = "Name of the Store Admin / Manager", example = "giri")
+        String adminName,
+
+        @Schema(description = "Employee number of the Store Admin", example = "EMP10245")
+        String adminNumber,
+
+        @Schema(description = "Mobile phone of the Store Admin", example = "+919999999999")
+        String adminMobile
 ) {}

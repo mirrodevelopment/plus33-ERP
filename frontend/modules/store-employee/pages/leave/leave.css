@@ -634,3 +634,24 @@
   font-size: 0.8rem;
   font-weight: 700;
 }
+
+.status-badge.pending {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--status-warning);
+}
+.status-badge.approved {
+  background: rgba(130, 163, 125, 0.12);
+  border: 1px solid rgba(130, 163, 125, 0.3);
+  color: var(--status-success);
+}
+.status-badge.rejected {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--status-danger);
+}
+.status-badge.cancelled {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+}

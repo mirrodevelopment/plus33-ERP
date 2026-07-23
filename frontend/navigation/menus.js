@@ -32,6 +32,12 @@ export function getMenuItems() {
   if (role === 'nationalAdmin') {
     return [
       {
+        title: 'ADMINISTRATION',
+        items: [
+          { name: 'Leave Policy Management', icon: 'sliders', route: '#leave-policy-admin' }
+        ]
+      },
+      {
         title: 'OPERATIONS',
         items: [
           { name: 'Regions Management', icon: 'map', route: '#regional-regions' },
@@ -111,7 +117,8 @@ export function getMenuItems() {
         items: [
           { name: 'Complaints Management', icon: 'message-square', route: '#regional-complaints' },
           { name: 'Legal Cases', icon: 'scale', route: '#regional-legal' },
-          { name: 'Audit & Compliance', icon: 'shield', route: '#regional-audit' }
+          { name: 'Audit & Compliance', icon: 'shield', route: '#regional-audit' },
+          { name: 'Leave Policy Booklet', icon: 'book-open', route: '#leave-policy-booklet' }
         ]
       },
       {
@@ -167,13 +174,13 @@ export function getMenuItems() {
           { name: 'Shift Attendance', icon: 'clock', route: '#attendance' },
           { name: 'Announcements', icon: 'megaphone', route: '#announcements' },
           { name: 'Documents Hub', icon: 'file-text', route: '#documents' },
-          { name: 'Time Off Requests', icon: 'plane-takeoff', route: '#supervisor-leaves' }
+          { name: 'Leave Management', icon: 'plane-takeoff', route: '#supervisor-leaves' }
         ]
       },
       {
         title: 'PERSONAL',
         items: [
-          { name: 'Leave Management', icon: 'plane-takeoff', route: '#leave' },
+          { name: 'Apply Leave', icon: 'plane-takeoff', route: '#leave' },
           { name: 'My Profile', icon: 'user', route: '#supervisor-profile' },
           { name: 'Settings', icon: 'settings', route: '#settings' }
         ]
@@ -221,6 +228,7 @@ export function getMenuItems() {
       {
         title: 'ADMINISTRATION',
         items: [
+          { name: 'Pending Approvals', icon: 'check-square', route: '#store-pending-approvals' },
           { name: 'Broadcast Announcement', icon: 'send', route: '#store-announcements' },
           { name: 'Leave Management', icon: 'calendar', route: '#store-leave' },
           { name: 'Workforce Overview', icon: 'users', route: '#store-workforce' },
@@ -243,6 +251,7 @@ export function getMenuItems() {
         { name: 'Users & Roles', icon: 'users', route: '#users' },
         { name: 'Roles & Permissions', icon: 'shield', route: '#permissions' },
         { name: 'System Settings', icon: 'settings', route: '#settings' },
+        { name: 'Leave Policy Management', icon: 'sliders', route: '#leave-policy-admin' },
         { name: 'My Profile', icon: 'user', route: '#ultimate-profile' }
       ]
     },

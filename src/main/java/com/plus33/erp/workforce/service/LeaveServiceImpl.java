@@ -33,10 +33,12 @@ public class LeaveServiceImpl {
     private final LeaveApprovalWorkflowRepository workflowRepository;
     private final LeaveAuditLogRepository auditLogRepository;
     private final LeaveDocumentRepository documentRepository;
-    private final HolidayCalendarRepository holidayCalendarRepository;
+    private final HolidayRepository holidayRepository;
     private final LeaveBlackoutDateRepository blackoutRepository;
     private final WorkingDayCalculatorService workingDayCalculator;
     private final LeavePolicyService leavePolicyService;
+    private final LeavePolicyGroupRepository leavePolicyGroupRepository;
+    private final WeeklyOffRuleRepository weeklyOffRuleRepository;
     private final EmployeeRepository employeeRepository;
     private final UserStoreRepository userStoreRepository;
     private final AttendanceRepository attendanceRepository;
@@ -53,10 +55,12 @@ public class LeaveServiceImpl {
             LeaveApprovalWorkflowRepository workflowRepository,
             LeaveAuditLogRepository auditLogRepository,
             LeaveDocumentRepository documentRepository,
-            HolidayCalendarRepository holidayCalendarRepository,
+            HolidayRepository holidayRepository,
             LeaveBlackoutDateRepository blackoutRepository,
             WorkingDayCalculatorService workingDayCalculator,
             LeavePolicyService leavePolicyService,
+            LeavePolicyGroupRepository leavePolicyGroupRepository,
+            WeeklyOffRuleRepository weeklyOffRuleRepository,
             EmployeeRepository employeeRepository,
             UserStoreRepository userStoreRepository,
             AttendanceRepository attendanceRepository,
@@ -71,10 +75,12 @@ public class LeaveServiceImpl {
         this.workflowRepository = workflowRepository;
         this.auditLogRepository = auditLogRepository;
         this.documentRepository = documentRepository;
-        this.holidayCalendarRepository = holidayCalendarRepository;
+        this.holidayRepository = holidayRepository;
         this.blackoutRepository = blackoutRepository;
         this.workingDayCalculator = workingDayCalculator;
         this.leavePolicyService = leavePolicyService;
+        this.leavePolicyGroupRepository = leavePolicyGroupRepository;
+        this.weeklyOffRuleRepository   = weeklyOffRuleRepository;
         this.employeeRepository = employeeRepository;
         this.userStoreRepository = userStoreRepository;
         this.attendanceRepository = attendanceRepository;
@@ -112,10 +118,18 @@ public class LeaveServiceImpl {
             throw new BusinessException("Leave cannot be applied for a past date.");
         }
 
-        // Resolve effective policy rules
-        String countryCode = resolveCountryCode(employee);
+        // Resolve effective policy rules — use policy group hierarchy (INDIA/EU/UAE)
+        String[] resolved = resolveGroupAndCountry(employee);
+        String policyGroupCode = resolved[0];
+        String countryCode     = resolved[1];
+        Long   storeId         = employee.getUser() != null ?
+                resolveStoreId(employee.getUser().getId()) : null;
+
+        LeavePolicyGroup policyGroup = leavePolicyGroupRepository
+                .findByCode(policyGroupCode).orElse(null);
+
         LeavePolicyService.ResolvedPolicy policy = leavePolicyService
-                .resolvePolicy(1L, leaveType, countryCode, LocalDate.now());
+                .resolvePolicy(null, storeId, 1L, leaveType, policyGroup, LocalDate.now());
 
         // Rule 3: Min notice period
         int minNotice = policy.minNoticeDays;
@@ -123,8 +137,8 @@ public class LeaveServiceImpl {
             throw new BusinessException("This leave type requires at least " + minNotice + " day(s) advance notice.");
         }
 
-        // Rule 4: Calculate working days
-        BigDecimal totalDays = workingDayCalculator.calculate(startDate, endDate, session, countryCode);
+        // Rule 4: Calculate working days (uses DB-driven weekly-off rules, not hardcoded)
+        BigDecimal totalDays = workingDayCalculator.calculate(startDate, endDate, session, policyGroupCode, countryCode);
         if (totalDays.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessException("The selected dates do not include any working days.");
         }
@@ -227,6 +241,8 @@ public class LeaveServiceImpl {
                         "Auto-approved: " + leaveType.getName() + " is a legally protected leave type.");
                 return saved;
             }
+        } else {
+            leave.setApproverRole("STORE_ADMIN");
         }
 
         // Debit pending balance
@@ -268,7 +284,8 @@ public class LeaveServiceImpl {
         }
 
         LeaveType leaveType = leave.getLeaveType();
-        String countryCode = resolveCountryCode(leave.getEmployee());
+        String[] resolvedApprove = resolveGroupAndCountry(leave.getEmployee());
+        String countryCode = resolvedApprove[1];
         LeavePolicyService.ResolvedPolicy policy = leavePolicyService.resolvePolicy(1L, leaveType, countryCode, leave.getStartDate());
 
         // Sick leave >2 days or policy requires document
@@ -284,9 +301,11 @@ public class LeaveServiceImpl {
         }
 
         // Attendance synchronization & shift validation
+        // Resolve weekly-off days once for efficiency (not per iteration)
+        java.util.Set<String> weeklyOffs = weeklyOffRuleRepository.resolveWeeklyOffDays(resolvedApprove[0]);
         for (LocalDate d = leave.getStartDate(); !d.isAfter(leave.getEndDate()); d = d.plusDays(1)) {
-            boolean isH = holidayCalendarRepository.existsByCountryCodeAndHolidayDate(countryCode, d);
-            boolean isW = isWeekend(d, countryCode);
+            boolean isH = holidayRepository.existsByCountryCodeAndHolidayDate(countryCode, d);
+            boolean isW = weeklyOffs.contains(d.getDayOfWeek().name());
             if (isH || isW) {
                 continue;
             }
@@ -372,8 +391,8 @@ public class LeaveServiceImpl {
         }
 
         // Rule 1: Protected leave rejections blocked
-        String countryCode = resolveCountryCode(leave.getEmployee());
-        LeavePolicyService.ResolvedPolicy policy = leavePolicyService.resolvePolicy(1L, leave.getLeaveType(), countryCode, leave.getStartDate());
+        String[] resolvedReject = resolveGroupAndCountry(leave.getEmployee());
+        LeavePolicyService.ResolvedPolicy policy = leavePolicyService.resolvePolicy(1L, leave.getLeaveType(), resolvedReject[1], leave.getStartDate());
         if (policy.isProtected) {
             throw new BusinessException("Protected leave types cannot be rejected.");
         }
@@ -594,11 +613,11 @@ public class LeaveServiceImpl {
             Employee emp = employeeRepository.findById(employeeId)
                     .orElseThrow(() -> new BusinessException("Employee not found"));
 
-            String countryCode = resolveCountryCode(emp);
+            String[] resolvedInit = resolveGroupAndCountry(emp);
             for (LeaveType lt : activeTypes) {
                 boolean hasBalance = existing.stream().anyMatch(b -> b.getLeaveType().getId().equals(lt.getId()));
                 if (!hasBalance) {
-                    LeavePolicyService.ResolvedPolicy policy = leavePolicyService.resolvePolicy(1L, lt, countryCode, LocalDate.now());
+                    LeavePolicyService.ResolvedPolicy policy = leavePolicyService.resolvePolicy(1L, lt, resolvedInit[1], LocalDate.now());
                     BigDecimal opening = policy.annualEntitlement != null ? policy.annualEntitlement : BigDecimal.ZERO;
 
                     EmployeeLeaveBalance b = new EmployeeLeaveBalance();
@@ -706,29 +725,36 @@ public class LeaveServiceImpl {
         auditLogRepository.save(audit);
     }
 
-    private String resolveCountryCode(Employee employee) {
+    /**
+     * Resolves the policy group code and legacy country code for an employee
+     * based on their assigned store region. Returns a two-element array:
+     * [0] = policy group code (INDIA | EU | UAE)
+     * [1] = legacy country code (IN | FR | AE) for holiday calendar lookups
+     */
+    public String[] resolveGroupAndCountry(Employee employee) {
         if (employee != null && employee.getUser() != null) {
             List<UserStore> userStores = userStoreRepository.findByIdUserId(employee.getUser().getId());
             if (userStores != null && !userStores.isEmpty()) {
                 com.plus33.erp.organization.entity.Store store = userStores.get(0).getStore();
                 if (store != null && store.getRegion() != null && store.getRegion().getCode() != null) {
                     String code = store.getRegion().getCode().toUpperCase();
-                    if (code.startsWith("FR")) return "FR";
-                    if (code.startsWith("IN")) return "IN";
-                    if (code.startsWith("AE") || code.startsWith("UAE")) return "AE";
-                    if (code.startsWith("EU")) return "EU";
-                    return code;
+                    if (code.startsWith("IN"))  return new String[]{"INDIA", "IN"};
+                    if (code.startsWith("AE") || code.startsWith("UAE")) return new String[]{"UAE", "AE"};
+                    if (code.startsWith("FR") || code.startsWith("EU")) return new String[]{"EU", "FR"};
+                    // Unknown region: default to EU
+                    return new String[]{"EU", code};
                 }
             }
         }
-        return "FR";
+        return new String[]{"EU", "FR"}; // Global default
     }
 
-    private boolean isWeekend(LocalDate date, String countryCode) {
-        if ("IN".equalsIgnoreCase(countryCode) || "AE".equalsIgnoreCase(countryCode)) {
-            return date.getDayOfWeek() == java.time.DayOfWeek.SUNDAY;
+    private Long resolveStoreId(Long userId) {
+        List<UserStore> userStores = userStoreRepository.findByIdUserId(userId);
+        if (userStores != null && !userStores.isEmpty() && userStores.get(0).getStore() != null) {
+            return userStores.get(0).getStore().getId();
         }
-        return date.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || date.getDayOfWeek() == java.time.DayOfWeek.SUNDAY;
+        return null;
     }
 
     private boolean isHalfDay(String session) {
@@ -785,8 +811,9 @@ public class LeaveServiceImpl {
     @Transactional
     public void checkAndCreditCompOff(Attendance att) {
         Employee employee = att.getEmployee();
-        String countryCode = resolveCountryCode(employee);
-        boolean isHoliday = holidayCalendarRepository.existsByCountryCodeAndHolidayDate(countryCode, att.getAttendanceDate());
+        String[] resolved  = resolveGroupAndCountry(employee);
+        String countryCode = resolved[1]; // Legacy country code for holiday calendar
+        boolean isHoliday  = holidayRepository.existsByCountryCodeAndHolidayDate(countryCode, att.getAttendanceDate());
         if (isHoliday && ("PRESENT".equalsIgnoreCase(att.getStatus()) || "HALF_DAY".equalsIgnoreCase(att.getStatus()))) {
             LeaveType compOffType = leaveTypeRepository.findByCode("COMP_OFF").orElse(null);
             if (compOffType != null) {
@@ -815,5 +842,52 @@ public class LeaveServiceImpl {
                 }
             }
         }
+    }
+
+    public boolean isRejectedBySupervisor(Long leaveId) {
+        return approvalHistoryRepository.findByLeaveIdOrderByLevelAsc(leaveId).stream()
+                .anyMatch(h -> "SUPERVISOR".equals(h.getApproverRole()) && "REJECTED".equals(h.getDecision()));
+    }
+
+    @Transactional
+    public EmployeeLeave escalateLeave(Long leaveId, Long employeeUserId) {
+        EmployeeLeave leave = leaveRepository.findById(leaveId)
+                .orElseThrow(() -> new BusinessException("Leave request not found."));
+
+        if (!"REJECTED".equals(leave.getStatus())) {
+            throw new BusinessException("Only REJECTED leave requests can be escalated.");
+        }
+
+        if (!isRejectedBySupervisor(leaveId)) {
+            throw new BusinessException("Only requests rejected by a Shift Supervisor can be escalated.");
+        }
+
+        String oldStatus = leave.getStatus();
+        leave.setStatus("PENDING");
+        leave.setApproverRole("STORE_ADMIN");
+        leave.setCurrentApprovalLevel(2);
+        leave.setEscalatedAt(LocalDateTime.now());
+        leave.setEscalatedTo("STORE_ADMIN");
+
+        // Debit pending balance again (since rejection refunded it)
+        int year = leave.getStartDate().getYear();
+        EmployeeLeaveBalance balance = getOrCreateBalance(leave.getEmployee().getId(), leave.getLeaveType().getId(), year);
+        balance.setPending(balance.getPending().add(leave.getTotalDays()));
+        balanceRepository.save(balance);
+
+        // Ledger transaction: debit as PENDING
+        writeTransaction(leave.getEmployee(), leave.getLeaveType(), leave.getTotalDays().negate(), "APPROVAL",
+                leave, "Escalated pending deduction for leave request");
+
+        EmployeeLeave saved = leaveRepository.save(leave);
+
+        writeApprovalHistory(saved, 2, null, "SYSTEM", "ESCALATED",
+                oldStatus, "PENDING", "Escalated to Store Admin after supervisor rejection", null, null);
+
+        writeAudit(saved, employeeUserId, "ESCALATED",
+                "{\"status\":\"REJECTED\"}", "{\"status\":\"PENDING\",\"approverRole\":\"STORE_ADMIN\"}",
+                "Escalated leave request to Store Admin after supervisor rejection", null);
+
+        return saved;
     }
 }

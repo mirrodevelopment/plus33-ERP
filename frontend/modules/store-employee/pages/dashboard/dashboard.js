@@ -349,7 +349,7 @@ export default class StoreEmployeeDashboard {
             navigator.geolocation.getCurrentPosition(
               p => resolve(`${p.coords.latitude},${p.coords.longitude}`),
               () => resolve(null),
-              { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
           });
         } catch (_) { gps = null; }

@@ -1,0 +1,272 @@
+<!-- /******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Developed By      : Haulo
+ * Developed For     : PLUS33 Coffee
+ * Developer         : Sivasurya
+ *
+ * Module            : Store Admin Module — Pending Approvals
+ * File              : pending-approvals.html
+ * Path              : frontend/modules/store-admin/pages/pending-approvals/pending-approvals.html
+ * Purpose           : HTML structure layout for Store Admin Pending Approvals page module strictly matching reference design specs with top mode tab cards, search filter bar, category pill count badges, interactive data table, decision audit history, and modal dialogs.
+ * Version           : 2.0.0
+ *
+ * Description
+ * ---------------------------------------------------------------------------
+ * Complete semantic HTML5 template for Store Admin Pending Approvals hub.
+ ******************************************************************************/ -->
+
+<div class="pending-approvals-page">
+  <!-- PAGE HEADER -->
+  <div class="page-header flex justify-between align-center mb-md">
+    <div>
+      <div class="flex align-center gap-xs mb-xs">
+        <h1 class="page-title text-gradient">Store Pending Approvals Hub</h1>
+        <span class="badge badge-primary flex align-center gap-xs" id="badge-store-location">
+          <span class="live-pulse-dot"></span> Green Park Café, City Center
+        </span>
+      </div>
+      <p class="text-secondary text-sm">Centralized decision center for all Store Employee and Shift Supervisor requests.</p>
+    </div>
+
+    <!-- HEADER ACTION TOOLBAR -->
+    <div class="flex align-center gap-sm">
+      <button class="btn btn-secondary flex align-center gap-xs" id="btn-refresh-approvals" type="button">
+        <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i> Refresh Queue
+      </button>
+    </div>
+  </div>
+
+  <!-- TOP MODE TABS & SEARCH BAR -->
+  <div class="top-nav-tabs-row flex justify-between align-center mb-md flex-wrap gap-md">
+    <div class="mode-tabs-container flex gap-md">
+      <!-- Active Pending Queue Tab Card -->
+      <div class="tab-card active" id="tab-btn-queue">
+        <div class="tab-card-icon">
+          <i data-lucide="sliders" style="width:20px;height:20px;"></i>
+        </div>
+        <div>
+          <div class="tab-card-title flex align-center gap-xs">
+            Active Pending Queue <span class="badge-count" id="queue-badge-count">8</span>
+          </div>
+          <div class="tab-card-subtitle">Requests awaiting review and decision</div>
+        </div>
+      </div>
+
+      <!-- Decision Audit History Tab Card -->
+      <div class="tab-card" id="tab-btn-history">
+        <div class="tab-card-icon">
+          <i data-lucide="history" style="width:20px;height:20px;"></i>
+        </div>
+        <div>
+          <div class="tab-card-title">Decision Audit History</div>
+          <div class="tab-card-subtitle">View all decision logs &amp; history</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="search-filter-group flex align-center gap-sm">
+      <div class="search-box">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="input-search-approvals" class="form-input search-input" placeholder="Search by requester name, ID, or category..." />
+      </div>
+      <button class="btn-filter-icon" type="button" title="Filter options">
+        <i data-lucide="sliders-horizontal" style="width:16px;height:16px;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE CARD -->
+  <div class="card glass mb-md main-workspace-card">
+    <!-- CATEGORY FILTER PILLS (Only visible in Queue mode) -->
+    <div class="category-pills-row p-md flex flex-wrap gap-sm border-bottom" id="category-pills-container">
+      <button class="pill-btn active" data-category="ALL" type="button">
+        <i data-lucide="list-filter" style="width:14px;height:14px;"></i> All Requests <span class="pill-badge" id="pill-count-all">8</span>
+      </button>
+      <button class="pill-btn" data-category="DOCUMENT" type="button">
+        <i data-lucide="file-text" style="width:14px;height:14px;"></i> Document Verification <span class="pill-badge" id="pill-count-doc">2</span>
+      </button>
+      <button class="pill-btn" data-category="LEAVE" type="button">
+        <i data-lucide="calendar" style="width:14px;height:14px;"></i> Leaves &amp; Time-off <span class="pill-badge" id="pill-count-leave">1</span>
+      </button>
+      <button class="pill-btn" data-category="LEAVE_CANCEL" type="button">
+        <i data-lucide="x-circle" style="width:14px;height:14px;"></i> Leave Cancellations <span class="pill-badge" id="pill-count-cancel">1</span>
+      </button>
+      <button class="pill-btn" data-category="AWAY_PASS" type="button">
+        <i data-lucide="send" style="width:14px;height:14px;"></i> Away Passes <span class="pill-badge" id="pill-count-away">1</span>
+      </button>
+      <button class="pill-btn" data-category="SHIFT_SWAP" type="button">
+        <i data-lucide="arrow-left-right" style="width:14px;height:14px;"></i> Escalated Shift Swaps <span class="pill-badge" id="pill-count-swap">1</span>
+      </button>
+      <button class="pill-btn" data-category="OVERTIME" type="button">
+        <i data-lucide="clock" style="width:14px;height:14px;"></i> Rest Day Overtime <span class="pill-badge" id="pill-count-ot">1</span>
+      </button>
+      <button class="pill-btn" data-category="STOCK_WASTE" type="button">
+        <i data-lucide="package" style="width:14px;height:14px;"></i> Stock Write-offs <span class="pill-badge" id="pill-count-waste">1</span>
+      </button>
+      <button class="pill-btn" data-category="EXPENSE" type="button">
+        <i data-lucide="receipt" style="width:14px;height:14px;"></i> Store Expenses <span class="pill-badge" id="pill-count-expense">1</span>
+      </button>
+    </div>
+
+    <!-- PENDING QUEUE TABLE CONTAINER -->
+    <div class="table-responsive p-sm" id="view-pending-queue">
+      <table class="data-table" id="table-approvals-queue">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 220px;">REQUESTER DETAILS</th>
+            <th scope="col" style="width: 170px;">CATEGORY</th>
+            <th scope="col">REQUEST DETAILS / PAYLOAD</th>
+            <th scope="col" style="width: 160px;">SUBMITTED</th>
+            <th scope="col" style="width: 120px;">URGENCY</th>
+            <th scope="col" style="width: 210px; text-align: right;">ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody id="tbody-approvals-queue">
+          <!-- Dynamically populated rows -->
+        </tbody>
+      </table>
+
+      <!-- Clean Empty Queue State -->
+      <div class="empty-state p-xl text-center" id="empty-queue-state" style="display: none;">
+        <i data-lucide="check-circle-2" style="width: 48px; height: 48px; color: var(--status-success);" class="mb-sm"></i>
+        <h3 class="font-bold text-lg color-primary mb-xs">All Approvals Cleared!</h3>
+        <p class="text-secondary text-sm">There are no pending requests matching the selected category or search filters.</p>
+      </div>
+    </div>
+
+    <!-- DECISION HISTORY TABLE CONTAINER -->
+    <div class="table-responsive p-sm" id="view-decision-history" style="display: none;">
+      <table class="data-table" id="table-approvals-history">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 120px;">REQUEST ID</th>
+            <th scope="col" style="width: 200px;">REQUESTER</th>
+            <th scope="col" style="width: 160px;">CATEGORY</th>
+            <th scope="col">SUMMARY</th>
+            <th scope="col" style="width: 130px;">DECISION</th>
+            <th scope="col" style="width: 180px;">DECISION LOG &amp; REASON</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-approvals-history">
+          <!-- Dynamically populated history rows -->
+        </tbody>
+      </table>
+
+      <!-- Empty History State -->
+      <div class="empty-state p-xl text-center" id="empty-history-state" style="display: none;">
+        <i data-lucide="history" style="width: 48px; height: 48px; color: var(--text-muted);" class="mb-sm"></i>
+        <h3 class="font-bold text-lg color-primary mb-xs">No Audit History Found</h3>
+        <p class="text-secondary text-sm">Decided requests and approval audit logs will appear here.</p>
+      </div>
+    </div>
+
+    <!-- TABLE FOOTER PAGINATION BAR -->
+    <div class="table-footer-bar flex justify-between align-center p-md border-top">
+      <div class="text-xs text-secondary" id="pagination-info">Showing 1 to 8 of 8 requests</div>
+      <div class="pagination-controls flex align-center gap-xs">
+        <button class="btn-page-nav" type="button" disabled><i data-lucide="chevron-left" style="width:14px;height:14px;"></i></button>
+        <button class="btn-page-num active" type="button">1</button>
+        <button class="btn-page-nav" type="button" disabled><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></button>
+      </div>
+      <div class="flex align-center gap-xs text-xs text-secondary">
+        Rows per page:
+        <select class="rows-select" aria-label="Rows per page">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL OVERLAYS                                                            -->
+<!-- ========================================================================= -->
+
+<!-- Details & Document Preview Modal -->
+<div class="modal-overlay" id="modal-details-overlay" style="display: none;" aria-hidden="true">
+  <div class="modal-card glass" style="max-width: 680px; width: 90%;">
+    <div class="modal-header flex justify-between align-center p-md border-bottom">
+      <h3 class="font-bold text-md color-primary" id="details-modal-title">Request Details</h3>
+      <button class="btn-icon btn-close-modal" type="button" aria-label="Close modal">
+        <i data-lucide="x" style="width:16px; height:16px;"></i>
+      </button>
+    </div>
+    <div class="modal-body p-md">
+      <!-- Requester Info Header -->
+      <div class="flex align-center gap-md mb-md pb-md border-bottom">
+        <img id="details-user-avatar" src="imgs/female-avatar.jpg" alt="Requester" class="avatar-md" />
+        <div>
+          <div class="font-bold text-base color-primary" id="details-user-name">Requester Name</div>
+          <div class="text-xs text-secondary" id="details-user-role">Role &bull; Code</div>
+          <div class="text-xs text-muted" id="details-user-store">Store Location</div>
+        </div>
+        <div class="ml-auto">
+          <span class="badge badge-urgency normal" id="details-request-urgency">NORMAL</span>
+        </div>
+      </div>
+
+      <!-- Request Summary Box -->
+      <div class="summary-box p-md rounded mb-md" id="details-summary-box" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08);">
+        <!-- Summary details injected dynamically -->
+      </div>
+
+      <!-- Document Attachment Frame -->
+      <div class="attachment-frame mb-md" id="details-attachment-panel" style="display: none;">
+        <div class="font-bold text-xs color-primary mb-xs flex align-center gap-xs">
+          <i data-lucide="file-text" style="width:14px;height:14px;"></i> Uploaded Document Scan
+        </div>
+        <div class="doc-preview-container p-sm text-center" style="background: rgba(0,0,0,0.4); border-radius: 8px;">
+          <img id="doc-preview-image" src="" alt="Document Preview" style="max-height: 260px; max-width: 100%; border-radius: 6px; display: none;" />
+          <iframe id="doc-preview-iframe" src="" style="width: 100%; height: 260px; border: none; border-radius: 6px; display: none;" title="PDF Preview"></iframe>
+          <div id="doc-preview-fallback" style="display: none;" class="p-md text-muted text-xs">
+            Preview unavailable for this document format. Use download button below.
+          </div>
+        </div>
+        <div class="mt-xs text-right">
+          <a id="btn-download-doc" href="#" target="_blank" class="btn btn-secondary btn-xs inline-flex align-center gap-xs" download>
+            <i data-lucide="download" style="width:12px;height:12px;"></i> Download Document File
+          </a>
+        </div>
+      </div>
+
+      <!-- Remarks / Reason -->
+      <div>
+        <label class="font-bold text-xs color-primary mb-xs block">Requester Remarks / Reason:</label>
+        <p class="text-xs text-secondary italic p-sm rounded" id="details-remarks-text" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); margin: 0;">
+          No remarks provided.
+        </p>
+      </div>
+    </div>
+    <div class="modal-footer flex justify-end gap-sm p-md border-top">
+      <button class="btn btn-secondary btn-close-modal" type="button">Close</button>
+      <button class="btn btn-danger btn-modal-reject" type="button">Reject</button>
+      <button class="btn btn-primary btn-modal-approve" type="button">Approve Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rejection Reason Modal -->
+<div class="modal-overlay" id="modal-reject-overlay" style="display: none;" aria-hidden="true">
+  <div class="modal-card glass" style="max-width: 480px; width: 90%;">
+    <div class="modal-header flex justify-between align-center p-md border-bottom">
+      <h3 class="font-bold text-md color-danger flex align-center gap-xs">
+        <i data-lucide="x-circle" style="width:18px;height:18px;"></i> Reject Request
+      </h3>
+      <button class="btn-icon btn-close-modal" type="button" aria-label="Close modal">
+        <i data-lucide="x" style="width:16px; height:16px;"></i>
+      </button>
+    </div>
+    <div class="modal-body p-md">
+      <p class="text-xs text-secondary mb-sm">Please state the reason for rejecting this request. This explanation will be logged and communicated to the employee.</p>
+      <textarea id="input-reject-reason" class="form-input" rows="4" placeholder="Enter detailed reason for rejection..."></textarea>
+    </div>
+    <div class="modal-footer flex justify-end gap-sm p-md border-top">
+      <button class="btn btn-secondary btn-close-modal" type="button">Cancel</button>
+      <button class="btn btn-danger" id="btn-confirm-reject" type="button">Confirm Rejection</button>
+    </div>
+  </div>
+</div>
