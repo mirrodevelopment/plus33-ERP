@@ -238,13 +238,13 @@ export default class LogsPage {
         let logoutText = '—';
         if (l.status === 'SUCCESS') {
           if (l.logoutTime) {
-            logoutText = String(l.logoutTime).replace('T', ' ').substring(0, 19);
+            logoutText = `<span style="color:var(--text-muted);">${String(l.logoutTime).replace('T', ' ').substring(0, 19)}</span> <span style="font-size:0.68rem; font-weight:700; color:#e74c3c; background:rgba(231,76,60,0.12); padding:2px 6px; border-radius:3px; margin-left:4px;">Logged Out</span>`;
           } else if (isActiveNow) {
-            logoutText = '<span style="color:#2ecc71; font-weight:700;">Active Now</span>';
+            logoutText = '<span style="color:#2ecc71; font-weight:700; background:rgba(46,204,113,0.12); padding:2px 8px; border-radius:3px; font-size:0.7rem;">Active Now</span>';
           } else if (l.lastActiveTime) {
-            logoutText = `<span style="color:var(--text-muted);">${String(l.lastActiveTime).replace('T', ' ').substring(0, 19)} <span style="font-size:0.68rem; opacity:0.75; font-style:italic;">(Timed Out)</span></span>`;
+            logoutText = `<span style="color:var(--text-muted);">${String(l.lastActiveTime).replace('T', ' ').substring(0, 19)}</span> <span style="font-size:0.68rem; font-weight:700; color:#e67e22; background:rgba(230,126,34,0.12); padding:2px 6px; border-radius:3px; margin-left:4px;">Timed Out</span>`;
           } else {
-            logoutText = '<span style="color:var(--text-muted);">Timed Out</span>';
+            logoutText = '<span style="font-size:0.68rem; font-weight:700; color:#e67e22; background:rgba(230,126,34,0.12); padding:2px 6px; border-radius:3px;">Timed Out</span>';
           }
         }
 

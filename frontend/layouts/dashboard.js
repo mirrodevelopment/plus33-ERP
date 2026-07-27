@@ -411,6 +411,20 @@ export const dashboardLayout = {
       });
     }
 
+    // Tab / Window close beacon listener
+    window.addEventListener('beforeunload', () => {
+      const token = storage.get('plus33-token');
+      if (token) {
+        try {
+          fetch('/api/platform/logs/logout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            keepalive: true
+          });
+        } catch (e) {}
+      }
+    });
+
     // Profile Top Bar & Avatar Click -> Open User Profile Page for ALL users
     const navigateToProfile = (e) => {
       if (e) {
