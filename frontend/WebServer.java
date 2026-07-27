@@ -317,7 +317,7 @@ public class WebServer {
             }
 
             // Reverse Proxy for Spring Boot Backend API calls on port 8080
-            if (path.startsWith("/api/v1/") || path.startsWith("/api/v2/")) {
+            if (path.startsWith("/api/v1/") || path.startsWith("/api/v2/") || path.startsWith("/api/platform/")) {
                 String query = t.getRequestURI().getRawQuery();
                 String targetUrl = "http://127.0.0.1:8080" + path + (query != null ? "?" + query : "");
                 try {
