@@ -226,7 +226,7 @@ export default class LogsPage {
           if (!end) end = new Date(l.loginTime);
 
           const diffMs = end - loginTime;
-          const diffMins = Math.max(0, Math.round(diffMs / 60000));
+          const diffMins = isNaN(diffMs) ? 0 : Math.max(0, Math.round(diffMs / 60000));
           
           if (isActiveNow) {
             durationText = `<span style="display:inline-flex; align-items:center; gap:5px; font-weight:700; color:#2ecc71;">Active Now <span style="width:6px; height:6px; border-radius:50%; background:#2ecc71; display:inline-block; animation: pulse-dot 1.5s infinite;"></span> (${diffMins}m elapsed)</span>`;
@@ -252,8 +252,8 @@ export default class LogsPage {
             <td style="padding: var(--spacing-md);">${statusBadge}</td>
             <td style="padding: var(--spacing-md); font-size:0.75rem;">${durationText}</td>
             <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;" title="${l.userAgent || ''}">${shortUA}</td>
-            <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;">${l.loginTime.replace('T', ' ').substring(0, 19)}</td>
-            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.logoutTime ? l.logoutTime.replace('T', ' ').substring(0, 19) : (l.status === 'SUCCESS' ? '<span style="color:#2ecc71; font-weight:700;">Active Now</span>' : '—')}</td>
+            <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;">${l.loginTime ? String(l.loginTime).replace('T', ' ').substring(0, 19) : '—'}</td>
+            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.logoutTime ? String(l.logoutTime).replace('T', ' ').substring(0, 19) : (l.status === 'SUCCESS' ? '<span style="color:#2ecc71; font-weight:700;">Active Now</span>' : '—')}</td>
           </tr>
         `;
       }).join('');
@@ -269,7 +269,7 @@ export default class LogsPage {
             <td style="padding: var(--spacing-md); color:#fff; font-size:0.78rem;">${l.userIdentity}</td>
             <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;">${l.traceContext}</td>
             <td style="padding: var(--spacing-md); color:var(--text-primary); font-family:monospace; font-size:0.72rem;">${l.payloadDiff}</td>
-            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.createdAt.replace('T', ' ')}</td>
+            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.createdAt ? String(l.createdAt).replace('T', ' ').substring(0, 19) : '—'}</td>
           </tr>
         `;
       }).join('');
@@ -297,7 +297,7 @@ export default class LogsPage {
             </td>
             <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;">${l.logger}</td>
             <td style="padding: var(--spacing-md); color:var(--text-primary); font-size:0.75rem;">${l.message}</td>
-            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.timestamp.replace('T', ' ')}</td>
+            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.timestamp ? String(l.timestamp).replace('T', ' ').substring(0, 19) : '—'}</td>
           </tr>
         `;
       }).join('');
