@@ -34,6 +34,7 @@ export default class LogsPage {
   constructor() {
     this.auditLogs = [];
     this.systemLogs = [];
+    this.loginLogs = [];
     this.dashboardStats = {
       totalCacheNodes: 4,
       totalPods: 12,
@@ -41,7 +42,7 @@ export default class LogsPage {
       totalBreakers: 2,
       status: "HEALTHY"
     };
-    this.activeTab = 'audit'; // 'audit' or 'system'
+    this.activeTab = 'logins';
   }
 
   /**
@@ -118,13 +119,16 @@ export default class LogsPage {
       </div>
 
       <!-- Main Layout Panels -->
-      <div class="grid grid-cols-3 gap-lg mb-lg">
+      <div class="mb-lg">
         
-        <!-- Left: Interactive Tabbed Log Viewer -->
-        <div class="card glass col-span-2 flex flex-col" style="padding: var(--spacing-lg); border-color: rgba(255,255,255,0.05); min-height: 480px;">
+        <!-- Interactive Tabbed Log Viewer -->
+        <div class="card glass flex flex-col" style="padding: var(--spacing-lg); border-color: rgba(255,255,255,0.05); min-height: 480px;">
           <div class="flex justify-between align-center mb-md flex-wrap gap-sm">
             <!-- Tabs Controls -->
             <div class="flex gap-xs" style="background:rgba(0,0,0,0.2); padding:2px; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.05);">
+              <button id="tab-login-logs" class="btn" style="padding:6px 16px; border-radius:var(--radius-sm); font-size:0.75rem; font-weight:700; cursor:pointer; border:none; transition:var(--transition-fast); background:${this.activeTab === 'logins' ? 'rgba(255,255,255,0.08)' : 'transparent'}; color:${this.activeTab === 'logins' ? '#fff' : 'var(--text-muted)'};">
+                User Login Activity
+              </button>
               <button id="tab-audit-logs" class="btn" style="padding:6px 16px; border-radius:var(--radius-sm); font-size:0.75rem; font-weight:700; cursor:pointer; border:none; transition:var(--transition-fast); background:${this.activeTab === 'audit' ? 'rgba(255,255,255,0.08)' : 'transparent'}; color:${this.activeTab === 'audit' ? '#fff' : 'var(--text-muted)'};">
                 Audit Logs
               </button>
@@ -149,69 +153,6 @@ export default class LogsPage {
             </table>
           </div>
         </div>
-        
-        <!-- Right: Actions Panels -->
-        <div class="flex flex-col gap-lg col-span-1">
-          <!-- 1. Evict Cache Cluster Form -->
-          <div class="card glass" style="padding: var(--spacing-lg); border-color: rgba(255,255,255,0.05);">
-            <div class="flex align-center gap-xs mb-md">
-              <i data-lucide="trash-2" style="color: var(--accent-primary); width:18px; height:18px;"></i>
-              <h3 class="m-0" style="font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;">
-                Evict Cache Key
-              </h3>
-            </div>
-            
-            <form id="cache-evict-form" style="display:flex; flex-direction:column; gap: var(--spacing-sm);">
-              <div class="flex flex-col gap-xs">
-                <label style="font-size:0.6rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Namespace</label>
-                <input type="text" id="cache-ns" placeholder="wms.locations" required style="padding:6px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-sm); color:#fff; font-size:0.78rem; outline:none;" />
-              </div>
-              
-              <div class="flex flex-col gap-xs">
-                <label style="font-size:0.6rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Key identifier</label>
-                <input type="text" id="cache-key" placeholder="ledger" required style="padding:6px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-sm); color:#fff; font-size:0.78rem; outline:none;" />
-              </div>
-
-              <button type="submit" class="btn" style="background:var(--accent-primary); color:#000; font-weight:700; font-size:0.75rem; text-transform:uppercase; padding:8px; border-radius:var(--radius-sm); border:none; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer; margin-top:var(--spacing-xs); transition:var(--transition-fast);">
-                <i data-lucide="zap" style="width:14px; height:14px;"></i>
-                Evict Key
-              </button>
-            </form>
-          </div>
-
-          <!-- 2. Set Config Form -->
-          <div class="card glass" style="padding: var(--spacing-lg); border-color: rgba(255,255,255,0.05);">
-            <div class="flex align-center gap-xs mb-md">
-              <i data-lucide="sliders" style="color: var(--accent-primary); width:18px; height:18px;"></i>
-              <h3 class="m-0" style="font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;">
-                Set Global Variable
-              </h3>
-            </div>
-            
-            <form id="config-set-form" style="display:flex; flex-direction:column; gap: var(--spacing-sm);">
-              <div class="flex gap-sm">
-                <div class="flex flex-col gap-xs flex-grow">
-                  <label style="font-size:0.6rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Key</label>
-                  <input type="text" id="cfg-key" placeholder="route.optimization" required style="padding:6px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-sm); color:#fff; font-size:0.78rem; outline:none;" />
-                </div>
-                <div class="flex flex-col gap-xs" style="width:100px;">
-                  <label style="font-size:0.6rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Profile</label>
-                  <input type="text" id="cfg-profile" value="production" required style="padding:6px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-sm); color:#fff; font-size:0.78rem; outline:none; text-align:center;" />
-                </div>
-              </div>
-
-              <div class="flex flex-col gap-xs">
-                <label style="font-size:0.6rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Value</label>
-                <input type="text" id="cfg-val" placeholder="green" required style="padding:6px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-sm); color:#fff; font-size:0.78rem; outline:none;" />
-              </div>
-
-              <button type="submit" class="btn" style="background:var(--accent-primary); color:#000; font-weight:700; font-size:0.75rem; text-transform:uppercase; padding:8px; border-radius:var(--radius-sm); border:none; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer; margin-top:var(--spacing-xs); transition:var(--transition-fast);">
-                <i data-lucide="save" style="width:14px; height:14px;"></i>
-                Update Variable
-              </button>
-            </form>
-          </div>
-        </div>
 
       </div>
     `;
@@ -226,19 +167,22 @@ export default class LogsPage {
    */
   async fetchData() {
     try {
-      const [dashRes, auditRes, sysRes] = await Promise.all([
+      const [dashRes, auditRes, sysRes, loginRes] = await Promise.all([
         apiClient.get('/api/platform/dashboard'),
         apiClient.get('/api/platform/logs/audit'),
-        apiClient.get('/api/platform/logs/system')
+        apiClient.get('/api/platform/logs/system'),
+        apiClient.get('/api/platform/logs/logins').catch(() => [])
       ]);
 
       if (dashRes) this.dashboardStats = dashRes;
       if (auditRes) this.auditLogs = auditRes;
       if (sysRes) this.systemLogs = sysRes;
+      this.loginLogs = loginRes || [];
     } catch (err) {
-      logger.error('LogsPage', 'Failed to fetch database audit/system logs:', err);
+      logger.error('LogsPage', 'Failed to fetch database logs:', err);
       this.auditLogs = [];
       this.systemLogs = [];
+      this.loginLogs = [];
     }
   }
 
@@ -247,11 +191,19 @@ export default class LogsPage {
    * @memberof Pages Module
    */
   renderLogHeader() {
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Pages Module
-     */
-    if (this.activeTab === 'audit') {
+    if (this.activeTab === 'logins') {
+      return `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; font-weight:700;">
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">User Email</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">IP Address</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Resolved Location</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Status</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Session Active Duration</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Client Context</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md); text-align:right;">Login Time</th>
+        </tr>
+      `;
+    } else if (this.activeTab === 'audit') {
       return `
         <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; font-weight:700;">
           <th style="padding: var(--spacing-sm) var(--spacing-md);">Log ID</th>
@@ -281,15 +233,71 @@ export default class LogsPage {
    * @memberof Pages Module
    */
   renderLogRows() {
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Pages Module
-     */
-    if (this.activeTab === 'audit') {
-      /**
-       * Performs the fn operation in this module.
-       * @memberof Pages Module
-       */
+    if (this.activeTab === 'logins') {
+      if (!this.loginLogs || this.loginLogs.length === 0) {
+        return `<tr><td colspan="7" style="padding: var(--spacing-xl); text-align:center; color: var(--text-muted);">No login activity logs available.</td></tr>`;
+      }
+      return this.loginLogs.map(l => {
+        let statusBadge = '';
+        if (l.status === 'SUCCESS') {
+          statusBadge = `<span style="font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:3px; background:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span>`;
+        } else {
+          statusBadge = `<span style="font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:3px; background:rgba(231,76,60,0.15); color:var(--status-danger);" title="${l.failureReason || 'Invalid credentials'}">FAILED</span>`;
+        }
+
+        let durationText = '';
+        if (l.status === 'FAILED') {
+          durationText = '<span style="color:var(--text-muted);">—</span>';
+        } else {
+          const loginTime = new Date(l.loginTime);
+          let end = l.logoutTime ? new Date(l.logoutTime) : null;
+          let isActiveNow = false;
+
+          if (!end && l.lastActiveTime) {
+            const lastActive = new Date(l.lastActiveTime);
+            const now = new Date();
+            if ((now - lastActive) < 60000) {
+              isActiveNow = true;
+              end = now;
+            } else {
+              end = lastActive;
+            }
+          }
+
+          if (!end) end = new Date(l.loginTime);
+
+          const diffMs = end - loginTime;
+          const diffMins = Math.max(0, Math.round(diffMs / 60000));
+          
+          if (isActiveNow) {
+            durationText = `<span style="display:inline-flex; align-items:center; gap:5px; font-weight:700; color:#2ecc71;">Active Now <span style="width:6px; height:6px; border-radius:50%; background:#2ecc71; display:inline-block; animation: pulse-dot 1.5s infinite;"></span> (${diffMins}m elapsed)</span>`;
+          } else {
+            durationText = `<span style="color:var(--text-primary); font-family:monospace;">${diffMins} min</span>`;
+          }
+        }
+
+        let shortUA = 'Unknown';
+        if (l.userAgent) {
+          if (l.userAgent.includes('Chrome')) shortUA = 'Chrome / Browser';
+          else if (l.userAgent.includes('Firefox')) shortUA = 'Firefox / Browser';
+          else if (l.userAgent.includes('Safari') && !l.userAgent.includes('Chrome')) shortUA = 'Safari / Browser';
+          else if (l.userAgent.includes('Postman')) shortUA = 'Postman Client';
+          else shortUA = l.userAgent.length > 25 ? l.userAgent.substring(0, 22) + '...' : l.userAgent;
+        }
+
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); transition: var(--transition-fast);" onmouseover="this.style.background='rgba(255,255,255,0.01)'" onmouseout="this.style.background='transparent'">
+            <td style="padding: var(--spacing-md); font-weight:700; color:#fff;">${l.username}</td>
+            <td style="padding: var(--spacing-md); color:var(--text-muted); font-family:monospace; font-size:0.75rem;">${l.ipAddress}</td>
+            <td style="padding: var(--spacing-md); color:#fff; font-size:0.78rem;">${l.location || 'Local Loopback'}</td>
+            <td style="padding: var(--spacing-md);">${statusBadge}</td>
+            <td style="padding: var(--spacing-md); font-size:0.75rem;">${durationText}</td>
+            <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;" title="${l.userAgent || ''}">${shortUA}</td>
+            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.loginTime.replace('T', ' ').substring(0, 19)}</td>
+          </tr>
+        `;
+      }).join('');
+    } else if (this.activeTab === 'audit') {
       if (!this.auditLogs || this.auditLogs.length === 0) {
         return `<tr><td colspan="6" style="padding: var(--spacing-xl); text-align:center; color: var(--text-muted);">No audit trails generated.</td></tr>`;
       }
@@ -342,20 +350,31 @@ export default class LogsPage {
    */
   bindEvents(container, lifecycle) {
     // 1. Tab switches
+    const loginBtn = container.querySelector('#tab-login-logs');
     const auditBtn = container.querySelector('#tab-audit-logs');
     const sysBtn = container.querySelector('#tab-system-logs');
     const tbody = container.querySelector('#log-table-body');
     const thead = container.querySelector('#log-table-head');
     
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Pages Module
-     */
-    if (auditBtn && sysBtn) {
+    if (loginBtn && auditBtn && sysBtn) {
+      loginBtn.addEventListener('click', () => {
+        this.activeTab = 'logins';
+        loginBtn.style.background = 'rgba(255,255,255,0.08)';
+        loginBtn.style.color = '#fff';
+        auditBtn.style.background = 'transparent';
+        auditBtn.style.color = 'var(--text-muted)';
+        sysBtn.style.background = 'transparent';
+        sysBtn.style.color = 'var(--text-muted)';
+        if (thead) thead.innerHTML = this.renderLogHeader();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+
       auditBtn.addEventListener('click', () => {
         this.activeTab = 'audit';
         auditBtn.style.background = 'rgba(255,255,255,0.08)';
         auditBtn.style.color = '#fff';
+        loginBtn.style.background = 'transparent';
+        loginBtn.style.color = 'var(--text-muted)';
         sysBtn.style.background = 'transparent';
         sysBtn.style.color = 'var(--text-muted)';
         if (thead) thead.innerHTML = this.renderLogHeader();
@@ -366,6 +385,8 @@ export default class LogsPage {
         this.activeTab = 'system';
         sysBtn.style.background = 'rgba(255,255,255,0.08)';
         sysBtn.style.color = '#fff';
+        loginBtn.style.background = 'transparent';
+        loginBtn.style.color = 'var(--text-muted)';
         auditBtn.style.background = 'transparent';
         auditBtn.style.color = 'var(--text-muted)';
         if (thead) thead.innerHTML = this.renderLogHeader();
@@ -373,76 +394,7 @@ export default class LogsPage {
       });
     }
 
-    // 2. Cache Eviction Submit Handler
-    const evictForm = container.querySelector('#cache-evict-form');
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Pages Module
-     */
-    if (evictForm) {
-      /**
-       * Handles the handler event or exception in the business workflow.
-       * @memberof Pages Module
-       */
-      const handler = async (e) => {
-        e.preventDefault();
-        const namespace = container.querySelector('#cache-ns').value.trim();
-        const key = container.querySelector('#cache-key').value.trim();
-        
-        logger.info('LogsPage', `Requesting cache key eviction: ns=${namespace}, key=${key}`);
 
-        try {
-          await apiClient.post(`/api/platform/cache/evict?namespace=${encodeURIComponent(namespace)}&key=${encodeURIComponent(key)}&operator=admin@plus33.com`);
-          notificationStore.success(`Cache key [${namespace}:${key}] evicted successfully.`, 5000);
-          
-          // Reload logs to show new audit entry
-          await this.fetchData();
-          if (tbody) tbody.innerHTML = this.renderLogRows();
-          evictForm.reset();
-        } catch (err) {
-          logger.error('LogsPage', 'Eviction failed:', err);
-          notificationStore.danger('Failed to evict cache key. Check system credentials.');
-        }
-      };
-      evictForm.addEventListener('submit', handler);
-      lifecycle.onCleanup(() => evictForm.removeEventListener('submit', handler));
-    }
-
-    // 3. Set Config Submit Handler
-    const configForm = container.querySelector('#config-set-form');
-    /**
-     * Performs the fn operation in this module.
-     * @memberof Pages Module
-     */
-    if (configForm) {
-      /**
-       * Handles the handler event or exception in the business workflow.
-       * @memberof Pages Module
-       */
-      const handler = async (e) => {
-        e.preventDefault();
-        const key = container.querySelector('#cfg-key').value.trim();
-        const value = container.querySelector('#cfg-val').value.trim();
-        const profile = container.querySelector('#cfg-profile').value.trim();
-        
-        logger.info('LogsPage', `Setting config: key=${key}, val=${value}, profile=${profile}`);
-
-        try {
-          await apiClient.post(`/api/platform/config?key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}&profile=${encodeURIComponent(profile)}&operator=admin@plus33.com`);
-          notificationStore.success(`Global configuration variable [${key}] updated successfully!`, 5000);
-          
-          // Reload logs to show new audit entry
-          await this.fetchData();
-          if (tbody) tbody.innerHTML = this.renderLogRows();
-          configForm.reset();
-        } catch (err) {
-          logger.error('LogsPage', 'Configuration set failed:', err);
-          notificationStore.danger('Failed to set config. Check system parameters.');
-        }
-      };
-      configForm.addEventListener('submit', handler);
-      lifecycle.onCleanup(() => configForm.removeEventListener('submit', handler));
-    }
   }
 }
 
