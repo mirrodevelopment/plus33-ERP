@@ -545,8 +545,9 @@ public class PlatformOpsController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        java.util.List<com.plus33.erp.security.entity.UserActivityLog> allLogs = userActivityLogRepo.findAllByOrderByLoginTimeDesc();
-        return ResponseEntity.ok(allLogs);
+        String email = principal.getName();
+        java.util.List<com.plus33.erp.security.entity.UserActivityLog> userLogs = userActivityLogRepo.findByUsernameOrderByLoginTimeDesc(email);
+        return ResponseEntity.ok(userLogs);
     }
 
     @PostMapping("/logs/heartbeat")

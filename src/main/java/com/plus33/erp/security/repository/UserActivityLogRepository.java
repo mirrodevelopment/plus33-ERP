@@ -23,6 +23,8 @@ public interface UserActivityLogRepository extends JpaRepository<UserActivityLog
     
     List<UserActivityLog> findAllByOrderByLoginTimeDesc();
 
+    List<UserActivityLog> findByUsernameOrderByLoginTimeDesc(String username);
+
     Optional<UserActivityLog> findFirstByUsernameAndStatusAndLogoutTimeIsNullOrderByLoginTimeDesc(
             String username, 
             String status
