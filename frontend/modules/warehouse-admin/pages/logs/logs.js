@@ -25,6 +25,7 @@
 import { apiClient } from '../../../../api/client.js';
 import { logger } from '../../../../core/logger.js';
 import { notificationStore } from '../../../../store/notificationStore.js';
+import { authStore } from '../../../../store/authStore.js';
 
 export default class LogsPage {
   /**
@@ -35,6 +36,9 @@ export default class LogsPage {
     this.auditLogs = [];
     this.systemLogs = [];
     this.loginLogs = [];
+    this.startDate = '';
+    this.endDate = '';
+    this.targetEmail = '';
     this.dashboardStats = {
       totalCacheNodes: 4,
       totalPods: 12,
@@ -94,10 +98,31 @@ export default class LogsPage {
                 System Diagnostics
               </button>
             </div>
-            
-            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight:600; background:rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">
-              Live Stream Enabled
-            </span>
+
+            <!-- Date Range Filters & Export Actions Bar -->
+            <div class="flex align-center gap-xs flex-wrap">
+              <div style="display:flex; align-items:center; gap:4px; font-size:0.75rem; color:var(--text-muted);">
+                <span style="font-weight:600;">User:</span>
+                <input type="text" id="log-target-email" placeholder="User email..." value="${this.targetEmail || ''}" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem; width:135px;" />
+              </div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:0.75rem; color:var(--text-muted);">
+                <span style="font-weight:600;">From:</span>
+                <input type="date" id="log-start-date" value="${this.startDate || ''}" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem;" />
+              </div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:0.75rem; color:var(--text-muted);">
+                <span style="font-weight:600;">To:</span>
+                <input type="date" id="log-end-date" value="${this.endDate || ''}" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem;" />
+              </div>
+              <button id="btn-filter-logs" class="btn" type="button" style="padding:4px 12px; font-size:0.72rem; font-weight:700; background:var(--accent-primary); color:#000; border:none; border-radius:4px; cursor:pointer;">
+                Pull Logs
+              </button>
+              <button id="btn-reset-logs" class="btn" type="button" style="padding:4px 10px; font-size:0.72rem; font-weight:600; background:rgba(255,255,255,0.08); color:var(--text-muted); border:none; border-radius:4px; cursor:pointer;">
+                Reset
+              </button>
+              <button id="btn-export-pdf" class="btn" type="button" style="padding:4px 12px; font-size:0.72rem; font-weight:700; background:rgba(230,126,34,0.18); color:#e67e22; border:1px solid rgba(230,126,34,0.3); border-radius:4px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                <i data-lucide="file-text" style="width:14px; height:14px;"></i> Export PDF
+              </button>
+            </div>
           </div>
           
           <div style="overflow-x: auto; flex-grow: 1;">
@@ -125,11 +150,18 @@ export default class LogsPage {
    */
   async fetchData() {
     try {
+      let queryStr = '';
+      const params = new URLSearchParams();
+      if (this.startDate) params.append('startDate', this.startDate);
+      if (this.endDate) params.append('endDate', this.endDate);
+      if (this.targetEmail) params.append('targetEmail', this.targetEmail);
+      if (params.toString()) queryStr = '?' + params.toString();
+
       const [dashRes, auditRes, sysRes, loginRes] = await Promise.all([
         apiClient.get('/api/platform/dashboard').catch(() => null),
         apiClient.get('/api/platform/logs/audit').catch(() => []),
         apiClient.get('/api/platform/logs/system').catch(() => []),
-        apiClient.get('/api/platform/logs/logins').catch(() => [])
+        apiClient.get(`/api/platform/logs/logins${queryStr}`).catch(() => [])
       ]);
 
       if (dashRes) this.dashboardStats = dashRes;
@@ -367,7 +399,177 @@ export default class LogsPage {
       });
     }
 
+    // 2. Date & user filters & PDF export buttons
+    const filterBtn = container.querySelector('#btn-filter-logs');
+    const resetBtn = container.querySelector('#btn-reset-logs');
+    const pdfBtn = container.querySelector('#btn-export-pdf');
+    const startDateInput = container.querySelector('#log-start-date');
+    const endDateInput = container.querySelector('#log-end-date');
+    const targetEmailInput = container.querySelector('#log-target-email');
 
+    if (filterBtn) {
+      filterBtn.addEventListener('click', async () => {
+        if (startDateInput) this.startDate = startDateInput.value;
+        if (endDateInput) this.endDate = endDateInput.value;
+        if (targetEmailInput) this.targetEmail = targetEmailInput.value;
+        await this.fetchData();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', async () => {
+        this.startDate = '';
+        this.endDate = '';
+        this.targetEmail = '';
+        if (startDateInput) startDateInput.value = '';
+        if (endDateInput) endDateInput.value = '';
+        if (targetEmailInput) targetEmailInput.value = '';
+        await this.fetchData();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+    }
+
+    if (pdfBtn) {
+      pdfBtn.addEventListener('click', async () => {
+        await this.exportPdf();
+      });
+    }
+  }
+
+  async exportPdf() {
+    let me = null;
+    try {
+      const meRes = await apiClient.get('/api/v1/auth/me');
+      if (meRes && meRes.success && meRes.data) {
+        me = meRes.data;
+      }
+    } catch (e) {
+      logger.warn('LogsPage', 'Could not fetch current user profile for PDF export:', e);
+    }
+
+    const authUser = authStore.getUser() || {};
+    const exportingUserName = me?.name || (me?.firstName ? `${me.firstName} ${me.lastName || ''}`.trim() : '') || authUser.name || authUser.username || 'System User';
+    const exportingEmpId = me?.employeeCode || (me?.id ? `EMP-${me.id}` : 'ADMIN-001');
+    const exportingUserEmail = me?.email || me?.username || authUser.username || 'N/A';
+    const exportingUserRole = me?.designation || authUser.role || 'Platform Administrator';
+    const exportingDept = me?.department || 'Operations';
+
+    const printWin = window.open('', '_blank', 'width=950,height=750');
+    if (!printWin) {
+      alert('Pop-up window blocked. Please allow pop-ups for this site to export PDF reports.');
+      return;
+    }
+
+    const dateFilterStr = (this.startDate || this.endDate) 
+      ? `${this.startDate || 'Beginning'} to ${this.endDate || 'Present'}`
+      : 'All Recorded Activity';
+
+    const rowsHtml = (this.loginLogs || []).map(l => `
+      <tr style="border-bottom: 1px solid #e0e0e0;">
+        <td style="padding: 8px; font-weight: 700; color: #111;">${l.username}</td>
+        <td style="padding: 8px; font-family: monospace; color: #555;">${l.ipAddress}</td>
+        <td style="padding: 8px;">${l.location || 'Local Loopback'}</td>
+        <td style="padding: 8px;">
+          <span style="padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; background: ${l.status === 'SUCCESS' ? '#e8f5e9' : '#ffebee'}; color: ${l.status === 'SUCCESS' ? '#2e7d32' : '#c62828'};">
+            ${l.status}
+          </span>
+        </td>
+        <td style="padding: 8px; color: #555;">${l.userAgent ? (l.userAgent.includes('Chrome') ? 'Chrome / Browser' : (l.userAgent.length > 25 ? l.userAgent.substring(0, 22) + '...' : l.userAgent)) : 'Unknown'}</td>
+        <td style="padding: 8px; color: #444;">${l.loginTime ? String(l.loginTime).replace('T', ' ').substring(0, 19) : '—'}</td>
+        <td style="padding: 8px; text-align: right; color: #444;">${l.logoutTime ? String(l.logoutTime).replace('T', ' ').substring(0, 19) + ' (Logged Out)' : (l.status === 'SUCCESS' ? 'Active / Logged In' : '—')}</td>
+      </tr>
+    `).join('');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>PLUS33 ERP - User Activity Logs Report</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 25px; color: #222; background: #fff; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #c9a96e; padding-bottom: 15px; margin-bottom: 20px; }
+          .brand { font-size: 20px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.5px; }
+          .sub-brand { font-size: 11px; font-weight: 600; color: #888; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+          .title { font-size: 15px; font-weight: 700; color: #c9a96e; text-transform: uppercase; margin-top: 6px; }
+          .meta { font-size: 12px; color: #444; margin-bottom: 20px; background: #f8f9fa; padding: 14px 18px; border-radius: 6px; border: 1px solid #e9ecef; }
+          .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+          .meta-item { line-height: 1.6; }
+          .emp-badge { font-family: monospace; font-weight: 700; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px; color: #111; }
+          table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+          th { background: #1a1a1a; color: #fff; text-align: left; padding: 10px 8px; font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+          td { padding: 8px; vertical-align: middle; }
+          .footer { margin-top: 35px; border-top: 1px solid #e0e0e0; padding-top: 12px; font-size: 10px; color: #888; display: flex; justify-content: space-between; }
+          @media print {
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="brand">PLUS33 COFFEE</div>
+            <div class="sub-brand">Enterprise Resource Planning</div>
+            <div class="title">User Access &amp; Activity Audit Log Report</div>
+          </div>
+          <div style="text-align: right; font-size: 11px; color: #666;">
+            <div><strong>Generated:</strong> ${new Date().toLocaleString()}</div>
+            <div><strong>Exported By:</strong> ${exportingUserName}</div>
+            <div style="margin-top: 2px; color: #888;">Emp ID: <span class="emp-badge">${exportingEmpId}</span></div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div><strong>Exporting User:</strong> ${exportingUserName}</div>
+              <div><strong>Employee ID (EMP ID):</strong> <span class="emp-badge">${exportingEmpId}</span></div>
+              <div><strong>Role / Designation:</strong> ${exportingUserRole} (${exportingDept})</div>
+            </div>
+            <div class="meta-item">
+              <div><strong>User Email:</strong> ${exportingUserEmail}</div>
+              <div><strong>Date Range Filter:</strong> ${dateFilterStr}</div>
+              <div><strong>Total Log Entries:</strong> ${(this.loginLogs || []).length}</div>
+            </div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>USER EMAIL</th>
+              <th>IP ADDRESS</th>
+              <th>LOCATION</th>
+              <th>STATUS</th>
+              <th>CLIENT CONTEXT</th>
+              <th>LOGIN TIME</th>
+              <th style="text-align: right;">LOGOUT / STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml || '<tr><td colspan="7" style="text-align:center; padding:30px; color:#888;">No activity log entries found matching selected criteria.</td></tr>'}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          <div>PLUS33 Coffee ERP System — Confidential Record Exported by ${exportingUserName} (${exportingEmpId})</div>
+          <div>Page 1 of 1</div>
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWin.document.open();
+    printWin.document.write(htmlContent);
+    printWin.document.close();
   }
 }
 

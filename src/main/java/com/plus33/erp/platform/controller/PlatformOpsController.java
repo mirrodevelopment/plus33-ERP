@@ -541,13 +541,119 @@ public class PlatformOpsController {
 
     @GetMapping("/logs/logins")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public ResponseEntity<?> getUserLoginLogs(java.security.Principal principal) {
+    public ResponseEntity<?> getUserLoginLogs(
+            java.security.Principal principal,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String targetEmail) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
         String email = principal.getName();
-        java.util.List<com.plus33.erp.security.entity.UserActivityLog> userLogs = userActivityLogRepo.findByUsernameOrderByLoginTimeDesc(email);
-        return ResponseEntity.ok(userLogs);
+        com.plus33.erp.security.entity.User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null || user.getRoles() == null || user.getRoles().isEmpty()) {
+            return ResponseEntity.status(403).build();
+        }
+
+        boolean isUltimateAdmin = false;
+        boolean isAdmin = false;
+        String roleCode = "";
+        for (com.plus33.erp.security.entity.Role r : user.getRoles()) {
+            if (r.getCode() != null) {
+                String c = r.getCode().toUpperCase();
+                if ("ULTIMATE_ADMIN".equals(c)) {
+                    isUltimateAdmin = true;
+                    roleCode = "ULTIMATE_ADMIN";
+                    break;
+                }
+                if (c.contains("ADMIN") || c.contains("SUPERVISOR") || "STORE".equals(c)) {
+                    isAdmin = true;
+                }
+                if (roleCode.isEmpty()) {
+                    roleCode = c;
+                }
+            }
+        }
+        
+        // Restrict pure non-admin employees from pulling activity logs
+        if (!isUltimateAdmin && !isAdmin && roleCode.contains("EMPLOYEE")) {
+            return ResponseEntity.status(403).body(java.util.Collections.emptyList());
+        }
+
+        java.time.LocalDateTime start = null;
+        java.time.LocalDateTime end = null;
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            try {
+                start = java.time.LocalDate.parse(startDate).atStartOfDay();
+            } catch (Exception ignored) {}
+        }
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            try {
+                end = java.time.LocalDate.parse(endDate).atTime(23, 59, 59);
+            } catch (Exception ignored) {}
+        }
+
+        String filterEmail = (targetEmail != null && !targetEmail.trim().isEmpty()) ? targetEmail.trim() : null;
+
+        // Branch 1: ULTIMATE_ADMIN (Global View)
+        if (isUltimateAdmin) {
+            if (filterEmail != null) {
+                if (start != null && end != null) {
+                    return ResponseEntity.ok(userActivityLogRepo.findByUsernameAndLoginTimeBetweenOrderByLoginTimeDesc(filterEmail, start, end));
+                }
+                return ResponseEntity.ok(userActivityLogRepo.findByUsernameOrderByLoginTimeDesc(filterEmail));
+            }
+            if (start != null && end != null) {
+                return ResponseEntity.ok(userActivityLogRepo.findByLoginTimeBetweenOrderByLoginTimeDesc(start, end));
+            }
+            return ResponseEntity.ok(userActivityLogRepo.findAllByOrderByLoginTimeDesc());
+        }
+
+        // Branch 2: Scoped Roles (National, Regional, Store)
+        java.util.List<com.plus33.erp.security.entity.User> allUsers = userRepository.findAll();
+        java.util.List<String> targetUsernames = new java.util.ArrayList<>();
+
+        if (roleCode.contains("NATIONAL")) {
+            String adminCountry = getUserCountry(user.getId());
+            for (com.plus33.erp.security.entity.User u : allUsers) {
+                if (adminCountry.equalsIgnoreCase(getUserCountry(u.getId()))) {
+                    targetUsernames.add(u.getEmail());
+                }
+            }
+        } else if (roleCode.contains("REGIONAL")) {
+            for (com.plus33.erp.security.entity.User u : allUsers) {
+                if (shareRegion(user.getId(), u.getId())) {
+                    targetUsernames.add(u.getEmail());
+                }
+            }
+        } else {
+            for (com.plus33.erp.security.entity.User u : allUsers) {
+                if (shareStore(user.getId(), u.getId())) {
+                    targetUsernames.add(u.getEmail());
+                }
+            }
+        }
+
+        if (targetUsernames.isEmpty()) {
+            targetUsernames.add(email);
+        }
+
+        if (filterEmail != null) {
+            if (targetUsernames.contains(filterEmail) || email.equalsIgnoreCase(filterEmail)) {
+                if (start != null && end != null) {
+                    return ResponseEntity.ok(userActivityLogRepo.findByUsernameAndLoginTimeBetweenOrderByLoginTimeDesc(filterEmail, start, end));
+                }
+                return ResponseEntity.ok(userActivityLogRepo.findByUsernameOrderByLoginTimeDesc(filterEmail));
+            } else {
+                return ResponseEntity.ok(java.util.Collections.emptyList());
+            }
+        }
+
+        if (start != null && end != null) {
+            return ResponseEntity.ok(userActivityLogRepo.findByUsernameInAndLoginTimeBetweenOrderByLoginTimeDesc(targetUsernames, start, end));
+        }
+
+        return ResponseEntity.ok(userActivityLogRepo.findByUsernameInOrderByLoginTimeDesc(targetUsernames));
     }
 
     @PostMapping("/logs/heartbeat")

@@ -103,7 +103,7 @@ export function getMenuItems() {
       items: [
         { name: 'Reports & Analytics', icon: 'chart', route: (role === 'nationalWarehouseAdmin' || role === 'regionalWarehouseAdmin') ? '#reports' : '#regional-reports', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin'] },
         { name: 'Data Insights', icon: 'chart', route: '#insights', roles: ['ultimateAdmin'] },
-        { name: 'Activity Logs', icon: 'clock', route: '#logs', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin', 'shiftSupervisor', 'supervisor', 'storeEmployee', 'employee', 'store', 'storeAdmin'] },
+        { name: 'Activity Logs', icon: 'clock', route: '#logs', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin', 'shiftSupervisor', 'supervisor', 'store', 'storeAdmin'] },
         { name: 'Help & Support', icon: 'help-circle', route: '#support', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin', 'shiftSupervisor', 'supervisor', 'storeEmployee', 'employee', 'store', 'storeAdmin'] }
       ]
     }
