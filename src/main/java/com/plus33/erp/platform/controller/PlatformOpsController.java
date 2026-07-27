@@ -561,7 +561,7 @@ public class PlatformOpsController {
         for (com.plus33.erp.security.entity.Role r : user.getRoles()) {
             if (r.getCode() != null) {
                 String c = r.getCode().toUpperCase();
-                if ("ULTIMATE_ADMIN".equals(c)) {
+                if (c.contains("ULTIMATE") || c.equals("ADMIN") || c.equals("ROLE_ADMIN") || c.equals("ROLE_ULTIMATE_ADMIN")) {
                     isUltimateAdmin = true;
                     roleCode = "ULTIMATE_ADMIN";
                     break;

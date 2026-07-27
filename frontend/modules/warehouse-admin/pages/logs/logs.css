@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
  * Project           : PLUS33 Coffee ERP
  * Developed By      : Haulo
  * Developed For     : PLUS33 Coffee
@@ -7,11 +7,202 @@
  * Module            : Warehouse Admin Module
  * File              : logs.css
  * Path              : frontend/modules/warehouse-admin/pages/logs/logs.css
- * Purpose           : Frontend component file supplying interface presentation, layout structures, or UI logic for Warehouse Admin Module
+ * Purpose           : Stylesheet for Platform Operations & Logs Auditor component
  * Version           : 1.0.0
- *
- * Description
- * ---------------------------------------------------------------------------
- * Implementation component part of the PLUS33 Coffee ERP web application SPA architecture.
  ******************************************************************************/
-/* CSS for logs */
+
+.logs-page-container {
+  padding: 0;
+  width: 100%;
+}
+
+.page-title {
+  font-family: var(--font-display, sans-serif);
+  font-weight: 800;
+  font-size: 1.65rem;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  color: var(--text-muted, #888);
+  font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(130,163,125,0.12);
+  border: 1px solid rgba(130,163,125,0.3);
+  border-radius: var(--radius-full, 9999px);
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-success, #4caf50);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-success, #4caf50);
+  display: inline-block;
+  animation: pulse-dot 2s infinite;
+}
+
+.btn-gold-gradient {
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #c9a96e 0%, #a88344 100%);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-md, 6px);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(201,169,110,0.25);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-gold-gradient:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.viewer-card {
+  padding: var(--spacing-lg, 20px);
+  border-color: rgba(255,255,255,0.05);
+  min-height: 480px;
+}
+
+.tabs-container {
+  background: rgba(0,0,0,0.2);
+  padding: 2px;
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.tab-btn {
+  padding: 6px 16px;
+  border-radius: var(--radius-sm, 4px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition-fast, all 0.15s ease);
+  background: transparent;
+  color: var(--text-muted, #888);
+}
+
+.tab-btn.active {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.controls-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 6px);
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted, #888);
+}
+
+.filter-label {
+  font-weight: 600;
+}
+
+.log-select-input {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  max-width: 220px;
+  cursor: pointer;
+}
+
+.log-select-input option {
+  background: #1e1e1e;
+  color: #fff;
+}
+
+.log-date-input {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.btn-accent-pull {
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--accent-primary, #c9a96e);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-reset {
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-muted, #888);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-export-pdf {
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(230,126,34,0.18);
+  color: #e67e22;
+  border: 1px solid rgba(230,126,34,0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  flex-grow: 1;
+  margin-top: 12px;
+}
+
+.log-data-table {
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+.icon-sm {
+  width: 14px;
+  height: 14px;
+}
+
+.icon-xs {
+  width: 12px;
+  height: 12px;
+}
