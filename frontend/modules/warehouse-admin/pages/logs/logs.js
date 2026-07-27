@@ -75,48 +75,6 @@ export default class LogsPage {
         </div>
       </div>
 
-      <!-- KPI Grid -->
-      <div class="grid grid-cols-4 gap-md mb-lg">
-        <div class="card glass flex align-center gap-md" style="padding: var(--spacing-md);">
-          <div style="background: rgba(201,164,106,0.1); border-radius: var(--radius-md); padding: 10px; color: var(--accent-primary); display:flex; align-items:center;">
-            <i data-lucide="server" style="width:24px; height:24px;"></i>
-          </div>
-          <div>
-            <div style="font-size: 1.4rem; font-weight: 800; font-family: var(--font-display);">${this.dashboardStats.totalCacheNodes} Nodes</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px;">Cache Nodes</div>
-          </div>
-        </div>
-
-        <div class="card glass flex align-center gap-md" style="padding: var(--spacing-md);">
-          <div style="background: rgba(59,130,246,0.1); border-radius: var(--radius-md); padding: 10px; color: #3b82f6; display:flex; align-items:center;">
-            <i data-lucide="container" style="width:24px; height:24px;"></i>
-          </div>
-          <div>
-            <div style="font-size: 1.4rem; font-weight: 800; font-family: var(--font-display);">${this.dashboardStats.totalPods} Pods</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px;">Kubernetes Pools</div>
-          </div>
-        </div>
-
-        <div class="card glass flex align-center gap-md" style="padding: var(--spacing-md);">
-          <div style="background: rgba(130,163,125,0.1); border-radius: var(--radius-md); padding: 10px; color: var(--status-success); display:flex; align-items:center;">
-            <i data-lucide="globe" style="width:24px; height:24px;"></i>
-          </div>
-          <div>
-            <div style="font-size: 1.4rem; font-weight: 800; font-family: var(--font-display);">${this.dashboardStats.totalRegions} Regions</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px;">Active Clusters</div>
-          </div>
-        </div>
-
-        <div class="card glass flex align-center gap-md" style="padding: var(--spacing-md);">
-          <div style="background: rgba(46,204,113,0.1); border-radius: var(--radius-md); padding: 10px; color: #2ecc71; display:flex; align-items:center;">
-            <i data-lucide="shield-check" style="width:24px; height:24px;"></i>
-          </div>
-          <div>
-            <div style="font-size: 1.4rem; font-weight: 800; font-family: var(--font-display);">${this.dashboardStats.status}</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px;">Runtime Health</div>
-          </div>
-        </div>
-      </div>
 
       <!-- Main Layout Panels -->
       <div class="mb-lg">
