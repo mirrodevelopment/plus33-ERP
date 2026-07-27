@@ -126,9 +126,9 @@ export default class LogsPage {
   async fetchData() {
     try {
       const [dashRes, auditRes, sysRes, loginRes] = await Promise.all([
-        apiClient.get('/api/platform/dashboard'),
-        apiClient.get('/api/platform/logs/audit'),
-        apiClient.get('/api/platform/logs/system'),
+        apiClient.get('/api/platform/dashboard').catch(() => null),
+        apiClient.get('/api/platform/logs/audit').catch(() => []),
+        apiClient.get('/api/platform/logs/system').catch(() => []),
         apiClient.get('/api/platform/logs/logins').catch(() => [])
       ]);
 
