@@ -29,6 +29,7 @@ import { themeStore } from '../store/themeStore.js';
 import { userStore } from '../store/userStore.js';
 import { eventBus } from '../core/eventBus.js';
 import { logger } from '../core/logger.js';
+import { apiClient } from '../api/client.js';
 
 /** Path to the dashboard layout HTML template */
 const LAYOUT_TEMPLATE_URL = 'layouts/html/dashboard-layout.html';
@@ -117,6 +118,9 @@ export const dashboardLayout = {
 
     // 3. Bind all layout-level event listeners
     this._bindEvents();
+
+    // 4. Start session heartbeat
+    this._startHeartbeat();
 
     logger.debug('DashboardLayout', 'Layout rendered and events bound.');
   },
@@ -301,6 +305,8 @@ export const dashboardLayout = {
     logoutItem.id = 'sidebar-logout-link-inner';
     logoutItem.addEventListener('click', (e) => {
       e.preventDefault();
+      apiClient.post('/api/platform/logs/logout').catch(() => {});
+      this._stopHeartbeat();
       authStore.logout();
       window.location.hash = '#login';
     });
@@ -398,6 +404,8 @@ export const dashboardLayout = {
     const logoutBtn = document.getElementById('btn-logout');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
+        apiClient.post('/api/platform/logs/logout').catch(() => {});
+        this._stopHeartbeat();
         authStore.logout();
         window.location.hash = '#login';
       });
@@ -756,7 +764,30 @@ export const dashboardLayout = {
     };
     return labels[theme] || 'Theme';
   },
-  getLucideIconName(key) { return this._getLucideIconName(key); }
+  getLucideIconName(key) { return this._getLucideIconName(key); },
+
+  _startHeartbeat() {
+    if (this._heartbeatInterval) {
+      clearInterval(this._heartbeatInterval);
+    }
+    if (authStore.isLoggedIn()) {
+      apiClient.post('/api/platform/logs/heartbeat').catch(() => {});
+    }
+    this._heartbeatInterval = setInterval(() => {
+      if (authStore.isLoggedIn()) {
+        apiClient.post('/api/platform/logs/heartbeat').catch(() => {});
+      } else {
+        this._stopHeartbeat();
+      }
+    }, 30000);
+  },
+
+  _stopHeartbeat() {
+    if (this._heartbeatInterval) {
+      clearInterval(this._heartbeatInterval);
+      this._heartbeatInterval = null;
+    }
+  }
 };
 
 export default dashboardLayout;

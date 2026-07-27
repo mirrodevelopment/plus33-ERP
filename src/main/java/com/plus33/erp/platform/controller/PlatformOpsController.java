@@ -524,13 +524,6 @@ public class PlatformOpsController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Performs the runTwinSimulation operation in this module.
-     *
-     * <p><em>Requires JWT authentication. Permission enforced via @PreAuthorize annotation.</em></p>
-     *
-     * @return HTTP ResponseEntity wrapping ApiResponse with status code and data
-     */
     @PostMapping("/twin/simulation")
     public ResponseEntity<Void> runTwinSimulation(
             @RequestParam Long scenarioId,
@@ -540,4 +533,97 @@ public class PlatformOpsController {
         auditService.logAudit("RUN_TWIN_SIMULATION", operator, "REST", "scenario=" + scenarioId);
         return ResponseEntity.ok().build();
     }
-}
+
+    @Autowired com.plus33.erp.security.repository.UserActivityLogRepository userActivityLogRepo;
+    @Autowired com.plus33.erp.security.repository.UserRepository userRepository;
+    @Autowired com.plus33.erp.workforce.repository.UserStoreRepository userStoreRepository;
+    @Autowired com.plus33.erp.workforce.repository.UserRegionRepository userRegionRepository;
+
+    @GetMapping("/logs/logins")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<?> getUserLoginLogs(java.security.Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        java.util.List<com.plus33.erp.security.entity.UserActivityLog> allLogs = userActivityLogRepo.findAllByOrderByLoginTimeDesc();
+        return ResponseEntity.ok(allLogs);
+    }
+
+    @PostMapping("/logs/heartbeat")
+    public ResponseEntity<Void> heartbeat(java.security.Principal principal) {
+        if (principal != null) {
+            String email = principal.getName();
+            java.util.Optional<com.plus33.erp.security.entity.UserActivityLog> activeLogOpt = 
+                userActivityLogRepo.findFirstByUsernameAndStatusAndLogoutTimeIsNullOrderByLoginTimeDesc(email, "SUCCESS");
+            if (activeLogOpt.isPresent()) {
+                com.plus33.erp.security.entity.UserActivityLog log = activeLogOpt.get();
+                log.setLastActiveTime(java.time.LocalDateTime.now());
+                userActivityLogRepo.save(log);
+            }
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logs/logout")
+    public ResponseEntity<Void> logout(java.security.Principal principal) {
+        if (principal != null) {
+            String email = principal.getName();
+            java.util.Optional<com.plus33.erp.security.entity.UserActivityLog> activeLogOpt = 
+                userActivityLogRepo.findFirstByUsernameAndStatusAndLogoutTimeIsNullOrderByLoginTimeDesc(email, "SUCCESS");
+            if (activeLogOpt.isPresent()) {
+                com.plus33.erp.security.entity.UserActivityLog log = activeLogOpt.get();
+                java.time.LocalDateTime now = java.time.LocalDateTime.now();
+                log.setLogoutTime(now);
+                log.setLastActiveTime(now);
+                userActivityLogRepo.save(log);
+            }
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    private int getRoleRank(String roleCode) {
+        if ("ULTIMATE_ADMIN".equalsIgnoreCase(roleCode)) return 4;
+        if ("NATIONAL_ADMIN".equalsIgnoreCase(roleCode)) return 3;
+        if ("REGIONAL_ADMIN".equalsIgnoreCase(roleCode)) return 2;
+        if ("STORE_ADMIN".equalsIgnoreCase(roleCode) || "STORE".equalsIgnoreCase(roleCode)) return 1;
+        return 0;
+    }
+
+    private String getUserCountry(Long userId) {
+        java.util.List<com.plus33.erp.workforce.entity.UserStore> userStores = userStoreRepository.findByIdUserId(userId);
+        if (userStores != null && !userStores.isEmpty() && userStores.get(0).getStore() != null) {
+            com.plus33.erp.organization.entity.Store store = userStores.get(0).getStore();
+            if (store.getRegion() != null && store.getRegion().getCode() != null) {
+                String code = store.getRegion().getCode().toUpperCase();
+                if (code.startsWith("FR")) return "France";
+                if (code.startsWith("AE") || code.startsWith("UAE")) return "UAE";
+                if (code.startsWith("IN")) return "India";
+            }
+        }
+        java.util.List<com.plus33.erp.workforce.entity.UserRegion> userRegions = userRegionRepository.findByIdUserId(userId);
+        if (userRegions != null && !userRegions.isEmpty() && userRegions.get(0).getRegion() != null) {
+            com.plus33.erp.organization.entity.Region region = userRegions.get(0).getRegion();
+            if (region.getCode() != null) {
+                String code = region.getCode().toUpperCase();
+                if (code.startsWith("FR")) return "France";
+                if (code.startsWith("AE") || code.startsWith("UAE")) return "UAE";
+                if (code.startsWith("IN")) return "India";
+            }
+        }
+        return "India";
+    }
+
+    private boolean shareRegion(Long userId1, Long userId2) {
+        java.util.List<com.plus33.erp.workforce.entity.UserRegion> r1 = userRegionRepository.findByIdUserId(userId1);
+        java.util.List<com.plus33.erp.workforce.entity.UserRegion> r2 = userRegionRepository.findByIdUserId(userId2);
+        if (r1 == null || r2 == null || r1.isEmpty() || r2.isEmpty()) return false;
+        return r1.get(0).getRegion().getId().equals(r2.get(0).getRegion().getId());
+    }
+
+    private boolean shareStore(Long userId1, Long userId2) {
+        java.util.List<com.plus33.erp.workforce.entity.UserStore> s1 = userStoreRepository.findByIdUserId(userId1);
+        java.util.List<com.plus33.erp.workforce.entity.UserStore> s2 = userStoreRepository.findByIdUserId(userId2);
+        if (s1 == null || s2 == null || s1.isEmpty() || s2.isEmpty()) return false;
+        return s1.get(0).getStore().getId().equals(s2.get(0).getStore().getId());
+    }
+}
