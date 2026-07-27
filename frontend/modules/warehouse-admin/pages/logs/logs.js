@@ -205,12 +205,12 @@ export default class LogsPage {
         }
 
         let durationText = '';
+        let isActiveNow = false;
         if (l.status === 'FAILED') {
           durationText = '<span style="color:var(--text-muted);">—</span>';
         } else {
           const loginTime = new Date(l.loginTime);
           let end = l.logoutTime ? new Date(l.logoutTime) : null;
-          let isActiveNow = false;
 
           if (!end && l.lastActiveTime) {
             const lastActive = new Date(l.lastActiveTime);
@@ -235,6 +235,19 @@ export default class LogsPage {
           }
         }
 
+        let logoutText = '—';
+        if (l.status === 'SUCCESS') {
+          if (l.logoutTime) {
+            logoutText = String(l.logoutTime).replace('T', ' ').substring(0, 19);
+          } else if (isActiveNow) {
+            logoutText = '<span style="color:#2ecc71; font-weight:700;">Active Now</span>';
+          } else if (l.lastActiveTime) {
+            logoutText = `<span style="color:var(--text-muted);">${String(l.lastActiveTime).replace('T', ' ').substring(0, 19)} <span style="font-size:0.68rem; opacity:0.75; font-style:italic;">(Timed Out)</span></span>`;
+          } else {
+            logoutText = '<span style="color:var(--text-muted);">Timed Out</span>';
+          }
+        }
+
         let shortUA = 'Unknown';
         if (l.userAgent) {
           if (l.userAgent.includes('Chrome')) shortUA = 'Chrome / Browser';
@@ -253,7 +266,7 @@ export default class LogsPage {
             <td style="padding: var(--spacing-md); font-size:0.75rem;">${durationText}</td>
             <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;" title="${l.userAgent || ''}">${shortUA}</td>
             <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;">${l.loginTime ? String(l.loginTime).replace('T', ' ').substring(0, 19) : '—'}</td>
-            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.logoutTime ? String(l.logoutTime).replace('T', ' ').substring(0, 19) : (l.status === 'SUCCESS' ? '<span style="color:#2ecc71; font-weight:700;">Active Now</span>' : '—')}</td>
+            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${logoutText}</td>
           </tr>
         `;
       }).join('');
