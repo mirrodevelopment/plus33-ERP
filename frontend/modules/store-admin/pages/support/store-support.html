@@ -1,0 +1,96 @@
+<!--
+/******************************************************************************
+ * Project    : PLUS33 Coffee ERP
+ * Component  : Store Admin & Manager Support Hub — Separate Component
+ * File       : store-support.html
+ ******************************************************************************/
+-->
+<div class="store-support-container">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="ss-header-banner">
+    <div>
+      <h1 style="margin:0 0 4px 0;font-size:1.45rem;font-weight:800;display:flex;align-items:center;gap:10px;">
+        <i data-lucide="store" style="color:#4ade80;"></i>
+        Store Manager Help &amp; Support Hub
+      </h1>
+      <p style="margin:0;font-size:0.8rem;color:var(--text-muted,#8c857b);">
+        File store equipment faults, POS system tickets, inventory escalations, or staff grievances.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Submission Form ─────────────────────────────────────────────────── -->
+  <div class="ss-form-card">
+    <h3 style="margin:0;font-size:1rem;font-weight:700;color:var(--text-primary,#fff);display:flex;align-items:center;gap:8px;">
+      <i data-lucide="wrench" style="width:16px;height:16px;color:var(--accent-primary,#c9a46a);"></i>
+      Submit Store Equipment or Operational Ticket
+    </h3>
+
+    <form id="ss-submit-form" style="display:flex;flex-direction:column;gap:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Send Ticket To (Target Authority) *</label>
+          <select class="ss-input" id="ss-target-select" required>
+            <option value="REGIONAL_ADMIN" selected>🗺️ Regional Operations Manager</option>
+            <option value="NATIONAL_ADMIN">🌐 National Management &amp; HR</option>
+            <option value="ULTIMATE_ADMIN">🛡️ Ultimate System Admin (Whistleblower &amp; Escalation)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Store Location</label>
+          <input type="text" class="ss-input" id="ss-store-name" readonly placeholder="Auto-detected store…">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Ticket Category *</label>
+          <select class="ss-input" id="ss-category-select">
+            <option value="POS_HARDWARE">☕ POS &amp; Espresso Hardware</option>
+            <option value="INVENTORY_DISCREPANCY">📦 Inventory &amp; Stock Count</option>
+            <option value="STAFF_GRIEVANCE">⚖️ Staff Workplace Grievance</option>
+            <option value="GENERAL_FEEDBACK">📝 General Store Operations</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Priority Level *</label>
+          <select class="ss-input" id="ss-priority-select">
+            <option value="LOW">🟢 Low — General inquiry</option>
+            <option value="MEDIUM" selected>🟡 Medium — Standard request</option>
+            <option value="HIGH">🟠 High — Operational defect</option>
+            <option value="CRITICAL">🔴 Critical — Store operational halt</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Priority Level *</label>
+          <select class="ss-input" id="ss-priority-select">
+            <option value="LOW">🟢 Low — General inquiry</option>
+            <option value="MEDIUM" selected>🟡 Medium — Standard request</option>
+            <option value="HIGH">🟠 High — Operational defect</option>
+            <option value="CRITICAL">🔴 Critical — Store operational halt</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Subject / Title *</label>
+          <input type="text" class="ss-input" id="ss-subject-inp" placeholder="Brief issue summary…" required>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Detailed Description *</label>
+        <textarea class="ss-input" id="ss-desc-inp" rows="4" placeholder="Provide full details of hardware model, error codes, or operational context…" required></textarea>
+      </div>
+
+      <div>
+        <button type="submit" class="ss-btn">
+          Submit Store Ticket
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>

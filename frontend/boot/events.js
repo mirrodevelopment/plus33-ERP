@@ -27,16 +27,25 @@ import { notificationStore } from '../store/notificationStore.js';
 
 logger.info('Boot', 'Registering system-level safety event hooks...');
 
-// Handle script errors
+// Handle uncaught script errors
 window.addEventListener('error', (event) => {
+  // Ignore HTML resource loading errors (images, map tiles, css, audio/video)
+  if (event.target && event.target !== window && (event.target instanceof HTMLElement || event.target.tagName)) {
+    logger.warn('ResourceError', `Resource failed to load: ${event.target.src || event.target.href || event.target.tagName}`);
+    return;
+  }
+
   logger.error('SystemError', `Script error detected: ${event.message}`, {
     filename: event.filename,
     lineno: event.lineno,
     colno: event.colno,
     error: event.error
   });
-  
-  notificationStore.danger('A platform execution fault occurred. See console logs.');
+
+  // Only display toast for actual unhandled script errors
+  if (event.message && !event.message.includes('ResizeObserver')) {
+    notificationStore.warning(`UI Notice: ${event.message}`);
+  }
 });
 
 // Handle unhandled rejections

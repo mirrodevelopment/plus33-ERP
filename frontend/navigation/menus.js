@@ -9,15 +9,6 @@
  * Path              : frontend/navigation/menus.js
  * Purpose           : Navigation menu generator providing role-specific sidebar navigation groups and items filtered against user permissions for nationalAdmin, regionalAdmin, storeAdmin, shiftSupervisor, storeEmployee, warehouse roles, and ultimateAdmin.
  * Version           : 1.0.0
- *
- * Description
- * ---------------------------------------------------------------------------
- * Menu structure provider for sidebar navigation in frontend/layouts/dashboard.js.
- * Features:
- *   - Reads active user role via authStore.getRole().
- *   - Dynamically constructs sidebar navigation sections for each role.
- *   - Points 'My Profile' links to correct role-specific routes (#national-profile, #regional-profile, #supervisor-profile, #employee-profile, #store-profile, #ultimate-profile).
- *   - Filters items against permissionStore.hasPermission() to enforce RBAC.
  ******************************************************************************/
 
 import { permissionStore } from '../store/permissionStore.js';
@@ -29,281 +20,113 @@ import { authStore } from '../store/authStore.js';
 export function getMenuItems() {
   const role = authStore.getRole();
 
-  if (role === 'nationalAdmin') {
-    return [
-      {
-        title: 'ADMINISTRATION',
-        items: [
-          { name: 'Leave Policy Management', icon: 'sliders', route: '#leave-policy-admin' }
-        ]
-      },
-      {
-        title: 'OPERATIONS',
-        items: [
-          { name: 'Regions Management', icon: 'map', route: '#regional-regions' },
-          { name: 'Stores Management', icon: 'coffee', route: '#regional-stores' },
-          { name: 'Warehouse Overview', icon: 'warehouse', route: '#regional-warehouse' },
-          { name: 'Sales Overview', icon: 'chart', route: '#regional-sales' },
-          { name: 'Inventory Overview', icon: 'package', route: '#regional-inventory' },
-          { name: 'Supply Requests', icon: 'truck', route: '#regional-supply-requests' }
-        ]
-      },
-      {
-        title: 'COMMUNICATION',
-        items: [
-          { name: 'Broadcast Announcement', icon: 'send', route: '#regional-announcements' }
-        ]
-      },
-      {
-        title: 'WORKFORCE',
-        items: [
-          { name: 'Employee Overview', icon: 'users', route: '#regional-employees' },
-          { name: 'Recruitment', icon: 'user-plus', route: '#regional-recruitment' },
-          { name: 'Training & Development', icon: 'graduation-cap', route: '#regional-training' },
-          { name: 'Performance', icon: 'star', route: '#regional-performance' }
-        ]
-      },
-      {
-        title: 'REPORTS & ANALYTICS',
-        items: [
-          { name: 'Reports', icon: 'bar-chart', route: '#regional-reports' },
-          { name: 'Analytics', icon: 'activity', route: '#regional-analytics' },
-          { name: 'Settings', icon: 'settings', route: '#regional-settings' },
-          { name: 'My Profile', icon: 'user', route: '#national-profile' },
-          { name: 'Help & Support', icon: 'help-circle', route: '#regional-help' }
-        ]
-      }
-    ];
-  }
-
-  if (role === 'regionalAdmin') {
-    return [
-      {
-        title: 'OPERATIONS',
-        items: [
-          { name: 'Regions Management', icon: 'map', route: '#regional-regions' },
-          { name: 'Stores Management', icon: 'coffee', route: '#regional-stores' },
-          { name: 'Warehouse Overview', icon: 'warehouse', route: '#regional-warehouse' },
-          { name: 'Sales Overview', icon: 'chart', route: '#regional-sales' },
-          { name: 'Inventory Overview', icon: 'package', route: '#regional-inventory' },
-          { name: 'Supply Requests', icon: 'truck', route: '#regional-supply-requests' }
-        ]
-      },
-      {
-        title: 'COMMUNICATION',
-        items: [
-          { name: 'Broadcast Announcement', icon: 'send', route: '#regional-announcements' }
-        ]
-      },
-      {
-        title: 'WORKFORCE',
-        items: [
-          { name: 'Employee Overview', icon: 'users', route: '#regional-employees' },
-          { name: 'Recruitment', icon: 'user-plus', route: '#regional-recruitment' },
-          { name: 'Training & Development', icon: 'graduation-cap', route: '#regional-training' },
-          { name: 'Performance', icon: 'star', route: '#regional-performance' }
-        ]
-      },
-      {
-        title: 'VENDORS & PROCUREMENT',
-        items: [
-          { name: 'Vendors', icon: 'truck', route: '#regional-vendors' },
-          { name: 'Purchase Management', icon: 'shopping-bag', route: '#regional-purchase' },
-          { name: 'Contracts', icon: 'file-text', route: '#regional-contracts' }
-        ]
-      },
-      {
-        title: 'COMPLIANCE & SUPPORT',
-        items: [
-          { name: 'Complaints Management', icon: 'message-square', route: '#regional-complaints' },
-          { name: 'Legal Cases', icon: 'scale', route: '#regional-legal' },
-          { name: 'Audit & Compliance', icon: 'shield', route: '#regional-audit' },
-          { name: 'Leave Policy Booklet', icon: 'book-open', route: '#leave-policy-booklet' }
-        ]
-      },
-      {
-        title: 'REPORTS & ANALYTICS',
-        items: [
-          { name: 'Reports', icon: 'bar-chart', route: '#regional-reports' },
-          { name: 'Analytics', icon: 'activity', route: '#regional-analytics' },
-          { name: 'Settings', icon: 'settings', route: '#regional-settings' },
-          { name: 'My Profile', icon: 'user', route: '#regional-profile' },
-          { name: 'Help & Support', icon: 'help-circle', route: '#regional-help' }
-        ]
-      }
-    ];
-  }
-
-  if (role === 'nationalWarehouseAdmin' || role === 'regionalWarehouseAdmin') {
-    return [
-      {
-        title: 'OPERATIONS',
-        items: [
-          { name: 'Inventory Overview', icon: 'package', route: '#inventory' },
-          { name: 'WMS Physical Topology', icon: 'map', route: '#warehouse' },
-          { name: 'Supply Chain Overview', icon: 'truck', route: '#supply-chain' }
-        ]
-      },
-      {
-        title: 'REPORTS & ANALYTICS',
-        items: [
-          { name: 'Reports & Analytics', icon: 'chart', route: '#reports' },
-          { name: 'Activity Logs', icon: 'clock', route: '#logs' }
-        ]
-      },
-      {
-        title: 'ADMINISTRATION',
-        items: [
-          { name: 'Users & Roles', icon: 'users', route: '#users' },
-          { name: 'My Profile', icon: 'user', route: '#profile' }
-        ]
-      }
-    ];
-  }
-
-  if (role === 'shiftSupervisor') {
-    return [
-      {
-        title: 'SHIFT SUPERVISOR',
-        items: [
-          { name: 'Shift Dashboard', icon: 'bar-chart', route: '#supervisor-dashboard' },
-          { name: 'Shift Planner', icon: 'calendar', route: '#shift-planner' },
-          { name: 'Broadcast Announcement', icon: 'send', route: '#supervisor-announcements' },
-          { name: 'My Roster', icon: 'calendar', route: '#schedule' },
-          { name: 'Team Checklist', icon: 'check-square', route: '#tasks' },
-          { name: 'Shift Attendance', icon: 'clock', route: '#attendance' },
-          { name: 'Announcements', icon: 'megaphone', route: '#announcements' },
-          { name: 'Documents Hub', icon: 'file-text', route: '#documents' },
-          { name: 'Leave Management', icon: 'plane-takeoff', route: '#supervisor-leaves' }
-        ]
-      },
-      {
-        title: 'PERSONAL',
-        items: [
-          { name: 'Apply Leave', icon: 'plane-takeoff', route: '#leave' },
-          { name: 'My Profile', icon: 'user', route: '#supervisor-profile' },
-          { name: 'Settings', icon: 'settings', route: '#settings' }
-        ]
-      }
-    ];
-  }
-
-  if (role === 'storeEmployee') {
-    return [
-      {
-        title: 'WORKPLACE',
-        items: [
-          { name: 'My Schedule', icon: 'calendar', route: '#schedule' },
-          { name: 'My Tasks', icon: 'check-square', route: '#tasks' },
-          { name: 'Attendance', icon: 'clock', route: '#attendance' },
-          { name: 'Training', icon: 'graduation-cap', route: '#training' },
-          { name: 'Performance', icon: 'star', route: '#performance' },
-          { name: 'Leave', icon: 'plane-takeoff', route: '#leave' },
-          { name: 'Announcements', icon: 'megaphone', route: '#announcements' },
-          { name: 'Documents', icon: 'file-text', route: '#documents' },
-          { name: 'My Profile', icon: 'user', route: '#employee-profile' },
-          { name: 'Payslips', icon: 'banknote', route: '#payslips' },
-          { name: 'Settings', icon: 'settings', route: '#settings' },
-          { name: 'Help & Support', icon: 'help-circle', route: '#support' }
-        ]
-      }
-    ];
-  }
-
-  if (role === 'store') {
-    return [
-      {
-        title: 'OPERATIONS',
-        items: [
-          { name: 'Sales Overview', icon: 'chart', route: '#sales' }
-        ]
-      },
-      {
-        title: 'INVENTORY',
-        items: [
-          { name: 'Inventory Overview', icon: 'package', route: '#store-inventory' },
-          { name: 'Daily Usage Tracker', icon: 'clipboard', route: '#store-usage' }
-        ]
-      },
-      {
-        title: 'ADMINISTRATION',
-        items: [
-          { name: 'Pending Approvals', icon: 'check-square', route: '#store-pending-approvals' },
-          { name: 'Broadcast Announcement', icon: 'send', route: '#store-announcements' },
-          { name: 'Leave Management', icon: 'calendar', route: '#store-leave' },
-          { name: 'Workforce Overview', icon: 'users', route: '#store-workforce' },
-          { name: 'Store Settings', icon: 'settings', route: '#store-settings' },
-          { name: 'My Profile', icon: 'user', route: '#store-profile' }
-        ]
-      }
-    ];
-  }
-
-  // Default / ultimateAdmin menus
   const groups = [
     {
       title: 'ADMINISTATION',
       items: [
-        { name: 'National Management', icon: 'globe', route: '#national-management' },
-        { name: 'Regions Management', icon: 'map', route: '#regions' },
-        { name: 'Stores Management', icon: 'coffee', route: '#stores' },
-        { name: 'Warehouses Management', icon: 'warehouse', route: '#warehouses' },
-        { name: 'Users & Roles', icon: 'users', route: '#users' },
-        { name: 'Roles & Permissions', icon: 'shield', route: '#permissions' },
-        { name: 'System Settings', icon: 'settings', route: '#settings' },
-        { name: 'Leave Policy Management', icon: 'sliders', route: '#leave-policy-admin' },
-        { name: 'My Profile', icon: 'user', route: '#ultimate-profile' }
+        { name: 'National Management', icon: 'globe', route: '#national-management', roles: ['ultimateAdmin'] },
+        { name: 'Regions Management', icon: 'map', route: role === 'ultimateAdmin' ? '#regions' : '#regional-regions', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin'] },
+        { name: 'Stores Management', icon: 'coffee', route: role === 'ultimateAdmin' ? '#stores' : '#regional-stores', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin'] },
+        { name: 'Warehouses Management', icon: 'warehouse', route: role === 'ultimateAdmin' ? '#warehouses' : '#regional-warehouse', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin'] },
+        { name: 'Users & Roles', icon: 'users', route: '#users', roles: ['ultimateAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin'] },
+        { name: 'Roles & Permissions', icon: 'shield', route: '#permissions', roles: ['ultimateAdmin'] },
+        { name: 'System Settings', icon: 'settings', route: role === 'regionalAdmin' ? '#regional-settings' : (role === 'store' || role === 'storeAdmin') ? '#store-settings' : '#settings', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'store', 'storeAdmin', 'shiftSupervisor', 'supervisor', 'storeEmployee', 'employee'] },
+        { name: 'Leave Policy Management', icon: 'sliders', route: '#leave-policy-admin', roles: ['ultimateAdmin', 'nationalAdmin'] },
+        { name: 'Leave Management', icon: 'calendar', route: (role === 'store' || role === 'storeAdmin') ? '#store-leave' : '#supervisor-leaves', roles: ['store', 'storeAdmin', 'shiftSupervisor', 'supervisor'] },
+        { name: 'Leave', icon: 'plane-takeoff', route: '#leave', roles: ['storeEmployee', 'employee'] },
+        { name: 'Apply Leave', icon: 'plane-takeoff', route: '#leave', roles: ['shiftSupervisor', 'supervisor'] },
+        { name: 'Payslips', icon: 'banknote', route: '#payslips', roles: ['storeEmployee', 'employee'] },
+        { name: 'My Profile', icon: 'user', route: () => {
+            if (role === 'ultimateAdmin') return '#ultimate-profile';
+            if (role === 'nationalAdmin') return '#national-profile';
+            if (role === 'regionalAdmin') return '#regional-profile';
+            if (role === 'shiftSupervisor' || role === 'supervisor') return '#supervisor-profile';
+            if (role === 'storeEmployee' || role === 'employee') return '#employee-profile';
+            if (role === 'store' || role === 'storeAdmin') return '#store-profile';
+            return '#profile';
+          }, roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin', 'shiftSupervisor', 'supervisor', 'storeEmployee', 'employee', 'store', 'storeAdmin'] }
       ]
     },
     {
       title: 'COMMUNICATION',
       items: [
-        { name: 'Broadcast Announcement', icon: 'send', route: '#ultimate-announcements' }
+        { name: 'Broadcast Announcement', icon: 'send', route: () => {
+            if (role === 'ultimateAdmin') return '#ultimate-announcements';
+            if (role === 'nationalAdmin' || role === 'regionalAdmin') return '#regional-announcements';
+            if (role === 'store' || role === 'storeAdmin') return '#store-announcements';
+            if (role === 'shiftSupervisor' || role === 'supervisor') return '#supervisor-announcements';
+            return '#announcements';
+          }, roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'store', 'storeAdmin', 'shiftSupervisor', 'supervisor', 'storeEmployee', 'employee'] }
       ]
     },
     {
       title: 'OPERATIONS',
       items: [
-        { name: 'Sales Overview', icon: 'chart', route: '#sales' },
-        { name: 'Inventory Overview', icon: 'package', route: '#inventory' },
-        { name: 'Supply Chain Overview', icon: 'truck', route: '#supply-chain' },
-        { name: 'Workforce Overview', icon: 'users', route: '#workforce' },
-        { name: 'Customer Overview', icon: 'user', route: '#customers' }
+        { name: 'Shift Dashboard', icon: 'bar-chart', route: '#supervisor-dashboard', roles: ['shiftSupervisor', 'supervisor'] },
+        { name: 'Shift Planner', icon: 'calendar', route: '#shift-planner', roles: ['shiftSupervisor', 'supervisor'] },
+        { name: 'My Roster', icon: 'calendar', route: '#schedule', roles: ['shiftSupervisor', 'supervisor'] },
+        { name: 'My Schedule', icon: 'calendar', route: '#schedule', roles: ['storeEmployee', 'employee'] },
+        { name: 'Team Checklist', icon: 'check-square', route: '#tasks', roles: ['shiftSupervisor', 'supervisor'] },
+        { name: 'My Tasks', icon: 'check-square', route: '#tasks', roles: ['storeEmployee', 'employee'] },
+        { name: 'Shift Attendance', icon: 'clock', route: '#attendance', roles: ['shiftSupervisor', 'supervisor'] },
+        { name: 'Attendance', icon: 'clock', route: '#attendance', roles: ['storeEmployee', 'employee'] },
+        { name: 'Training', icon: 'graduation-cap', route: '#training', roles: ['storeEmployee', 'employee'] },
+        { name: 'Performance', icon: 'star', route: '#performance', roles: ['storeEmployee', 'employee'] },
+        { name: 'Sales Overview', icon: 'chart', route: (role === 'store' || role === 'storeAdmin') ? '#sales' : '#regional-sales', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'store', 'storeAdmin'] },
+        { name: 'Inventory Overview', icon: 'package', route: (role === 'store' || role === 'storeAdmin') ? '#store-inventory' : (role === 'nationalWarehouseAdmin' || role === 'regionalWarehouseAdmin') ? '#inventory' : '#regional-inventory', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin', 'store', 'storeAdmin'] },
+        { name: 'Daily Usage Tracker', icon: 'clipboard', route: '#store-usage', roles: ['store', 'storeAdmin'] },
+        { name: 'WMS Physical Topology', icon: 'map', route: '#warehouse', roles: ['nationalWarehouseAdmin', 'regionalWarehouseAdmin'] },
+        { name: 'Supply Chain Overview', icon: 'truck', route: (role === 'nationalWarehouseAdmin' || role === 'regionalWarehouseAdmin') ? '#supply-chain' : '#regional-supply-requests', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin'] },
+        { name: 'Workforce Overview', icon: 'users', route: (role === 'store' || role === 'storeAdmin') ? '#store-workforce' : '#regional-employees', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'store', 'storeAdmin'] },
+        { name: 'Customer Overview', icon: 'user', route: '#customers', roles: ['ultimateAdmin'] }
       ]
     },
     {
       title: 'FINANCE',
       items: [
-        { name: 'Financial Overview', icon: 'dollar', route: '#finance' },
-        { name: 'Budget & Forecasting', icon: 'chart', route: '#budgets' },
-        { name: 'Profitability Analysis', icon: 'chart', route: '#profitability' }
+        { name: 'Financial Overview', icon: 'dollar', route: '#finance', roles: ['ultimateAdmin'] },
+        { name: 'Budget & Forecasting', icon: 'chart', route: '#budgets', roles: ['ultimateAdmin'] },
+        { name: 'Profitability Analysis', icon: 'chart', route: '#profitability', roles: ['ultimateAdmin'] }
       ]
     },
     {
       title: 'COMPLIANCE & CONTROL',
       items: [
-        { name: 'Audit & Compliance', icon: 'shield', route: '#audit' },
-        { name: 'Legal & Cases', icon: 'scale', route: '#legal' },
-        { name: 'Complaints Overview', icon: 'message', route: '#complaints' },
-        { name: 'Policies & Documents', icon: 'file', route: '#policies' }
+        { name: 'Audit & Compliance', icon: 'shield', route: role === 'regionalAdmin' ? '#regional-audit' : '#audit', roles: ['ultimateAdmin', 'regionalAdmin'] },
+        { name: 'Legal & Cases', icon: 'scale', route: role === 'regionalAdmin' ? '#regional-legal' : '#legal', roles: ['ultimateAdmin', 'regionalAdmin'] },
+        { name: 'Complaints Overview', icon: 'message-square', route: (role === 'store' || role === 'storeAdmin') ? '#store-complaints' : role === 'regionalAdmin' ? '#regional-complaints' : role === 'nationalAdmin' ? '#national-complaints' : '#complaints', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'store', 'storeAdmin'] },
+        { name: 'Policies & Documents', icon: 'file-text', route: role === 'regionalAdmin' ? '#leave-policy-booklet' : (role === 'shiftSupervisor' || role === 'supervisor' || role === 'storeEmployee' || role === 'employee') ? '#documents' : '#policies', roles: ['ultimateAdmin', 'regionalAdmin', 'shiftSupervisor', 'supervisor', 'storeEmployee', 'employee'] }
       ]
     },
     {
       title: 'SYSTEM & REPORTS',
       items: [
-        { name: 'Reports & Analytics', icon: 'chart', route: '#reports' },
-        { name: 'Data Insights', icon: 'chart', route: '#insights' },
-        { name: 'Activity Logs', icon: 'clock', route: '#logs' }
+        { name: 'Reports & Analytics', icon: 'chart', route: (role === 'nationalWarehouseAdmin' || role === 'regionalWarehouseAdmin') ? '#reports' : '#regional-reports', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin'] },
+        { name: 'Data Insights', icon: 'chart', route: '#insights', roles: ['ultimateAdmin'] },
+        { name: 'Activity Logs', icon: 'clock', route: '#logs', roles: ['ultimateAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin'] },
+        { name: 'Help & Support', icon: 'help-circle', route: '#support', roles: ['ultimateAdmin', 'nationalAdmin', 'regionalAdmin', 'nationalWarehouseAdmin', 'regionalWarehouseAdmin', 'shiftSupervisor', 'supervisor', 'storeEmployee', 'employee', 'store', 'storeAdmin'] }
       ]
     }
   ];
 
-  // Filter menu items by checking current permissions
   return groups.map(group => {
-    const visibleItems = group.items.filter(item => {
-      if (!item.permission) return true;
-      return permissionStore.hasPermission(item.permission);
-    });
+    const visibleItems = group.items
+      .filter(item => {
+        // Enforce role-based access
+        if (item.roles && !item.roles.includes(role)) return false;
+        // Enforce permission-based access (if defined)
+        if (item.permission && !permissionStore.hasPermission(item.permission)) return false;
+        return true;
+      })
+      .map(item => {
+        const route = typeof item.route === 'function' ? item.route() : item.route;
+        return {
+          name: item.name,
+          icon: item.icon,
+          route
+        };
+      });
+
     return {
       title: group.title,
       items: visibleItems

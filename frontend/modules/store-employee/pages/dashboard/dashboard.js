@@ -33,6 +33,7 @@ import { logger } from '../../../../core/logger.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
 import { apiClient } from '../../../../api/client.js';
 import { geofenceMonitor } from '../../../../core/geofenceMonitor.js';
+import { ClockInOutWidget } from '../../../../widgets/workforce/clock-in-out/clock-in-out.js';
 
 /** Path to the dashboard HTML template */
 const TEMPLATE_URL = 'modules/store-employee/pages/dashboard/dashboard.html';
@@ -46,12 +47,20 @@ export default class StoreEmployeeDashboard {
   constructor() {
     this.user = authStore.getUser();
     this.profile = userStore.getProfile(this.user?.role) || {};
-    
+
     // Load state from localStorage or use default mock values
-    const cachedState = localStorage.getItem(`emp_dashboard_state_${this.user?.username || 'neha'}`);
+    const activeUsername = this.user?.username || 'sivasurya';
+    const cachedState = localStorage.getItem(`emp_dashboard_state_${activeUsername}`);
     if (cachedState) {
       try {
         this.state = JSON.parse(cachedState);
+        // Always clear stale store coordinates — they will be refreshed from the API
+        // on every mount so we never use a cached null/undefined value for the map.
+        delete this.state.storeLat;
+        delete this.state.storeLng;
+        delete this.state.storeName;
+        // Sync active user's clean display name
+        this.state.name = this._getCleanName(this.user, this.profile);
       } catch (err) {
         logger.error('StoreEmployeeDashboard', 'Error parsing cached state, resetting', err);
         this.initDefaultState();
@@ -59,10 +68,17 @@ export default class StoreEmployeeDashboard {
     } else {
       this.initDefaultState();
     }
-    
+
     this._clockInterval = null;
     this.activeModal = null;
     this._geofenceActive = false;
+
+    // Map tracking properties
+    this._mapInitialized = false;
+    this._leafletMap = null;
+    this._empMarker = null;
+    this._geofenceCircle = null;
+    this._watchId = null;
 
     // Live backend data (populated by loadLeaveData)
     this.leaveTypes = [];
@@ -70,9 +86,33 @@ export default class StoreEmployeeDashboard {
     this.holidays = [];
   }
 
+  _getCleanName(user, profile) {
+    if (user?.fullName && !user.fullName.includes('@')) return user.fullName;
+    if (user?.name && !user.name.includes('@')) return user.name;
+    if (profile?.fullName && !profile.fullName.includes('@')) return profile.fullName;
+    if (profile?.name && !profile.name.includes('@') && profile.name !== 'Neha Sharma') return profile.name;
+
+    const raw = user?.username || user?.email || profile?.email || '';
+    if (!raw) return 'Store Employee 1';
+
+    let handle = raw.split('@')[0];
+
+    if (/^emp\d+/i.test(handle) || handle.includes('_st_') || handle.includes('reg_')) {
+      const numMatch = handle.match(/\d+/);
+      const num = numMatch ? numMatch[0] : '1';
+      return `Store Employee ${num}`;
+    }
+
+    return handle
+      .replace(/[._-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
   initDefaultState() {
     this.state = {
-      name: this.profile.name || 'Neha Sharma',
+      name: this._getCleanName(this.user, this.profile),
       id: 'EMP10245',
       level: 'Senior Barista',
       store: 'Green Park Café, City Center',
@@ -128,7 +168,7 @@ export default class StoreEmployeeDashboard {
    */
   async mount(container, lifecycle) {
     logger.info('StoreEmployeeDashboard', 'Mounting Store Employee Dashboard...');
-    
+
     // Load CSS
     this._loadCss();
 
@@ -142,17 +182,30 @@ export default class StoreEmployeeDashboard {
     // 3. Render loaded data into the DOM
     this._render(container);
 
-    // 4. Bind event listeners
+    // 4. Mount modular Clock In / Out & Geofence Map widget
+    const widgetTarget = container.querySelector('#clock-widget-container');
+    if (widgetTarget) {
+      this.clockWidget = new ClockInOutWidget({
+        onClockIn: () => this._loadAttendanceData(container),
+        onClockOut: () => this._loadAttendanceData(container)
+      });
+      await this.clockWidget.mount(widgetTarget);
+    }
+
+    // 5. Bind event listeners
     this._bindEvents(container, lifecycle);
 
-    // 5. Trigger live clock
+    // 6. Trigger live clock
     this.startClock(container);
 
-    // 6. Fetch live leave data from backend and re-render dynamic parts
+    // 7. Fetch live leave data from backend and re-render dynamic parts
     await this.loadLeaveData(container, lifecycle);
-    
+
     lifecycle.onCleanup(() => {
-      this.destroy();
+      if (this.clockWidget) {
+        this.clockWidget.destroy();
+        this.clockWidget = null;
+      }
       // Stop geofence monitor on page leave
       geofenceMonitor.stop();
     });
@@ -175,11 +228,30 @@ export default class StoreEmployeeDashboard {
       const meRes = await apiClient.get('/api/v1/auth/me');
       if (meRes?.success) {
         this.profile = { ...this.profile, ...meRes.data };
-        this.state.name = this.profile.name || this.state.name;
+        this.state.name = this._getCleanName(this.user, this.profile);
         this.state.store = this.profile.store || this.state.store;
         const rawRole = this.profile.role || 'SENIOR_EMPLOYEE';
         this.state.level = rawRole.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
         this.state.id = 'EMP' + (this.profile.id || '10245');
+
+        // Fetch store coordinates
+        let storeId = this.profile.storeId;
+        if (!storeId) {
+          logger.warn('StoreEmployeeDashboard', 'No storeId linked to user session. Defaulting to Store ID 12.');
+          storeId = 12;
+        }
+        if (storeId) {
+          const storeRes = await apiClient.get(`/api/v1/stores/${storeId}`);
+          if (storeRes?.success && storeRes.data) {
+            this.state.storeLat = storeRes.data.latitude;
+            this.state.storeLng = storeRes.data.longitude;
+            this.state.storeName = storeRes.data.name;
+            logger.info('StoreEmployeeDashboard', `Store coordinates loaded: lat=${this.state.storeLat}, lng=${this.state.storeLng}, store=${this.state.storeName}`);
+          } else {
+            logger.warn('StoreEmployeeDashboard', `Store API returned no data for storeId=${storeId}. Response:`, storeRes);
+          }
+        }
+
         this.saveState();
       }
     } catch (err) {
@@ -234,7 +306,7 @@ export default class StoreEmployeeDashboard {
     if (kpiChecklistSubtext) kpiChecklistSubtext.textContent = `Of ${this.state.tasks.length} total assigned`;
     if (kpiTrainingProgress) kpiTrainingProgress.textContent = `${this.state.trainingProgress}% Completed`;
     if (trainingProgressFill) trainingProgressFill.style.width = `${this.state.trainingProgress}%`;
-    
+
     if (kpiLeaveBalance) kpiLeaveBalance.textContent = `${this.state.leave.available} Days Available`;
     if (kpiLeaveDetail) {
       kpiLeaveDetail.innerHTML = `${this.state.leave.approved} used &nbsp;·&nbsp; ${this.state.leave.pending} pending`;
@@ -252,7 +324,7 @@ export default class StoreEmployeeDashboard {
         svg.setAttribute('fill', i <= score ? 'var(--accent-primary)' : 'none');
         svg.setAttribute('stroke', 'var(--accent-primary)');
         svg.setAttribute('stroke-width', '2');
-        
+
         const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
         poly.setAttribute('points', '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2');
         svg.appendChild(poly);
@@ -325,6 +397,9 @@ export default class StoreEmployeeDashboard {
     // 3. Render checklist tasks
     this._renderTaskList(container);
     this._renderAwayPassCard(container);
+    // NOTE: _initGeofenceMap is NOT called here on re-renders to avoid
+    // destroying/re-creating the Leaflet map on every state update.
+    // It is called once from mount() after fresh coordinates are loaded.
   }
 
   // ---------------------------------------------------------------------------
@@ -341,7 +416,7 @@ export default class StoreEmployeeDashboard {
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
         this.activeModal = 'open';
-        
+
         // Modal close hooks
         const closeBtn = modalContent.querySelector('.btn-close-modal');
         if (closeBtn) {
@@ -386,16 +461,31 @@ export default class StoreEmployeeDashboard {
               { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
           });
-        } catch (_) { gps = null; }
+        } catch (_) {
+          gps = null;
+        }
+
+        // Fallback GPS from map marker or store coordinates if geolocation API times out
+        if (!gps && this._empMarker) {
+          const pos = this._empMarker.getLatLng();
+          if (pos && pos.lat && pos.lng) {
+            gps = `${pos.lat.toFixed(6)},${pos.lng.toFixed(6)}`;
+          }
+        }
+        if (!gps && this.state.storeLat && this.state.storeLng) {
+          gps = `${parseFloat(this.state.storeLat).toFixed(6)},${parseFloat(this.state.storeLng).toFixed(6)}`;
+        }
 
         try {
           const res = await apiClient.post('/api/v1/attendance/check-in', { gps });
           if (res?.success) {
+            this.playClockInSound();
             notificationStore.success('Successfully clocked in for your shift.');
             // Start geofence monitoring
             geofenceMonitor.start(
               () => {
                 // Auto-clocked-out callback
+                this.playClockOutSound();
                 this.state.clockedIn = false;
                 this.saveState();
                 this._render(container);
@@ -466,6 +556,188 @@ export default class StoreEmployeeDashboard {
         }
       };
       clockInBtn.addEventListener('click', handleClockIn);
+    }
+
+    if (clockOutBtn) {
+      const handleClockOut = async () => {
+        clockOutBtn.disabled = true;
+        try {
+          const res = await apiClient.post('/api/v1/attendance/check-out', {});
+          if (res?.success) {
+            this.playClockOutSound();
+            notificationStore.success('Successfully clocked out from your shift.');
+            geofenceMonitor.stop();
+            await this._loadAttendanceData(container);
+            this._render(container);
+            this._bindEvents(container, lifecycle);
+          } else {
+            notificationStore.danger(res?.message || 'Failed to clock out.');
+            clockOutBtn.disabled = false;
+          }
+        } catch (e) {
+          notificationStore.danger('Error during clock out: ' + e.message);
+          clockOutBtn.disabled = false;
+        }
+      };
+      clockOutBtn.addEventListener('click', handleClockOut);
+    }
+
+    const btnRefreshMap = container.querySelector('#btn-refresh-map');
+    if (btnRefreshMap) {
+      btnRefreshMap.addEventListener('click', async () => {
+        notificationStore.info('Refreshing store map and live GPS location...');
+        await this._loadData();
+        this._initGeofenceMap(container);
+        notificationStore.success('Map refreshed successfully!');
+      });
+    }
+
+    const btnGetRoute = container.querySelector('#btn-get-fastest-route');
+    if (btnGetRoute) {
+      btnGetRoute.addEventListener('click', () => {
+        const storeLat = parseFloat(this.state.storeLat);
+        const storeLng = parseFloat(this.state.storeLng);
+
+        if (isNaN(storeLat) || isNaN(storeLng) || storeLat === 0 || storeLng === 0) {
+          notificationStore.warning('Store location is not configured.');
+          return;
+        }
+
+        let empLat = null;
+        let empLng = null;
+
+        if (this._empMarker) {
+          const pos = this._empMarker.getLatLng();
+          empLat = pos.lat;
+          empLng = pos.lng;
+        }
+
+        if (!empLat || !empLng) {
+          notificationStore.info('Acquiring your live GPS location for routing...');
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                this._calculateAndDrawRoute(container, position.coords.latitude, position.coords.longitude, storeLat, storeLng);
+              },
+              (err) => {
+                notificationStore.danger('Could not acquire your GPS location for route calculation.');
+              }
+            );
+            return;
+          }
+        }
+
+        this._calculateAndDrawRoute(container, empLat, empLng, storeLat, storeLng);
+      });
+    }
+
+    // Recenter Map to Employee Live GPS Location
+    const btnMyLoc = container.querySelector('#btn-recenter-my-location');
+    if (btnMyLoc) {
+      btnMyLoc.addEventListener('click', () => {
+        if (!this._leafletMap) return;
+
+        let empLat = null;
+        let empLng = null;
+
+        if (this._empMarker) {
+          const pos = this._empMarker.getLatLng();
+          empLat = pos.lat;
+          empLng = pos.lng;
+        }
+
+        const centerMap = (lat, lng) => {
+          this._leafletMap.setView([lat, lng], 18);
+          if (this._empMarker) {
+            this._empMarker.setLatLng([lat, lng]);
+            this._empMarker.bindPopup(`<b>Your Live GPS Location</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
+          }
+          notificationStore.success(`🎯 Map centered at your live GPS location: ${lat.toFixed(6)}, ${lng.toFixed(6)}.`);
+        };
+
+        if (empLat && empLng) {
+          centerMap(empLat, empLng);
+        } else if (navigator.geolocation) {
+          notificationStore.info('Acquiring live GPS location...');
+          navigator.geolocation.getCurrentPosition(
+            (pos) => centerMap(pos.coords.latitude, pos.coords.longitude),
+            (err) => notificationStore.danger('Failed to retrieve your GPS location: ' + err.message)
+          );
+        }
+      });
+    }
+
+    // Map Direction Rotation Controls
+    const btnRotateNorth = container.querySelector('#btn-rotate-north');
+    const btnRotateCw = container.querySelector('#btn-rotate-map-cw');
+    const mapEl = container.querySelector('#geofence-map');
+
+    this._mapRotation = 0;
+
+    if (btnRotateNorth && mapEl) {
+      btnRotateNorth.addEventListener('click', () => {
+        this._mapRotation = 0;
+        mapEl.style.transform = 'rotate(0deg)';
+        notificationStore.info('🧭 Map orientation reset to North (0°).');
+      });
+    }
+
+    if (btnRotateCw && mapEl) {
+      btnRotateCw.addEventListener('click', () => {
+        this._mapRotation = (this._mapRotation + 90) % 360;
+        mapEl.style.transform = `rotate(${this._mapRotation}deg)`;
+        notificationStore.info(`🔄 Map direction rotated to ${this._mapRotation}°.`);
+      });
+    }
+
+    // Map Layer Switcher (Satellite View)
+    const btnToggleSat = container.querySelector('#btn-toggle-satellite');
+    this._isSatelliteView = false;
+
+    if (btnToggleSat) {
+      btnToggleSat.addEventListener('click', () => {
+        if (!this._leafletMap || typeof window.L === 'undefined') return;
+
+        this._isSatelliteView = !this._isSatelliteView;
+
+        if (this._activeTileLayer) {
+          try { this._leafletMap.removeLayer(this._activeTileLayer); } catch (e) { }
+        }
+
+        if (this._isSatelliteView) {
+          this._activeTileLayer = window.L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: '&copy; Esri, Maxar, Earthstar Geographics'
+          }).addTo(this._leafletMap);
+          btnToggleSat.innerHTML = '🗺️ Street View';
+          notificationStore.info('🛰️ Switched map layer to High-Res Satellite View.');
+        } else {
+          this._activeTileLayer = window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(this._leafletMap);
+          btnToggleSat.innerHTML = '🛰️ Satellite View';
+          notificationStore.info('🗺️ Switched map layer to Detailed Street View.');
+        }
+      });
+    }
+
+    // Travel Mode Switcher
+    const selectTravelMode = container.querySelector('#select-travel-mode');
+    if (selectTravelMode) {
+      selectTravelMode.addEventListener('change', () => {
+        const mode = selectTravelMode.value;
+        if (btnGetRoute) {
+          const modeLabels = { driving: '🚗 Get Fastest Route', walking: '🚶 Get Fastest Route', biking: '🚴 Get Fastest Route' };
+          const span = btnGetRoute.querySelector('span');
+          if (span) span.textContent = modeLabels[mode] || '🚗 Get Fastest Route';
+        }
+        // If route info panel is active, recalculate immediately
+        const routePanel = container.querySelector('#route-info-panel');
+        if (routePanel && routePanel.style.display !== 'none' && btnGetRoute) {
+          btnGetRoute.click();
+        }
+      });
     }
 
     const btnFetchLocation = container.querySelector('#btn-fetch-live-location');
@@ -631,12 +903,12 @@ export default class StoreEmployeeDashboard {
     // 2. Add custom task
     const addTaskBtn = container.querySelector('#btn-add-task');
     const addTaskInput = container.querySelector('#add-task-input');
-    
+
     if (addTaskBtn && addTaskInput) {
       const handleAddTask = () => {
         const text = addTaskInput.value.trim();
         if (!text) return;
-        
+
         const newId = this.state.tasks.length ? Math.max(...this.state.tasks.map(t => t.id)) + 1 : 1;
         this.state.tasks.push({
           id: newId,
@@ -644,15 +916,15 @@ export default class StoreEmployeeDashboard {
           priority: 'Low Priority',
           status: 'Not Started'
         });
-        
+
         this.state.activities.unshift({ text: `Added custom task "${text}"`, time: 'Just now' });
         notificationStore.success('Added new task to checklist.');
-        
+
         this.saveState();
         this._render(container);
         this._bindEvents(container, lifecycle);
       };
-      
+
       addTaskBtn.addEventListener('click', handleAddTask);
       lifecycle.onCleanup(() => addTaskBtn.removeEventListener('click', handleAddTask));
 
@@ -679,8 +951,8 @@ export default class StoreEmployeeDashboard {
       while (cur <= endDate) {
         const d = cur.getUTCDay();
         const iso = cur.getUTCFullYear() + '-' +
-                    String(cur.getUTCMonth() + 1).padStart(2, '0') + '-' +
-                    String(cur.getUTCDate()).padStart(2, '0');
+          String(cur.getUTCMonth() + 1).padStart(2, '0') + '-' +
+          String(cur.getUTCDate()).padStart(2, '0');
         if (d !== 0 && d !== 6 && !holidaySet.has(iso)) count++;
         cur.setUTCDate(cur.getUTCDate() + 1);
       }
@@ -957,7 +1229,7 @@ export default class StoreEmployeeDashboard {
       selectAwayReason.addEventListener('change', handleReasonSelectChange);
       lifecycle.onCleanup(() => selectAwayReason.removeEventListener('change', handleReasonSelectChange));
     }
-    
+
     if (btnSubmitAway) {
       const handleSubmitAway = async () => {
         let rawReason = '';
@@ -970,12 +1242,12 @@ export default class StoreEmployeeDashboard {
         } else {
           rawReason = selectAwayReason?.value || 'No reason';
         }
-        
+
         const startVal = container.querySelector('#away-pass-start-time-select')?.value || 'now';
         const mins = selectAwayDuration?.value || '30';
         const startLabel = startVal === 'now' ? 'Now' : startVal;
         const reason = `${rawReason} (Start: ${startLabel}) (Requested Duration: ${mins} mins)`;
-        
+
         btnSubmitAway.disabled = true;
         try {
           const res = await apiClient.post('/api/v1/away-permission/request', { reason });
@@ -1020,7 +1292,7 @@ export default class StoreEmployeeDashboard {
         if (reasonInput.trim()) {
           extensionReason += ` Reason: ${reasonInput.trim()}`;
         }
-        
+
         btnExtendAway.disabled = true;
         try {
           const res = await apiClient.post(`/api/v1/away-permission/${pass.id}/extend`, {
@@ -1049,7 +1321,7 @@ export default class StoreEmployeeDashboard {
       const handleReturnAway = async () => {
         const pass = this.state.currentAwayPass;
         if (!pass) return;
-        
+
         btnReturnAway.disabled = true;
         try {
           const res = await apiClient.post(`/api/v1/away-permission/${pass.id}/return`, {});
@@ -1081,7 +1353,11 @@ export default class StoreEmployeeDashboard {
       clearInterval(this._clockInterval);
       this._clockInterval = null;
     }
-    logger.debug('StoreEmployeeDashboard', 'Clock cleared.');
+    if (this._watchId) {
+      navigator.geolocation.clearWatch(this._watchId);
+      this._watchId = null;
+    }
+    logger.debug('StoreEmployeeDashboard', 'Clock and location watch cleared.');
   }
 
   unmount() {
@@ -1107,12 +1383,12 @@ export default class StoreEmployeeDashboard {
 
     const iconMap = { info: '💡', warning: '⚠️', danger: '🚨', success: '✅' };
     const colorMap = {
-      info:    'var(--status-info)',
+      info: 'var(--status-info)',
       warning: '#f59e0b',
-      danger:  'var(--status-danger)',
+      danger: 'var(--status-danger)',
       success: 'var(--status-success)',
     };
-    const icon  = iconMap[type]  || '💡';
+    const icon = iconMap[type] || '💡';
     const color = colorMap[type] || 'var(--accent-primary)';
 
     const actionButtons = actions.map(a =>
@@ -1247,7 +1523,7 @@ export default class StoreEmployeeDashboard {
         if (balKpiDetail) {
           balKpiDetail.innerHTML = `${totalUsed} used &nbsp;·&nbsp; ${totalPending} pending`;
         }
-        
+
         // Update internal state
         this.state.leave.available = totalRemaining;
         this.state.leave.pending = totalPending;
@@ -1319,7 +1595,7 @@ export default class StoreEmployeeDashboard {
       const endParts = this.state.shiftEndTime.split(':');
       endDate = new Date(now);
       endDate.setHours(parseInt(endParts[0]), parseInt(endParts[1]), parseInt(endParts[2] || '0'), 0);
-      
+
       // If shift end is before shift start (crosses midnight)
       if (this.state.shiftStartTime) {
         const startParts = this.state.shiftStartTime.split(':');
@@ -1455,14 +1731,14 @@ export default class StoreEmployeeDashboard {
         const task = this.state.tasks.find(t => t.id === id);
         if (task) {
           task.status = chk.checked ? 'Completed' : 'In Progress';
-          
+
           if (chk.checked) {
             this.state.activities.unshift({ text: `Completed checklist item "${task.name}"`, time: 'Just now' });
             notificationStore.info(`Completed task: ${task.name}`);
           } else {
             this.state.activities.unshift({ text: `Unchecked checklist item "${task.name}"`, time: 'Just now' });
           }
-          
+
           this.saveState();
           this._render(container);
           this._bindEvents(container, lifecycle);
@@ -1482,7 +1758,7 @@ export default class StoreEmployeeDashboard {
           const taskName = this.state.tasks[index].name;
           this.state.tasks.splice(index, 1);
           notificationStore.info(`Removed task: ${taskName}`);
-          
+
           this.saveState();
           this._render(container);
           this._bindEvents(container, lifecycle);
@@ -1521,7 +1797,7 @@ export default class StoreEmployeeDashboard {
             (type, title, message, actions) => {
               // container may be stale on resume — best-effort
               const c = document.querySelector('.store-employee-dashboard-workspace')?.closest('[data-page]') || document.body;
-              self._showGeofencePopup(c, { onCleanup: () => {} }, type, title, message, actions);
+              self._showGeofencePopup(c, { onCleanup: () => { } }, type, title, message, actions);
             }
           );
         }
@@ -1545,7 +1821,7 @@ export default class StoreEmployeeDashboard {
       } catch (err) {
         logger.warn('StoreEmployeeDashboard', 'Error loading overtime requests', err);
       }
-      
+
       const historyRes = await apiClient.get('/api/v1/attendance/history');
       if (historyRes?.success && historyRes.data) {
         const logs = historyRes.data;
@@ -1576,7 +1852,7 @@ export default class StoreEmployeeDashboard {
       }
 
       this.saveState();
-    } catch(err) {
+    } catch (err) {
       logger.error('StoreEmployeeDashboard', 'Failed to load attendance data', err);
     }
   }
@@ -1725,7 +2001,7 @@ export default class StoreEmployeeDashboard {
     if (diffMs > 0) {
       timerBlock.style.display = 'flex';
       timerVal.textContent = this.formatDuration(diffMs);
-      
+
       const approvedUntil = new Date(pass.approvedUntil);
       if (now > approvedUntil) {
         timerVal.style.color = '#ff6b6b';
@@ -1743,9 +2019,450 @@ export default class StoreEmployeeDashboard {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // PRIVATE STATE MANAGEMENT
-  // ---------------------------------------------------------------------------
+  _initGeofenceMap(container) {
+    const mapEl = container.querySelector('#geofence-map');
+    if (!mapEl) return;
+
+    // Guard: Leaflet must be loaded globally via CDN in index.html
+    if (typeof window.L === 'undefined') {
+      logger.error('StoreEmployeeDashboard', 'Leaflet (window.L) is not loaded. Cannot initialize geofence map.');
+      const statusText = container.querySelector('#geofence-status-text');
+      if (statusText) {
+        statusText.innerHTML = `<span style="color: var(--status-danger, #f44336); font-weight:700;">Map library not loaded. Please refresh the page.</span>`;
+        statusText.style.background = 'rgba(244,67,54,0.08)';
+        statusText.style.borderColor = 'rgba(244,67,54,0.2)';
+      }
+      return;
+    }
+
+    // Clean up existing map instance if any
+    if (this._leafletMap) {
+      try {
+        this._leafletMap.remove();
+      } catch (e) {
+        logger.error('StoreEmployeeDashboard', 'Error removing Leaflet map:', e);
+      }
+      this._leafletMap = null;
+    }
+    if (this._watchId) {
+      navigator.geolocation.clearWatch(this._watchId);
+      this._watchId = null;
+    }
+
+    const storeLat = parseFloat(this.state.storeLat);
+    const storeLng = parseFloat(this.state.storeLng);
+
+    logger.info('StoreEmployeeDashboard', `_initGeofenceMap: storeLat=${storeLat}, storeLng=${storeLng}`);
+
+    if (isNaN(storeLat) || isNaN(storeLng) || storeLat === 0 || storeLng === 0) {
+      logger.warn('StoreEmployeeDashboard', 'Store coordinates are null/zero — map will not render. Ensure store admin has saved GPS coordinates.');
+      const statusText = container.querySelector('#geofence-status-text');
+      if (statusText) statusText.innerHTML = `<span style="color: var(--accent-warning, #f59e0b);">Store coordinates not configured. Please contact admin.</span>`;
+      return;
+    }
+
+    try {
+      // Initialize Leaflet map centered at store coordinates
+      const map = window.L.map(mapEl).setView([storeLat, storeLng], 18);
+      this._leafletMap = map;
+
+      // High-detail OpenStreetMap light theme tiles
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // Store Marker (Bold Red/Gold Store Pin with shadow)
+      const storeIcon = window.L.divIcon({
+        className: 'custom-store-icon',
+        html: '<div style="background: #dc2626; border: 3px solid #ffffff; width: 20px; height: 20px; border-radius: 50%; box-shadow: 0 2px 10px rgba(0,0,0,0.4);"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+      });
+      window.L.marker([storeLat, storeLng], { icon: storeIcon })
+        .addTo(map)
+        .bindPopup(`<b>${this.state.storeName || 'Store'}</b><br>Store GPS Location`)
+        .openPopup();
+
+      // 30m Geofence Circle Boundary
+      const geofenceCircle = window.L.circle([storeLat, storeLng], {
+        color: '#dc2626',
+        fillColor: '#ef4444',
+        fillOpacity: 0.15,
+        weight: 2,
+        radius: 30
+      }).addTo(map);
+      this._geofenceCircle = geofenceCircle;
+
+      // 150m Outer Auto Clock-Out Monitoring Circle
+      const autoClockOutCircle = window.L.circle([storeLat, storeLng], {
+        color: '#3b82f6',
+        fillColor: '#3b82f6',
+        fillOpacity: 0.05,
+        weight: 1.5,
+        dashArray: '6, 6',
+        radius: 150
+      }).addTo(map);
+      this._autoClockOutCircle = autoClockOutCircle;
+
+      // Employee Marker (Bright Blue Pulsing Marker)
+      const empIcon = window.L.divIcon({
+        className: 'custom-emp-icon',
+        html: '<div style="background: #2563eb; border: 3px solid #ffffff; width: 18px; height: 18px; border-radius: 50%; box-shadow: 0 0 12px rgba(37,99,235,0.7);"></div>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+      this._empMarker = window.L.marker([storeLat, storeLng], { icon: empIcon }).addTo(map);
+
+      logger.info('StoreEmployeeDashboard', 'Geofence map initialized successfully with 30m & 150m zones.');
+
+      // Start periodic watch of employee's live location to update map
+      this._trackEmployeeLocation(container);
+    } catch (e) {
+      logger.error('StoreEmployeeDashboard', 'Error initializing Leaflet map:', e);
+    }
+  }
+
+  _trackEmployeeLocation(container) {
+    if (!navigator.geolocation) return;
+
+    const updatePosition = (position) => {
+      // Guard: Ensure map and container are active in current DOM tree
+      if (!this._leafletMap || !this._leafletMap._container || !document.body.contains(this._leafletMap._container)) {
+        return;
+      }
+
+      const empLat = position.coords.latitude;
+      const empLng = position.coords.longitude;
+
+      const storeLat = parseFloat(this.state.storeLat);
+      const storeLng = parseFloat(this.state.storeLng);
+
+      if (isNaN(storeLat) || isNaN(storeLng)) return;
+
+      // Update employee marker position safely
+      if (this._empMarker) {
+        try {
+          this._empMarker.setLatLng([empLat, empLng]);
+        } catch (e) {
+          logger.warn('StoreEmployeeDashboard', 'Ignored marker position update on detached DOM layer:', e);
+        }
+      }
+
+      // Calculate distance
+      const distance = this._haversineDistance(empLat, empLng, storeLat, storeLng);
+      const rounded = Math.round(distance);
+
+      const statusText = container.querySelector('#geofence-status-text');
+      const clockInBtn = container.querySelector('#btn-clock-in');
+
+      // Update UI status, map geofence circle color, and clock-in button access
+      if (this.state.clockedIn) {
+        // --- POST CLOCK-IN SHIFT MONITORING MODE ---
+        if (this._geofenceCircle) {
+          try {
+            this._geofenceCircle.setStyle({
+              color: '#10b981',
+              fillColor: '#10b981',
+              fillOpacity: 0.2,
+              weight: 2
+            });
+          } catch (e) {}
+        }
+
+        if (this._autoClockOutCircle) {
+          try {
+            if (distance > 120 && distance <= 150) {
+              this._autoClockOutCircle.setStyle({
+                color: '#f59e0b',
+                fillColor: '#f59e0b',
+                fillOpacity: 0.14,
+                weight: 2.5,
+                dashArray: '4, 4'
+              });
+            } else if (distance > 150) {
+              this._autoClockOutCircle.setStyle({
+                color: '#ef4444',
+                fillColor: '#ef4444',
+                fillOpacity: 0.2,
+                weight: 3,
+                dashArray: '2, 2'
+              });
+            } else {
+              this._autoClockOutCircle.setStyle({
+                color: '#3b82f6',
+                fillColor: '#3b82f6',
+                fillOpacity: 0.06,
+                weight: 1.5,
+                dashArray: '6, 6'
+              });
+            }
+          } catch (e) {}
+        }
+
+        if (statusText) {
+          if (distance <= 120) {
+            statusText.innerHTML = `<span style="color: #4caf50; font-weight: 700;">🟢 Active Shift · Inside 150m Safe Zone (${rounded}m from store) — Auto Clock-Out Monitoring Active</span>`;
+            statusText.style.background = 'rgba(76, 175, 80, 0.08)';
+            statusText.style.borderColor = 'rgba(76, 175, 80, 0.2)';
+          } else if (distance <= 150) {
+            statusText.innerHTML = `<span style="color: #f59e0b; font-weight: 700;">⚠️ Approaching 150m Store Boundary (${rounded}m away - Auto Clock-Out at 150m)</span>`;
+            statusText.style.background = 'rgba(245, 158, 11, 0.08)';
+            statusText.style.borderColor = 'rgba(245, 158, 11, 0.2)';
+          } else {
+            statusText.innerHTML = `<span style="color: #ef4444; font-weight: 700;">🚨 Exceeded 150m Store Boundary (${rounded}m away - Auto Clock-Out Pending)</span>`;
+            statusText.style.background = 'rgba(244, 67, 54, 0.08)';
+            statusText.style.borderColor = 'rgba(244, 67, 54, 0.2)';
+          }
+        }
+      } else {
+        // --- PRE CLOCK-IN GEOFENCE ENTRY MODE ---
+        if (distance <= 30) {
+          if (statusText) {
+            statusText.innerHTML = `<span style="color: var(--status-success, #4caf50); font-weight: 700;">✓ Inside Geofence (${rounded}m away) — Ready to Clock In</span>`;
+            statusText.style.background = 'rgba(76, 175, 80, 0.08)';
+            statusText.style.borderColor = 'rgba(76, 175, 80, 0.2)';
+          }
+
+          if (this._geofenceCircle) {
+            try {
+              this._geofenceCircle.setStyle({
+                color: '#10b981',
+                fillColor: '#10b981',
+                fillOpacity: 0.28,
+                weight: 3
+              });
+            } catch (e) {}
+          }
+
+          if (clockInBtn) {
+            clockInBtn.disabled = false;
+            clockInBtn.style.opacity = '1';
+            clockInBtn.style.cursor = 'pointer';
+          }
+        } else {
+          if (statusText) {
+            statusText.innerHTML = `<span style="color: var(--accent-warning, #f59e0b); font-weight: 700;">✕ Outside Geofence (${rounded}m away - Required: &lt;30m to Clock In)</span>`;
+            statusText.style.background = 'rgba(245, 158, 11, 0.08)';
+            statusText.style.borderColor = 'rgba(245, 158, 11, 0.2)';
+          }
+
+          if (this._geofenceCircle) {
+            try {
+              this._geofenceCircle.setStyle({
+                color: '#dc2626',
+                fillColor: '#ef4444',
+                fillOpacity: 0.15,
+                weight: 2
+              });
+            } catch (e) {}
+          }
+
+          if (clockInBtn) {
+            clockInBtn.disabled = true;
+            clockInBtn.style.opacity = '0.5';
+            clockInBtn.style.cursor = 'not-allowed';
+          }
+        }
+      }
+
+      // Fit bounds safely to show both store and employee
+      if (this._leafletMap && this._leafletMap._container && document.body.contains(this._leafletMap._container)) {
+        try {
+          const bounds = window.L.latLngBounds([
+            [storeLat, storeLng],
+            [empLat, empLng]
+          ]);
+          this._leafletMap.fitBounds(bounds.pad(0.3));
+        } catch (e) {}
+      }
+    };
+
+    // Watch position in real-time
+    this._watchId = navigator.geolocation.watchPosition(
+      updatePosition,
+      (error) => {
+        logger.error('StoreEmployeeDashboard', 'WatchPosition failed:', error);
+        const statusText = container.querySelector('#geofence-status-text');
+        if (statusText) {
+          statusText.innerHTML = `<span style="color: var(--status-danger); font-weight: 700;">⚠️ Location access denied. Enable GPS to clock in.</span>`;
+          statusText.style.background = 'rgba(244, 67, 54, 0.08)';
+          statusText.style.borderColor = 'rgba(244, 67, 54, 0.2)';
+        }
+        const clockInBtn = container.querySelector('#btn-clock-in');
+        if (clockInBtn) {
+          clockInBtn.disabled = true;
+          clockInBtn.style.opacity = '0.5';
+          clockInBtn.style.cursor = 'not-allowed';
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }
+
+  async _calculateAndDrawRoute(container, empLat, empLng, storeLat, storeLng) {
+    if (!this._leafletMap || typeof window.L === 'undefined') return;
+
+    const selectTravelMode = container.querySelector('#select-travel-mode');
+    const mode = selectTravelMode?.value || 'driving';
+
+    const osrmProfileMap = { driving: 'driving', walking: 'foot', biking: 'bike' };
+    const gmapsModeMap = { driving: 'driving', walking: 'walking', biking: 'bicycling' };
+    const modeNameMap = { driving: 'Drive', walking: 'Walk', biking: 'Bike' };
+    const modeIconMap = { driving: '🚗', walking: '🚶', biking: '🚴' };
+
+    const profile = osrmProfileMap[mode] || 'driving';
+    const gmapsMode = gmapsModeMap[mode] || 'driving';
+
+    // Show info panel
+    const routePanel = container.querySelector('#route-info-panel');
+    const detailsText = container.querySelector('#route-details-text');
+    const gmapsBtn = container.querySelector('#btn-open-google-maps');
+
+    if (routePanel) routePanel.style.display = 'block';
+    if (detailsText) detailsText.textContent = `🔄 Calculating ${modeNameMap[mode]} route...`;
+
+    const gmapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${empLat},${empLng}&destination=${storeLat},${storeLng}&travelmode=${gmapsMode}`;
+    if (gmapsBtn) gmapsBtn.setAttribute('href', gmapsUrl);
+
+    // Remove existing route line if any
+    if (this._routePolyline) {
+      try { this._leafletMap.removeLayer(this._routePolyline); } catch (e) { }
+      this._routePolyline = null;
+    }
+
+    try {
+      // Query OSRM public route service for selected profile
+      const osrmUrl = `https://router.project-osrm.org/route/v1/${profile}/${empLng},${empLat};${storeLng},${storeLat}?overview=full&geometries=geojson`;
+      const response = await fetch(osrmUrl);
+      const data = await response.json();
+
+      if (data && data.routes && data.routes.length > 0) {
+        const route = data.routes[0];
+        const distanceKm = (route.distance / 1000).toFixed(2);
+        const durationMin = Math.max(1, Math.ceil(route.duration / 60));
+
+        // Convert OSRM GeoJSON [lng, lat] to Leaflet [lat, lng]
+        const latLngs = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+
+        // Draw route line on Leaflet map
+        const polyline = window.L.polyline(latLngs, {
+          color: mode === 'walking' ? '#10b981' : mode === 'biking' ? '#f59e0b' : '#3b82f6',
+          weight: 5,
+          opacity: 0.85,
+          lineJoin: 'round',
+          dashArray: mode === 'walking' ? '4, 4' : '8, 4'
+        }).addTo(this._leafletMap);
+
+        this._routePolyline = polyline;
+
+        if (detailsText) {
+          detailsText.textContent = `Distance: ${distanceKm} km · Est. ${modeNameMap[mode]} Time: ${durationMin} min(s)`;
+        }
+
+        // Fit map bounds to show route
+        this._leafletMap.fitBounds(polyline.getBounds().pad(0.25));
+        notificationStore.success(`${modeIconMap[mode]} Route calculated: ${distanceKm} km (${durationMin} mins ${modeNameMap[mode].toLowerCase()} time).`);
+        return;
+      }
+    } catch (e) {
+      logger.warn('StoreEmployeeDashboard', 'OSRM routing API unavailable, falling back to direct line:', e);
+    }
+
+    // Fallback if OSRM request fails (Direct line)
+    const directDistanceM = this._haversineDistance(empLat, empLng, storeLat, storeLng);
+    const directKm = (directDistanceM / 1000).toFixed(2);
+    const estMin = Math.max(1, Math.ceil(directDistanceM / 500));
+
+    const directPolyline = window.L.polyline([[empLat, empLng], [storeLat, storeLng]], {
+      color: '#c9a46a',
+      weight: 4,
+      dashArray: '6, 6',
+      opacity: 0.8
+    }).addTo(this._leafletMap);
+
+    this._routePolyline = directPolyline;
+
+    if (detailsText) {
+      detailsText.textContent = `Distance: ${directKm} km · Est. Time: ~${estMin} min(s)`;
+    }
+
+    this._leafletMap.fitBounds(directPolyline.getBounds().pad(0.25));
+    notificationStore.info(`🚗 Route calculated: ${directKm} km (~${estMin} mins).`);
+  }
+
+  _haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // Earth radius in meters
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  playClockInSound() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+
+      const playTone = (freq, startOffset, duration) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + startOffset);
+
+        gain.gain.setValueAtTime(0.18, ctx.currentTime + startOffset);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startOffset + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime + startOffset);
+        osc.stop(ctx.currentTime + startOffset + duration);
+      };
+
+      // Play pleasant ascending chime (C5 -> E5 -> G5)
+      playTone(523.25, 0.00, 0.12);
+      playTone(659.25, 0.10, 0.14);
+      playTone(783.99, 0.22, 0.25);
+    } catch (e) {
+      logger.warn('StoreEmployeeDashboard', 'AudioContext playback failed:', e);
+    }
+  }
+
+  playClockOutSound() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+
+      const playTone = (freq, startOffset, duration) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + startOffset);
+
+        gain.gain.setValueAtTime(0.18, ctx.currentTime + startOffset);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startOffset + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime + startOffset);
+        osc.stop(ctx.currentTime + startOffset + duration);
+      };
+
+      // Play smooth descending chime (E5 -> C5 -> G4)
+      playTone(659.25, 0.00, 0.12);
+      playTone(523.25, 0.10, 0.15);
+      playTone(392.00, 0.22, 0.30);
+    } catch (e) {
+      logger.warn('StoreEmployeeDashboard', 'AudioContext playback failed:', e);
+    }
+  }
 
   _loadCss() {
     const cssId = 'store-employee-dashboard-page-css';

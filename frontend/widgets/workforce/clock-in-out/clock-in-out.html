@@ -1,0 +1,132 @@
+<!--
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Workforce / Store Employee
+ * Component         : Clock In & Clock Out Widget
+ * File              : clock-in-out.html
+ * Path              : frontend/widgets/workforce/clock-in-out/clock-in-out.html
+ * Purpose           : Reusable HTML template for Clock In/Out & Geofence Map
+ ******************************************************************************/
+-->
+<div class="clock-in-out-widget card glass">
+  <!-- Live Clock Header -->
+  <div class="clock-widget-header">
+    <div class="clock-display-group">
+      <span class="clock-live-time" id="clock-run-time">--:--:-- --</span>
+      <span class="clock-live-date" id="clock-run-date">Loading date...</span>
+    </div>
+    <div class="clock-status-badge clock-status-out" id="clock-duty-badge">
+      <span class="status-dot"></span>
+      <span id="clock-duty-text">Clocked Out</span>
+    </div>
+  </div>
+
+  <!-- Shift Details Summary Row -->
+  <div class="clock-shift-details">
+    <div class="detail-block">
+      <span class="detail-label">Current Shift</span>
+      <div class="detail-title" id="clock-shift-name">Morning Shift</div>
+      <div class="detail-subtitle" id="clock-shift-hours">08:00 AM - 04:00 PM</div>
+    </div>
+    <div class="detail-block" id="clock-break-block">
+      <span class="detail-label">Next Shift Break</span>
+      <div class="detail-title color-primary" id="clock-break-name">12:00 PM - 12:30 PM</div>
+      <div class="detail-subtitle" id="clock-break-hours">Lunch Break (Paid)</div>
+    </div>
+    <div class="detail-block" id="clock-elapsed-block" style="display:none;">
+      <span class="detail-label">Time Logged In</span>
+      <div class="detail-title color-success" id="clock-elapsed-value">00:00:00</div>
+      <div class="detail-subtitle">worked today</div>
+    </div>
+  </div>
+
+  <!-- Clock Actions Row -->
+  <div class="clock-actions-row">
+    <button class="btn btn-success btn-clock" id="btn-clock-in" type="button">
+      <i data-lucide="play" aria-hidden="true"></i>
+      <span>Clock In</span>
+    </button>
+    <button class="btn btn-danger btn-clock" id="btn-clock-out" type="button" disabled>
+      <i data-lucide="square" aria-hidden="true"></i>
+      <span>Clock Out</span>
+    </button>
+    <button class="btn btn-warning btn-clock" id="btn-request-overtime" type="button" style="display: none;">
+      <i data-lucide="plus" aria-hidden="true"></i>
+      <span>Request Overtime</span>
+    </button>
+  </div>
+
+  <!-- Store Geofence Map Section -->
+  <div class="clock-map-section">
+    <div class="clock-map-header">
+      <h4 class="clock-map-title">
+        <i data-lucide="map-pin" style="width:16px;height:16px;color:var(--accent-primary,#c9a46a);"></i>
+        <span>Store Geofence Map</span>
+      </h4>
+      <div id="gps-status-pill" class="gps-status-pill gps-status-idle">
+        <span class="gps-dot"></span>
+        <span id="gps-status-text">Awaiting GPS…</span>
+      </div>
+    </div>
+
+    <!-- Map Toolbar Row -->
+    <div class="clock-map-toolbar">
+      <span class="geofence-zone-label">Geofence Boundary Zone</span>
+      <div class="clock-map-controls">
+        <button type="button" id="btn-recenter-my-location" class="btn btn-secondary btn-sm-map btn-recenter" title="Center map at my GPS location">
+          🎯 My Location
+        </button>
+        <button type="button" id="btn-refresh-map" class="btn btn-secondary btn-sm-map" title="Re-acquire GPS location">
+          <i data-lucide="refresh-cw" style="width:12px;height:12px;"></i>
+          <span>🔄 Refresh Map</span>
+        </button>
+        <button type="button" id="btn-get-fastest-route" class="btn btn-secondary btn-sm-map btn-route-gold" title="Calculate fastest route to store">
+          <i data-lucide="navigation" style="width:12px;height:12px;"></i>
+          <span>🚗 Get Fastest Route</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Map Canvas Element -->
+    <div id="clock-geofence-map-canvas" class="clock-map-canvas">
+      <div id="clock-map-placeholder" class="clock-map-placeholder">
+        <i data-lucide="map" style="width:36px;height:36px;opacity:0.4;"></i>
+        <span>Loading GPS map…</span>
+      </div>
+    </div>
+
+    <!-- Geofence Status Text Banner -->
+    <div id="clock-geofence-status-text" class="clock-geofence-banner">
+      Acquiring GPS location…
+    </div>
+
+    <!-- Route Info Panel -->
+    <div id="clock-route-info-panel" class="clock-route-panel" style="display:none;">
+      <div class="route-panel-content">
+        <div>
+          <span class="route-panel-title">🚗 Fastest Route to Store</span>
+          <div id="clock-route-details-text" class="route-panel-details">Calculating optimal path…</div>
+        </div>
+        <a id="clock-btn-open-google-maps" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-primary btn-google-maps">
+          <i data-lucide="external-link" style="width:12px;height:12px;"></i> Google Maps
+        </a>
+      </div>
+    </div>
+
+    <!-- GPS Info Chips Row -->
+    <div class="clock-gps-chips-row">
+      <div class="gps-info-chip" id="gps-coords-chip" style="display:none;">
+        <i data-lucide="crosshair" style="width:13px;height:13px;"></i>
+        <span id="gps-coords-text">—</span>
+      </div>
+      <div class="gps-info-chip" id="gps-distance-chip" style="display:none;">
+        <i data-lucide="navigation" style="width:13px;height:13px;"></i>
+        <span id="gps-distance-text">—</span>
+      </div>
+      <div class="gps-info-chip" id="gps-accuracy-chip" style="display:none;">
+        <i data-lucide="radio" style="width:13px;height:13px;"></i>
+        <span id="gps-accuracy-text">—</span>
+      </div>
+    </div>
+  </div>
+</div>

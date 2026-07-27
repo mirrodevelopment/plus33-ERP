@@ -28,7 +28,7 @@ export default class StoreSettings {
     this.latitude = null;
     this.longitude = null;
     this.geofenceRadiusMeters = null;
-    
+
     // UI state
     this.shifts = [];
     this.holidays = [];
@@ -56,7 +56,10 @@ export default class StoreSettings {
     // 3. Render content
     this._render(container);
 
-    // 4. Bind event listeners
+    // 4. Initialize Admin Interactive Map
+    this._initAdminStoreMap(container);
+
+    // 5. Bind event listeners
     this._bindEvents(container, lifecycle);
   }
 
@@ -85,12 +88,12 @@ export default class StoreSettings {
         this.storeName = meRes.data.store;
       }
 
-      // Fallback to Store ID 1 if not linked to a user session
+      // Fallback to Store ID 12 if not linked to a user session
       if (!this.storeId) {
-        logger.warn('StoreSettings', 'No storeId linked to user session. Defaulting to Store ID 1.');
-        this.storeId = 1;
-        this.storeCode = 'STR-001';
-        this.storeName = 'Paris Versailles';
+        logger.warn('StoreSettings', 'No storeId linked to user session. Defaulting to Store ID 12.');
+        this.storeId = 12;
+        this.storeCode = 'STR-012';
+        this.storeName = 'Paris Flagship Store';
       }
 
       // 2. Fetch the store settings using the store ID
@@ -142,21 +145,36 @@ export default class StoreSettings {
     if (nameInput) nameInput.value = this.storeName || '';
     if (codeInput) codeInput.value = this.storeCode || '';
 
-    // Fill store geolocation fields and lock them
+    // Fill store geolocation fields directly from database (no dummy defaults)
     const latInput = container.querySelector('#settings-store-latitude');
     const lngInput = container.querySelector('#settings-store-longitude');
     const geofenceInput = container.querySelector('#settings-store-geofence');
+    const coordsTextBadge = container.querySelector('#admin-map-coords-text');
+
+    const hasDbLat = this.latitude !== null && this.latitude !== undefined && this.latitude !== '';
+    const hasDbLng = this.longitude !== null && this.longitude !== undefined && this.longitude !== '';
+
+    const formattedLat = hasDbLat ? parseFloat(this.latitude).toFixed(6) : '';
+    const formattedLng = hasDbLng ? parseFloat(this.longitude).toFixed(6) : '';
+
     if (latInput) {
-      latInput.value = this.latitude ?? '';
+      latInput.value = formattedLat;
       latInput.disabled = true;
     }
     if (lngInput) {
-      lngInput.value = this.longitude ?? '';
+      lngInput.value = formattedLng;
       lngInput.disabled = true;
     }
     if (geofenceInput) {
-      geofenceInput.value = this.geofenceRadiusMeters ?? 200;
+      geofenceInput.value = 30;
       geofenceInput.disabled = true;
+    }
+    if (coordsTextBadge) {
+      if (hasDbLat && hasDbLng) {
+        coordsTextBadge.textContent = `${formattedLat}, ${formattedLng}`;
+      } else {
+        coordsTextBadge.innerHTML = `<span style="color: var(--accent-warning, #f59e0b);">Not Configured in Database — Drag Pin, Click Map, or Click '📍 Use Current GPS Location' to set location</span>`;
+      }
     }
 
     // Reset Edit Location button lock states
@@ -359,13 +377,23 @@ export default class StoreSettings {
       const wifiPassword = operationsForm.querySelector('#settings-wifi-password').value.trim();
       const receiptFooter = operationsForm.querySelector('#settings-receipt-footer').value.trim();
 
-      // Geofencing Coordinates
-      const latVal = operationsForm.querySelector('#settings-store-latitude').value.trim();
-      const lngVal = operationsForm.querySelector('#settings-store-longitude').value.trim();
-      const geofenceVal = operationsForm.querySelector('#settings-store-geofence').value.trim();
+      // Geofencing Coordinates (Read from inputs, internal state, or active map marker)
+      let latVal = operationsForm.querySelector('#settings-store-latitude')?.value?.trim();
+      let lngVal = operationsForm.querySelector('#settings-store-longitude')?.value?.trim();
 
-      if (!hours || !wifiSsid || !wifiPassword || !receiptFooter || !latVal || !lngVal || !geofenceVal) {
-        notificationStore.warning('All configurations must be filled out completely.');
+      if (!latVal && this.latitude) latVal = String(this.latitude);
+      if (!lngVal && this.longitude) lngVal = String(this.longitude);
+
+      if (!latVal && this._adminMarker) latVal = String(this._adminMarker.getLatLng().lat.toFixed(6));
+      if (!lngVal && this._adminMarker) lngVal = String(this._adminMarker.getLatLng().lng.toFixed(6));
+
+      if (!hours || !wifiSsid || !wifiPassword || !receiptFooter) {
+        notificationStore.warning('All operations configurations (hours, wifi, receipt footer) must be filled out.');
+        return;
+      }
+
+      if (!latVal || !lngVal) {
+        notificationStore.warning('Please select or enter valid store latitude and longitude coordinates.');
         return;
       }
 
@@ -381,7 +409,7 @@ export default class StoreSettings {
 
       const latitude = parseFloat(latVal);
       const longitude = parseFloat(lngVal);
-      const geofenceRadius = parseInt(geofenceVal, 10);
+      const geofenceRadius = 30; // Geofence radius is fixed strictly at 30 meters
 
       if (isNaN(latitude) || latitude < -90 || latitude > 90) {
         notificationStore.warning('Latitude must be a valid numeric coordinate between -90 and 90.');
@@ -389,10 +417,6 @@ export default class StoreSettings {
       }
       if (isNaN(longitude) || longitude < -180 || longitude > 180) {
         notificationStore.warning('Longitude must be a valid numeric coordinate between -180 and 180.');
-        return;
-      }
-      if (isNaN(geofenceRadius) || geofenceRadius < 10) {
-        notificationStore.warning('Geofence boundary radius must be a valid number of 10 or greater.');
         return;
       }
 
@@ -459,12 +483,25 @@ export default class StoreSettings {
 
         navigator.geolocation.getCurrentPosition(
           (position) => {
+            const lat = position.coords.latitude.toFixed(6);
+            const lng = position.coords.longitude.toFixed(6);
             const latField = container.querySelector('#settings-store-latitude');
             const lngField = container.querySelector('#settings-store-longitude');
-            if (latField) latField.value = position.coords.latitude.toFixed(6);
-            if (lngField) lngField.value = position.coords.longitude.toFixed(6);
-            
-            notificationStore.success('Successfully retrieved current coordinates!');
+            if (latField) latField.value = lat;
+            if (lngField) lngField.value = lng;
+
+            this.latitude = lat;
+            this.longitude = lng;
+
+            // Move admin map marker and 30m circle to current GPS position
+            if (this._adminMarker) this._adminMarker.setLatLng([lat, lng]);
+            if (this._adminCircle) this._adminCircle.setLatLng([lat, lng]);
+            if (this._adminMap) this._adminMap.setView([lat, lng], 18);
+
+            const textBadge = container.querySelector('#admin-map-coords-text');
+            if (textBadge) textBadge.textContent = `${lat}, ${lng}`;
+
+            notificationStore.success('Successfully retrieved current GPS coordinates & updated map pin!');
             geoBtn.disabled = false;
             if (btnText) btnText.textContent = '📍 Use Current GPS Location';
           },
@@ -500,7 +537,7 @@ export default class StoreSettings {
           geofenceField.disabled = false;
           getGeoBtn.disabled = false;
           getGeoBtn.style.display = 'inline-flex';
-          
+
           if (btnText) btnText.textContent = 'Lock Location';
           editLocBtn.style.background = 'rgba(201, 164, 106, 0.2)';
           editLocBtn.style.borderColor = 'var(--accent-primary, #c9a46a)';
@@ -512,15 +549,109 @@ export default class StoreSettings {
           getGeoBtn.disabled = true;
           getGeoBtn.style.display = 'none';
 
-          // Restore original values since editing is cancelled/locked
-          latField.value = this.latitude ?? '';
-          lngField.value = this.longitude ?? '';
-          geofenceField.value = this.geofenceRadiusMeters ?? 200;
-
           if (btnText) btnText.textContent = 'Edit Location';
           editLocBtn.style.background = 'rgba(255, 255, 255, 0.05)';
           editLocBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
         }
+      });
+    }
+
+    // 2c-2. Standalone Save Location Only Button
+    const saveLocBtn = container.querySelector('#btn-save-location-only');
+    if (saveLocBtn) {
+      saveLocBtn.addEventListener('click', async () => {
+        const latField = container.querySelector('#settings-store-latitude');
+        const lngField = container.querySelector('#settings-store-longitude');
+
+        let latVal = latField?.value?.trim() || (this.latitude ? String(this.latitude) : '');
+        let lngVal = lngField?.value?.trim() || (this.longitude ? String(this.longitude) : '');
+
+        if (!latVal && this._adminMarker) latVal = String(this._adminMarker.getLatLng().lat.toFixed(6));
+        if (!lngVal && this._adminMarker) lngVal = String(this._adminMarker.getLatLng().lng.toFixed(6));
+
+        const latitude = parseFloat(latVal);
+        const longitude = parseFloat(lngVal);
+
+        if (isNaN(latitude) || latitude < -90 || latitude > 90) {
+          notificationStore.warning('Please enter a valid numeric latitude between -90 and 90.');
+          return;
+        }
+        if (isNaN(longitude) || longitude < -180 || longitude > 180) {
+          notificationStore.warning('Please enter a valid numeric longitude between -180 and 180.');
+          return;
+        }
+
+        saveLocBtn.disabled = true;
+
+        try {
+          const locationRes = await apiClient.put(`/api/v1/stores/${this.storeId}/location`, {
+            latitude: latitude,
+            longitude: longitude,
+            geofenceRadiusMeters: 30
+          });
+
+          if (locationRes && locationRes.success) {
+            this.latitude = locationRes.data.latitude;
+            this.longitude = locationRes.data.longitude;
+            this.geofenceRadiusMeters = locationRes.data.geofenceRadiusMeters;
+
+            if (latField) {
+              latField.value = parseFloat(this.latitude).toFixed(6);
+              latField.disabled = true;
+            }
+            if (lngField) {
+              lngField.value = parseFloat(this.longitude).toFixed(6);
+              lngField.disabled = true;
+            }
+
+            const textBadge = container.querySelector('#admin-map-coords-text');
+            if (textBadge) textBadge.textContent = `${parseFloat(this.latitude).toFixed(6)}, ${parseFloat(this.longitude).toFixed(6)}`;
+
+            if (this._adminMarker) {
+              this._adminMarker.setLatLng([this.latitude, this.longitude]);
+              this._adminMarker.bindPopup(`<b>${this.storeName || 'Store Location'}</b><br>Coordinates Saved: ${parseFloat(this.latitude).toFixed(6)}, ${parseFloat(this.longitude).toFixed(6)}`).openPopup();
+            }
+            if (this._adminCircle) {
+              this._adminCircle.setLatLng([this.latitude, this.longitude]);
+            }
+            if (this._adminMap) {
+              this._adminMap.setView([this.latitude, this.longitude], 18);
+            }
+
+            const btnText = editLocBtn?.querySelector('span');
+            if (btnText) btnText.textContent = 'Edit Location';
+            if (editLocBtn) {
+              editLocBtn.style.background = 'rgba(255, 255, 255, 0.05)';
+              editLocBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+            }
+            const getGeoBtn = container.querySelector('#btn-get-current-location');
+            if (getGeoBtn) {
+              getGeoBtn.disabled = true;
+              getGeoBtn.style.display = 'none';
+            }
+
+            notificationStore.success(`✓ Store location (${parseFloat(this.latitude).toFixed(6)}, ${parseFloat(this.longitude).toFixed(6)}) saved to database successfully!`);
+          } else {
+            notificationStore.danger(locationRes?.message || 'Failed to save location coordinates to database.');
+          }
+        } catch (err) {
+          logger.error('StoreSettings', 'Failed to save location to database:', err);
+          notificationStore.danger('Could not save location coordinates due to server error.');
+        } finally {
+          saveLocBtn.disabled = false;
+        }
+      });
+    }
+
+    // 2c-3. Refresh Admin Map Button
+    const btnRefreshAdminMap = container.querySelector('#btn-refresh-admin-map');
+    if (btnRefreshAdminMap) {
+      btnRefreshAdminMap.addEventListener('click', async () => {
+        notificationStore.info('Refreshing store location map...');
+        await this._loadData();
+        this._render(container);
+        this._initAdminStoreMap(container);
+        notificationStore.success('Admin store location map refreshed!');
       });
     }
 
@@ -855,7 +986,7 @@ export default class StoreSettings {
     const onApplyThemeFromModal = () => {
       if (pendingThemeVal) {
         this.selectedTheme = pendingThemeVal;
-        
+
         // Update visual checked state on cards
         themeCards.forEach(c => {
           const val = c.getAttribute('data-theme-val');
@@ -867,7 +998,7 @@ export default class StoreSettings {
             c.setAttribute('aria-checked', 'false');
           }
         });
-        
+
         notificationStore.success(`Selected theme: ${themeMetadata[this.selectedTheme]?.name}. Click Apply Preferences to save.`);
       }
       closeModal();
@@ -924,7 +1055,153 @@ export default class StoreSettings {
     }
   }
 
+  _initAdminStoreMap(container) {
+    const mapEl = container.querySelector('#admin-store-map');
+    if (!mapEl) return;
+
+    if (typeof window.L === 'undefined') {
+      logger.error('StoreSettings', 'Leaflet not loaded globally. Cannot initialize admin store map.');
+      return;
+    }
+
+    if (this._adminMap) {
+      try {
+        this._adminMap.remove();
+      } catch (e) {
+        logger.error('StoreSettings', 'Error removing existing admin map:', e);
+      }
+      this._adminMap = null;
+    }
+
+    const hasDbCoords = !isNaN(parseFloat(this.latitude)) && !isNaN(parseFloat(this.longitude)) && parseFloat(this.latitude) !== 0;
+
+    let lat = hasDbCoords ? parseFloat(this.latitude) : 11.020470;
+    let lng = hasDbCoords ? parseFloat(this.longitude) : 76.970698;
+
+    try {
+      const map = window.L.map(mapEl).setView([lat, lng], 18);
+      this._adminMap = map;
+
+      // High-detail OpenStreetMap light theme tiles
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // Store Draggable Marker (Bold Red Pin with shadow)
+      const storeIcon = window.L.divIcon({
+        className: 'custom-admin-store-icon',
+        html: '<div style="background: #dc2626; border: 3px solid #ffffff; width: 22px; height: 22px; border-radius: 50%; box-shadow: 0 2px 12px rgba(0,0,0,0.5); cursor: grab;"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+
+      const marker = window.L.marker([lat, lng], { icon: storeIcon, draggable: true }).addTo(map);
+      marker.bindPopup(`<b>${this.storeName || 'Store Location'}</b><br>Drag pin or click anywhere on map to pick store location`).openPopup();
+      this._adminMarker = marker;
+
+      // 30m Geofence Radius Circle
+      const circle = window.L.circle([lat, lng], {
+        color: '#dc2626',
+        fillColor: '#ef4444',
+        fillOpacity: 0.15,
+        weight: 2,
+        radius: 30
+      }).addTo(map);
+      this._adminCircle = circle;
+
+      const updateCoordsUI = (newLat, newLng) => {
+        const formattedLat = newLat.toFixed(6);
+        const formattedLng = newLng.toFixed(6);
+
+        this.latitude = formattedLat;
+        this.longitude = formattedLng;
+
+        const latField = container.querySelector('#settings-store-latitude');
+        const lngField = container.querySelector('#settings-store-longitude');
+        const textBadge = container.querySelector('#admin-map-coords-text');
+
+        if (latField) {
+          latField.value = formattedLat;
+          latField.disabled = false;
+        }
+        if (lngField) {
+          lngField.value = formattedLng;
+          lngField.disabled = false;
+        }
+        if (textBadge) {
+          textBadge.textContent = `${formattedLat}, ${formattedLng}`;
+        }
+
+        // Unlock location edit mode automatically so Save button submits new coordinates
+        const editLocBtn = container.querySelector('#btn-edit-location');
+        const getGeoBtn = container.querySelector('#btn-get-current-location');
+        if (editLocBtn) {
+          const btnText = editLocBtn.querySelector('span');
+          if (btnText) btnText.textContent = 'Lock Location';
+          editLocBtn.style.background = 'rgba(201, 164, 106, 0.2)';
+          editLocBtn.style.borderColor = 'var(--accent-primary, #c9a46a)';
+        }
+        if (getGeoBtn) {
+          getGeoBtn.disabled = false;
+          getGeoBtn.style.display = 'inline-flex';
+        }
+      };
+
+      // Handle dragging the store pin on the map
+      marker.on('dragend', (e) => {
+        const pos = e.target.getLatLng();
+        circle.setLatLng(pos);
+        updateCoordsUI(pos.lat, pos.lng);
+        notificationStore.info(`Picked map location: ${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}. Click 'Save Settings' to apply.`);
+      });
+
+      // Handle clicking anywhere on the map
+      map.on('click', (e) => {
+        const pos = e.latlng;
+        marker.setLatLng(pos);
+        circle.setLatLng(pos);
+        updateCoordsUI(pos.lat, pos.lng);
+        notificationStore.info(`Picked map location: ${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}. Click 'Save Settings' to apply.`);
+      });
+
+      // Option 2 — Manual Typing Event Listeners: Sync manual input typing directly to map marker
+      const latField = container.querySelector('#settings-store-latitude');
+      const lngField = container.querySelector('#settings-store-longitude');
+
+      const syncTypedInputToMap = () => {
+        const typedLat = parseFloat(latField?.value);
+        const typedLng = parseFloat(lngField?.value);
+
+        if (!isNaN(typedLat) && !isNaN(typedLng) && typedLat >= -90 && typedLat <= 90 && typedLng >= -180 && typedLng <= 180) {
+          const newPos = [typedLat, typedLng];
+          marker.setLatLng(newPos);
+          circle.setLatLng(newPos);
+          map.setView(newPos, 18);
+          this.latitude = typedLat.toFixed(6);
+          this.longitude = typedLng.toFixed(6);
+
+          const textBadge = container.querySelector('#admin-map-coords-text');
+          if (textBadge) textBadge.textContent = `${this.latitude}, ${this.longitude}`;
+        }
+      };
+
+      if (latField) latField.addEventListener('input', syncTypedInputToMap);
+      if (lngField) lngField.addEventListener('input', syncTypedInputToMap);
+
+      logger.info('StoreSettings', 'Interactive admin store location map initialized successfully.');
+    } catch (err) {
+      logger.error('StoreSettings', 'Error initializing admin store map:', err);
+    }
+  }
+
   destroy() {
     logger.info('StoreSettings', 'Destroying Store Settings Page context...');
+    if (this._adminMap) {
+      try {
+        this._adminMap.remove();
+      } catch (e) {}
+      this._adminMap = null;
+    }
   }
 }

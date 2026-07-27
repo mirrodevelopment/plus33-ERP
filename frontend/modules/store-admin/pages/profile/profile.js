@@ -65,8 +65,16 @@ export default class StoreAdminProfilePage {
     try {
       const response = await apiClient.get('/api/v1/auth/me');
       if (response && response.success && response.data) {
-        this.profile = response.data;
-        userStore.updateProfile(this.user?.role, response.data);
+        let displayName = response.data.fullName || response.data.name || `${response.data.firstName || ''} ${response.data.lastName || ''}`.trim();
+        if (!displayName || displayName.includes('@')) {
+          const raw = response.data.username || response.data.email || '';
+          const handle = raw.split('@')[0];
+          displayName = handle ? handle.replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Store Manager';
+        }
+        this.profile = { ...response.data, name: displayName };
+        userStore.updateProfile('store', this.profile);
+        authStore.updateUser({ name: displayName });
+        eventBus.emit('user:profile-updated', { profile: this.profile });
         if (response.data.storeId) {
           try {
             const storeRes = await apiClient.get(`/api/v1/stores/${response.data.storeId}`);
@@ -97,7 +105,13 @@ export default class StoreAdminProfilePage {
   render(container) {
     this.user = authStore.getUser();
     const p = this.profile || {};
-    const fullName = (p.firstName || p.lastName) ? `${p.firstName || ''} ${p.lastName || ''}`.trim() : (p.fullName || p.name || this.user?.name || '');
+    let fullName = (p.firstName || p.lastName) ? `${p.firstName || ''} ${p.lastName || ''}`.trim() : (p.fullName || p.name || this.user?.fullName || this.user?.name || '');
+    if (!fullName || fullName.includes('@') || fullName.includes('_admin') || fullName === 'storeAdmin') {
+      const raw = this.user?.username || this.user?.email || p.email || '';
+      const handle = raw.split('@')[0];
+      const numMatch = handle.match(/\d+/);
+      fullName = `Store Manager ${numMatch ? numMatch[0] : '1'}`;
+    }
     const email = p.email || this.user?.email || '';
     const storeName = p.storeName || p.store || '';
 

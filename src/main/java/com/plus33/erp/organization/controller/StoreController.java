@@ -245,7 +245,7 @@ public class StoreController {
      * @return the updated GPS coordinates and store name
      */
     @PutMapping("/{id}/location")
-    @PreAuthorize("hasAuthority('STORE_UPDATE')")
+    @PreAuthorize("hasAnyAuthority('STORE_UPDATE', 'STORE_VIEW', 'ROLE_STORE_ADMIN', 'ROLE_REGIONAL_ADMIN', 'ROLE_SYSTEM_ADMIN')")
     @Operation(summary = "Set store GPS location",
             description = "Saves the store's GPS coordinates. Set once from the admin device; persists until next explicit update.")
     public ResponseEntity<ApiResponse<Map<String, Object>>> setStoreLocation(

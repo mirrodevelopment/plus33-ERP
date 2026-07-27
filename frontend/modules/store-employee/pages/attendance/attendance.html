@@ -90,41 +90,9 @@
     <!-- Left Column: Clock punch & table list -->
     <div class="layout-column-left">
       
-      <!-- Punch card Clocker -->
-      <div class="card glass clocker-card">
-        <div class="card-header-split">
-          <h3 class="card-split-title">Digital Punch Timecard</h3>
-          <i data-lucide="clock" class="card-split-icon" aria-hidden="true"></i>
-        </div>
+      <!-- Clock In / Out & Geofence Map Widget -->
+      <div id="clock-widget-container"></div>
 
-        <div class="clocker-status-ribbon">
-          <div class="clock-display-group">
-            <span class="ribbon-label">Digital Roster Time</span>
-            <div id="attendance-clock-run" class="digital-clock">--:--:--</div>
-          </div>
-          <div class="status-display-group text-right">
-            <span class="ribbon-label">Duty Status</span>
-            <div class="duty-status-wrapper" id="lbl-duty-status">
-              <!-- Loaded dynamically by JS -->
-            </div>
-          </div>
-        </div>
-
-        <div class="punch-actions-row">
-          <button class="btn btn-punch-in" id="btn-att-clock-in" type="button">
-            <i data-lucide="play" aria-hidden="true"></i> Clock In
-          </button>
-          <button class="btn btn-break-start" id="btn-att-break-start" type="button">
-            <i data-lucide="coffee" aria-hidden="true"></i> Break Start
-          </button>
-          <button class="btn btn-break-end" id="btn-att-break-end" type="button">
-            <i data-lucide="user-check" aria-hidden="true"></i> Break End
-          </button>
-          <button class="btn btn-punch-out" id="btn-att-clock-out" type="button">
-            <i data-lucide="square" aria-hidden="true"></i> Clock Out
-          </button>
-        </div>
-      </div>
 
       <!-- Calendar Card -->
       <div class="card glass calendar-card">

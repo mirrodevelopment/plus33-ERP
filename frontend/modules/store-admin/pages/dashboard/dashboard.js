@@ -120,9 +120,20 @@ export default class StoreAdminDashboard {
     try {
       this.data = await dashboardService.getDashboardOverview();
       const meRes = await apiClient.get('/api/v1/auth/me');
-      if (meRes?.success) {
+      if (meRes?.success && meRes.data) {
         this.profile = { ...this.profile, ...meRes.data };
         this.storeId = meRes.data.storeId || null;
+
+        let displayName = meRes.data.fullName || meRes.data.name || `${meRes.data.firstName || ''} ${meRes.data.lastName || ''}`.trim();
+        if (!displayName || displayName.includes('@')) {
+          const raw = meRes.data.username || meRes.data.email || '';
+          const handle = raw.split('@')[0];
+          displayName = handle ? handle.replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Store Manager';
+        }
+        this.profile.name = displayName;
+        userStore.updateProfile('store', this.profile);
+        authStore.updateUser({ name: displayName });
+        eventBus.emit('user:profile-updated', { profile: this.profile });
       }
 
       // Fetch store details to get timezone
@@ -228,7 +239,22 @@ export default class StoreAdminDashboard {
     const activeStoreText = this.profile.store || 'Coffee House - Downtown';
     if (storeNameEl) storeNameEl.textContent = activeStoreText;
     if (storeIdEl) storeIdEl.textContent = this.storeId || '—';
-    if (userNameEl) userNameEl.textContent = this.profile.name || 'Store Admin User';
+    if (userNameEl) {
+      let dispName = this.profile?.fullName || this.profile?.name || this.user?.fullName || this.user?.name;
+      if (!dispName || dispName.includes('@') || dispName === 'storeAdmin' || dispName === 'Store Manager') {
+        const raw = this.user?.username || this.user?.email || this.profile?.email || '';
+        const handle = raw.split('@')[0];
+        if (/^(emp|store|admin|sup|user)\d+/i.test(handle) || handle.includes('_st_') || handle.includes('reg_')) {
+          const numMatch = handle.match(/\d+/);
+          dispName = `Store Manager${numMatch ? ' ' + numMatch[0] : ''}`;
+        } else if (handle) {
+          dispName = handle.replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        } else {
+          dispName = 'Store Manager';
+        }
+      }
+      userNameEl.textContent = dispName;
+    }
 
     if (storeTypeEl) {
       const typeVal = this.storeDetails?.type;

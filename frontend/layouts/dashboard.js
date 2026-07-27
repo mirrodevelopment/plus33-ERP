@@ -33,6 +33,72 @@ import { logger } from '../core/logger.js';
 /** Path to the dashboard layout HTML template */
 const LAYOUT_TEMPLATE_URL = 'layouts/html/dashboard-layout.html';
 
+const demoNames = [
+  'Beverly Crusher',
+  'Geordi La Forge',
+  'Miles O\'Brien',
+  'Neha Sharma',
+  'Arjun Mehta',
+  'Rajesh Kumar',
+  'Vijay Iyer',
+  'Rohan Sharma',
+  'Jean Dupont',
+  'Store Admin User',
+  'User Profile',
+  'User'
+];
+
+function formatRoleTitle(role) {
+  if (!role) return 'User';
+  if (role === 'nationalAdmin') return 'National Admin';
+  if (role === 'regionalAdmin') return 'Regional Admin';
+  if (role === 'storeAdmin' || role === 'store') return 'Store Manager';
+  if (role === 'shiftSupervisor' || role === 'supervisor') return 'Shift Lead';
+  if (role === 'storeEmployee') return 'Store Employee';
+  if (role === 'ultimateAdmin') return 'Ultimate Admin';
+  if (role === 'nationalWarehouseAdmin') return 'National Warehouse Admin';
+  if (role === 'regionalWarehouseAdmin') return 'Regional Warehouse Admin';
+  return role.replace(/([a-z])([A-Z])/g, '$1 $2').replace('_', ' ');
+}
+
+function formatTitleCase(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/[._-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+/** Helper to format clean user names for any user account */
+function formatCleanUserName(user, profile) {
+  let name = user?.fullName || user?.name || profile?.fullName;
+  if (name && !name.includes('@') && !demoNames.includes(name)) {
+    return formatTitleCase(name);
+  }
+  if (profile?.name && !profile.name.includes('@') && !demoNames.includes(profile.name) && profile.name !== 'Store Manager' && profile.name !== 'Store Employee') {
+    return formatTitleCase(profile.name);
+  }
+
+  const raw = user?.username || user?.email || profile?.email || '';
+  const userRole = user?.role || profile?.role;
+  const defaultRoleTitle = formatRoleTitle(userRole);
+
+  if (!raw) return defaultRoleTitle;
+
+  let handle = raw.split('@')[0];
+
+  // Handle technical numbered usernames like emp1_st_fr_reg_1_01, store1_admin, etc.
+  if (/^(emp|store|admin|sup|user)\d+/i.test(handle) || handle.includes('_st_') || handle.includes('reg_')) {
+    const numMatch = handle.match(/\d+/);
+    const num = numMatch ? numMatch[0] : '';
+    return `${defaultRoleTitle}${num ? ' ' + num : ''}`;
+  }
+
+  // Format clean username handles like giri -> Giri, john.doe -> John Doe
+  return formatTitleCase(handle);
+}
+
 export const dashboardLayout = {
 
   /**
@@ -86,13 +152,14 @@ export const dashboardLayout = {
     }
   },
 
-
   /**
    * Populate sidebar user profile section with current user data.
    */
   _populateUserProfile() {
     const user = authStore.getUser();
     const profile = userStore.getProfile(user?.role);
+
+    const displayName = formatCleanUserName(user, profile);
 
     const avatarUrl = profile?.avatarUrl
       ? (profile.avatarUrl.includes('unsplash.com') ? profile.avatarUrl : `${profile.avatarUrl}?t=${Date.now()}`)
@@ -103,17 +170,23 @@ export const dashboardLayout = {
     const avatarEl = document.getElementById('user-avatar-sidebar');
     const nameEl = document.getElementById('user-name-sidebar');
     const roleEl = document.getElementById('user-role-sidebar');
+    const storeIdEl = document.getElementById('user-store-id-sidebar');
     const sidebarLink = document.getElementById('sidebar-profile-link');
+
+    // Resolve store ID from user or profile
+    const storeId = user?.storeId || profile?.storeId || user?.store_id || profile?.store_id || null;
 
     const formatRoleName = (r) => {
       if (!r) return '—';
       if (r === 'nationalAdmin') return 'National Admin';
       if (r === 'regionalAdmin') return 'Regional Admin';
-      if (r === 'storeAdmin') return 'Store Manager';
-      if (r === 'supervisor') return 'Shift Lead';
+      if (r === 'storeAdmin' || r === 'store') return 'Store Manager';
+      if (r === 'supervisor' || r === 'shiftSupervisor') return 'Shift Lead';
       if (r === 'storeEmployee') return 'Barista / Employee';
       if (r === 'ultimateAdmin') return 'Ultimate Admin';
-      return r.replace(/([a-z])([A-Z])/g, '$1 $2').replace('_', ' ');
+      if (r === 'nationalWarehouseAdmin') return 'National Warehouse Admin';
+      if (r === 'regionalWarehouseAdmin') return 'Regional Warehouse Admin';
+      return r.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ');
     };
 
     const navigateToProfile = (e) => {
@@ -132,7 +205,7 @@ export const dashboardLayout = {
       avatarEl.onclick = navigateToProfile;
     }
     if (nameEl) {
-      nameEl.textContent = profile?.name || 'User';
+      nameEl.textContent = displayName;
       nameEl.style.cursor = 'pointer';
       nameEl.onclick = navigateToProfile;
     }
@@ -140,6 +213,9 @@ export const dashboardLayout = {
       roleEl.textContent = formatRoleName(user?.role);
       roleEl.style.cursor = 'pointer';
       roleEl.onclick = navigateToProfile;
+    }
+    if (storeIdEl) {
+      storeIdEl.textContent = storeId ? `Store ID: ${storeId}` : '';
     }
     if (sidebarLink) {
       sidebarLink.href = targetHash;
@@ -159,7 +235,7 @@ export const dashboardLayout = {
       avatarHeader.onclick = navigateToProfile;
     }
     if (nameHeader) {
-      nameHeader.textContent = profile?.name || 'User';
+      nameHeader.textContent = displayName;
       nameHeader.style.cursor = 'pointer';
       nameHeader.onclick = navigateToProfile;
     }
@@ -220,7 +296,6 @@ export const dashboardLayout = {
     // Footer nav items
     const footerGroup = document.createElement('div');
     footerGroup.className = 'nav-group nav-group--footer';
-    footerGroup.appendChild(this._createNavItem('help-circle', 'Help & Support', '#help', currentHash));
 
     const logoutItem = this._createNavItem('log-out', 'Logout', '#logout', currentHash);
     logoutItem.id = 'sidebar-logout-link-inner';
@@ -436,17 +511,21 @@ export const dashboardLayout = {
       if (nameEl) nameEl.textContent = displayName;
       if (nameHeader) nameHeader.textContent = displayName;
       if (welcomeName) welcomeName.textContent = displayName;
+
+      // Update store ID in sidebar when profile data arrives
+      const storeIdEl = document.getElementById('user-store-id-sidebar');
+      const storeId = profile.storeId || profile.store_id || null;
+      if (storeIdEl) storeIdEl.textContent = storeId ? `Store ID: ${storeId}` : '';
     });
 
     eventBus.on('auth:state-changed', ({ user }) => {
-      if (user && user.name) {
-        const nameEl = document.getElementById('user-name-sidebar');
-        const nameHeader = document.getElementById('user-name-header');
-        const welcomeName = document.getElementById('header-user-name');
-        if (nameEl) nameEl.textContent = user.name;
-        if (nameHeader) nameHeader.textContent = user.name;
-        if (welcomeName) welcomeName.textContent = user.name;
-      }
+      const displayName = formatCleanUserName(user, null);
+      const nameEl = document.getElementById('user-name-sidebar');
+      const nameHeader = document.getElementById('user-name-header');
+      const welcomeName = document.getElementById('header-user-name');
+      if (nameEl) nameEl.textContent = displayName;
+      if (nameHeader) nameHeader.textContent = displayName;
+      if (welcomeName) welcomeName.textContent = displayName;
     });
 
     // Workforce pending documents badge — updates sidebar nav dot and bell count

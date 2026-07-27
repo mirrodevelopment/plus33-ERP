@@ -1,0 +1,192 @@
+/******************************************************************************
+ * Project    : PLUS33 Coffee ERP
+ * Component  : Store Admin Complaints Overview Stylesheet (Theme-Reactive)
+ * File       : store-complaints.css
+ ******************************************************************************/
+
+.store-complaints-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--bg-app, #0f0e0d);
+  min-height: 100vh;
+  color: var(--text-primary, #f5f2eb);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+}
+
+.sc-header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: var(--bg-card, rgba(30, 28, 26, 0.7));
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.25));
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(12px);
+}
+
+.sc-badge {
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(201, 164, 106, 0.15);
+  border: 1px solid rgba(201, 164, 106, 0.35);
+  color: var(--accent-primary, #c9a46a);
+  font-weight: 700;
+}
+
+.sc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.sc-kpi-card {
+  background: var(--bg-card, rgba(30, 28, 26, 0.7));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sc-kpi-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted, #8c857b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sc-kpi-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent-primary, #c9a46a);
+}
+
+.sc-filter-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.sc-filter-tab {
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  color: var(--text-muted, #8c857b);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.sc-filter-tab.active,
+.sc-filter-tab:hover {
+  background: rgba(201, 164, 106, 0.15);
+  border-color: rgba(201, 164, 106, 0.4);
+  color: var(--accent-primary, #c9a46a);
+}
+
+.sc-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sc-item-card {
+  background: var(--bg-card, rgba(30, 28, 26, 0.7));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.sc-item-card:hover {
+  border-color: rgba(201, 164, 106, 0.35);
+}
+
+.sc-btn {
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--accent-primary, #c9a46a);
+  color: #0f0e0d;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.sc-btn:hover { opacity: 0.9; }
+
+.sc-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  color: var(--text-primary, #fff);
+}
+
+.sc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.sc-modal-box {
+  background: var(--bg-card, #1c1a17);
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.35));
+  border-radius: 16px;
+  width: 100%;
+  max-width: 540px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.sc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sc-modal-close-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.sc-modal-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  color: var(--text-primary, #fff);
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+
+.sc-modal-input:focus {
+  outline: none;
+  border-color: var(--accent-primary, #c9a46a);
+}

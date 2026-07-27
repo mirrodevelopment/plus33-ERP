@@ -1,0 +1,281 @@
+<!--
+/******************************************************************************
+ * Project    : PLUS33 Coffee ERP
+ * Component  : Store Employee Help & Support Hub — Separate Component
+ * File       : employee-support.html
+ ******************************************************************************/
+-->
+<div class="employee-support-page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="es-header">
+    <div>
+      <h1 style="margin:0 0 4px 0;font-size:1.5rem;font-weight:800;display:flex;align-items:center;gap:12px;">
+        <i data-lucide="help-circle" style="color:var(--accent-primary,#c9a46a);"></i>
+        Help &amp; Support Hub
+      </h1>
+      <p style="margin:0;font-size:0.82rem;color:var(--text-muted,#8c857b);">
+        PLUS33 Store Operations Support, Payroll Inquiries, Policy Guides &amp; Anonymous Whistleblower Protection.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Navigation Tabs ─────────────────────────────────────────────────── -->
+  <div class="es-tabs-bar">
+    <button type="button" class="es-tab-btn active" data-tab="submit">
+      <i data-lucide="send" style="width:15px;height:15px;"></i> Submit Request
+    </button>
+    <button type="button" class="es-tab-btn" data-tab="tickets">
+      <i data-lucide="ticket" style="width:15px;height:15px;"></i> My Tickets &amp; Grievances
+    </button>
+    <button type="button" class="es-tab-btn" data-tab="tracker">
+      <i data-lucide="key" style="width:15px;height:15px;"></i> Track Anonymous Key
+    </button>
+    <button type="button" class="es-tab-btn" data-tab="faqs">
+      <i data-lucide="book-open" style="width:15px;height:15px;"></i> Knowledge Base FAQs
+    </button>
+  </div>
+
+  <!-- ── TAB 1: Submit Request ───────────────────────────────────────────── -->
+  <div id="es-tab-submit" style="display:flex;flex-direction:column;gap:20px;">
+
+    <!-- Category Selection -->
+    <div>
+      <label style="font-size:0.75rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:8px;">
+        1. Select Support Category *
+      </label>
+      <select id="es-inp-category" class="es-input" style="font-weight:700;">
+        <option value="TECHNICAL_SUPPORT">🖥️ Technical Support (POS, Hardware, App, Login &amp; Access)</option>
+        <option value="WORKPLACE_COMPLAINT">🚨 Workplace Grievance (Harassment, Safety, Fraud &amp; Misconduct)</option>
+        <option value="HR_PAYROLL">💼 HR &amp; Payroll (Salary, Leaves, Payslips, Benefits)</option>
+        <option value="GENERAL_FEEDBACK">💬 General Feedback (Suggestions &amp; Improvements)</option>
+      </select>
+    </div>
+
+    <!-- Anonymity Card (Only for Grievance & HR) -->
+    <div id="es-anon-card" style="display:none;background:var(--bg-card,rgba(30,30,30,0.6));border:1px solid var(--border-color,rgba(201,164,106,0.3));border-radius:16px;padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:42px;height:42px;border-radius:12px;background:rgba(201,164,106,0.15);color:var(--accent-primary,#c9a46a);display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="shield-check"></i>
+          </div>
+          <div>
+            <h4 style="margin:0 0 2px 0;font-size:0.95rem;font-weight:800;color:#fff;">Submit Anonymously (Whistleblower Protection)</h4>
+            <p style="margin:0;font-size:0.76rem;color:var(--text-muted,#8c857b);">Strips all identity markers. You will receive a secret 12-char tracking key.</p>
+          </div>
+        </div>
+        <label style="position:relative;display:inline-block;width:46px;height:24px;cursor:pointer;">
+          <input type="checkbox" id="es-anon-toggle" style="opacity:0;width:0;height:0;">
+          <span id="es-toggle-slider" style="position:absolute;inset:0;background:rgba(255,255,255,0.12);border-radius:24px;transition:0.2s;"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Ticket Form -->
+    <form id="es-form" style="background:var(--bg-card,rgba(30,30,30,0.6));border:1px solid var(--border-color,rgba(201,164,106,0.25));border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;">
+      
+      <!-- Target Admin & Subcategory Selection -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">2. Send Complaint To (Target Authority) *</label>
+          <select id="es-inp-target-role" class="es-input" required>
+            <option value="STORE_ADMIN">🏪 Store Admin &amp; Store Manager</option>
+            <option value="REGIONAL_ADMIN">🗺️ Regional Operations Manager</option>
+            <option value="NATIONAL_ADMIN">🌐 National Management &amp; HR</option>
+            <option value="ULTIMATE_ADMIN" selected>🛡️ Ultimate System Admin (Executive Whistleblower)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Problem Subcategory *</label>
+          <select id="es-inp-subcat" class="es-input">
+            <option value="Hostile Work Environment">Hostile Work Environment</option>
+            <option value="Sexual / Verbal Harassment">Sexual / Verbal Harassment</option>
+            <option value="Favoritism & Nepotism">Favoritism &amp; Nepotism</option>
+            <option value="Executive Financial Fraud">Executive Financial Fraud</option>
+            <option value="Safety & Health Hazard">Safety &amp; Health Hazard</option>
+            <option value="OTHER_CUSTOM">✍️ Other / Custom Issue…</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Custom Category Input Wrapper -->
+      <div id="es-custom-cat-wrapper" style="display:none;">
+        <label style="font-size:0.72rem;font-weight:700;color:var(--accent-primary,#c9a46a);text-transform:uppercase;">Custom Category / Specific Issue Name *</label>
+        <input type="text" id="es-inp-custom-cat" class="es-input" placeholder="Type your custom problem category or specific issue topic…" style="border-color:rgba(201,164,106,0.4);">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Priority Level *</label>
+          <select id="es-inp-priority" class="es-input">
+            <option value="LOW">🟢 Low</option>
+            <option value="MEDIUM" selected>🟡 Medium</option>
+            <option value="HIGH">🟠 High</option>
+            <option value="CRITICAL">🔴 Critical</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Store Location</label>
+          <input type="text" id="es-inp-store" class="es-input" readonly placeholder="Auto-detected store…">
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Subject *</label>
+        <input type="text" id="es-inp-subject" class="es-input" placeholder="Summarize your issue or request…" required maxLength="150">
+      </div>
+
+      <div>
+        <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Detailed Description *</label>
+        <textarea id="es-inp-desc" class="es-input" rows="5" placeholder="Provide full details, timeline, and relevant background…" required maxLength="2000"></textarea>
+      </div>
+
+      <div>
+        <button type="submit" class="es-btn">
+          <i data-lucide="send" style="width:14px;height:14px;margin-right:6px;"></i> Submit Request
+        </button>
+      </div>
+    </form>
+
+    <!-- Policy Banners -->
+    <div style="margin-top:10px;">
+      <label style="font-size:0.75rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;display:block;margin-bottom:12px;">
+        Official Policy &amp; Employee Benefit Guides
+      </label>
+      <div class="es-policy-grid">
+        <!-- Process Guide Banner Card -->
+        <div class="es-policy-card" id="es-btn-process-guide" style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; border-color: rgba(201, 164, 106, 0.35); background: rgba(25, 25, 25, 0.45); padding: 18px 24px; border-radius: 16px;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 48px; height: 48px; border-radius: 10px; border: 1.5px solid rgba(201, 164, 106, 0.45); background: rgba(201, 164, 106, 0.08); display: flex; align-items: center; justify-content: center; color: var(--accent-primary, #c9a46a); flex-shrink: 0;">
+              <i data-lucide="book-open" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div>
+              <h5 style="margin: 0 0 4px 0; font-size: 0.94rem; font-weight: 800; color: #fff; letter-spacing: 0.01em;">Complaints &amp; Grievance Process Guide</h5>
+              <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted, #8c857b);">View anonymous whistleblower safeguards, target authority routing &amp; escalation steps</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" style="color: var(--text-muted, #8c857b); width: 18px; height: 18px; flex-shrink: 0; margin-left: 10px;"></i>
+        </div>
+
+        <div class="es-policy-card" data-policy="LEAVE">
+          <i data-lucide="calendar" style="color:var(--accent-primary,#c9a46a);width:24px;height:24px;flex-shrink:0;"></i>
+          <div>
+            <h5 style="margin:0 0 2px 0;font-size:0.88rem;font-weight:700;">Annual Leave &amp; Sick Policy</h5>
+            <p style="margin:0;font-size:0.75rem;color:var(--text-muted,#8c857b);">21 Days Annual Paid Leave &amp; Emergency Leave SLAs</p>
+          </div>
+        </div>
+
+        <div class="es-policy-card" data-policy="WHISTLEBLOWER">
+          <i data-lucide="shield-check" style="color:var(--accent-primary,#c9a46a);width:24px;height:24px;flex-shrink:0;"></i>
+          <div>
+            <h5 style="margin:0 0 2px 0;font-size:0.88rem;font-weight:700;">Whistleblower Rights</h5>
+            <p style="margin:0;font-size:0.75rem;color:var(--text-muted,#8c857b);">Zero identity logging &amp; anti-retaliation legal immunity</p>
+          </div>
+        </div>
+
+        <div class="es-policy-card" data-policy="PAYROLL">
+          <i data-lucide="banknote" style="color:var(--accent-primary,#c9a46a);width:24px;height:24px;flex-shrink:0;"></i>
+          <div>
+            <h5 style="margin:0 0 2px 0;font-size:0.88rem;font-weight:700;">Salary &amp; Overtime Rules</h5>
+            <p style="margin:0;font-size:0.75rem;color:var(--text-muted,#8c857b);">28th disbursement date &amp; 1.5x/2.0x OT rates</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── TAB 2: My Tickets & Grievances ─────────────────────────────────── -->
+  <div id="es-tab-tickets" style="display:none;flex-direction:column;gap:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h3 style="margin:0;font-size:1.1rem;font-weight:800;color:#fff;">My Submitted Tickets &amp; Grievances</h3>
+        <p style="margin:0;font-size:0.78rem;color:var(--text-muted,#8c857b);">
+          View investigation status, published executive findings, and track resolution progress for your submitted tickets.
+        </p>
+      </div>
+      <button type="button" class="es-btn" id="btn-es-refresh-my-tickets" style="padding:6px 14px;font-size:0.78rem;">
+        <i data-lucide="refresh-cw" style="width:14px;height:14px;margin-right:4px;"></i> Refresh Tickets
+      </button>
+    </div>
+
+    <div id="es-my-tickets-list" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="padding:20px;text-align:center;color:var(--text-muted,#8c857b);font-size:0.85rem;">
+        Loading your submitted tickets…
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 3: Tracker ──────────────────────────────────────────────────── -->
+  <div id="es-tab-tracker" style="display:none;background:var(--bg-card,rgba(30,30,30,0.6));border:1px solid var(--border-color,rgba(201,164,106,0.25));border-radius:16px;padding:24px;flex-direction:column;gap:16px;">
+    <h3 style="margin:0;font-size:1rem;font-weight:800;">Track Anonymous Complaint</h3>
+    <p style="margin:0;font-size:0.8rem;color:var(--text-muted,#8c857b);">
+      Enter your secret 12-character tracking key (e.g., <code>TK-ANO-7F9C2B</code>) to check investigation progress and read official executive findings.
+    </p>
+
+    <div style="display:flex;gap:10px;">
+      <input type="text" id="es-tracker-key-inp" class="es-input" placeholder="TK-ANO-XXXXXX" style="font-family:monospace;font-weight:800;letter-spacing:0.08em;color:var(--accent-primary,#c9a46a);">
+      <button type="button" id="btn-es-track" class="es-btn">Search Key</button>
+    </div>
+
+    <div id="es-tracker-result" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- ── TAB 4: Knowledge Base FAQs ───────────────────────────────────────── -->
+  <div id="es-tab-faqs" style="display:none;flex-direction:column;gap:16px;">
+    <h3 style="margin:0;font-size:1.1rem;font-weight:800;color:#fff;">Frequently Asked Questions (FAQs)</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="background:var(--bg-card,rgba(30,30,30,0.6));border:1px solid var(--border-color,rgba(201,164,106,0.25));border-radius:12px;padding:16px;">
+        <h4 style="margin:0 0 6px 0;font-size:0.92rem;font-weight:700;color:var(--accent-primary,#c9a46a);">Q: When is monthly salary disbursed?</h4>
+        <p style="margin:0;font-size:0.8rem;color:var(--text-muted,#8c857b);line-height:1.45;">Salary is direct deposited on the 28th of every month. Overtime rates apply at 1.5x on standard weekdays and 2.0x on national holidays.</p>
+      </div>
+      <div style="background:var(--bg-card,rgba(30,30,30,0.6));border:1px solid var(--border-color,rgba(201,164,106,0.25));border-radius:12px;padding:16px;">
+        <h4 style="margin:0 0 6px 0;font-size:0.92rem;font-weight:700;color:var(--accent-primary,#c9a46a);">Q: How does Anonymous Whistleblower Protection work?</h4>
+        <p style="margin:0;font-size:0.8rem;color:var(--text-muted,#8c857b);line-height:1.45;">When toggled ON for Workplace Grievances or HR issues, all user identifiers are stripped. You get a 12-char tracking key to track executive investigation findings.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Complaints & Grievance Process Guide Modal ───────────────────────── -->
+  <div id="es-process-modal" class="es-modal-overlay" style="display:none;">
+    <div class="es-modal-card">
+      <div class="es-modal-header">
+        <h3 style="margin:0;font-size:1.05rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:10px;">
+          <i data-lucide="book-open" style="color:var(--accent-primary,#c9a46a);width:20px;height:20px;"></i>
+          Complaints &amp; Grievance System Process
+        </h3>
+        <button type="button" id="btn-es-close-process-modal" class="es-modal-close-btn">✕</button>
+      </div>
+      <div class="es-modal-body">
+        <div style="background:rgba(201,164,106,0.08);border:1px solid rgba(201,164,106,0.25);padding:14px;border-radius:10px;margin-bottom:4px;">
+          <strong style="color:var(--accent-primary,#c9a46a);display:block;margin-bottom:6px;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;">1. Anonymous Whistleblower Safeguard</strong>
+          <p style="margin:0;font-size:0.8rem;color:rgba(255,255,255,0.85);line-height:1.45;">
+            By toggling "Submit Anonymously", all database links to your user profile, username, or IP are strictly removed. The system saves the report under a randomized key (e.g. <code>TK-ANO-XXXXXX</code>) allowing zero tracing.
+          </p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:14px;border-radius:10px;margin-bottom:4px;">
+          <strong style="color:#fff;display:block;margin-bottom:6px;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;">2. Target Authority Routing</strong>
+          <p style="margin:0;font-size:0.8rem;color:rgba(255,255,255,0.85);line-height:1.45;">
+            Your report is routed directly to the selected authority (Store Admin, Regional Manager, National HR, or Executive Compliance). It will only appear on that specific target level's secure dashboard.
+          </p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:14px;border-radius:10px;margin-bottom:4px;">
+          <strong style="color:#fff;display:block;margin-bottom:6px;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;">3. Resolution &amp; Finding Publication</strong>
+          <p style="margin:0;font-size:0.8rem;color:rgba(255,255,255,0.85);line-height:1.45;">
+            Investigators review the details and update the status to "Under Investigation". Once concluded, their official investigation reports are published back to your key for secure retrieval.
+          </p>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);padding:14px;border-radius:10px;">
+          <strong style="color:#ef4444;display:block;margin-bottom:6px;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;">4. Multi-Level Escalation Path</strong>
+          <p style="margin:0;font-size:0.8rem;color:rgba(255,255,255,0.85);line-height:1.45;">
+            If resolution is delayed or unsatisfactory, you can escalate the ticket directly to the next higher level of authority (Store $\rightarrow$ Regional $\rightarrow$ National $\rightarrow$ Executive) via the Tracking tab.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

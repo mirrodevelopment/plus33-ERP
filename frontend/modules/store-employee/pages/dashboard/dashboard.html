@@ -147,61 +147,9 @@
     <!-- Column Left: Duty Actions & Active Shifts -->
     <div class="layout-column-left">
       
-      <!-- Duty Check-In Card -->
-      <div class="card glass duty-timecard-card">
-        <div class="card-header-split">
-          <h3 class="card-split-title">Duty shift Timecard</h3>
-          <i data-lucide="clock" class="card-split-icon" aria-hidden="true"></i>
-        </div>
-        
-        <div class="duty-shift-details-box">
-          <div class="detail-block">
-            <span class="detail-label">Shift Schedule</span>
-            <div class="detail-title" id="timecard-shift-name">Morning Shift</div>
-            <div class="detail-subtitle" id="timecard-shift-hours">08:00 AM - 04:00 PM</div>
-          </div>
-          <div class="detail-block" id="shift-break-block">
-            <span class="detail-label">Next Shift Break</span>
-            <div class="detail-title color-primary" id="timecard-break-name">12:00 PM - 12:30 PM</div>
-            <div class="detail-subtitle" id="timecard-break-hours">Lunch Break (Paid)</div>
-          </div>
-          <div class="detail-block" id="shift-elapsed-block" style="display:none;">
-            <span class="detail-label">Time Logged In</span>
-            <div class="detail-title" style="color: var(--status-success, #82a37d); font-weight: 800;" id="shift-elapsed-value">00:00:00</div>
-            <div class="detail-subtitle" id="shift-elapsed-label">worked today</div>
-          </div>
-          <div class="detail-block" id="shift-countdown-block" style="display:none;">
-            <span class="detail-label">Time Remaining</span>
-            <div class="detail-title" id="shift-countdown-value">--:--:--</div>
-            <div class="detail-subtitle" id="shift-countdown-label">until shift ends</div>
-          </div>
-        </div>
+      <!-- Clock In / Out & Geofence Map Widget -->
+      <div id="clock-widget-container"></div>
 
-        <div class="timecard-actions-row">
-          <button class="btn btn-success btn-clock" id="btn-clock-in" type="button">
-            <i data-lucide="play" aria-hidden="true"></i> Clock In
-          </button>
-          <button class="btn btn-danger btn-clock" id="btn-clock-out" type="button">
-            <i data-lucide="square" aria-hidden="true"></i> Clock Out
-          </button>
-          <button class="btn btn-warning btn-clock" id="btn-request-overtime" type="button" style="display: none;">
-            <i data-lucide="plus" aria-hidden="true"></i> Request Overtime
-          </button>
-        </div>
-
-        <!-- Live Location Widget -->
-        <div class="live-location-widget" style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.08);">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <span class="detail-label" style="margin:0;">Live Location Status</span>
-            <button type="button" class="btn btn-ghost" id="btn-fetch-live-location" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;">
-              <span>🔄 Fetch Coordinates</span>
-            </button>
-          </div>
-          <div id="live-location-display" style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
-            No coordinates fetched. Click the button to check GPS signal.
-          </div>
-        </div>
-      </div>
 
       <!-- ===== AWAY PASS CARD ===== -->
       <div class="card glass away-pass-card" id="away-pass-card">

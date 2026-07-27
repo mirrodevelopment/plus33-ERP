@@ -1,0 +1,73 @@
+/******************************************************************************
+ * Project    : PLUS33 Coffee ERP
+ * Component  : Regional Admin Support & Grievance Portal — Separate Component CSS
+ * File       : regional-support.css
+ * Theme      : Dynamic (Theme-Reactive via theme-registry.js & var(--...))
+ ******************************************************************************/
+
+.regional-support-container {
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  color: var(--text-primary, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rs-header-banner {
+  background: var(--bg-card, rgba(30, 30, 30, 0.6));
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.25));
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.rs-header-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #fb923c, var(--accent-primary, #c9a46a), transparent);
+}
+
+.rs-form-card {
+  background: var(--bg-card, rgba(30, 30, 30, 0.6));
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.25));
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rs-input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm, 8px);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  color: var(--text-primary, #ffffff);
+  font-size: 0.84rem;
+  font-family: inherit;
+}
+.rs-input:focus { outline: none; border-color: var(--accent-primary, #c9a46a); }
+
+.rs-btn {
+  padding: 10px 22px;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: var(--accent-primary, #c9a46a);
+  color: #000;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+.rs-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px var(--accent-glow, rgba(201,164,106,0.2)); }

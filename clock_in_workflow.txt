@@ -1,0 +1,104 @@
+================================================================================
+                    PLUS33 Coffee ERP - Clock-In Workflow
+================================================================================
+
+STORE GPS COORDINATES
+  Store ID : 12 (Default / Flagship Store)
+  Latitude : 11.020470
+  Longitude: 76.970698
+  Location : Coimbatore, Tamil Nadu, India
+
+--------------------------------------------------------------------------------
+
+1. FIXED STORE LOCATION SEEDING & ADMIN MANAGEMENT
+   - Every store has fixed GPS coordinates (Latitude, Longitude) in PostgreSQL database
+     (stores table: columns latitude, longitude, geofence_radius_meters).
+   - Store Admins manage physical location boundaries under:
+       Store Admin > Settings > Store Location & Geofencing
+   - Admin features:
+       * Interactive Leaflet Map: Drag store marker or click anywhere on map to set position.
+       * Manual Coordinate Entry: Type exact latitude & longitude in text inputs with live map sync.
+       * 💾 Save Store Location Button: Persists coordinates directly via PUT /api/v1/stores/{id}/location.
+       * 📍 Use Current GPS Location: Auto-populates admin's current live device coordinates.
+       * 🔄 Refresh Map: Re-fetches coordinates from database and re-initializes map pin.
+   - Geofence radius is fixed strictly at 30 meters for employee clock-ins.
+   - Migration V436 seeds all stores with actual coordinates (11.020470, 76.970698).
+
+2. EMPLOYEE DASHBOARD MOUNT — COORDINATE LOADING ORDER
+   - On mount, stale cached store coordinates (storeLat/storeLng) are cleared from
+     localStorage to ensure fresh data is always fetched from the backend API.
+   - The dashboard calls GET /api/v1/auth/me to get the employee's storeId.
+   - If storeId is null (no store linked to session), it defaults to Store ID 12.
+   - It calls GET /api/v1/stores/{storeId} to load latitude, longitude, and store name.
+   - Coordinates are logged to the browser console for debugging:
+       [INFO] StoreEmployeeDashboard: Store coordinates loaded: lat=11.020470, lng=76.970698
+   - _initGeofenceMap() is called AFTER _loadData() and _render() complete, ensuring
+     fresh coordinates are available before the Leaflet map is initialized.
+
+3. HIGH-DETAIL LIGHT THEME MAP VISUALIZATION & DYNAMIC GEOFENCE
+   - Powered by OpenStreetMap High-Resolution Light Cartography (`https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`).
+   - Renders clear street names, building outlines, parks, and topography up to max zoom 19.
+   - High-Visibility Map Markers:
+       * Store Marker: Bold red pin (#dc2626) with white border & shadow.
+       * Employee Marker: Pulsing royal blue pin (#2563eb).
+   - Dynamic 30m Geofence Zone:
+       * Inside Zone (≤30m): Geofence circle turns VIBRANT EMERALD GREEN (#10b981, 28% opacity).
+       * Outside Zone (>30m): Geofence circle remains WARNING RED (#dc2626, 15% opacity).
+
+4. INTERACTIVE GOOGLE MAPS-STYLE NAVIGATION CONTROLS
+   - 🎯 My Location Button: Instantly recenters Leaflet map at employee's live GPS position.
+   - 🔄 Refresh Map Button: Re-fetches database store coordinates and updates map pins.
+   - 🧭 Compass Direction & Orientation Controls:
+       * Reset North (0°): Resets map view orientation to North-Up.
+       * Rotate +90°: Rotates map orientation by 90° clockwise increments (0° -> 90° -> 180° -> 270°).
+   - 🚗 Travel Mode Switcher: Select between 🚗 Driving, 🚶 Walking (dashed green line), and 🚴 Cycling (amber line).
+   - 🚗 Get Fastest Route Button: Queries OSRM routing engine to compute exact street turn geometries,
+     street distance in km, and estimated travel time in minutes directly on Leaflet map!
+   - 🛰️ Satellite View Toggle: Switches map layer to Esri High-Resolution World Imagery satellite topography.
+   - Google Maps Button: Opens native turn-by-turn navigation (driving, walking, bicycling) directly on mobile/desktop.
+
+5. REAL-TIME LOCATION TRACKING & CLIENT-SIDE GEOFENCE VALIDATION
+   - The dashboard invokes navigator.geolocation.watchPosition to track coordinates in real-time.
+   - Client calculates haversine distance between employee and store center.
+   - If Distance <= 30 meters:
+       * Status: "✓ Inside Geofence (X m away)" [Green Banner]
+       * 30m Map Circle turns Vibrant Emerald Green.
+       * "Clock In" button is ENABLED and fully active.
+   - If Distance > 30 meters:
+       * Status: "✕ Outside Geofence (X m away - Required: <30m)" [Amber Banner]
+       * 30m Map Circle remains Red.
+       * "Clock In" button is DISABLED (opacity 50%, cursor not-allowed).
+   - If Location Access Denied:
+       * Status: "⚠️ Location access denied. Enable GPS to clock in." [Red Banner]
+       * "Clock In" button is DISABLED.
+
+6. CLOCK-IN API CALL & BACKEND SECURITY ASSERTION
+   - Employee clicks active "Clock In" button.
+   - POST request sent to /api/v1/attendance/check-in with payload: { "gps": "11.020470,76.970698" }
+   - Server (AttendanceServiceImpl.java) fetches store coordinates directly from PostgreSQL.
+   - Recalculates haversine distance server-side.
+   - If distance > 30m: throws OUT_OF_RANGE error, clock-in is rejected.
+   - If GPS missing: throws GPS_REQUIRED error.
+
+7. ATTENDANCE LOG & SHIFT RESOLUTION
+   - On validation success, system checks for scheduled shift.
+   - If rest day (no shift): auto-allocates fallback shift for overtime logging.
+   - Attendance record saved with checkInTime and status = ACTIVE.
+
+8. REAL-TIME GEOFENCE MONITORING & 150m AUTO CLOCK-OUT (Post Clock-In)
+   - GeofenceMonitor pings /api/v1/attendance/ping-location every 5 minutes in background loop.
+   - Live GPS position is compared against database store coordinates.
+   - System rules while clocked in:
+       OK               → Within 120m safe zone, no action.
+       WARNING          → Approaching boundary (120m–150m away), displays boundary alert.
+       AWAY_PASS_ACTIVE → Approved away pass active (silent).
+       IN_GRACE_PERIOD  → Pass expired, 10-min grace period (warning popup + extension request).
+       AUTO_CLOCKED_OUT → Employee moved >150m away without active pass → System automatically executes Auto Clock-Out!
+       NOT_CLOCKED_IN   → Stop 5-minute background monitoring loop.
+
+9. PERMISSION & SCHEMA NOTES
+   - StoreController.java setStoreLocation (@PutMapping /{id}/location) allows ROLE_STORE_ADMIN.
+   - Stores database table columns: latitude NUMERIC(10,6), longitude NUMERIC(10,6), geofence_radius_meters INTEGER.
+   - Migration V436 updates flagship Store ID 12 coordinates to (11.020470, 76.970698).
+
+================================================================================

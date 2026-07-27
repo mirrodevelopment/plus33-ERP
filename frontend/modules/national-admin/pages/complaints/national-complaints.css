@@ -1,0 +1,96 @@
+/******************************************************************************
+ * Project    : PLUS33 Coffee ERP
+ * Component  : National Admin Executive Complaints — Separate Component CSS
+ * File       : national-complaints.css
+ * Theme      : Dynamic (Theme-Reactive via theme-registry.js & var(--...))
+ ******************************************************************************/
+
+.national-complaints-container {
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  padding: 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+  color: var(--text-primary, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: nc-fade-in 0.35s ease-out both;
+}
+@keyframes nc-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nc-header-banner {
+  background: var(--bg-card, rgba(30, 30, 30, 0.6));
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.25));
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+.nc-header-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #60a5fa, var(--accent-primary, #c9a46a), transparent);
+}
+
+.nc-header-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-primary, #ffffff);
+}
+.nc-header-title i { color: #60a5fa; width: 26px; height: 26px; }
+
+.nc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.nc-kpi-card {
+  background: var(--bg-card, rgba(30, 30, 30, 0.6));
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.25));
+  border-radius: var(--radius-lg, 16px);
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nc-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 8px);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  color: var(--text-primary, #ffffff);
+  font-size: 0.84rem;
+  font-family: inherit;
+}
+.nc-input:focus { outline: none; border-color: var(--accent-primary, #c9a46a); }
+
+.nc-btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+.nc-btn-primary { background: var(--accent-primary, #c9a46a); color: #000; }
+.nc-btn-secondary { background: rgba(255,255,255,0.08); color: #fff; border-color: var(--border-color, rgba(255,255,255,0.12)); }

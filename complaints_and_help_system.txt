@@ -1,0 +1,110 @@
+================================================================================
+PLUS33 COFFEE ERP — COMPLAINTS & HELP SYSTEM ARCHITECTURE AND PROCESS GUIDE
+================================================================================
+
+This document explains the architecture, design patterns, security guarantees,
+and data processes of the Help & Support Tickets and Anonymous Workplace
+Complaints system in the PLUS33 ERP platform.
+
+--------------------------------------------------------------------------------
+1. ARCHITECTURE OVERVIEW
+--------------------------------------------------------------------------------
+The Help & Support module is split into two distinct channels to balance standard
+operational tracking with critical workplace grievance reporting:
+
+A. Public/Named Support Tickets
+   - Purpose: Standard support requests (IT troubleshooting, HR inquiries, etc.).
+   - Identity: Linked to a specific reporter (employee name, ID, and role).
+   - Database Table: `support_tickets`
+   - Key Fields: `id`, `ticket_code`, `reporter_id`, `reporter_name`, `store_id`, 
+     `subject`, `description`, `status`.
+
+B. Strictly Anonymous Workplace Complaints
+   - Purpose: Whistleblowing and sensitive reporting (harassment, fraud, hazards).
+   - Identity: ZERO reporter identifiers are captured or stored in the database.
+   - Database Table: `anonymous_complaints`
+   - Key Fields: `id`, `tracking_key`, `category`, `subject`, `description`, 
+     `status`, `target_role`, `compliance_response`, `response_published_at`.
+
+--------------------------------------------------------------------------------
+2. DATA WORKFLOWS & LOGIC PROCESSES
+--------------------------------------------------------------------------------
+
+[PROCESS 1: Standard Ticket Submission]
+1. The employee fills out a support request in the Employee Support Portal.
+2. The frontend sends a POST request to `/api/v1/support/tickets` containing the
+   reporter's name, ID, role, target department, category, and description.
+3. The backend generates a unique ticket code (e.g. `TK-2026-9865`) and saves it.
+4. The ticket code is displayed to the employee for future tracking.
+
+[PROCESS 2: Anonymous Complaint Submission]
+1. The employee toggles "Submit Anonymously" inside the Support Hub.
+2. The frontend makes a POST request to `/api/v1/complaints/anonymous`.
+3. The request body contains category, subject, description, and target role, but
+   absolutely no user ID, username, or IP identifier.
+4. The backend generates a secure 12-character tracking key (e.g. `TK-ANO-7F9C2B`),
+   saves the complaint to the database, and returns the key.
+5. The tracking key is presented to the employee. (WARNING: If lost, the complaint
+   status cannot be checked, as there is no account linkage).
+
+[PROCESS 3: Unified Executive Overview (Admin Dashboard)]
+1. When an Administrator (Store, Regional, National, or Ultimate) logs in, the
+   dashboard requests the overview from `/api/v1/complaints/overview`.
+2. The backend (`SupportServiceImpl.getAllAnonymousComplaints`) queries:
+   a. All records from the `anonymous_complaints` table.
+   b. All records from the `support_tickets` table.
+3. It maps the standard tickets into the `AnonymousComplaint` model structure:
+   - The ticket code is mapped to the `trackingKey` field.
+   - The submitter's `reporterName` and `reporterId` are mapped to transient fields.
+4. The list is sorted chronologically and sent to the frontend.
+
+[PROCESS 4: Tracking & Investigation Responses]
+1. The submitter inputs their tracking key (starts with `TK-ANO-` or `TK-2026-`).
+2. The endpoint `/api/v1/complaints/track/{key}` searches both tables.
+3. If an investigator has updated the status and published a response, it is
+   returned. If still under investigation, a generic placeholder is shown.
+
+[PROCESS 5: Grievance Escalation]
+1. If an employee is unsatisfied with the progress, they can click "Escalate" on their ticket.
+2. The system now supports escalation for both channels:
+   - Anonymous Complaints: PUT request to `/api/v1/complaints/escalate/{trackingKey}`
+   - Named Support Tickets: PUT request to `/api/v1/support/tickets/escalate/{ticketCode}`
+3. The target authority role escalates (e.g. `STORE_ADMIN` -> `REGIONAL_ADMIN` -> 
+   `NATIONAL_ADMIN` -> `ULTIMATE_ADMIN`), bumping the level by 1 and appending an
+   audit note to the description.
+4. Escalation option automatically disables when the ticket status is RESOLVED or CLOSED, or when it reaches the highest executive tier (`ULTIMATE_ADMIN`).
+
+--------------------------------------------------------------------------------
+3. ANONYMITY AND PRIVACY MECHANISMS
+--------------------------------------------------------------------------------
+To guarantee whistleblowers' absolute safety:
+- **No Foreign Keys:** The database schema for `anonymous_complaints` has no relation
+  or reference to the `users` or `employees` tables.
+- **Transient Memory Transmission:** The `reporterId` and `reporterName` fields inside 
+  the `AnonymousComplaint` Java class are annotated with `@Transient`. This means 
+  they exist only in JVM memory during mapping of named support tickets, and are 
+  never created as database columns. They are serialized as `null` for anonymous
+  complaints, preventing any accidental leaks.
+- **Frontend Segregation:** Anonymous tickets are identified in the client JS via
+  the `TK-ANO-` code prefix. When detected, the UI renders a rose-colored tag
+  captioned "Anonymous" and conceals all details.
+
+--------------------------------------------------------------------------------
+4. RECENT SYSTEM FIXES & FEATURES (JULY 2026)
+--------------------------------------------------------------------------------
+1. **Flyway Migration Clashes:** Cleaned up duplicate version numbers (`V435`/`V436`)
+   and assigned support files to `V437` and `V438`.
+2. **PostgreSQL Migration Compatibility:** Re-wrote MySQL schema syntax to match
+   PostgreSQL specs (`BIGSERIAL`, separate `CREATE INDEX` commands, and dropping
+   unsupported `ON UPDATE` clauses).
+3. **Database Validation alignment:** Added `subcategory` columns inside the Flyway
+   scripts to match Hibernate validation expectations.
+4. **Reporter UI Addition:** Embedded a "Reporter" column across all admin page tables 
+   displaying user data for public tickets, and a themed "Anonymous" badge for complaints.
+5. **Unified Process Guide Banner & Modal:**
+   - Created a premium, clickable guide banner and modal explaining whistleblower rules, target routing, and escalations.
+   - Consolidated navigation links (`menus.js`) so that Store Managers, Regional Admins, and Employees route to the same unified `#support` hub.
+   - Embedded this guide card and popup across all admin overview registry dashboards (`ultimateAdmin`, `nationalAdmin`, `regionalAdmin`, `storeAdmin`) to give administrators direct insight into the flow.
+6. **Support Ticket Escalation Flow:**
+   - Created a new backend route and service method (`escalateTicket`) to allow the creator of standard, named support tickets to escalate unresolved cases up the management ladder.
+================================================================================

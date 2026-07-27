@@ -27,8 +27,8 @@ class UserStore {
   constructor() {
     this.profiles = {
       'ultimateAdmin': {
-        name: 'Arjun Mehta',
-        email: 'arjun.mehta@plus33.coffee',
+        name: 'Ultimate System Admin',
+        email: 'ultimate.admin@plus33.coffee',
         department: 'Executive Administration',
         store: 'Corporate Head Office',
         storeRegion: 'Delhi NCR',
@@ -46,8 +46,8 @@ class UserStore {
         swiftCode: 'HDFCINBBXXX'
       },
       'nationalWarehouseAdmin': {
-        name: 'Geordi La Forge',
-        email: 'geordi.laforge@plus33.coffee',
+        name: 'National Warehouse Admin',
+        email: 'national.warehouse@plus33.coffee',
         department: 'Logistics & Supply Chain',
         store: 'Central Logistics Hub',
         storeRegion: 'Île-de-France',
@@ -65,8 +65,8 @@ class UserStore {
         swiftCode: 'BNPAFRPPXXX'
       },
       'regionalWarehouseAdmin': {
-        name: 'Miles O\'Brien',
-        email: 'miles.obrien@plus33.coffee',
+        name: 'Regional Warehouse Admin',
+        email: 'regional.warehouse@plus33.coffee',
         department: 'Logistics & Supply Chain',
         store: 'North France Logistics',
         storeRegion: 'North France',
@@ -84,8 +84,8 @@ class UserStore {
         swiftCode: 'AGRIFRPPXXX'
       },
       'store': {
-        name: 'Beverly Crusher',
-        email: 'beverly.crusher@plus33.coffee',
+        name: 'Store Manager',
+        email: 'store.manager@plus33.coffee',
         department: 'Retail Operations',
         store: 'Green Park Café, City Center',
         storeRegion: 'Delhi NCR',
@@ -103,8 +103,8 @@ class UserStore {
         swiftCode: 'ICICINBBXXX'
       },
       'storeEmployee': {
-        name: 'Neha Sharma',
-        email: 'neha.sharma@plus33.coffee',
+        name: 'Store Employee',
+        email: 'store.employee@plus33.coffee',
         department: 'Retail Operations',
         store: 'Green Park Café, City Center',
         storeRegion: 'Delhi NCR',
@@ -122,8 +122,8 @@ class UserStore {
         swiftCode: 'HDFCINBBXXX'
       },
       'shiftSupervisor': {
-        name: 'Rohan Sharma',
-        email: 'rohan.sharma@plus33.coffee',
+        name: 'Shift Supervisor',
+        email: 'shift.supervisor@plus33.coffee',
         department: 'Retail Operations',
         store: 'Green Park Café, City Center',
         storeRegion: 'Delhi NCR',
@@ -141,7 +141,7 @@ class UserStore {
         swiftCode: 'AXISINBBXXX'
       },
       'nationalAdmin': {
-        name: 'Rajesh Kumar',
+        name: 'National Admin',
         email: 'national.admin@plus33.coffee',
         department: 'National Operations',
         store: 'National HQ',
@@ -160,7 +160,7 @@ class UserStore {
         swiftCode: 'SBININBBXXX'
       },
       'regionalAdmin': {
-        name: 'Vijay Iyer',
+        name: 'Regional Admin',
         email: 'regional.admin@plus33.coffee',
         department: 'Regional Operations',
         store: 'Regional Hub',

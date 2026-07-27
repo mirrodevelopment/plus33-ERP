@@ -857,9 +857,9 @@ public class AttendanceServiceImpl implements AttendanceService {
      * </ul>
      */
     private void assertWithinGeofence(String gps, Store store, int radiusMeters) {
+        final int limit = 30; // Strictly enforce 30 meters
         if (store == null || store.getLatitude() == null || store.getLongitude() == null) {
-            // Store has no GPS configured — skip geofence check
-            return;
+            throw new BusinessException("GPS_REQUIRED: The store has no GPS coordinates configured. Please contact the store administrator.");
         }
         if (gps == null || gps.isBlank()) {
             throw new BusinessException("GPS_REQUIRED: Location access is required to clock in. Please enable GPS in your browser.");
@@ -874,10 +874,10 @@ public class AttendanceServiceImpl implements AttendanceService {
             double storeLat = store.getLatitude().doubleValue();
             double storeLng = store.getLongitude().doubleValue();
             double distance = haversineMeters(empLat, empLng, storeLat, storeLng);
-            if (distance > radiusMeters) {
+            if (distance > limit) {
                 int rounded = (int) Math.round(distance);
                 throw new BusinessException("OUT_OF_RANGE: You are " + rounded + " m away from " + store.getName()
-                        + ". You must be within " + radiusMeters + " m to clock in.");
+                        + ". You must be within " + limit + " m to clock in.");
             }
         } catch (BusinessException be) {
             throw be;
@@ -948,17 +948,17 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
 
         double distance = haversineMeters(empLat, empLng, store.getLatitude().doubleValue(), store.getLongitude().doubleValue());
-        int autoClockOutRadius = store.getGeofenceRadiusMeters() != null ? store.getGeofenceRadiusMeters() : 200;
-        int warningRadius = (int) (autoClockOutRadius * 0.75); // warn at 75% (150m for 200m limit)
+        int autoClockOutRadius = 150; // Auto clock-out if employee goes 150 meters away from store location
+        int warningRadius = 120; // Warn when employee approaches 120 meters away (80% of 150m boundary)
 
         result.put("distance", (int) Math.round(distance));
         result.put("storeName", store.getName());
 
         if (distance <= autoClockOutRadius) {
-            // Within safe zone
+            // Within safe 150m tracking zone
             if (distance > warningRadius) {
                 result.put("action", "WARNING");
-                result.put("message", "You are getting close to the store boundary (" + (int) Math.round(distance) + " m away).");
+                result.put("message", "You are getting close to the 150m store boundary (" + (int) Math.round(distance) + " m away).");
             } else {
                 result.put("action", "OK");
             }

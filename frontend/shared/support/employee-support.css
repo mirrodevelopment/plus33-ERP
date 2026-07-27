@@ -1,0 +1,234 @@
+/******************************************************************************
+ * Project    : PLUS33 Coffee ERP
+ * Component  : Store Employee Help & Support Hub — Separate Component CSS
+ * File       : employee-support.css
+ * Theme      : Dynamic (Theme-Reactive via theme-registry.js & var(--...))
+ ******************************************************************************/
+
+.employee-support-page {
+  font-family: var(--font-sans, 'Montserrat', 'Inter', system-ui, sans-serif);
+  padding: 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+  color: var(--text-primary, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: es-fade 0.35s ease-out both;
+}
+@keyframes es-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.es-header {
+  background: var(--bg-card, rgba(30, 30, 30, 0.6));
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.25));
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Tabs */
+.es-tabs-bar {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  padding-bottom: 2px;
+}
+.es-tab-btn {
+  background: none;
+  border: none;
+  padding: 10px 4px 14px 4px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted, #8c857b);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  transition: color 0.2s ease;
+  font-family: inherit;
+}
+.es-tab-btn:hover { color: var(--text-primary, #ffffff); }
+.es-tab-btn.active { color: var(--accent-primary, #c9a46a); }
+.es-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent-primary, #c9a46a);
+  box-shadow: 0 0 8px var(--accent-glow, rgba(201,164,106,0.4));
+}
+
+/* Categories Grid */
+.es-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.es-category-card {
+  background: var(--bg-card, rgba(30, 30, 30, 0.6));
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.25));
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.es-category-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-color-hover, rgba(201, 164, 106, 0.55));
+  background: var(--bg-card-hover, rgba(45, 45, 45, 0.85));
+}
+.es-category-card.selected {
+  border-color: var(--accent-primary, #c9a46a);
+  background: var(--accent-glow, rgba(201, 164, 106, 0.12));
+  box-shadow: 0 8px 24px var(--accent-glow, rgba(201, 164, 106, 0.15));
+}
+
+.es-category-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(201, 164, 106, 0.12);
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary, #c9a46a);
+  margin-bottom: 14px;
+}
+.es-category-icon i { width: 26px; height: 26px; }
+
+/* Policy Banner Cards */
+.es-policy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.es-policy-card {
+  background: var(--bg-card, rgba(30, 30, 30, 0.6));
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.25));
+  border-radius: var(--radius-lg, 16px);
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.es-policy-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-color-hover, rgba(201, 164, 106, 0.55));
+}
+
+.es-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm, 8px);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  color: var(--text-primary, #ffffff);
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+.es-input:focus { outline: none; border-color: var(--accent-primary, #c9a46a); }
+
+.es-btn {
+  padding: 12px 26px;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: var(--accent-primary, #c9a46a);
+  color: #000;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+.es-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px var(--accent-glow, rgba(201,164,106,0.25)); }
+
+/* Modal Popup Styles */
+.es-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: es-fade-in 0.2s ease-out;
+}
+
+@keyframes es-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.es-modal-card {
+  background: #181818;
+  border: 1px solid var(--border-color, rgba(201, 164, 106, 0.3));
+  border-radius: var(--radius-lg, 16px);
+  max-width: 650px;
+  width: 100%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  animation: es-slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+@keyframes es-slide-up {
+  from { transform: translateY(15px); }
+  to { transform: translateY(0); }
+}
+
+.es-modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.es-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.es-modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted, #8c857b);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.es-modal-close-btn:hover {
+  color: #fff;
+}

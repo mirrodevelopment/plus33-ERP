@@ -815,3 +815,83 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* ============================================================
+   GPS MAP CARD STYLES
+   ============================================================ */
+
+.clock-map-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  animation: slideUp 0.35s ease;
+}
+
+/* GPS Status Pill */
+.gps-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 12px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+.gps-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.gps-status-idle   { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+.gps-status-idle .gps-dot { background: rgba(255,255,255,0.25); }
+
+.gps-status-locating { background: rgba(201,164,106,0.15); color: #c9a46a; }
+.gps-status-locating .gps-dot { background: #c9a46a; animation: pulse 1s ease-in-out infinite; }
+
+.gps-status-inside  { background: rgba(130,163,125,0.15); color: #82a37d; }
+.gps-status-inside .gps-dot  { background: #82a37d; }
+
+.gps-status-outside { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+.gps-status-outside .gps-dot { background: #ff6b6b; }
+
+.gps-status-error   { background: rgba(255,165,0,0.12); color: #ffa500; }
+.gps-status-error .gps-dot   { background: #ffa500; }
+
+/* GPS Info Chips */
+.gps-info-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+.gps-info-chip i { color: var(--accent-primary, #c9a46a); flex-shrink: 0; }
+
+/* Leaflet dark-theme overrides */
+#attendance-map .leaflet-tile-pane { filter: brightness(0.85) saturate(0.7); }
+#attendance-map .leaflet-control-attribution { display: none !important; }
+#attendance-map .leaflet-control-zoom a {
+  background: rgba(20,24,40,0.95);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+/* Geofence circle fill */
+.leaflet-interactive.geofence-circle {
+  fill: rgba(201,164,106,0.12);
+  stroke: #c9a46a;
+  stroke-width: 2;
+  stroke-dasharray: 6,4;
+}
+
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.5; transform:scale(1.4); }
+}

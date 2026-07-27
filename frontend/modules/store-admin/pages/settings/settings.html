@@ -98,32 +98,52 @@
             <h3 class="section-title">Store Location & Geofencing</h3>
             <p class="section-desc">Manage physical GPS coordinates and boundary parameters used for employee check-ins.</p>
           </div>
-          <button type="button" id="btn-edit-location" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); padding: 0.4rem 0.8rem; border-radius: 4px; color: #ffffff; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.2s;">
-            <i data-lucide="edit-2" aria-hidden="true"></i>
-            <span>Edit Location</span>
-          </button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button type="button" id="btn-edit-location" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); padding: 0.4rem 0.8rem; border-radius: 4px; color: #ffffff; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.2s;">
+              <i data-lucide="edit-2" aria-hidden="true"></i>
+              <span>Edit Location</span>
+            </button>
+            <button type="button" id="btn-save-location-only" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.9rem; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: 600;">
+              <i data-lucide="save" aria-hidden="true"></i>
+              <span>Save Store Location</span>
+            </button>
+          </div>
         </div>
 
         <div class="form-grid-3col">
           <div class="form-group">
             <label for="settings-store-latitude" class="form-label">Latitude</label>
-            <input id="settings-store-latitude" type="number" step="any" class="form-input" placeholder="e.g. 48.8566" disabled required>
+            <input id="settings-store-latitude" type="number" step="any" class="form-input" placeholder="e.g. 11.020470" disabled required>
           </div>
           <div class="form-group">
             <label for="settings-store-longitude" class="form-label">Longitude</label>
-            <input id="settings-store-longitude" type="number" step="any" class="form-input" placeholder="e.g. 2.3522" disabled required>
+            <input id="settings-store-longitude" type="number" step="any" class="form-input" placeholder="e.g. 76.970698" disabled required>
           </div>
           <div class="form-group">
-            <label for="settings-store-geofence" class="form-label">Geofence Radius (Meters)</label>
-            <input id="settings-store-geofence" type="number" class="form-input" min="10" placeholder="e.g. 200" disabled required>
+            <label for="settings-store-geofence" class="form-label">Geofence Radius (Meters) <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: normal;">(Fixed)</span></label>
+            <input id="settings-store-geofence" type="number" class="form-input" value="30" disabled required>
           </div>
         </div>
 
-        <div style="margin-top: 0.5rem; margin-bottom: 1.5rem;">
-          <button type="button" id="btn-get-current-location" class="btn btn-secondary btn-sm" style="display: none; align-items: center; gap: 0.5rem; background: rgba(201,164,106,0.15); border: 1px solid rgba(201,164,106,0.3); color: var(--accent-primary, #c9a46a); padding: 0.45rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600;" disabled>
-            <i data-lucide="map-pin" aria-hidden="true"></i>
-            <span>📍 Use Current GPS Location</span>
-          </button>
+        <!-- Store Map Picker Widget -->
+        <div id="admin-store-map-widget" style="margin-top: 14px; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+            <span class="detail-label" style="margin:0; font-weight: 600; color: var(--text-primary);">Interactive Store Location Map (Drag Pin or Click Map)</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" id="btn-refresh-admin-map" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; padding: 0.35rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: 600;">
+                <i data-lucide="refresh-cw" aria-hidden="true" style="width: 12px; height: 12px;"></i>
+                <span>🔄 Refresh Map</span>
+              </button>
+              <button type="button" id="btn-get-current-location" class="btn btn-secondary btn-sm" style="display: none; align-items: center; gap: 0.5rem; background: rgba(201,164,106,0.15); border: 1px solid rgba(201,164,106,0.3); color: var(--accent-primary, #c9a46a); padding: 0.35rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.78rem; font-weight: 600;" disabled>
+                <i data-lucide="map-pin" aria-hidden="true"></i>
+                <span>📍 Use Current GPS Location</span>
+              </button>
+            </div>
+          </div>
+          <div id="admin-store-map" style="width: 100%; height: 280px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.15); margin-bottom: 8px; position: relative; z-index: 1;"></div>
+          <div id="admin-map-coords-badge" style="font-size: 0.8rem; text-align: center; font-weight: 600; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">
+            Active Store Coordinates: <span id="admin-map-coords-text" style="color: var(--accent-primary, #c9a46a); font-weight: 700;">11.020470, 76.970698</span> &nbsp;·&nbsp; 30m Geofence Circle Active
+          </div>
         </div>
 
         <hr class="settings-divider">

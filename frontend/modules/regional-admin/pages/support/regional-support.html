@@ -1,0 +1,88 @@
+<!--
+/******************************************************************************
+ * Project    : PLUS33 Coffee ERP
+ * Component  : Regional Admin Support & Operations Portal — Separate Component
+ * File       : regional-support.html
+ ******************************************************************************/
+-->
+<div class="regional-support-container">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="rs-header-banner">
+    <div>
+      <h1 style="margin:0 0 4px 0;font-size:1.45rem;font-weight:800;display:flex;align-items:center;gap:10px;">
+        <i data-lucide="map" style="color:#fb923c;"></i>
+        Regional Operations &amp; Support Portal
+      </h1>
+      <p style="margin:0;font-size:0.8rem;color:var(--text-muted,#8c857b);">
+        File regional operational tickets, report regional store policy disputes, or track regional grievance status.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Submission Form ─────────────────────────────────────────────────── -->
+  <div class="rs-form-card">
+    <h3 style="margin:0;font-size:1rem;font-weight:700;color:var(--text-primary,#fff);display:flex;align-items:center;gap:8px;">
+      <i data-lucide="send" style="width:16px;height:16px;color:var(--accent-primary,#c9a46a);"></i>
+      Submit Regional Escalation or Grievance
+    </h3>
+
+    <form id="rs-submit-form" style="display:flex;flex-direction:column;gap:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Send Complaint To (Target Authority) *</label>
+          <select class="rs-input" id="rs-target-select" required>
+            <option value="NATIONAL_ADMIN">🌐 National Management &amp; HR</option>
+            <option value="ULTIMATE_ADMIN" selected>🛡️ Ultimate System Admin (Executive Whistleblower)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Support Category *</label>
+          <select class="rs-input" id="rs-cat-select" required>
+            <option value="WORKPLACE_COMPLAINT">🚨 Workplace Grievance &amp; Policy Dispute</option>
+            <option value="HR_PAYROLL">💼 HR &amp; Regional Payroll</option>
+            <option value="TECHNICAL_SUPPORT">🖥️ Technical &amp; System Infrastructure</option>
+            <option value="GENERAL_FEEDBACK">💬 Regional Operations Feedback</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Regional Target Store *</label>
+          <select class="rs-input" id="rs-store-select" required>
+            <option value="1">Store #1 — HQ Flagship</option>
+            <option value="2">Store #2 — Metro Center</option>
+            <option value="3">Store #3 — Westside Mall</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Priority Level *</label>
+          <select class="rs-input" id="rs-priority-select">
+            <option value="LOW">🟢 Low</option>
+            <option value="MEDIUM" selected>🟡 Medium</option>
+            <option value="HIGH">🟠 High</option>
+            <option value="CRITICAL">🔴 Critical</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Subject / Title *</label>
+        <input type="text" class="rs-input" id="rs-subject-inp" placeholder="Brief subject description…" required>
+      </div>
+
+      <div>
+        <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted,#8c857b);text-transform:uppercase;">Detailed Description *</label>
+        <textarea class="rs-input" id="rs-desc-inp" rows="4" placeholder="Provide full regional context and impacted store locations…" required></textarea>
+      </div>
+
+      <div>
+        <button type="submit" class="rs-btn">
+          Submit Regional Request
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>

@@ -1,0 +1,39 @@
+13:46:19.141 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to System property 'spring.devtools.restart.enabled' being set to false
+2026-07-27T13:46:19.718+05:30  INFO 18812 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : Starting Plus33ErpApplication using Java 17.0.17 with PID 18812 (D:\plus33\plus33-erp\target\classes started by admin in D:\plus33\plus33-erp)
+2026-07-27T13:46:19.722+05:30  INFO 18812 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-07-27T13:46:19.851+05:30  INFO 18812 --- [plus33-erp] [           main] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-07-27T13:46:23.061+05:30  INFO 18812 --- [plus33-erp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-27T13:46:26.255+05:30  INFO 18812 --- [plus33-erp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 3186 ms. Found 599 JPA repository interfaces.
+2026-07-27T13:46:29.042+05:30  INFO 18812 --- [plus33-erp] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-07-27T13:46:29.065+05:30  INFO 18812 --- [plus33-erp] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-27T13:46:29.065+05:30  INFO 18812 --- [plus33-erp] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-07-27T13:46:29.153+05:30  INFO 18812 --- [plus33-erp] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 9294 ms
+2026-07-27T13:46:30.539+05:30  INFO 18812 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-27T13:46:30.864+05:30  INFO 18812 --- [plus33-erp] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4f4b7a2e
+2026-07-27T13:46:30.864+05:30  INFO 18812 --- [plus33-erp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-27T13:46:30.921+05:30  INFO 18812 --- [plus33-erp] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5432/plus33_erp (PostgreSQL 17.10)
+2026-07-27T13:46:31.379+05:30  INFO 18812 --- [plus33-erp] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 438
+2026-07-27T13:46:31.379+05:30  INFO 18812 --- [plus33-erp] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-07-27T13:46:31.742+05:30  INFO 18812 --- [plus33-erp] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-27T13:46:31.820+05:30  INFO 18812 --- [plus33-erp] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.23.Final
+2026-07-27T13:46:32.521+05:30  INFO 18812 --- [plus33-erp] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-27T13:46:32.642+05:30  INFO 18812 --- [plus33-erp] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/plus33_erp]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 17.10
+	Default catalog/schema: plus33_erp/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-27T13:46:46.281+05:30  INFO 18812 --- [plus33-erp] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-27T13:46:47.149+05:30  INFO 18812 --- [plus33-erp] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-27T13:46:48.280+05:30  INFO 18812 --- [plus33-erp] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-27T13:48:04.877+05:30  INFO 18812 --- [plus33-erp] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-07-27T13:48:05.310+05:30  INFO 18812 --- [plus33-erp] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-07-27T13:48:05.349+05:30  INFO 18812 --- [plus33-erp] [           main] com.plus33.erp.Plus33ErpApplication      : Started Plus33ErpApplication in 106.239 seconds (process running for 106.811)
+2026-07-27T13:48:05.493+05:30  WARN 18812 --- [plus33-erp] [           main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-07-27T13:48:05.495+05:30  WARN 18812 --- [plus33-erp] [           main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'

@@ -28,9 +28,40 @@ import { notificationStore } from '../../../../store/notificationStore.js';
 import { logger } from '../../../../core/logger.js';
 import { apiClient } from '../../../../api/client.js';
 import { htmlLoader } from '../../../../core/htmlLoader.js';
+import { ClockInOutWidget } from '../../../../widgets/workforce/clock-in-out/clock-in-out.js';
 
 /** Path to the attendance HTML template */
 const TEMPLATE_URL = 'modules/store-employee/pages/attendance/attendance.html';
+
+// ---------------------------------------------------------------------------
+// LEAFLET LOADER — loads Leaflet CSS + JS lazily once
+// ---------------------------------------------------------------------------
+let _leafletLoadPromise = null;
+function _ensureLeaflet() {
+  if (_leafletLoadPromise) return _leafletLoadPromise;
+  _leafletLoadPromise = new Promise((resolve) => {
+    if (window.L) { resolve(); return; }
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(css);
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = resolve;
+    document.head.appendChild(script);
+  });
+  return _leafletLoadPromise;
+}
+
+/** Haversine distance in metres between two [lat,lon] pairs */
+function _haversineM(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
 
 export default class StoreEmployeeAttendance {
 
@@ -81,6 +112,13 @@ export default class StoreEmployeeAttendance {
     this.casualRemaining = 0;
     this.casualUsed = 0;
     this.policyData = null;
+
+    // Map state
+    this._map = null;
+    this._userMarker = null;
+    this._storeMarker = null;
+    this._geofenceCircle = null;
+    this.storeCoords = null; // {lat, lon, radiusMeters}
   }
 
   // ---------------------------------------------------------------------------
@@ -113,13 +151,22 @@ export default class StoreEmployeeAttendance {
     // 5. Bind event listeners
     this.bindEvents(container, lifecycle);
 
-    // 6. Start running clock
-    this.startClock(container);
+    // 6. Mount modular Clock In / Out & Geofence Map widget
+    const widgetTarget = container.querySelector('#clock-widget-container');
+    if (widgetTarget) {
+      this.clockWidget = new ClockInOutWidget({
+        onClockIn: () => this.loadData(),
+        onClockOut: () => this.loadData()
+      });
+      await this.clockWidget.mount(widgetTarget);
+    }
 
     lifecycle.onCleanup(() => {
       this.destroy();
     });
   }
+
+
 
   async _loadTemplate(container) {
     await htmlLoader.inject(TEMPLATE_URL, container);
@@ -148,6 +195,28 @@ export default class StoreEmployeeAttendance {
       if (calRes?.success) {
         this.calendarData = calRes.data || [];
       }
+
+      // --- Fetch store GPS coords for map ---
+      try {
+        const meRes = await apiClient.get('/api/v1/auth/me');
+        const storeId = meRes?.data?.storeId;
+        if (storeId) {
+          const storeRes = await apiClient.get(`/api/v1/stores/${storeId}`);
+          if (storeRes?.success && storeRes.data) {
+            const s = storeRes.data;
+            if (s.latitude != null && s.longitude != null) {
+              this.storeCoords = {
+                lat: parseFloat(s.latitude),
+                lon: parseFloat(s.longitude),
+                radiusMeters: s.geofenceRadiusMeters || 200,
+              };
+            }
+          }
+        }
+      } catch (e) {
+        logger.warn('StoreEmployeeAttendance', 'Could not fetch store GPS coords', e);
+      }
+
       try {
         const leaveBalRes = await apiClient.get('/api/v1/leaves/my/balance');
         if (leaveBalRes?.success && leaveBalRes.data) {
@@ -305,16 +374,30 @@ export default class StoreEmployeeAttendance {
       const handleClockIn = async () => {
         clockInBtn.disabled = true;
         let gps = null;
+        let userLat = null, userLon = null, userAccuracy = null;
+
+        // Show locating status
+        this._updateGpsStatus(container, 'locating', 'Getting your location…');
+
         try {
-          gps = await new Promise((resolve) => {
-            if (!navigator.geolocation) { resolve(null); return; }
-            navigator.geolocation.getCurrentPosition(
-              p => resolve(`${p.coords.latitude},${p.coords.longitude}`),
-              () => resolve(null),
-              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
+          const pos = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) { reject(new Error('No GPS')); return; }
+            navigator.geolocation.getCurrentPosition(resolve, reject,
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
           });
-        } catch (_) { gps = null; }
+          userLat = pos.coords.latitude;
+          userLon = pos.coords.longitude;
+          userAccuracy = pos.coords.accuracy;
+          gps = `${userLat},${userLon}`;
+        } catch (_) {
+          this._updateGpsStatus(container, 'error', 'GPS unavailable');
+          gps = null;
+        }
+
+        // Show map immediately with current location
+        if (userLat !== null) {
+          this._showLocationOnMap(userLat, userLon, userAccuracy, container);
+        }
 
         try {
           const res = await apiClient.request('/attendance/check-in', {
@@ -340,6 +423,20 @@ export default class StoreEmployeeAttendance {
     if (clockOutBtn) {
       const handleClockOut = async () => {
         clockOutBtn.disabled = true;
+
+        // Show locating on clock-out too
+        this._updateGpsStatus(container, 'locating', 'Getting your location…');
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) { reject(new Error('No GPS')); return; }
+            navigator.geolocation.getCurrentPosition(resolve, reject,
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+          });
+          this._showLocationOnMap(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, container);
+        } catch (_) {
+          this._updateGpsStatus(container, 'error', 'GPS unavailable');
+        }
+
         try {
           const res = await apiClient.request('/attendance/check-out', { method: 'POST' });
           if (res?.success) {
@@ -525,6 +622,164 @@ export default class StoreEmployeeAttendance {
       policyModal.addEventListener('click', handleOverlayClick);
       lifecycle.onCleanup(() => policyModal.removeEventListener('click', handleOverlayClick));
     }
+
+    // -----------------------------------------------------------------------
+    // MAP CONTROL BUTTONS
+    // -----------------------------------------------------------------------
+    this._mapRotation = 0;
+    this._satelliteLayer = null;
+    this._streetLayer = null;
+    this._isSatellite = false;
+
+    // Refresh Map — re-acquire GPS and update markers
+    const refreshMapBtn = container.querySelector('#btn-att-refresh-map');
+    if (refreshMapBtn) {
+      const handleRefresh = async () => {
+        this._updateGpsStatus(container, 'locating', 'Re-acquiring location…');
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) { reject(new Error('No GPS')); return; }
+            navigator.geolocation.getCurrentPosition(resolve, reject,
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+          });
+          await this._showLocationOnMap(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, container);
+        } catch (_) {
+          this._updateGpsStatus(container, 'error', 'GPS unavailable');
+        }
+      };
+      refreshMapBtn.addEventListener('click', handleRefresh);
+      lifecycle.onCleanup(() => refreshMapBtn.removeEventListener('click', handleRefresh));
+    }
+
+    // Re-center to My Location
+    const recenterBtn = container.querySelector('#btn-att-recenter');
+    if (recenterBtn) {
+      const handleRecenter = async () => {
+        if (!this._map) return;
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000 });
+          });
+          this._map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+        } catch (_) { /* silent */ }
+      };
+      recenterBtn.addEventListener('click', handleRecenter);
+      lifecycle.onCleanup(() => recenterBtn.removeEventListener('click', handleRecenter));
+    }
+
+    // Rotate North
+    const rotateNorthBtn = container.querySelector('#btn-att-rotate-north');
+    if (rotateNorthBtn) {
+      const handleNorth = () => {
+        this._mapRotation = 0;
+        const mapEl = container.querySelector('#attendance-map');
+        if (mapEl) mapEl.style.transform = `rotate(${this._mapRotation}deg)`;
+      };
+      rotateNorthBtn.addEventListener('click', handleNorth);
+      lifecycle.onCleanup(() => rotateNorthBtn.removeEventListener('click', handleNorth));
+    }
+
+    // Rotate +90°
+    const rotateCwBtn = container.querySelector('#btn-att-rotate-cw');
+    if (rotateCwBtn) {
+      const handleRotateCw = () => {
+        this._mapRotation = (this._mapRotation + 90) % 360;
+        const mapEl = container.querySelector('#attendance-map');
+        if (mapEl) mapEl.style.transform = `rotate(${this._mapRotation}deg)`;
+      };
+      rotateCwBtn.addEventListener('click', handleRotateCw);
+      lifecycle.onCleanup(() => rotateCwBtn.removeEventListener('click', handleRotateCw));
+    }
+
+    // Satellite View toggle
+    const satelliteBtn = container.querySelector('#btn-att-satellite');
+    if (satelliteBtn) {
+      const handleSatellite = async () => {
+        if (!this._map) return;
+        await _ensureLeaflet();
+        if (!this._isSatellite) {
+          if (!this._satelliteLayer) {
+            this._satelliteLayer = window.L.tileLayer(
+              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+              { maxZoom: 19 }
+            );
+          }
+          this._map.eachLayer(l => { if (l instanceof window.L.TileLayer) this._map.removeLayer(l); });
+          this._satelliteLayer.addTo(this._map);
+          this._isSatellite = true;
+          satelliteBtn.textContent = '🗺️ Street View';
+        } else {
+          this._map.eachLayer(l => { if (l instanceof window.L.TileLayer) this._map.removeLayer(l); });
+          if (!this._streetLayer) {
+            this._streetLayer = window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+          }
+          this._streetLayer.addTo(this._map);
+          this._isSatellite = false;
+          satelliteBtn.textContent = '🛰️ Satellite View';
+        }
+      };
+      satelliteBtn.addEventListener('click', handleSatellite);
+      lifecycle.onCleanup(() => satelliteBtn.removeEventListener('click', handleSatellite));
+    }
+
+    // Get Fastest Route
+    const fastestRouteBtn = container.querySelector('#btn-att-fastest-route');
+    if (fastestRouteBtn) {
+      const handleFastestRoute = async () => {
+        fastestRouteBtn.disabled = true;
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
+          });
+          const userLat = pos.coords.latitude;
+          const userLon = pos.coords.longitude;
+          const travelMode = container.querySelector('#att-select-travel-mode')?.value || 'driving';
+
+          // Ensure map is visible
+          if (!this._map) {
+            await this._showLocationOnMap(userLat, userLon, pos.coords.accuracy, container);
+          }
+
+          const routePanel = container.querySelector('#att-route-info-panel');
+          const routeDetails = container.querySelector('#att-route-details-text');
+          const googleMapsBtn = container.querySelector('#att-btn-open-google-maps');
+
+          if (this.storeCoords) {
+            const { lat: sLat, lon: sLon } = this.storeCoords;
+            const dist = _haversineM(userLat, userLon, sLat, sLon);
+            const distStr = dist < 1000 ? `${Math.round(dist)} m` : `${(dist/1000).toFixed(2)} km`;
+            const modeLabel = travelMode === 'walking' ? 'Walking' : travelMode === 'biking' ? 'Cycling' : 'Driving';
+            const estimatedMin = Math.ceil(dist / (travelMode === 'walking' ? 83 : travelMode === 'biking' ? 220 : 500));
+
+            if (routeDetails) routeDetails.textContent = `📍 ${distStr} away · ~${estimatedMin} min (${modeLabel})`;
+            if (googleMapsBtn) {
+              const modeMap = { driving: 'driving', walking: 'walking', biking: 'bicycling' };
+              googleMapsBtn.href = `https://www.google.com/maps/dir/${userLat},${userLon}/${sLat},${sLon}/@${sLat},${sLon},15z/data=!3m1!4b1!4m2!4m1!3e${modeMap[travelMode] === 'driving' ? 0 : modeMap[travelMode] === 'walking' ? 2 : 1}`;
+            }
+
+            // Draw route line on map
+            if (this._map) {
+              if (this._routeLine) this._map.removeLayer(this._routeLine);
+              this._routeLine = window.L.polyline([[userLat, userLon], [sLat, sLon]], {
+                color: '#3b82f6', weight: 3, dashArray: '8,5', opacity: 0.8
+              }).addTo(this._map);
+              const bounds = window.L.latLngBounds([[userLat, userLon], [sLat, sLon]]);
+              this._map.fitBounds(bounds, { padding: [40, 40] });
+            }
+            if (routePanel) routePanel.style.display = 'block';
+          } else {
+            if (routeDetails) routeDetails.textContent = 'Store location not configured.';
+            if (routePanel) routePanel.style.display = 'block';
+          }
+        } catch (_) {
+          notificationStore.danger('Could not get GPS location for route.');
+        } finally {
+          fastestRouteBtn.disabled = false;
+        }
+      };
+      fastestRouteBtn.addEventListener('click', handleFastestRoute);
+      lifecycle.onCleanup(() => fastestRouteBtn.removeEventListener('click', handleFastestRoute));
+    }
   }
 
   startClock(container) {
@@ -542,7 +797,9 @@ export default class StoreEmployeeAttendance {
   destroy() {
     if (this._clockInterval) {
       clearInterval(this._clockInterval);
+      this._clockInterval = null;
     }
+    this._destroyMap();
   }
 
   // ---------------------------------------------------------------------------
@@ -745,5 +1002,199 @@ export default class StoreEmployeeAttendance {
       document.head.appendChild(link);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // MAP METHODS
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Show the employee's GPS location + store location on the Leaflet map.
+   * @param {number} userLat
+   * @param {number} userLon
+   * @param {number} accuracy - in metres
+   * @param {HTMLElement} container
+   */
+  async _showLocationOnMap(userLat, userLon, accuracy, container) {
+    // Update GPS status to locating
+    this._updateGpsStatus(container, 'locating', 'Getting location…');
+
+    await _ensureLeaflet();
+
+    const mapEl = container.querySelector('#attendance-map');
+    if (!mapEl) return;
+
+    // Hide placeholder
+    const placeholder = container.querySelector('#map-placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+
+    // Initialise map if needed
+    if (!this._map) {
+      this._map = window.L.map(mapEl, {
+        zoomControl: true,
+        scrollWheelZoom: false,
+        attributionControl: false,
+      }).setView([userLat, userLon], 16);
+
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+      }).addTo(this._map);
+    }
+
+    // User marker (blue pulsing)
+    const userIcon = window.L.divIcon({
+      className: '',
+      html: `<div style="
+        width:18px;height:18px;border-radius:50%;
+        background:rgba(59,130,246,0.9);
+        border:3px solid #fff;
+        box-shadow:0 0 0 4px rgba(59,130,246,0.35);
+        animation:pulse 1.5s ease-in-out infinite;
+      "></div>`,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9],
+    });
+
+    if (this._userMarker) {
+      this._userMarker.setLatLng([userLat, userLon]);
+    } else {
+      this._userMarker = window.L.marker([userLat, userLon], { icon: userIcon })
+        .addTo(this._map)
+        .bindPopup('<b>📍 Your Location</b>');
+    }
+
+    // Accuracy circle (blue translucent)
+    if (accuracy && accuracy < 5000) {
+      window.L.circle([userLat, userLon], {
+        radius: accuracy,
+        color: '#3b82f6',
+        fillColor: '#3b82f6',
+        fillOpacity: 0.08,
+        weight: 1,
+        dashArray: '4,4',
+      }).addTo(this._map);
+    }
+
+    // Store marker (gold pin)
+    if (this.storeCoords) {
+      const { lat: sLat, lon: sLon, radiusMeters = 200 } = this.storeCoords;
+
+      if (!this._storeMarker) {
+        const storeIcon = window.L.divIcon({
+          className: '',
+          html: `<div style="
+            width:22px;height:22px;border-radius:50%;
+            background:#c9a46a;
+            border:3px solid #fff;
+            display:flex;align-items:center;justify-content:center;
+            font-size:12px;line-height:1;
+            box-shadow:0 2px 8px rgba(0,0,0,0.4);
+          ">☕</div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
+        });
+        this._storeMarker = window.L.marker([sLat, sLon], { icon: storeIcon })
+          .addTo(this._map)
+          .bindPopup('<b>☕ Store Location</b>');
+      }
+
+      // Geofence dashed circle
+      if (!this._geofenceCircle) {
+        this._geofenceCircle = window.L.circle([sLat, sLon], {
+          radius: radiusMeters,
+          color: '#c9a46a',
+          fillColor: '#c9a46a',
+          fillOpacity: 0.08,
+          weight: 2,
+          dashArray: '6,4',
+          className: 'geofence-circle',
+        }).addTo(this._map);
+      }
+
+      // Distance check
+      const dist = _haversineM(userLat, userLon, sLat, sLon);
+      const inside = dist <= radiusMeters;
+      const distStr = dist < 1000 ? `${Math.round(dist)} m from store` : `${(dist/1000).toFixed(2)} km from store`;
+
+      this._updateGpsStatus(container, inside ? 'inside' : 'outside',
+        inside ? `✓ Within geofence (${distStr})` : `⚠ Outside geofence (${distStr})`);
+
+      // Fit map to include both points
+      const bounds = window.L.latLngBounds([[userLat, userLon], [sLat, sLon]]);
+      this._map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
+
+      // Show distance chip
+      const distChip = container.querySelector('#gps-distance-chip');
+      const distText = container.querySelector('#gps-distance-text');
+      if (distChip) distChip.style.display = 'flex';
+      if (distText) distText.textContent = distStr;
+    } else {
+      this._map.setView([userLat, userLon], 16);
+      this._updateGpsStatus(container, 'inside', 'Location acquired');
+    }
+
+    // Show coords chip
+    const coordsChip = container.querySelector('#gps-coords-chip');
+    const coordsText = container.querySelector('#gps-coords-text');
+    if (coordsChip) coordsChip.style.display = 'flex';
+    if (coordsText) coordsText.textContent = `${userLat.toFixed(5)}, ${userLon.toFixed(5)}`;
+
+    // Show accuracy chip
+    const accChip = container.querySelector('#gps-accuracy-chip');
+    const accText = container.querySelector('#gps-accuracy-text');
+    if (accChip) accChip.style.display = 'flex';
+    if (accText) accText.textContent = accuracy ? `±${Math.round(accuracy)} m accuracy` : 'Accuracy unknown';
+
+    // Invalidate map size (important when rendered inside flex containers)
+    setTimeout(() => { if (this._map) this._map.invalidateSize(); }, 200);
+  }
+
+  /** Update the GPS status pill and the geofence status bar */
+  _updateGpsStatus(container, state, text) {
+    const pill = container.querySelector('#gps-status-pill');
+    const label = container.querySelector('#gps-status-text');
+    if (pill) pill.className = `gps-status-pill gps-status-${state}`;
+    if (label) label.textContent = text;
+
+    // Also update the larger geofence status text bar
+    const statusBar = container.querySelector('#att-geofence-status-text');
+    if (statusBar) {
+      statusBar.textContent = text;
+      const colorMap = {
+        inside:    { color: '#82a37d', bg: 'rgba(130,163,125,0.08)', border: 'rgba(130,163,125,0.2)' },
+        outside:   { color: '#ff6b6b', bg: 'rgba(255,107,107,0.08)', border: 'rgba(255,107,107,0.2)' },
+        locating:  { color: '#c9a46a', bg: 'rgba(201,164,106,0.08)', border: 'rgba(201,164,106,0.2)' },
+        error:     { color: '#ffa500', bg: 'rgba(255,165,0,0.08)',   border: 'rgba(255,165,0,0.2)'   },
+        idle:      { color: 'var(--text-muted)', bg: 'rgba(255,255,255,0.02)', border: 'rgba(255,255,255,0.05)' },
+      };
+      const c = colorMap[state] || colorMap.idle;
+      statusBar.style.color  = c.color;
+      statusBar.style.background = c.bg;
+      statusBar.style.borderColor = c.border;
+    }
+  }
+
+  /** Destroy and clean up Leaflet map instance */
+  _destroyMap() {
+    if (this._map) {
+      this._map.remove();
+      this._map = null;
+      this._userMarker = null;
+      this._storeMarker = null;
+      this._geofenceCircle = null;
+    }
+  }
+
+  destroy() {
+    if (this._clockInterval) {
+      clearInterval(this._clockInterval);
+      this._clockInterval = null;
+    }
+    if (this.clockWidget) {
+      this.clockWidget.destroy();
+      this.clockWidget = null;
+    }
+    this._destroyMap();
+  }
+
 }
 export { StoreEmployeeAttendance };
