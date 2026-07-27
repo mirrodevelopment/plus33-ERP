@@ -158,7 +158,8 @@ export default class LogsPage {
           <th style="padding: var(--spacing-sm) var(--spacing-md);">Status</th>
           <th style="padding: var(--spacing-sm) var(--spacing-md);">Session Active Duration</th>
           <th style="padding: var(--spacing-sm) var(--spacing-md);">Client Context</th>
-          <th style="padding: var(--spacing-sm) var(--spacing-md); text-align:right;">Login Time</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Login Time</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md); text-align:right;">Logout Time</th>
         </tr>
       `;
     } else if (this.activeTab === 'audit') {
@@ -193,7 +194,7 @@ export default class LogsPage {
   renderLogRows() {
     if (this.activeTab === 'logins') {
       if (!this.loginLogs || this.loginLogs.length === 0) {
-        return `<tr><td colspan="7" style="padding: var(--spacing-xl); text-align:center; color: var(--text-muted);">No login activity logs available.</td></tr>`;
+        return `<tr><td colspan="8" style="padding: var(--spacing-xl); text-align:center; color: var(--text-muted);">No login activity logs available.</td></tr>`;
       }
       return this.loginLogs.map(l => {
         let statusBadge = '';
@@ -251,7 +252,8 @@ export default class LogsPage {
             <td style="padding: var(--spacing-md);">${statusBadge}</td>
             <td style="padding: var(--spacing-md); font-size:0.75rem;">${durationText}</td>
             <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;" title="${l.userAgent || ''}">${shortUA}</td>
-            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.loginTime.replace('T', ' ').substring(0, 19)}</td>
+            <td style="padding: var(--spacing-md); color:var(--text-muted); font-size:0.75rem;">${l.loginTime.replace('T', ' ').substring(0, 19)}</td>
+            <td style="padding: var(--spacing-md); text-align:right; color:var(--text-muted); font-size:0.75rem;">${l.logoutTime ? l.logoutTime.replace('T', ' ').substring(0, 19) : (l.status === 'SUCCESS' ? '<span style="color:#2ecc71; font-weight:700;">Active Now</span>' : '—')}</td>
           </tr>
         `;
       }).join('');
