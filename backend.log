@@ -46,3 +46,14 @@
 2026-07-28T16:14:25.045+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-8] c.p.erp.security.filter.JwtAuthFilter    : Invalid JWT token: An error occurred while attempting to decode the Jwt: Jwt expired at 2026-07-28T10:43:19Z
 2026-07-28T16:15:33.009+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-3] c.p.erp.security.filter.JwtAuthFilter    : Invalid JWT token: An error occurred while attempting to decode the Jwt: Jwt expired at 2026-07-28T10:44:00Z
 2026-07-28T16:15:33.032+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-6] c.p.erp.security.filter.JwtAuthFilter    : Invalid JWT token: An error occurred while attempting to decode the Jwt: Jwt expired at 2026-07-28T10:44:24Z
+2026-07-28T16:56:16.343+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-7] org.hibernate.orm.jdbc.error             : HHH000247: ErrorCode: 0, SQLState: 42P18
+2026-07-28T16:56:16.343+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-7] org.hibernate.orm.jdbc.error             : ERROR: could not determine data type of parameter $5
+2026-07-28T17:23:33.006+05:30  WARN 15128 --- [plus33-erp] [.1-8080-exec-10] c.p.erp.security.filter.JwtAuthFilter    : Invalid JWT token: An error occurred while attempting to decode the Jwt: Jwt expired at 2026-07-28T11:51:59Z
+2026-07-28T17:40:55.189+05:30  WARN 15128 --- [plus33-erp] [.1-8080-exec-10] org.hibernate.orm.jdbc.error             : HHH000247: ErrorCode: 0, SQLState: 42P18
+2026-07-28T17:40:55.189+05:30  WARN 15128 --- [plus33-erp] [.1-8080-exec-10] org.hibernate.orm.jdbc.error             : ERROR: could not determine data type of parameter $5
+2026-07-28T17:48:38.120+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-8] org.hibernate.orm.jdbc.error             : HHH000247: ErrorCode: 0, SQLState: 42P18
+2026-07-28T17:48:38.120+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-8] org.hibernate.orm.jdbc.error             : ERROR: could not determine data type of parameter $5
+2026-07-28T17:49:32.972+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-2] org.hibernate.orm.jdbc.error             : HHH000247: ErrorCode: 0, SQLState: 42P18
+2026-07-28T17:49:32.974+05:30  WARN 15128 --- [plus33-erp] [0.1-8080-exec-2] org.hibernate.orm.jdbc.error             : ERROR: could not determine data type of parameter $5
+2026-07-28T17:54:09.804+05:30  WARN 15128 --- [plus33-erp] [.1-8080-exec-10] org.hibernate.orm.jdbc.error             : HHH000247: ErrorCode: 0, SQLState: 42P18
+2026-07-28T17:54:09.804+05:30  WARN 15128 --- [plus33-erp] [.1-8080-exec-10] org.hibernate.orm.jdbc.error             : ERROR: could not determine data type of parameter $5
