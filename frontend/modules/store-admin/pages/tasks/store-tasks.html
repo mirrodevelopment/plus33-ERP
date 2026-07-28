@@ -3,69 +3,87 @@
      File    : store-tasks.html
      Path    : frontend/modules/store-admin/pages/tasks/store-tasks.html
      ============================================================ -->
-<div class="store-tasks-gov-page animate-fade-in">
+<div class="store-tasks-page animate-fade-in">
 
-  <!-- Header -->
-  <div class="store-gov-header">
-    <div>
-      <h2 class="store-gov-title">
-        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="title-icon">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
-        </svg>
-        <span>Store Tasks Governance</span>
-      </h2>
-      <span class="store-gov-subtitle">Executive storewide task delegation, assign to all store employees, supervisor controls, &amp; audit reports</span>
-    </div>
-
-    <div style="display: flex; gap: 10px;">
-      <button type="button" id="btn-export-task-pdf" class="tasks-btn tasks-btn--glass">
-        <span>📄 Export Audit PDF</span>
-      </button>
-      <button type="button" id="btn-open-admin-create-modal" class="tasks-btn tasks-btn--gold">
-        <span>+ Assign Store Directive / Task</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Store KPI Banner -->
-  <div class="tasks-kpi-grid mb-xl">
-    <div class="tasks-kpi-card tasks-kpi-card--gold">
-      <div class="tasks-kpi-card__top"><span class="tasks-kpi-card__label">Store Tasks Today</span><div>📅</div></div>
-      <div class="tasks-kpi-card__val" id="admin-kpi-today">0</div>
-      <div class="tasks-kpi-card__sub">Storewide scheduled today</div>
-    </div>
-    <div class="tasks-kpi-card tasks-kpi-card--green">
-      <div class="tasks-kpi-card__top"><span class="tasks-kpi-card__label">Store Completed (Month)</span><div>✅</div></div>
-      <div class="tasks-kpi-card__val" id="admin-kpi-completed">0</div>
-      <div class="tasks-kpi-card__sub">Successfully verified</div>
-    </div>
-    <div class="tasks-kpi-card tasks-kpi-card--amber">
-      <div class="tasks-kpi-card__top"><span class="tasks-kpi-card__label">Store Uncompleted (Month)</span><div>⏳</div></div>
-      <div class="tasks-kpi-card__val" id="admin-kpi-uncompleted">0</div>
-      <div class="tasks-kpi-card__sub">Ongoing / pending / blocked</div>
-    </div>
-  </div>
-
-  <!-- Default Quick Directive Cards Grid -->
-  <div class="mb-xl">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+  <!-- Header Section -->
+  <div class="store-tasks-header mb-xl">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div>
-        <h3 style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: #fff; margin: 0;">⚡ Standard Operational Directive Cards</h3>
-        <p style="font-size: 0.8rem; color: #a1a1aa; margin: 2px 0 0;">Select an employee directly on any default card below and click dispatch.</p>
+        <h2 class="store-tasks-title" style="display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin: 0;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="title-icon">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Store Tasks Governance &amp; Dispatch</span>
+        </h2>
+        <span class="store-tasks-subtitle" style="font-size: 0.85rem; color: #a1a1aa; margin-top: 4px; display: block;">Central shift task management, preset dispatch, employee task tracking, &amp; report verification</span>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="button" id="btn-purge-all-db-data" class="tasks-btn tasks-btn--glass" style="color: #f87171; border-color: rgba(239,68,68,0.4);">
+          <span>🗑️ Reset DB &amp; Purge All Data</span>
+        </button>
+        <button type="button" id="btn-export-task-pdf" class="tasks-btn tasks-btn--glass">
+          <span>📄 Export PDF / Print</span>
+        </button>
+        <button type="button" id="btn-export-task-img" class="tasks-btn tasks-btn--glass" style="color: #60a5fa; border-color: rgba(96,165,250,0.4);">
+          <span>🖼️ Export Image</span>
+        </button>
+        <button type="button" id="btn-open-admin-create-modal" class="tasks-btn tasks-btn--gold">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>+ Create Custom Task</span>
+        </button>
       </div>
     </div>
-    
-    <div class="quick-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+  </div>
+
+  <!-- 3 KPI Counter Cards -->
+  <div class="tasks-kpi-grid mb-xl">
+    <div class="tasks-kpi-card tasks-kpi-card--gold">
+      <div class="tasks-kpi-card__top">
+        <span class="tasks-kpi-card__label">Today's Tasks</span>
+        <div class="tasks-kpi-card__icon">📅</div>
+      </div>
+      <div class="tasks-kpi-card__val" id="admin-kpi-today">0</div>
+      <div class="tasks-kpi-card__sub">Storewide directives active</div>
+    </div>
+
+    <div class="tasks-kpi-card tasks-kpi-card--green">
+      <div class="tasks-kpi-card__top">
+        <span class="tasks-kpi-card__label">Completed (Month)</span>
+        <div class="tasks-kpi-card__icon">✅</div>
+      </div>
+      <div class="tasks-kpi-card__val" id="admin-kpi-completed">0</div>
+      <div class="tasks-kpi-card__sub">Verified &amp; closed</div>
+    </div>
+
+    <div class="tasks-kpi-card tasks-kpi-card--amber">
+      <div class="tasks-kpi-card__top">
+        <span class="tasks-kpi-card__label">Uncompleted (Month)</span>
+        <div class="tasks-kpi-card__icon">⏳</div>
+      </div>
+      <div class="tasks-kpi-card__val" id="admin-kpi-uncompleted">0</div>
+      <div class="tasks-kpi-card__sub">Pending, active, or blocked</div>
+    </div>
+  </div>
+
+  <!-- Quick Operational Presets Dispatch Grid -->
+  <div class="presets-section mb-xl">
+    <h3 style="font-family: var(--font-display); font-size: 1.1rem; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+      <span>⚡ Quick Storewide Presets Dispatch</span>
+      <span style="font-size: 0.75rem; color: #a1a1aa; font-weight: 400;">(Dispatch standard shift directives directly to shift team)</span>
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px;">
       
-      <!-- Card 1: Inventory -->
+      <!-- Card 1: Inventory Audit -->
       <div class="glass-card-preset" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(201,164,106,0.3); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 1.4rem;">📦</span>
-            <span style="background: rgba(201,164,106,0.15); color: #c9a46a; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">STOCK AUDIT</span>
+            <span style="background: rgba(201,164,106,0.15); color: #c9a46a; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">INVENTORY</span>
           </div>
-          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">Daily Stock Level & Inventory Audit</h4>
-          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Count coffee beans, syrups, oat milk, & dairy. Log variance in ERP.</p>
+          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">Daily Stock Level &amp; Inventory Audit</h4>
+          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Physical count of coffee beans (Ethiopian, Colombian), syrups, dairy, &amp; consumables.</p>
         </div>
         <div>
           <label style="font-size: 0.72rem; color: #c9a46a; font-weight: 600; display: block; margin-bottom: 4px;">ASSIGN TO EMPLOYEE:</label>
@@ -76,41 +94,41 @@
         </div>
       </div>
 
-      <!-- Card 2: Equipment Calibration -->
+      <!-- Card 2: Espresso Machine Clean -->
       <div class="glass-card-preset" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(59,130,246,0.3); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 1.4rem;">☕</span>
             <span style="background: rgba(59,130,246,0.15); color: #60a5fa; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">MAINTENANCE</span>
           </div>
-          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">Espresso Machine Calibration & Clean</h4>
-          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Backflush group heads with Cafetto, test shot timing (27-30s) & wipe wands.</p>
+          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">Espresso Machine Calibration &amp; Clean</h4>
+          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Shot extraction timing check (27-30s), backflush group heads, &amp; steam wand wipe.</p>
         </div>
         <div>
           <label style="font-size: 0.72rem; color: #60a5fa; font-weight: 600; display: block; margin-bottom: 4px;">ASSIGN TO EMPLOYEE:</label>
           <select class="card-assignee-select form-input" data-card="EQUIP_CALIB" style="font-size: 0.8rem; padding: 6px 10px; margin-bottom: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15);">
             <option value="all@plus33.com">👥 All Store Employees (Storewide Broadcast)</option>
           </select>
-          <button type="button" class="tasks-btn tasks-btn--glass btn-quick-dispatch" data-card="EQUIP_CALIB" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px; border-color: rgba(59,130,246,0.4); color: #60a5fa;">⚡ Dispatch Machine Calibration</button>
+          <button type="button" class="tasks-btn tasks-btn--glass btn-quick-dispatch" data-card="EQUIP_CALIB" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px; border-color: rgba(59,130,246,0.4); color: #60a5fa;">⚡ Dispatch Machine Clean</button>
         </div>
       </div>
 
-      <!-- Card 3: Food Safety & Temp -->
+      <!-- Card 3: HACCP Food Safety Audit -->
       <div class="glass-card-preset" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(16,185,129,0.3); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 1.4rem;">🛡️</span>
-            <span style="background: rgba(16,185,129,0.15); color: #34d399; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">SAFETY & HYGIENE</span>
+            <span style="background: rgba(16,185,129,0.15); color: #34d399; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">COMPLIANCE</span>
           </div>
-          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">HACCP Food Safety & Fridge Temp Audit</h4>
-          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Log milk fridge & chiller temps (1-4°C). Inspect pastry expiration dates.</p>
+          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">HACCP Food Safety &amp; Fridge Temp Audit</h4>
+          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Log milk fridge &amp; chiller temps (< 4°C), inspect pastry expiry dates, &amp; check sanitization.</p>
         </div>
         <div>
           <label style="font-size: 0.72rem; color: #34d399; font-weight: 600; display: block; margin-bottom: 4px;">ASSIGN TO EMPLOYEE:</label>
           <select class="card-assignee-select form-input" data-card="HACCP_SAFETY" style="font-size: 0.8rem; padding: 6px 10px; margin-bottom: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15);">
             <option value="all@plus33.com">👥 All Store Employees (Storewide Broadcast)</option>
           </select>
-          <button type="button" class="tasks-btn tasks-btn--green btn-quick-dispatch" data-card="HACCP_SAFETY" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px;">⚡ Dispatch HACCP Audit</button>
+          <button type="button" class="tasks-btn tasks-btn--glass btn-quick-dispatch" data-card="HACCP_SAFETY" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px; border-color: rgba(16,185,129,0.4); color: #34d399;">⚡ Dispatch HACCP Audit</button>
         </div>
       </div>
 
@@ -121,8 +139,8 @@
             <span style="font-size: 1.4rem;">💰</span>
             <span style="background: rgba(245,158,11,0.15); color: #fbbf24; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">CASH RECON</span>
           </div>
-          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">Shift Handover & Cash Drawer Recon</h4>
-          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Count float against POS shift closure report & deposit cash in drop safe.</p>
+          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">Shift Handover &amp; Cash Drawer Recon</h4>
+          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Count float against POS shift closure report &amp; deposit cash in drop safe.</p>
         </div>
         <div>
           <label style="font-size: 0.72rem; color: #fbbf24; font-weight: 600; display: block; margin-bottom: 4px;">ASSIGN TO EMPLOYEE:</label>
@@ -140,8 +158,8 @@
             <span style="font-size: 1.4rem;">🌅</span>
             <span style="background: rgba(168,85,247,0.15); color: #c084fc; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">OPENING PREP</span>
           </div>
-          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">Store Opening & Counter Preparation</h4>
-          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Power on grinders, set up seating area, & initialize POS registers.</p>
+          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">Store Opening &amp; Counter Preparation</h4>
+          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Power on grinders, set up seating area, &amp; initialize POS registers.</p>
         </div>
         <div>
           <label style="font-size: 0.72rem; color: #c084fc; font-weight: 600; display: block; margin-bottom: 4px;">ASSIGN TO EMPLOYEE:</label>
@@ -159,8 +177,8 @@
             <span style="font-size: 1.4rem;">🔴</span>
             <span style="background: rgba(239,68,68,0.2); color: #f87171; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px;">IMMEDIATE PRIORITY</span>
           </div>
-          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">URGENT: Bar Sanitization & Spill Clean</h4>
-          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Pre-emptive immediate directive: Sanitize main workstation & clear spills.</p>
+          <h4 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px;">URGENT: Bar Sanitization &amp; Spill Clean</h4>
+          <p style="color: #94a3b8; font-size: 0.78rem; line-height: 1.4; margin: 0 0 14px;">Pre-emptive immediate directive: Sanitize main workstation &amp; clear spills.</p>
         </div>
         <div>
           <label style="font-size: 0.72rem; color: #f87171; font-weight: 600; display: block; margin-bottom: 4px;">ASSIGN TO EMPLOYEE:</label>
@@ -175,33 +193,34 @@
   </div>
 
   <!-- Main Store Tasks Table Card -->
-  <div class="tasks-card glass">
-    <div class="tasks-toolbar">
-      <h3 style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: #fff; margin: 0;">Store Task Directory</h3>
+  <div class="tasks-card glass mb-xl">
+    <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-family: var(--font-display); font-size: 1.1rem; color: #fff; margin: 0;">Store Task Directory</h3>
+      <span style="font-size: 0.78rem; color: #a1a1aa;">All active &amp; historical storewide task directives</span>
     </div>
-    <div id="admin-store-tasks-list" class="tasks-list-container">
+    <div id="admin-store-tasks-list" style="padding: 16px;">
       <!-- Dynamically populated -->
     </div>
   </div>
 
-  <!-- Store Admin Task Assignment Modal -->
+  <!-- Modal: Create Custom Task Directive -->
   <div id="modal-admin-task" class="tasks-modal-overlay" style="display: none;">
     <div class="tasks-modal-card">
       <div class="tasks-modal-header">
-        <h4 class="tasks-modal-title">Create &amp; Assign Store Task</h4>
+        <h4 class="tasks-modal-title">📋 Dispatch Custom Store Task Directive</h4>
         <button type="button" id="btn-close-admin-modal" class="modal-close-btn">✕</button>
       </div>
       <form id="form-admin-task" class="tasks-form">
         <div class="form-group">
-          <label class="form-label" style="color: #c9a46a; font-weight: 700;">⚡ Standard Directive Presets (Auto-Fill Template)</label>
+          <label class="form-label" style="color: #c9a46a;">Quick Preset Selection (Optional)</label>
           <select id="adm-preset-template" class="form-input" style="border: 1px solid rgba(201,164,106,0.4); background: rgba(201,164,106,0.08); color: #c9a46a; font-weight: 600;">
             <option value="">-- Choose a Preset Operational Template --</option>
-            <option value="INV_AUDIT">📦 Daily Stock Level & Inventory Audit</option>
-            <option value="EQUIP_CALIB">☕ Espresso Machine Calibration & Group Head Cleaning</option>
-            <option value="HACCP_SAFETY">🛡️ HACCP Food Safety & Milk Fridge Temperature Audit</option>
-            <option value="CASH_RECON">💰 Shift Handover & Cash Drawer Reconciliation</option>
-            <option value="OPENING_PREP">🌅 Store Opening & Counter Service Preparation</option>
-            <option value="IMMEDIATE_DEEP_CLEAN">🔴 IMMEDIATE: Urgent Bar Sanitization & Spill Clean</option>
+            <option value="INV_AUDIT">📦 Daily Stock Level &amp; Inventory Audit</option>
+            <option value="EQUIP_CALIB">☕ Espresso Machine Calibration &amp; Group Head Cleaning</option>
+            <option value="HACCP_SAFETY">🛡️ HACCP Food Safety &amp; Milk Fridge Temperature Audit</option>
+            <option value="CASH_RECON">💰 Shift Handover &amp; Cash Drawer Reconciliation</option>
+            <option value="OPENING_PREP">🌅 Store Opening &amp; Counter Service Preparation</option>
+            <option value="IMMEDIATE_DEEP_CLEAN">🔴 IMMEDIATE: Urgent Bar Sanitization &amp; Spill Clean</option>
           </select>
         </div>
         <div class="form-group">
@@ -234,6 +253,47 @@
         <div class="modal-actions">
           <button type="button" id="btn-cancel-admin-modal" class="tasks-btn tasks-btn--glass">Cancel</button>
           <button type="submit" class="tasks-btn tasks-btn--gold">Dispatch Store Directive</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Store Admin Report Verification & Approval Modal -->
+  <div id="modal-admin-view-report" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card" style="max-width: 600px;">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title">📄 Task Completion Report &amp; Proof Inspection</h4>
+        <button type="button" id="btn-close-admin-view-report-modal" class="modal-close-btn">✕</button>
+      </div>
+      <div id="admin-view-report-content" style="display: flex; flex-direction: column; gap: 14px; color: #fff;">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button type="button" id="btn-cancel-admin-view-report" class="tasks-btn tasks-btn--glass">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Reject Report with Written Reason (Store Admin) -->
+  <div id="modal-admin-reject-report" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title" style="color: #f87171;">❌ Request Revision / Reject Report</h4>
+        <button type="button" id="btn-close-admin-reject-modal" class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-admin-reject-report" class="tasks-form">
+        <input type="hidden" id="admin-rej-task-id" />
+        <div class="form-group">
+          <label class="form-label">Task Title</label>
+          <input type="text" id="admin-rej-task-title" class="form-input" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Written Reason for Revision Request / Rejection <span style="color:#ef4444;">*</span></label>
+          <textarea id="admin-rej-reason" class="form-input form-textarea" rows="4" placeholder="Detail what is missing or needs correction (e.g. Fridge temperature reading was missing, photo proof blurry, or stock count incomplete)..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-admin-reject" class="tasks-btn tasks-btn--glass">Cancel</button>
+          <button type="submit" class="tasks-btn tasks-btn--red">❌ Confirm &amp; Request Revision</button>
         </div>
       </form>
     </div>

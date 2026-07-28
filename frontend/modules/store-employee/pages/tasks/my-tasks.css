@@ -345,3 +345,12 @@
 .form-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; }
 .form-textarea { resize: vertical; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+
+@media print {
+  .tasks-kpi-grid, .tasks-kpi-card, .tasks-btn, button, .modal-close-btn, .tasks-modal-overlay, .my-tasks-header__right { display: none !important; }
+  body * { visibility: hidden; }
+  .my-tasks-page, .my-tasks-page * { visibility: visible; }
+  .my-tasks-page { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; color: #000 !important; }
+  .task-item { background: #fff !important; color: #000 !important; border: 1px solid #ccc !important; page-break-inside: avoid; }
+  h2, h4, span, div, p, strong { color: #000 !important; }
+}

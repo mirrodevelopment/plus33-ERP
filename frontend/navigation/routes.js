@@ -170,7 +170,7 @@ export const routes = [
 
   // Employee Workplace Pages
   { path: '#schedule', page: 'modules/store-employee/pages/schedule/schedule.js', layout: 'dashboard', title: 'My Schedule', requiresAuth: true },
-  { path: '#tasks', page: 'modules/store-employee/pages/tasks/tasks.js', layout: 'dashboard', title: 'My Tasks', requiresAuth: true },
+  { path: '#tasks', page: 'modules/store-employee/pages/tasks/my-tasks.js', layout: 'dashboard', title: 'My Tasks', requiresAuth: true },
   { path: '#attendance', page: 'modules/store-employee/pages/attendance/attendance.js', layout: 'dashboard', title: 'Attendance', requiresAuth: true },
   { path: '#training', page: 'modules/store-employee/pages/training/training.js', layout: 'dashboard', title: 'Training', requiresAuth: true },
   { path: '#performance', page: 'modules/store-employee/pages/performance/performance.js', layout: 'dashboard', title: 'Performance', requiresAuth: true },

@@ -6,18 +6,27 @@
 <div class="my-tasks-page animate-fade-in">
 
   <!-- Header Section -->
-  <div class="my-tasks-header">
+  <div class="my-tasks-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
     <div class="my-tasks-header__left">
-      <h2 class="my-tasks-title">
+      <h2 class="my-tasks-title" style="display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin: 0;">
         <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="title-icon">
           <path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
         </svg>
         <span>My Tasks</span>
       </h2>
-      <span class="my-tasks-subtitle">Personal shift task workspace, live status execution, &amp; report logging</span>
+      <span class="my-tasks-subtitle" style="font-size: 0.85rem; color: #a1a1aa; margin-top: 4px; display: block;">Personal shift task workspace, live status execution, &amp; report logging</span>
     </div>
 
-    <div class="my-tasks-header__right">
+    <div class="my-tasks-header__right" style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="button" id="btn-export-my-pdf" class="tasks-btn tasks-btn--glass">
+        <span>📄 Export PDF / Print</span>
+      </button>
+      <button type="button" id="btn-export-my-img" class="tasks-btn tasks-btn--glass" style="color: #60a5fa; border-color: rgba(96,165,250,0.4);">
+        <span>🖼️ Export Image</span>
+      </button>
+      <button type="button" id="btn-purge-my-tasks-data" class="tasks-btn tasks-btn--glass" style="color: #f87171; border-color: rgba(239,68,68,0.4);">
+        <span>🗑️ Reset DB &amp; Purge All Data</span>
+      </button>
       <button type="button" id="btn-refresh-my-tasks" class="tasks-btn tasks-btn--glass">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
@@ -73,14 +82,14 @@
   </div>
 
   <!-- Main Tasks Card & Controls -->
-  <div class="tasks-card glass">
+  <div class="tasks-card glass mb-xl">
     <div class="tasks-toolbar">
       <!-- Filter Tabs -->
       <div class="tasks-tabs">
         <button type="button" class="tab-pill active" data-status="all">All Tasks (<span id="count-all">0</span>)</button>
         <button type="button" class="tab-pill" data-status="PENDING">Pending (<span id="count-pending">0</span>)</button>
         <button type="button" class="tab-pill" data-status="STARTED">Started (<span id="count-started">0</span>)</button>
-        <button type="button" class="tab-pill" data-status="IN_PROGRESS">Ongoing (<span id="count-ongoing">0</span>)</button>
+        <button type="button" class="tab-pill" data-status="ONGOING">Ongoing (<span id="count-ongoing">0</span>)</button>
         <button type="button" class="tab-pill" data-status="COMPLETED">Completed (<span id="count-completed">0</span>)</button>
         <button type="button" class="tab-pill" data-status="BLOCKED">Blocked (<span id="count-blocked">0</span>)</button>
       </div>
@@ -92,69 +101,248 @@
     </div>
   </div>
 
-  <!-- Deadline Extension Request Modal -->
-  <div id="modal-extension-request" class="tasks-modal-overlay" style="display: none;">
+  <!-- Task Guidelines & SOP Policy Banner Card (Placed at the END of the page) -->
+  <div id="btn-open-task-policy-modal" style="background: rgba(30, 30, 30, 0.7); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 18px 22px; margin-top: 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.borderColor='rgba(201,164,106,0.5)'; this.style.background='rgba(40,40,40,0.8)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)'; this.style.background='rgba(30,30,30,0.7)';">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div style="width: 44px; height: 44px; background: rgba(201, 164, 106, 0.15); border: 1px solid rgba(201, 164, 106, 0.3); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #c9a46a; flex-shrink: 0;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+        </svg>
+      </div>
+      <div>
+        <h4 style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0 0 3px;">Task Guidelines &amp; Operational SOP Policy</h4>
+        <span style="font-size: 0.82rem; color: #a1a1aa;">View store task execution rules, safety guidelines, approval workflows, &amp; status definitions</span>
+      </div>
+    </div>
+    <div style="color: #a1a1aa; font-weight: 700; font-size: 1.2rem; padding-left: 12px;">›</div>
+  </div>
+
+  <!-- Task Guidelines & SOP Policy Pop-up Modal -->
+  <div id="modal-task-policy-guidelines" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card" style="max-width: 680px; background: #141414; border: 1px solid rgba(201,164,106,0.4); box-shadow: 0 0 30px rgba(0,0,0,0.8);">
+      <div class="tasks-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; background: rgba(201, 164, 106, 0.15); border: 1px solid rgba(201, 164, 106, 0.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #c9a46a;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+            </svg>
+          </div>
+          <div>
+            <h4 class="tasks-modal-title" style="color: #c9a46a; font-size: 1.15rem; margin: 0;">Task Guidelines &amp; Operational SOP Policy</h4>
+            <span style="font-size: 0.78rem; color: #a1a1aa;">PLUS33 Coffee Store Operations Standard Operating Procedure</span>
+          </div>
+        </div>
+        <button type="button" id="btn-close-policy-modal" class="modal-close-btn">✕</button>
+      </div>
+      
+      <div style="padding: 16px 0; display: flex; flex-direction: column; gap: 16px; max-height: 68vh; overflow-y: auto; color: #e2e8f0; font-size: 0.88rem; line-height: 1.5;">
+        
+        <!-- Section 1: Standard Status Definitions -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px;">
+          <h5 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 10px; display: flex; align-items: center; gap: 8px;">
+            <span>📌 1. Task Lifecycle &amp; 5 Core Statuses</span>
+          </h5>
+          <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; color: #cbd5e1;">
+            <li><strong style="color: #fbbf24;">Pending (ASSIGNED):</strong> Newly assigned directive awaiting employee initiation.</li>
+            <li><strong style="color: #60a5fa;">Started:</strong> Active task timer started on bar by employee.</li>
+            <li><strong style="color: #c084fc;">Ongoing (Awaiting Approval):</strong> Completion report &amp; proof submitted; awaiting supervisor sign-off.</li>
+            <li><strong style="color: #34d399;">Completed:</strong> Work verified, approved, and closed by Shift Supervisor or Store Admin.</li>
+            <li><strong style="color: #f87171;">Blocked:</strong> Halted due to equipment failure, ingredient stockout, or physical obstacle.</li>
+            <li><strong style="color: #ef4444;">Rejected:</strong> Employee rejected directive with a mandatory written operational justification.</li>
+          </ul>
+        </div>
+
+        <!-- Section 2: Action Button Workflow -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px;">
+          <h5 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 10px; display: flex; align-items: center; gap: 8px;">
+            <span>⚡ 2. Employee Action Options</span>
+          </h5>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: rgba(16,185,129,0.2); color: #34d399; font-weight: 700; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; min-width: 105px; text-align: center;">▶ Start Task</span>
+              <span>Click when initiating task execution to start activity timer.</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: rgba(245,158,11,0.2); color: #fbbf24; font-weight: 700; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; min-width: 105px; text-align: center;">⏳ Extra Time</span>
+              <span>Request a deadline extension from the assigner with a written operational reason.</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: rgba(239,68,68,0.2); color: #f87171; font-weight: 700; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; min-width: 105px; text-align: center;">❌ Reject Task</span>
+              <span>Reject assigned directive with mandatory written reason if unassigned to shift duty or unqualified.</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: rgba(201,164,106,0.2); color: #c9a46a; font-weight: 700; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; min-width: 105px; text-align: center;">📋 Submit Report</span>
+              <span>Attach photo proof/documents, work summary, &amp; audit metrics (fridge temp / espresso shot timings).</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="background: rgba(239,68,68,0.2); color: #f87171; font-weight: 700; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; min-width: 105px; text-align: center;">🚫 Mark Blocked</span>
+              <span>Use if an operational obstacle prevents completion. Enter obstacle notes for supervisor intervention.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Verification & Revision Workflow -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px;">
+          <h5 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+            <span>🔍 3. Verification &amp; Supervisor Approval / Revision</span>
+          </h5>
+          <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #a1a1aa; font-size: 0.84rem;">
+            <li><strong>✅ Approve &amp; Mark Completed:</strong> Shift Supervisor or Store Admin reviews submitted proof and approves work as COMPLETED.</li>
+            <li><strong>❌ Request Revision:</strong> If work is incomplete, supervisor sends a <strong>written revision reason</strong>. The task returns to employee with a highlighted warning box to resubmit.</li>
+          </ul>
+        </div>
+
+        <!-- Section 4: Live Time Remaining Countdown -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px;">
+          <h5 style="color: #fff; font-size: 0.95rem; font-weight: 700; margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+            <span>⏳ 4. Live Time Remaining Badge</span>
+          </h5>
+          <p style="margin: 0; color: #a1a1aa; font-size: 0.84rem; line-height: 1.5;">
+            Every task displays a dynamic live countdown badge e.g. <span style="color: #fbbf24; font-weight: 700;">⏳ 20H 30M Left</span> or <span style="color: #f87171; font-weight: 700;">⚠️ Overdue by 15M</span> based on the shift deadline.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="modal-actions" style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 14px;">
+        <button type="button" id="btn-cancel-policy-modal" class="tasks-btn tasks-btn--gold" style="width: 100%; justify-content: center;">Understood &amp; Close Policy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Request Deadline Extension / Extra Time -->
+  <div id="modal-request-extension" class="tasks-modal-overlay" style="display: none;">
     <div class="tasks-modal-card">
       <div class="tasks-modal-header">
-        <h4 class="tasks-modal-title">Request Deadline Extension</h4>
-        <button type="button" id="btn-close-extension-modal" class="modal-close-btn">✕</button>
+        <h4 class="tasks-modal-title" style="color: #fbbf24;">⏳ Request Deadline Extension / Extra Time</h4>
+        <button type="button" id="btn-close-ext-modal" class="modal-close-btn">✕</button>
       </div>
-      <form id="form-extension-request" class="tasks-form">
+      <form id="form-request-extension" class="tasks-form">
         <input type="hidden" id="ext-task-id" />
         <div class="form-group">
           <label class="form-label">Task Title</label>
           <input type="text" id="ext-task-title" class="form-input" readonly />
         </div>
         <div class="form-group">
-          <label class="form-label">Requested Target Deadline Date &amp; Time</label>
+          <label class="form-label">Requested New Deadline <span style="color:#ef4444;">*</span></label>
           <input type="datetime-local" id="ext-requested-date" class="form-input" required />
         </div>
         <div class="form-group">
-          <label class="form-label">Reason for Extension Request</label>
-          <textarea id="ext-reason" class="form-input form-textarea" rows="3" placeholder="Explain operational obstacle or why additional time is needed..." required></textarea>
+          <label class="form-label">Reason for Requesting Extra Time <span style="color:#ef4444;">*</span></label>
+          <textarea id="ext-reason" class="form-input form-textarea" rows="4" placeholder="Detail why extra time is required (e.g., Unexpected peak customer rush during shift, waiting for stock delivery, machine maintenance delay)..." required></textarea>
         </div>
         <div class="modal-actions">
-          <button type="button" id="btn-cancel-extension" class="tasks-btn tasks-btn--glass">Cancel</button>
-          <button type="submit" class="tasks-btn tasks-btn--gold">Submit Request</button>
+          <button type="button" id="btn-cancel-ext" class="tasks-btn tasks-btn--glass">Cancel</button>
+          <button type="submit" class="tasks-btn tasks-btn--gold">⏳ Submit Extra Time Request</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Work Report Submission Drawer -->
-  <div id="modal-work-report" class="tasks-modal-overlay" style="display: none;">
+  <!-- Task Rejection Modal (Employee Written Reason) -->
+  <div id="modal-reject-task" class="tasks-modal-overlay" style="display: none;">
     <div class="tasks-modal-card">
       <div class="tasks-modal-header">
-        <h4 class="tasks-modal-title">Submit Task Progress Report</h4>
+        <h4 class="tasks-modal-title" style="color: #f87171;">❌ Reject Assigned Directive</h4>
+        <button type="button" id="btn-close-reject-modal" class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-reject-task" class="tasks-form">
+        <input type="hidden" id="rej-task-id" />
+        <div class="form-group">
+          <label class="form-label">Task Title</label>
+          <input type="text" id="rej-task-title" class="form-input" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Written Reason for Rejection <span style="color:#ef4444;">*</span></label>
+          <textarea id="rej-reason" class="form-input form-textarea" rows="4" placeholder="Explain why you are unable to accept this task (e.g., Assigned to main bar shift, missing equipment training, shift ending soon)..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-reject" class="tasks-btn tasks-btn--glass">Cancel</button>
+          <button type="submit" class="tasks-btn tasks-btn--red">❌ Confirm Task Rejection</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mark Task Blocked Modal -->
+  <div id="modal-block-task" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title" style="color: #f87171;">🚫 Mark Task as Blocked</h4>
+        <button type="button" id="btn-close-block-modal" class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-block-task" class="tasks-form">
+        <input type="hidden" id="block-task-id" />
+        <div class="form-group">
+          <label class="form-label">Task Title</label>
+          <input type="text" id="block-task-title" class="form-input" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason for Blocking Task <span style="color:#ef4444;">*</span></label>
+          <textarea id="block-reason" class="form-input form-textarea" rows="3" placeholder="Specify equipment malfunction, missing ingredients, or physical obstacle..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-block" class="tasks-btn tasks-btn--glass">Cancel</button>
+          <button type="submit" class="tasks-btn tasks-btn--red">🚫 Set Status to Blocked</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Completion Report & Proof Submission Modal -->
+  <div id="modal-work-report" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card" style="max-width: 600px;">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title">📋 Submit Task Completion Report &amp; Proof</h4>
         <button type="button" id="btn-close-report-modal" class="modal-close-btn">✕</button>
       </div>
       <form id="form-work-report" class="tasks-form">
         <input type="hidden" id="rep-task-id" />
+
         <div class="form-group">
-          <label class="form-label">Report Status Action</label>
-          <select id="rep-status" class="form-input">
-            <option value="IN_PROGRESS">⚡ In-Progress / Ongoing Update</option>
-            <option value="COMPLETED">✅ Completed &amp; Ready for Review</option>
-            <option value="BLOCKED">⚠️ Report Operational Blocker</option>
-          </select>
+          <label class="form-label">Task Title</label>
+          <input type="text" id="rep-task-title" class="form-input" readonly />
         </div>
+
         <div class="form-group">
-          <label class="form-label">Completion Percentage (%)</label>
-          <input type="number" id="rep-percent" class="form-input" min="0" max="100" value="100" required />
+          <label class="form-label">Completion Summary &amp; Work Notes <span style="color:#ef4444;">*</span></label>
+          <textarea id="rep-notes" class="form-input" rows="4" placeholder="Detail actions completed, stock count, equipment checks, or sanitization results..." required></textarea>
         </div>
-        <div class="form-group">
-          <label class="form-label">Progress Notes &amp; Observations</label>
-          <textarea id="rep-notes" class="form-input form-textarea" rows="4" placeholder="Detail actions completed, stock consumed, equipment checks, or issues..." required></textarea>
+
+        <div class="form-row" style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <div class="form-group" style="flex: 1; min-width: 220px;">
+            <label class="form-label">Attach Proof Photo / Document</label>
+            <input type="file" id="rep-file-input" class="form-input" accept="image/*,.pdf,.doc,.docx" />
+            <input type="hidden" id="rep-attachment-data" />
+            <div id="rep-file-preview" style="margin-top: 6px; font-size: 0.78rem; color: #34d399; display: none;"></div>
+          </div>
+          <div class="form-group" style="width: 170px;">
+            <label class="form-label">Audit Metric / Temp</label>
+            <input type="text" id="rep-metric" class="form-input" placeholder="e.g. 3.2°C or 18g/36g" />
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Attachment URL / Document Link (Optional)</label>
-          <input type="text" id="rep-attachment" class="form-input" placeholder="e.g. photo checklist or report doc link" />
-        </div>
-        <div class="modal-actions">
+
+        <div class="modal-actions" style="margin-top: 16px;">
           <button type="button" id="btn-cancel-report" class="tasks-btn tasks-btn--glass">Cancel</button>
-          <button type="submit" class="tasks-btn tasks-btn--gold">Submit Report</button>
+          <button type="submit" class="tasks-btn tasks-btn--green">✓ Submit Report &amp; Complete Task</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- View Completion Report & Proof Modal -->
+  <div id="modal-view-report" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card" style="max-width: 600px;">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title">📄 Task Completion Report &amp; Proof</h4>
+        <button type="button" id="btn-close-view-report-modal" class="modal-close-btn">✕</button>
+      </div>
+      <div id="view-report-content" style="display: flex; flex-direction: column; gap: 14px; color: #fff;">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button type="button" id="btn-cancel-view-report" class="tasks-btn tasks-btn--glass">Close</button>
+      </div>
     </div>
   </div>
 

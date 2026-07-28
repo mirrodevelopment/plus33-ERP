@@ -350,4 +350,9 @@ public class StoreTaskServiceImpl implements StoreTaskService {
     public void deleteTask(Long taskId) {
         taskRepository.deleteById(taskId);
     }
+
+    @Override
+    public void purgeAllTasks() {
+        taskRepository.deleteAll();
+    }
 }

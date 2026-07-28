@@ -10,7 +10,7 @@ REM [0/4] Kill old processes on ports 8080 and 3000
 REM ---------------------------------------------------
 echo [0/4] Killing old processes on ports 8080 and 3000...
 
-for /f "usebackq tokens=*" %%L in (`powershell -NoProfile -Command "$procs = Get-NetTCPConnection -LocalPort 8080,3000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | Sort-Object -Unique; if (-not $procs) { Write-Output 'NONE' } else { foreach ($p in $procs) { try { $n = (Get-Process -Id $p -ErrorAction Stop).ProcessName } catch { $n = 'unknown' }; Write-Output ('KILLED PID ' + $p + ' (' + $n + ')'); Stop-Process -Id $p -Force -ErrorAction SilentlyContinue } }"`) do (
+for /f "usebackq tokens=*" %%L in (`powershell -NoProfile -Command "$procs = Get-NetTCPConnection -LocalPort 8080,3000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | Sort-Object -Unique | Where-Object { $_ -ne 0 }; if (-not $procs) { Write-Output 'NONE' } else { foreach ($p in $procs) { try { $n = (Get-Process -Id $p -ErrorAction Stop).ProcessName } catch { $n = 'unknown' }; Write-Output ('KILLED PID ' + $p + ' (' + $n + ')'); Stop-Process -Id $p -Force -ErrorAction SilentlyContinue } }"`) do (
     if "%%L"=="NONE" (
         echo   No old process found on ports 8080/3000.
     ) else (
@@ -18,21 +18,17 @@ for /f "usebackq tokens=*" %%L in (`powershell -NoProfile -Command "$procs = Get
     )
 )
 
-REM Give processes a moment to die, then verify the ports are actually free.
-REM Retry the kill + wait loop instead of trusting a single fixed delay.
 set /a clear_attempts=0
 set /a clear_max=10
 
 :wait_ports_clear
 set "port_busy="
-for %%P in (8080 3000) do (
-    powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort %%P -ErrorAction SilentlyContinue) { exit 1 } else { exit 0 }" >nul 2>nul
-    if errorlevel 1 set "port_busy=1"
-)
+powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 8080,3000 -State Listen -ErrorAction SilentlyContinue) { exit 1 } else { exit 0 }" >nul 2>nul
+if errorlevel 1 set "port_busy=1"
 
 if defined port_busy (
     set /a clear_attempts+=1
-    if !clear_attempts! geq !clear_max! (
+    if !clear_attempts! GEQ !clear_max! (
         echo.
         echo   Ports still busy after !clear_max! attempts, forcing kill of all java.exe...
         taskkill /F /IM java.exe >nul 2>&1
@@ -56,17 +52,25 @@ echo   Ports 8080 and 3000 are clear.
 REM ---------------------------------------------------
 REM [1/4] Compile backend if needed
 REM ---------------------------------------------------
-if not exist "%~dp0target\classes" (
-    echo [1/4] target\classes missing. Compiling backend...
-    call "%~dp0mvnw.cmd" compile "-Dmaven.test.skip=true" -q
-    if errorlevel 1 (
-        echo.
-        echo [FAILED] Maven compile failed. Check the errors above.
-        pause
-        exit /b 1
-    )
-) else (
-    echo [1/4] Skipping compile - classes already generated...
+echo [1/4] Compiling backend and processing resources...
+call "%~dp0mvnw.cmd" process-resources compile "-Dmaven.test.skip=true"
+if errorlevel 1 (
+    echo.
+    echo [FAILED] Maven compile failed. Check the errors above.
+    pause
+    exit /b 1
+)
+if exist "%~dp0src\main\resources\application.properties" (
+    if not exist "%~dp0target\classes" mkdir "%~dp0target\classes"
+    copy /y "%~dp0src\main\resources\application.properties" "%~dp0target\classes\application.properties" >nul 2>&1
+)
+if not exist "%~dp0target\classes\com\plus33\erp\Plus33ErpApplication.class" (
+    echo.
+    echo [FAILED] Compile reported success but Plus33ErpApplication.class is still missing.
+    echo   This usually means target\classes is corrupted/stale. Try deleting the
+    echo   target folder once and re-running this script for a clean rebuild.
+    pause
+    exit /b 1
 )
 
 REM ---------------------------------------------------
@@ -86,11 +90,12 @@ if not exist "%~dp0target\dependency" (
 )
 
 REM ---------------------------------------------------
-REM [3/4] Start backend
+REM [3/4] Start backend (output captured to backend.log for diagnostics)
 REM ---------------------------------------------------
 echo [3/4] Starting Spring Boot Backend (Port 8080)...
+if exist "%~dp0backend.log" del /f /q "%~dp0backend.log" >nul 2>&1
 
-start "PLUS33 Backend" /D "%~dp0" cmd /k "java -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Dspring.jmx.enabled=false -Dspring.main.lazy-initialization=true -Dspring.main.banner-mode=off -Dspring.config.location=file:target/classes/application.properties -cp target/classes;target/dependency/* com.plus33.erp.Plus33ErpApplication"
+start "PLUS33 Backend" /D "%~dp0" cmd /k "java -XX:TieredStopAtLevel=1 -XX:+UseParallelGC -Dspring.jmx.enabled=false -Dspring.main.lazy-initialization=true -Dspring.main.banner-mode=off -Dspring.config.location=optional:file:target/classes/application.properties -cp target/classes;target/dependency/* com.plus33.erp.Plus33ErpApplication > "%~dp0backend.log" 2>&1"
 
 REM ---------------------------------------------------
 REM [4/4] Compile + start frontend
@@ -106,27 +111,45 @@ if errorlevel 1 (
 start "PLUS33 Web Server" /D "%~dp0" cmd /k "java -cp frontend WebServer"
 
 REM ---------------------------------------------------
-REM Wait for backend health check (with timeout)
+REM Wait for backend health check (with timeout + crash detection)
 REM ---------------------------------------------------
 echo.
 echo Waiting for Java backend to start on Port 8080...
 set /a attempts=0
-set /a max_attempts=60
+set /a max_attempts=90
 
 :wait_backend
 powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>nul
-if !errorlevel! equ 0 goto backend_ready
+if not errorlevel 1 goto backend_ready
+
+REM Bail out immediately if the backend already crashed, instead of waiting the full timeout.
+if exist "%~dp0backend.log" (
+    findstr /C:"APPLICATION FAILED TO START" /C:"Exception in thread" /C:"Caused by" "%~dp0backend.log" >nul 2>&1
+    if not errorlevel 1 (
+        echo.
+        echo [FAILED] Backend crashed during startup. Last lines of backend.log:
+        echo ---------------------------------------------------
+        powershell -NoProfile -Command "Get-Content -Path '%~dp0backend.log' -Tail 30"
+        echo ---------------------------------------------------
+        pause
+        exit /b 1
+    )
+)
 
 set /a attempts+=1
-if !attempts! geq !max_attempts! (
+if !attempts! GEQ !max_attempts! (
     echo.
-    echo [FAILED] Backend did not respond on port 8080 after 2 minutes.
-    echo   Check the "PLUS33 Backend" console window for stack traces.
+    echo [FAILED] Backend did not respond on port 8080 after 3 minutes.
+    echo   Check backend.log or the "PLUS33 Backend" console window for stack traces.
+    echo   Last lines of backend.log:
+    echo ---------------------------------------------------
+    powershell -NoProfile -Command "if (Test-Path '%~dp0backend.log') { Get-Content -Path '%~dp0backend.log' -Tail 30 } else { Write-Output '(no backend.log found)' }"
+    echo ---------------------------------------------------
     pause
     exit /b 1
 )
 <nul set /p =.
-ping 127.0.0.1 -n 3 >nul
+ping 127.0.0.1 -n 2 >nul
 goto wait_backend
 
 :backend_ready
@@ -143,10 +166,10 @@ set /a max_attempts=30
 
 :wait_frontend
 powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>nul
-if !errorlevel! equ 0 goto frontend_ready
+if not errorlevel 1 goto frontend_ready
 
 set /a attempts+=1
-if !attempts! geq !max_attempts! (
+if !attempts! GEQ !max_attempts! (
     echo.
     echo [FAILED] Web server did not respond on port 3000 after 1 minute.
     echo   Check the "PLUS33 Web Server" console window for errors.
@@ -154,7 +177,7 @@ if !attempts! geq !max_attempts! (
     exit /b 1
 )
 <nul set /p =.
-ping 127.0.0.1 -n 3 >nul
+ping 127.0.0.1 -n 2 >nul
 goto wait_frontend
 
 :frontend_ready
@@ -168,6 +191,9 @@ echo ---------------------------------------------------
 echo.
 
 start chrome "http://localhost:3000/#login"
+if errorlevel 1 (
+    start http://localhost:3000/#login
+)
 
 echo Done. If Chrome didn't open (not installed/not default), the default
 echo browser was used instead, or open the link above manually.

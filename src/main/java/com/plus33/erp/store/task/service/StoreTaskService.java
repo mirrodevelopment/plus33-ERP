@@ -30,4 +30,6 @@ public interface StoreTaskService {
     Map<String, Object> getKpis(String employeeEmail);
 
     void deleteTask(Long taskId);
+
+    void purgeAllTasks();
 }

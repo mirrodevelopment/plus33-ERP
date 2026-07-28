@@ -148,4 +148,13 @@ public class StoreTaskController {
         response.put("message", "Task deleted successfully");
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/purge-all")
+    public ResponseEntity<?> purgeAllTasks() {
+        taskService.purgeAllTasks();
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "All tasks purged successfully across store database");
+        return ResponseEntity.ok(response);
+    }
 }
