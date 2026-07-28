@@ -43,6 +43,9 @@ export default class LogsPage {
   async mount(container, lifecycle) {
     logger.info('LogsPage', 'Mounting Platform Operations & Logs Auditor...');
 
+    // 0. Inject component stylesheet
+    this._loadCss();
+
     // 1. Fetch current logged-in user profile
     await this.fetchCurrentUserProfile();
 
@@ -57,10 +60,25 @@ export default class LogsPage {
 
     // 5. Fetch initial data (logged-in user data first)
     await this.fetchData();
+    const thead = container.querySelector('#log-table-head');
+    const tbody = container.querySelector('#log-table-body');
+    if (thead) thead.innerHTML = this.renderLogHeader();
+    if (tbody) tbody.innerHTML = this.renderLogRows();
 
     // 6. Bind events & Lucide icons
     if (window.lucide) window.lucide.createIcons();
     this.bindEvents(container, lifecycle);
+  }
+
+  _loadCss() {
+    const id = 'warehouse-admin-logs-css';
+    if (!document.getElementById(id)) {
+      const link = document.createElement('link');
+      link.id = id;
+      link.rel = 'stylesheet';
+      link.href = 'modules/warehouse-admin/pages/logs/logs.css';
+      document.head.appendChild(link);
+    }
   }
 
   async fetchCurrentUserProfile() {
@@ -118,46 +136,66 @@ export default class LogsPage {
         </div>
 
         <!-- Interactive Tabbed Log Viewer -->
-        <div class="card glass flex flex-col" style="padding: var(--spacing-lg); border-color: rgba(255,255,255,0.05); min-height: 480px;">
-          <div class="flex justify-between align-center mb-md flex-wrap gap-sm">
-            <!-- Tabs Controls -->
-            <div class="flex gap-xs" style="background:rgba(0,0,0,0.2); padding:2px; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.05);">
-              <button id="tab-login-logs" class="btn" style="padding:6px 16px; border-radius:var(--radius-sm); font-size:0.75rem; font-weight:700; cursor:pointer; border:none; transition:var(--transition-fast); background:${this.activeTab === 'logins' ? 'rgba(255,255,255,0.08)' : 'transparent'}; color:${this.activeTab === 'logins' ? '#fff' : 'var(--text-muted)'};">
+        <div class="card glass flex flex-col viewer-card">
+          <!-- Top Section: Segmented Tab Bar -->
+          <div class="logs-toolbar-header">
+            <div class="tabs-container">
+              <button id="tab-login-logs" class="btn tab-btn ${this.activeTab === 'logins' ? 'active' : ''}">
                 User Login Activity
               </button>
-              <button id="tab-audit-logs" class="btn" style="padding:6px 16px; border-radius:var(--radius-sm); font-size:0.75rem; font-weight:700; cursor:pointer; border:none; transition:var(--transition-fast); background:${this.activeTab === 'audit' ? 'rgba(255,255,255,0.08)' : 'transparent'}; color:${this.activeTab === 'audit' ? '#fff' : 'var(--text-muted)'};">
+              <button id="tab-audit-logs" class="btn tab-btn ${this.activeTab === 'audit' ? 'active' : ''}">
                 Audit Logs
               </button>
-              <button id="tab-system-logs" class="btn" style="padding:6px 16px; border-radius:var(--radius-sm); font-size:0.75rem; font-weight:700; cursor:pointer; border:none; transition:var(--transition-fast); background:${this.activeTab === 'system' ? 'rgba(255,255,255,0.08)' : 'transparent'}; color:${this.activeTab === 'system' ? '#fff' : 'var(--text-muted)'};">
+              <button id="tab-system-logs" class="btn tab-btn ${this.activeTab === 'system' ? 'active' : ''}">
                 System Diagnostics
               </button>
+              <button id="tab-other-data" class="btn tab-btn ${this.activeTab === 'other' ? 'active' : ''}">
+                Other User Data
+              </button>
             </div>
+          </div>
 
-            <!-- Date Range & User Selector Filters Bar -->
-            <div class="flex align-center gap-xs flex-wrap">
-              <div id="admin-user-selector-container" style="display:${this.isAdmin ? 'flex' : 'none'}; align-items:center; gap:4px; font-size:0.75rem; color:var(--text-muted);">
-                <span style="font-weight:600;">Select User:</span>
-                <select id="select-log-user" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem; max-width:210px; cursor:pointer;">
+          <!-- Bottom Section: Filter Controls & Action Buttons -->
+          <div class="logs-filters-panel">
+            <!-- Left Side: Filter Pills -->
+            <div class="filter-pills-row">
+              <div id="admin-user-selector-container" class="filter-pill" style="display:${(this.isAdmin && this.activeTab === 'other') ? 'flex' : 'none'};">
+                <span class="filter-label">Select User:</span>
+                <select id="select-log-user" class="log-select-input">
                   <!-- Dynamically populated -->
                 </select>
               </div>
 
-              <div style="display:flex; align-items:center; gap:4px; font-size:0.75rem; color:var(--text-muted);">
-                <span style="font-weight:600;">From:</span>
-                <input type="date" id="log-start-date" value="${this.startDate || ''}" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem;" />
+              <div id="data-category-selector-container" class="filter-pill" style="display:${this.activeTab === 'logins' ? 'none' : 'flex'};">
+                <span class="filter-label">Data Category:</span>
+                <select id="select-data-category" class="log-select-input" style="min-width: 170px;">
+                  <option value="logins">🔐 User Login Activity</option>
+                  <option value="audit">📋 Audit Action Trail</option>
+                  <option value="profile">👤 Profile &amp; Employment</option>
+                </select>
               </div>
-              <div style="display:flex; align-items:center; gap:4px; font-size:0.75rem; color:var(--text-muted);">
-                <span style="font-weight:600;">To:</span>
-                <input type="date" id="log-end-date" value="${this.endDate || ''}" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem;" />
+
+              <div class="filter-pill">
+                <span class="filter-label">From:</span>
+                <input type="date" id="log-start-date" class="log-date-input" value="${this.startDate || ''}" />
               </div>
-              <button id="btn-pull-user-data" class="btn" type="button" style="padding:4px 12px; font-size:0.72rem; font-weight:700; background:var(--accent-primary); color:#000; border:none; border-radius:4px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
-                <i data-lucide="download-cloud" style="width:12px; height:12px;"></i> Pull User Data
+
+              <div class="filter-pill">
+                <span class="filter-label">To:</span>
+                <input type="date" id="log-end-date" class="log-date-input" value="${this.endDate || ''}" />
+              </div>
+            </div>
+
+            <!-- Right Side: Action Button Group -->
+            <div class="action-btn-group">
+              <button id="btn-pull-user-data" class="btn btn-accent-pull" type="button" style="display:${this.activeTab === 'other' ? 'inline-flex' : 'none'};">
+                <i data-lucide="download-cloud" class="icon-xs"></i> Pull User Data
               </button>
-              <button id="btn-reset-logs" class="btn" type="button" style="padding:4px 10px; font-size:0.72rem; font-weight:600; background:rgba(255,255,255,0.08); color:var(--text-muted); border:none; border-radius:4px; cursor:pointer;">
+              <button id="btn-reset-logs" class="btn btn-reset" type="button">
                 Reset
               </button>
-              <button id="btn-export-pdf" class="btn" type="button" style="padding:4px 12px; font-size:0.72rem; font-weight:700; background:rgba(230,126,34,0.18); color:#e67e22; border:1px solid rgba(230,126,34,0.3); border-radius:4px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
-                <i data-lucide="file-text" style="width:14px; height:14px;"></i> Export PDF
+              <button id="btn-export-pdf" class="btn btn-export-pdf" type="button">
+                <i data-lucide="file-text" class="icon-xs"></i> Export PDF
               </button>
             </div>
           </div>
@@ -184,26 +222,33 @@ export default class LogsPage {
     let html = '';
     const myEmail = this.currentUser?.email || authStore.getUser()?.username || '';
 
-    // Option 1: Bulk Pull All Managed Personnel
-    html += `<option value="ALL_UNDER_ME">⚡ All Users & Employees Under Me (Bulk Pull)</option>`;
-
-    // Option 2: Logged-in User's own activity data
+    // Option 1: Current Logged-in User
     html += `<option value="${myEmail}">My Own Activity Logs (${myEmail})</option>`;
+
+    // Option 2: Bulk Pull All Managed Personnel
+    html += `<option value="ALL_UNDER_ME">⚡ All Users & Employees Under Me (Bulk Pull)</option>`;
 
     // Option 3..N: Specific Individual Users & Employees Under Admin
     if (this.targetUsers && this.targetUsers.length > 0) {
       for (const u of this.targetUsers) {
-        if (u.email !== myEmail) {
-          html += `<option value="${u.email}">${u.name} — ${u.employeeCode} (${u.email})</option>`;
+        if (u.email && u.email !== myEmail) {
+          html += `<option value="${u.email}">${u.name} — ${u.employeeCode || 'EMP'} (${u.email})</option>`;
         }
       }
     }
     selectEl.innerHTML = html;
-    selectEl.value = this.targetEmail || 'ALL_UNDER_ME';
+    selectEl.value = this.targetEmail || myEmail;
   }
 
   async fetchData() {
     try {
+      const myEmail = this.currentUser?.email || authStore.getUser()?.username || '';
+
+      // Default targetEmail to myEmail if not set
+      if (!this.targetEmail) {
+        this.targetEmail = myEmail;
+      }
+
       const params = new URLSearchParams();
       if (this.startDate) params.append('startDate', this.startDate);
       if (this.endDate) params.append('endDate', this.endDate);
@@ -258,6 +303,17 @@ export default class LogsPage {
           <th style="padding: var(--spacing-sm) var(--spacing-md); color: var(--accent-primary);">Change Details</th>
         </tr>
       `;
+    } else if (this.activeTab === 'other') {
+      return `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; font-weight:700;">
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">User Name &amp; Email</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Employee Code</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Role &amp; Designation</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Department</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md);">Security Status</th>
+          <th style="padding: var(--spacing-sm) var(--spacing-md); text-align:right;">Scope / Assignment</th>
+        </tr>
+      `;
     } else {
       return `
         <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; font-weight:700;">
@@ -273,7 +329,7 @@ export default class LogsPage {
   renderLogRows() {
     if (this.activeTab === 'logins') {
       if (!this.loginLogs || this.loginLogs.length === 0) {
-        return `<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-muted);">No login activity logs found for selected user criteria.</td></tr>`;
+        return `<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-muted);">No login activity logs found for logged-in user.</td></tr>`;
       }
       return this.loginLogs.map(l => `
         <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
@@ -281,13 +337,14 @@ export default class LogsPage {
           <td style="padding: var(--spacing-sm) var(--spacing-md); font-family: monospace; color: var(--text-muted);">${l.ipAddress}</td>
           <td style="padding: var(--spacing-sm) var(--spacing-md);">${l.location || 'Local Loopback'}</td>
           <td style="padding: var(--spacing-sm) var(--spacing-md);">
-            <span style="padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: ${l.status === 'SUCCESS' ? 'rgba(46,125,50,0.2)' : 'rgba(198,40,40,0.2)'}; color: ${l.status === 'SUCCESS' ? '#81c784' : '#e57373'}; border: 1px solid ${l.status === 'SUCCESS' ? 'rgba(46,125,50,0.4)' : 'rgba(198,40,40,0.4)'};">
+            <span style="padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: ${l.status === 'SUCCESS' ? 'rgba(46,125,50,0.2)' : 'rgba(198,40,40,0.2)'}; color: ${l.status === 'SUCCESS' ? '#81c784' : '#e57373'}; border: 1px solid ${l.status === 'SUCCESS' ? 'rgba(46,125,50,0.4)' : 'rgba(198,40,40,0.4)'};" title="${l.failureReason || 'Failed attempt'}">
               ${l.status}
             </span>
+            ${l.failureReason ? `<div style="font-size:0.7rem; color: #e57373; margin-top:2px;">${l.failureReason}</div>` : ''}
           </td>
           <td style="padding: var(--spacing-sm) var(--spacing-md); color: var(--text-muted);">${l.userAgent ? (l.userAgent.includes('Chrome') ? 'Chrome Browser' : (l.userAgent.length > 25 ? l.userAgent.substring(0, 22) + '...' : l.userAgent)) : 'Unknown'}</td>
           <td style="padding: var(--spacing-sm) var(--spacing-md);">${l.loginTime ? String(l.loginTime).replace('T', ' ').substring(0, 19) : '—'}</td>
-          <td style="padding: var(--spacing-sm) var(--spacing-md); text-align:right;">${l.logoutTime ? String(l.logoutTime).replace('T', ' ').substring(0, 19) : (l.status === 'SUCCESS' ? 'Active / Logged In' : '—')}</td>
+          <td style="padding: var(--spacing-sm) var(--spacing-md); text-align:right;">${l.logoutTime ? String(l.logoutTime).replace('T', ' ').substring(0, 19) : (l.status === 'SUCCESS' ? 'Active / Logged In' : '<span style="color:#e57373;">Failed Attempt</span>')}</td>
         </tr>
       `).join('');
     } else if (this.activeTab === 'audit') {
@@ -301,6 +358,36 @@ export default class LogsPage {
           <td style="padding: var(--spacing-sm) var(--spacing-md); color: var(--accent-primary); font-weight:600;">${a.operator}</td>
           <td style="padding: var(--spacing-sm) var(--spacing-md); font-family: monospace; font-size:0.75rem;">${a.traceId || 'REST-API'}</td>
           <td style="padding: var(--spacing-sm) var(--spacing-md); color: var(--text-muted);">${a.details}</td>
+        </tr>
+      `).join('');
+    } else if (this.activeTab === 'other') {
+      const usersToRender = (this.targetEmail === 'ALL_UNDER_ME' && this.targetUsers && this.targetUsers.length > 0)
+        ? this.targetUsers
+        : (this.targetUsers || []).filter(u => u.email === this.targetEmail);
+
+      if (!usersToRender || usersToRender.length === 0) {
+        const fallbackName = this.currentUser?.name || 'Logged-in Admin';
+        const fallbackEmail = this.currentUser?.email || authStore.getUser()?.username || 'admin@plus33.com';
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: var(--spacing-sm) var(--spacing-md); font-weight:700;">${fallbackName} <br/><span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">${fallbackEmail}</span></td>
+            <td style="padding: var(--spacing-sm) var(--spacing-md); font-family: monospace;">EMP-001</td>
+            <td style="padding: var(--spacing-sm) var(--spacing-md); font-weight:600; color:var(--accent-primary);">Administrator</td>
+            <td style="padding: var(--spacing-sm) var(--spacing-md);">Operations</td>
+            <td style="padding: var(--spacing-sm) var(--spacing-md);"><span style="padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:700; background:rgba(46,125,50,0.2); color:#81c784;">ACTIVE</span></td>
+            <td style="padding: var(--spacing-sm) var(--spacing-md); text-align:right;">Enterprise Scope</td>
+          </tr>
+        `;
+      }
+
+      return usersToRender.map(u => `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+          <td style="padding: var(--spacing-sm) var(--spacing-md); font-weight:700;">${u.name} <br/><span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">${u.email}</span></td>
+          <td style="padding: var(--spacing-sm) var(--spacing-md); font-family: monospace;">${u.employeeCode || 'EMP-101'}</td>
+          <td style="padding: var(--spacing-sm) var(--spacing-md); font-weight:600; color:var(--accent-primary);">${u.designation || 'Staff Member'}</td>
+          <td style="padding: var(--spacing-sm) var(--spacing-md);">${u.department || 'Operations'}</td>
+          <td style="padding: var(--spacing-sm) var(--spacing-md);"><span style="padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:700; background:rgba(46,125,50,0.2); color:#81c784;">ACTIVE</span></td>
+          <td style="padding: var(--spacing-sm) var(--spacing-md); text-align:right;">Assigned Scope</td>
         </tr>
       `).join('');
     } else {
@@ -324,58 +411,127 @@ export default class LogsPage {
     const loginBtn = container.querySelector('#tab-login-logs');
     const auditBtn = container.querySelector('#tab-audit-logs');
     const sysBtn = container.querySelector('#tab-system-logs');
+    const otherBtn = container.querySelector('#tab-other-data');
     const thead = container.querySelector('#log-table-head');
     const tbody = container.querySelector('#log-table-body');
+    const userSelectorContainer = container.querySelector('#admin-user-selector-container');
+    const categorySelectorContainer = container.querySelector('#data-category-selector-container');
+    const pullUserDataBtn = container.querySelector('#btn-pull-user-data');
 
-    if (loginBtn && auditBtn && sysBtn) {
-      loginBtn.addEventListener('click', () => {
+    const updateTabStyles = (activeId) => {
+      [loginBtn, auditBtn, sysBtn, otherBtn].forEach(btn => {
+        if (!btn) return;
+        if (btn.id === activeId) {
+          btn.style.background = 'rgba(255,255,255,0.08)';
+          btn.style.color = '#fff';
+        } else {
+          btn.style.background = 'transparent';
+          btn.style.color = 'var(--text-muted)';
+        }
+      });
+    };
+
+    const updateFilterVisibility = () => {
+      if (userSelectorContainer) {
+        userSelectorContainer.style.display = (this.activeTab === 'other') ? 'flex' : 'none';
+      }
+      if (categorySelectorContainer) {
+        categorySelectorContainer.style.display = (this.activeTab === 'logins') ? 'none' : 'flex';
+      }
+      if (pullUserDataBtn) {
+        pullUserDataBtn.style.display = (this.activeTab === 'other') ? 'inline-flex' : 'none';
+      }
+    };
+
+    updateFilterVisibility();
+
+    if (loginBtn) {
+      loginBtn.addEventListener('click', async () => {
         this.activeTab = 'logins';
-        loginBtn.style.background = 'rgba(255,255,255,0.08)';
-        loginBtn.style.color = '#fff';
-        auditBtn.style.background = 'transparent';
-        auditBtn.style.color = 'var(--text-muted)';
-        sysBtn.style.background = 'transparent';
-        sysBtn.style.color = 'var(--text-muted)';
-        if (thead) thead.innerHTML = this.renderLogHeader();
-        if (tbody) tbody.innerHTML = this.renderLogRows();
-      });
-
-      auditBtn.addEventListener('click', () => {
-        this.activeTab = 'audit';
-        auditBtn.style.background = 'rgba(255,255,255,0.08)';
-        auditBtn.style.color = '#fff';
-        loginBtn.style.background = 'transparent';
-        loginBtn.style.color = 'var(--text-muted)';
-        sysBtn.style.background = 'transparent';
-        sysBtn.style.color = 'var(--text-muted)';
-        if (thead) thead.innerHTML = this.renderLogHeader();
-        if (tbody) tbody.innerHTML = this.renderLogRows();
-      });
-
-      sysBtn.addEventListener('click', () => {
-        this.activeTab = 'system';
-        sysBtn.style.background = 'rgba(255,255,255,0.08)';
-        sysBtn.style.color = '#fff';
-        loginBtn.style.background = 'transparent';
-        loginBtn.style.color = 'var(--text-muted)';
-        auditBtn.style.background = 'transparent';
-        auditBtn.style.color = 'var(--text-muted)';
+        const myEmail = this.currentUser?.email || authStore.getUser()?.username || '';
+        this.targetEmail = myEmail;
+        updateTabStyles('tab-login-logs');
+        updateFilterVisibility();
+        await this.fetchData();
         if (thead) thead.innerHTML = this.renderLogHeader();
         if (tbody) tbody.innerHTML = this.renderLogRows();
       });
     }
 
-    const pullUserDataBtn = container.querySelector('#btn-pull-user-data');
+    if (auditBtn) {
+      auditBtn.addEventListener('click', async () => {
+        this.activeTab = 'audit';
+        const myEmail = this.currentUser?.email || authStore.getUser()?.username || '';
+        this.targetEmail = myEmail;
+        updateTabStyles('tab-audit-logs');
+        updateFilterVisibility();
+        await this.fetchData();
+        if (thead) thead.innerHTML = this.renderLogHeader();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+    }
+
+    if (sysBtn) {
+      sysBtn.addEventListener('click', () => {
+        this.activeTab = 'system';
+        updateTabStyles('tab-system-logs');
+        updateFilterVisibility();
+        if (thead) thead.innerHTML = this.renderLogHeader();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+    }
+
+    if (otherBtn) {
+      otherBtn.addEventListener('click', () => {
+        this.activeTab = 'other';
+        updateTabStyles('tab-other-data');
+        updateFilterVisibility();
+        if (thead) thead.innerHTML = this.renderLogHeader();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+    }
+
     const resetBtn = container.querySelector('#btn-reset-logs');
     const pdfBtn = container.querySelector('#btn-export-pdf');
     const headerPullBtn = container.querySelector('#btn-header-pull-data');
     const startDateInput = container.querySelector('#log-start-date');
     const endDateInput = container.querySelector('#log-end-date');
     const selectLogUser = container.querySelector('#select-log-user');
+    const selectCategory = container.querySelector('#select-data-category');
 
     if (selectLogUser) {
-      selectLogUser.addEventListener('change', () => {
+      selectLogUser.addEventListener('change', async () => {
         this.targetEmail = selectLogUser.value;
+        await this.fetchData();
+        if (thead) thead.innerHTML = this.renderLogHeader();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+    }
+
+    if (selectCategory) {
+      selectCategory.addEventListener('change', async () => {
+        this.dataCategory = selectCategory.value;
+        if (this.dataCategory === 'audit') this.activeTab = 'audit';
+        else if (this.dataCategory === 'logins') this.activeTab = 'logins';
+        await this.fetchData();
+        if (thead) thead.innerHTML = this.renderLogHeader();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+    }
+
+    if (startDateInput) {
+      startDateInput.addEventListener('change', async () => {
+        this.startDate = startDateInput.value;
+        await this.fetchData();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
+      });
+    }
+
+    if (endDateInput) {
+      endDateInput.addEventListener('change', async () => {
+        this.endDate = endDateInput.value;
+        await this.fetchData();
+        if (tbody) tbody.innerHTML = this.renderLogRows();
       });
     }
 

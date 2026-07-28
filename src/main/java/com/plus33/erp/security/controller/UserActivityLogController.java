@@ -76,4 +76,18 @@ public class UserActivityLogController {
         List<UserActivityLog> logs = userActivityLogService.searchActivityLogs(principal.getName(), targetEmail, startDate, endDate);
         return ResponseEntity.ok(ApiResponse.success("Activity logs pulled", logs));
     }
+
+    /**
+     * Aggregates a comprehensive consolidated data package for a target user.
+     */
+    @GetMapping("/user-package")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getUserPackage(
+            Principal principal,
+            @RequestParam(required = false) String targetEmail) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Unauthorized"));
+        }
+        Map<String, Object> pkg = userActivityLogService.getUserConsolidatedDataPackage(principal.getName(), targetEmail);
+        return ResponseEntity.ok(ApiResponse.success("User data package retrieved", pkg));
+    }
 }

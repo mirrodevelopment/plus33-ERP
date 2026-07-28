@@ -27,6 +27,7 @@ import com.plus33.erp.workforce.repository.UserRegionRepository;
 import com.plus33.erp.workforce.repository.UserStoreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -161,10 +162,17 @@ public class UserActivityLogServiceImpl implements UserActivityLogService {
             return userActivityLogRepository.findByUsernameInOrderByLoginTimeDesc(targetUsernames);
         }
 
-        if (start != null && end != null) {
-            return userActivityLogRepository.findByUsernameAndLoginTimeBetweenOrderByLoginTimeDesc(activeTarget, start, end);
+        Long targetUserId = null;
+        String prefix = activeTarget.contains("@") ? activeTarget.split("@")[0] : activeTarget;
+        User targetUser = userRepository.findByEmail(activeTarget).orElse(null);
+        if (targetUser == null && !activeTarget.contains("@")) {
+            targetUser = userRepository.findByEmail(activeTarget + "@plus33.com").orElse(null);
         }
-        return userActivityLogRepository.findByUsernameOrderByLoginTimeDesc(activeTarget);
+        if (targetUser != null) {
+            targetUserId = targetUser.getId();
+        }
+
+        return userActivityLogRepository.findFlexibleLogs(activeTarget, prefix, targetUserId, start, end);
     }
 
     private LocalDateTime parseStart(String startDate) {
@@ -221,5 +229,126 @@ public class UserActivityLogServiceImpl implements UserActivityLogService {
         List<UserStore> s2 = userStoreRepository.findByIdUserId(userId2);
         if (s1 == null || s2 == null || s1.isEmpty() || s2.isEmpty()) return false;
         return s1.get(0).getStore().getId().equals(s2.get(0).getStore().getId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> getUserConsolidatedDataPackage(String adminEmail, String targetEmail) {
+        Map<String, Object> pkg = new HashMap<>();
+
+        String activeTarget = (targetEmail != null && !targetEmail.trim().isEmpty()) ? targetEmail.trim() : adminEmail;
+        User targetUser = userRepository.findByEmail(activeTarget).orElse(null);
+
+        Map<String, Object> userProfile = new HashMap<>();
+        if (targetUser != null) {
+            userProfile.put("id", targetUser.getId());
+            userProfile.put("email", targetUser.getEmail());
+            userProfile.put("username", targetUser.getEmail());
+            userProfile.put("firstName", targetUser.getFirstName());
+            userProfile.put("lastName", targetUser.getLastName());
+            userProfile.put("active", targetUser.getActive());
+            userProfile.put("createdAt", targetUser.getCreatedAt());
+        } else {
+            userProfile.put("email", activeTarget);
+        }
+        pkg.put("userProfile", userProfile);
+
+        if (targetUser != null) {
+            Optional<Employee> empOpt = employeeRepository.findByUserId(targetUser.getId());
+            if (empOpt.isPresent()) {
+                Employee emp = empOpt.get();
+                Map<String, Object> empDetails = new HashMap<>();
+                empDetails.put("id", emp.getId());
+                empDetails.put("employeeCode", emp.getEmployeeCode());
+                empDetails.put("designation", emp.getDesignation());
+                empDetails.put("department", emp.getDepartment());
+                empDetails.put("employmentType", emp.getEmploymentType());
+                empDetails.put("hireDate", emp.getHireDate());
+                pkg.put("employeeProfile", empDetails);
+            }
+        }
+
+        List<UserActivityLog> activityLogs = searchActivityLogs(adminEmail, activeTarget, null, null);
+        pkg.put("activityLogs", activityLogs);
+        pkg.put("totalLogsCount", activityLogs.size());
+        pkg.put("securityStatus", "COMPLIANT");
+
+        return pkg;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logUserActivity(String email, String ipAddress, String userAgent, String status, String failureReason) {
+        try {
+            UserActivityLog log = new UserActivityLog();
+            log.setUsername(email);
+            log.setIpAddress(ipAddress);
+            log.setUserAgent(userAgent);
+            log.setStatus(status);
+
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (!userOpt.isPresent() && !email.contains("@")) {
+                userOpt = userRepository.findByEmail(email + "@plus33.com");
+            }
+
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                log.setUserId(user.getId());
+                log.setUsername(user.getEmail());
+
+                if (failureReason == null || failureReason.isEmpty()) {
+                    log.setFailureReason(null);
+                } else if (failureReason.toLowerCase().contains("bad credentials") || failureReason.toLowerCase().contains("invalid")) {
+                    log.setFailureReason("Bad credentials (Incorrect password for " + email + ")");
+                } else {
+                    log.setFailureReason(failureReason);
+                }
+
+                List<UserStore> userStores = userStoreRepository.findByIdUserId(user.getId());
+                if (userStores != null && !userStores.isEmpty() && userStores.get(0).getStore() != null) {
+                    com.plus33.erp.organization.entity.Store store = userStores.get(0).getStore();
+                    if (store.getRegion() != null && store.getRegion().getCode() != null) {
+                        String code = store.getRegion().getCode().toUpperCase();
+                        if (code.startsWith("FR")) log.setLocation("Paris, France 🇫🇷");
+                        else if (code.startsWith("AE") || code.startsWith("UAE")) log.setLocation("Dubai, UAE 🇦🇪");
+                        else if (code.startsWith("IN")) log.setLocation("New Delhi, India 🇮🇳");
+                        else log.setLocation(store.getName());
+                    } else {
+                        log.setLocation(store.getName());
+                    }
+                } else {
+                    List<UserRegion> userRegions = userRegionRepository.findByIdUserId(user.getId());
+                    if (userRegions != null && !userRegions.isEmpty() && userRegions.get(0).getRegion() != null) {
+                        com.plus33.erp.organization.entity.Region region = userRegions.get(0).getRegion();
+                        String code = region.getCode().toUpperCase();
+                        if (code.startsWith("FR")) log.setLocation("Paris, France 🇫🇷");
+                        else if (code.startsWith("AE") || code.startsWith("UAE")) log.setLocation("Dubai, UAE 🇦🇪");
+                        else if (code.startsWith("IN")) log.setLocation("New Delhi, India 🇮🇳");
+                        else log.setLocation(region.getName());
+                    }
+                }
+            } else {
+                if ("FAILED".equalsIgnoreCase(status) && (failureReason == null || failureReason.isEmpty())) {
+                    log.setFailureReason("Bad credentials (User account does not exist)");
+                } else {
+                    log.setFailureReason(failureReason);
+                }
+            }
+
+            if (log.getLocation() == null || log.getLocation().isEmpty()) {
+                if ("127.0.0.1".equals(ipAddress) || "0:0:0:0:0:0:0:1".equals(ipAddress) || "localhost".equalsIgnoreCase(ipAddress)) {
+                    log.setLocation("Delhi NCR, India 🇮🇳 (Local)");
+                } else {
+                    log.setLocation("Unknown Location 🌐");
+                }
+            }
+
+            log.setLoginTime(LocalDateTime.now());
+            log.setLastActiveTime(LocalDateTime.now());
+
+            userActivityLogRepository.save(log);
+        } catch (Exception e) {
+            System.err.println("Failed to log user activity: " + e.getMessage());
+        }
     }
 }

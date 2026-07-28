@@ -36,9 +36,9 @@
 
   <!-- Interactive Tabbed Log Viewer -->
   <div class="card glass flex flex-col viewer-card">
-    <div class="flex justify-between align-center mb-md flex-wrap gap-sm">
-      <!-- Tabs Controls -->
-      <div class="tabs-container flex gap-xs">
+    <!-- Top Section: Segmented Tab Bar -->
+    <div class="logs-toolbar-header">
+      <div class="tabs-container">
         <button id="tab-login-logs" class="btn tab-btn active">
           User Login Activity
         </button>
@@ -48,28 +48,46 @@
         <button id="tab-system-logs" class="btn tab-btn">
           System Diagnostics
         </button>
+        <button id="tab-other-data" class="btn tab-btn">
+          Other User Data
+        </button>
       </div>
+    </div>
 
-      <!-- Filters & Action Bar -->
-      <div class="flex align-center gap-xs flex-wrap controls-bar">
-        <!-- Admin User Selector Dropdown -->
-        <div id="admin-user-selector-container" class="filter-group" style="display: none;">
+    <!-- Bottom Section: Filter Controls & Action Buttons -->
+    <div class="logs-filters-panel">
+      <!-- Left Side: Filter Pills -->
+      <div class="filter-pills-row">
+        <div id="admin-user-selector-container" class="filter-pill" style="display: none;">
           <span class="filter-label">Select User:</span>
           <select id="select-log-user" class="log-select-input">
             <option value="">Loading users...</option>
           </select>
         </div>
 
-        <div class="filter-group">
+        <div id="data-category-selector-container" class="filter-pill" style="display: none;">
+          <span class="filter-label">Data Category:</span>
+          <select id="select-data-category" class="log-select-input" style="min-width: 170px;">
+            <option value="logins">🔐 User Login Activity</option>
+            <option value="audit">📋 Audit Action Trail</option>
+            <option value="profile">👤 Profile &amp; Employment Data</option>
+          </select>
+        </div>
+
+        <div class="filter-pill">
           <span class="filter-label">From:</span>
           <input type="date" id="log-start-date" class="log-date-input" />
         </div>
-        <div class="filter-group">
+
+        <div class="filter-pill">
           <span class="filter-label">To:</span>
           <input type="date" id="log-end-date" class="log-date-input" />
         </div>
+      </div>
 
-        <button id="btn-pull-user-data" class="btn btn-accent-pull" type="button">
+      <!-- Right Side: Action Button Group -->
+      <div class="action-btn-group">
+        <button id="btn-pull-user-data" class="btn btn-accent-pull" type="button" style="display: none;">
           <i data-lucide="download-cloud" class="icon-xs"></i> Pull User Data
         </button>
         <button id="btn-reset-logs" class="btn btn-reset" type="button">

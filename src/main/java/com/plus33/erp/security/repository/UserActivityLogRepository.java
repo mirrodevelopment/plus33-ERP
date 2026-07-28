@@ -37,4 +37,18 @@ public interface UserActivityLogRepository extends JpaRepository<UserActivityLog
             String username, 
             String status
     );
+
+    @org.springframework.data.jpa.repository.Query("SELECT l FROM UserActivityLog l WHERE " +
+        "(LOWER(l.username) = LOWER(:target) OR LOWER(l.username) LIKE LOWER(CONCAT(:prefix, '%')) " +
+        "OR (:userId IS NOT NULL AND l.userId = :userId)) " +
+        "AND (:start IS NULL OR l.loginTime >= :start) " +
+        "AND (:end IS NULL OR l.loginTime <= :end) " +
+        "ORDER BY l.loginTime DESC")
+    List<UserActivityLog> findFlexibleLogs(
+        @org.springframework.data.repository.query.Param("target") String target,
+        @org.springframework.data.repository.query.Param("prefix") String prefix,
+        @org.springframework.data.repository.query.Param("userId") Long userId,
+        @org.springframework.data.repository.query.Param("start") java.time.LocalDateTime start,
+        @org.springframework.data.repository.query.Param("end") java.time.LocalDateTime end
+    );
 }

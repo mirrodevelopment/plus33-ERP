@@ -1,0 +1,53 @@
+/******************************************************************************
+ * Project           : PLUS33 Coffee ERP
+ * Module            : Shift Supervisor — My Shift Tasks
+ * File              : supervisor-my-tasks.css
+ * Path              : frontend/modules/store-employee/pages/supervisor-my-tasks/supervisor-my-tasks.css
+ ******************************************************************************/
+
+.sup-my-tasks-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.sup-my-tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(201, 164, 106, 0.15);
+  padding-bottom: 14px;
+}
+
+.sup-tasks-title {
+  font-family: var(--font-display, 'Montserrat', sans-serif);
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon { color: var(--accent-primary, #c9a46a); }
+
+.sup-tasks-subtitle {
+  font-size: 0.8rem;
+  color: #a1a1aa;
+  margin-top: 4px;
+  display: block;
+}
+
+.subtask-row {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}

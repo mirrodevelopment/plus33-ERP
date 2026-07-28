@@ -104,6 +104,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/auth/login",
+                                "/api/v1/store-tasks/**",
                                 "/api/v1/complaints/**",
                                 "/api/v1/support/**",
                                 "/actuator/health",

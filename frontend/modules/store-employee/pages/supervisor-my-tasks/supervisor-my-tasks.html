@@ -1,0 +1,65 @@
+<!-- ============================================================
+     PLUS33 Coffee ERP | Shift Supervisor | My Shift Tasks
+     File    : supervisor-my-tasks.html
+     Path    : frontend/modules/store-employee/pages/supervisor-my-tasks/supervisor-my-tasks.html
+     ============================================================ -->
+<div class="sup-my-tasks-page animate-fade-in">
+
+  <!-- Page Header -->
+  <div class="sup-my-tasks-header">
+    <div>
+      <h2 class="sup-tasks-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="title-icon">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>My Shift Tasks &amp; Delegations</span>
+      </h2>
+      <span class="sup-tasks-subtitle">Directives assigned to you by Store Management — Execute or Split &amp; Delegate to your shift roster</span>
+    </div>
+
+    <div>
+      <button type="button" id="btn-refresh-sup-my-tasks" class="tasks-btn tasks-btn--glass">
+        <span>Refresh Shift Tasks</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Supervisor Tasks List -->
+  <div class="tasks-card glass">
+    <div id="sup-my-tasks-list" class="tasks-list-container">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+
+  <!-- Split & Delegate Task Modal -->
+  <div id="modal-split-task" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card" style="max-width: 600px;">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title">⚡ Split &amp; Delegate Task to Shift Team</h4>
+        <button type="button" id="btn-close-split-modal" class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-split-task" class="tasks-form">
+        <input type="hidden" id="split-parent-id" />
+        <div class="form-group">
+          <label class="form-label">Parent Task Directive</label>
+          <input type="text" id="split-parent-title" class="form-input" readonly />
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; margin-top: 4px;">
+          <h5 style="font-size: 0.82rem; color: var(--accent-primary, #c9a46a); margin-bottom: 10px;">Define Sub-Tasks for Shift Baristas</h5>
+          <div id="split-subtasks-container" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Subtask inputs generated dynamically -->
+          </div>
+          <button type="button" id="btn-add-subtask-row" class="tasks-btn tasks-btn--glass" style="margin-top: 10px;">+ Add Another Sub-Task</button>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 16px;">
+          <button type="button" id="btn-cancel-split" class="tasks-btn tasks-btn--glass">Cancel</button>
+          <button type="submit" class="tasks-btn tasks-btn--gold">Confirm &amp; Dispatch Sub-Tasks</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

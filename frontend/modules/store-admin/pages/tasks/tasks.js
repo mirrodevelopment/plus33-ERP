@@ -1,16 +1,16 @@
 /******************************************************************************
  * Project           : PLUS33 Coffee ERP
- * Module            : Store Employee Module
+ * Module            : Store Admin Module
  * File              : tasks.js
- * Path              : frontend/modules/store-employee/pages/tasks/tasks.js
- * Purpose           : Primary export entry point for Barista "My Tasks" page renderer
+ * Path              : frontend/modules/store-admin/pages/tasks/tasks.js
+ * Purpose           : Wrapper entry point for Store Admin Task Governance page
  ******************************************************************************/
 
-import StoreEmployeeMyTasks from './my-tasks.js';
+import StoreTasksGovernance from './store-tasks.js';
 
-export default class StoreEmployeeTasks {
+export default class StoreAdminTasks {
   constructor() {
-    this.delegate = new StoreEmployeeMyTasks();
+    this.delegate = new StoreTasksGovernance();
   }
 
   async mount(container, lifecycle) {

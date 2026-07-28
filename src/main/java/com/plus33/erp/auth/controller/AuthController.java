@@ -137,6 +137,7 @@ public class AuthController {
     private final com.plus33.erp.workforce.repository.EmployeeSalaryStructureItemRepository employeeSalaryStructureItemRepository;
     private final com.plus33.erp.workforce.repository.SalaryComponentRepository salaryComponentRepository;
     private final com.plus33.erp.security.repository.UserActivityLogRepository userActivityLogRepository;
+    private final com.plus33.erp.security.service.UserActivityLogService userActivityLogService;
 
     /**
      * Authenticates the user credentials and generates a signed JWT token.
@@ -182,58 +183,7 @@ public class AuthController {
     }
 
     private void logUserActivity(String email, String ipAddress, String userAgent, String status, String failureReason) {
-        try {
-            com.plus33.erp.security.entity.UserActivityLog log = new com.plus33.erp.security.entity.UserActivityLog();
-            log.setUsername(email);
-            log.setIpAddress(ipAddress);
-            log.setUserAgent(userAgent);
-            log.setStatus(status);
-            log.setFailureReason(failureReason);
-            log.setLoginTime(java.time.LocalDateTime.now());
-            log.setLastActiveTime(java.time.LocalDateTime.now());
-
-            Optional<User> userOpt = userRepository.findByEmail(email);
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                log.setUserId(user.getId());
-
-                List<com.plus33.erp.workforce.entity.UserStore> userStores = userStoreRepository.findByIdUserId(user.getId());
-                if (userStores != null && !userStores.isEmpty() && userStores.get(0).getStore() != null) {
-                    com.plus33.erp.organization.entity.Store store = userStores.get(0).getStore();
-                    if (store.getRegion() != null && store.getRegion().getCode() != null) {
-                        String code = store.getRegion().getCode().toUpperCase();
-                        if (code.startsWith("FR")) log.setLocation("Paris, France 🇫🇷");
-                        else if (code.startsWith("AE") || code.startsWith("UAE")) log.setLocation("Dubai, UAE 🇦🇪");
-                        else if (code.startsWith("IN")) log.setLocation("New Delhi, India 🇮🇳");
-                        else log.setLocation(store.getName());
-                    } else {
-                        log.setLocation(store.getName());
-                    }
-                } else {
-                    List<com.plus33.erp.workforce.entity.UserRegion> userRegions = userRegionRepository.findByIdUserId(user.getId());
-                    if (userRegions != null && !userRegions.isEmpty() && userRegions.get(0).getRegion() != null) {
-                        com.plus33.erp.organization.entity.Region region = userRegions.get(0).getRegion();
-                        String code = region.getCode().toUpperCase();
-                        if (code.startsWith("FR")) log.setLocation("Paris, France 🇫🇷");
-                        else if (code.startsWith("AE") || code.startsWith("UAE")) log.setLocation("Dubai, UAE 🇦🇪");
-                        else if (code.startsWith("IN")) log.setLocation("New Delhi, India 🇮🇳");
-                        else log.setLocation(region.getName());
-                    }
-                }
-            }
-
-            if (log.getLocation() == null || log.getLocation().isEmpty()) {
-                if ("127.0.0.1".equals(ipAddress) || "0:0:0:0:0:0:0:1".equals(ipAddress) || "localhost".equalsIgnoreCase(ipAddress)) {
-                    log.setLocation("Delhi NCR, India 🇮🇳 (Local)");
-                } else {
-                    log.setLocation("Unknown Location 🌐");
-                }
-            }
-
-            userActivityLogRepository.save(log);
-        } catch (Exception e) {
-            System.err.println("Failed to log user activity: " + e.getMessage());
-        }
+        userActivityLogService.logUserActivity(email, ipAddress, userAgent, status, failureReason);
     }
 
     /**

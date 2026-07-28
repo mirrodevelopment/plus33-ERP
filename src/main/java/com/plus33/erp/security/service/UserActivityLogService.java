@@ -34,4 +34,14 @@ public interface UserActivityLogService {
      * Pulls activity logs for a target user within the admin's scope and date range.
      */
     List<UserActivityLog> searchActivityLogs(String adminEmail, String targetEmail, String startDate, String endDate);
+
+    /**
+     * Aggregates a comprehensive consolidated data package (profile, employee, activity logs, security status) for a target user.
+     */
+    Map<String, Object> getUserConsolidatedDataPackage(String adminEmail, String targetEmail);
+
+    /**
+     * Logs user login activity (success/failure) in an isolated transaction so failed attempts are persisted.
+     */
+    void logUserActivity(String email, String ipAddress, String userAgent, String status, String failureReason);
 }

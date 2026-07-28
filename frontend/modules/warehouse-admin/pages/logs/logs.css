@@ -73,116 +73,194 @@
 }
 
 .viewer-card {
-  padding: var(--spacing-lg, 20px);
-  border-color: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-color: rgba(255, 255, 255, 0.08);
   min-height: 480px;
+  gap: 14px;
+}
+
+/* ── Top Tabs Row ── */
+.logs-toolbar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 12px;
 }
 
 .tabs-container {
-  background: rgba(0,0,0,0.2);
-  padding: 2px;
-  border-radius: var(--radius-md, 6px);
-  border: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .tab-btn {
-  padding: 6px 16px;
-  border-radius: var(--radius-sm, 4px);
-  font-size: 0.75rem;
+  padding: 7px 18px;
+  border-radius: 6px;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   border: none;
-  transition: var(--transition-fast, all 0.15s ease);
+  transition: all 0.2s ease;
   background: transparent;
-  color: var(--text-muted, #888);
+  color: var(--text-muted, #94a3b8);
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
 }
 
 .tab-btn.active {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.controls-bar {
+/* ── Filter Bar & Actions Row ── */
+.logs-filters-panel {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs, 6px);
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.filter-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.filter-group {
+.filter-pill {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.75rem;
-  color: var(--text-muted, #888);
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 4px 10px;
+  height: 34px;
 }
 
 .filter-label {
+  font-size: 0.75rem;
   font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .log-select-input {
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
-  max-width: 220px;
+  min-width: 180px;
+  max-width: 250px;
+  height: 26px;
   cursor: pointer;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .log-select-input option {
-  background: #1e1e1e;
+  background: #0f172a;
   color: #fff;
+  padding: 6px 10px;
 }
 
 .log-date-input {
-  background: rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
+  height: 26px;
+  color-scheme: dark;
+}
+
+.action-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .btn-accent-pull {
-  padding: 4px 12px;
-  font-size: 0.72rem;
+  padding: 6px 14px;
+  height: 34px;
+  font-size: 0.75rem;
   font-weight: 700;
-  background: var(--accent-primary, #c9a96e);
+  background: linear-gradient(135deg, #c9a46a 0%, #a88344 100%);
   color: #000;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(201, 164, 106, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-accent-pull:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201, 164, 106, 0.35);
 }
 
 .btn-reset {
-  padding: 4px 10px;
-  font-size: 0.72rem;
+  padding: 6px 12px;
+  height: 34px;
+  font-size: 0.75rem;
   font-weight: 600;
-  background: rgba(255,255,255,0.08);
-  color: var(--text-muted, #888);
-  border: none;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
 .btn-export-pdf {
-  padding: 4px 12px;
-  font-size: 0.72rem;
+  padding: 6px 14px;
+  height: 34px;
+  font-size: 0.75rem;
   font-weight: 700;
-  background: rgba(230,126,34,0.18);
-  color: #e67e22;
-  border: 1px solid rgba(230,126,34,0.3);
-  border-radius: 4px;
+  background: rgba(217, 119, 6, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  border-radius: 6px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-export-pdf:hover {
+  background: rgba(217, 119, 6, 0.25);
+  border-color: rgba(217, 119, 6, 0.5);
+  transform: translateY(-1px);
 }
 
 .table-wrapper {

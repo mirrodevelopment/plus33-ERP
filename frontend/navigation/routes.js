@@ -177,6 +177,14 @@ export const routes = [
   { path: '#leave', page: 'modules/store-employee/pages/leave/leave.js', layout: 'dashboard', title: 'Leave Management', requiresAuth: true },
   { path: '#announcements', page: 'modules/store-employee/pages/announcements/announcements.js', layout: 'dashboard', title: 'Announcements Center', requiresAuth: true },
 
+  // Shift Supervisor Task Pages
+  { path: '#supervisor-my-tasks', page: 'modules/store-employee/pages/supervisor-my-tasks/supervisor-my-tasks.js', layout: 'dashboard', title: 'My Shift Tasks', requiresAuth: true },
+  { path: '#supervisor-tasks', page: 'modules/store-employee/pages/supervisor-tasks/supervisor-tasks.js', layout: 'dashboard', title: 'Shift Task Management', requiresAuth: true },
+
+  // Store Admin Task Governance Page
+  { path: '#store-tasks', page: 'modules/store-admin/pages/tasks/store-tasks.js', layout: 'dashboard', title: 'Store Tasks Governance', requiresAuth: true },
+  { path: '#store-admin-tasks', page: 'modules/store-admin/pages/tasks/store-tasks.js', layout: 'dashboard', title: 'Store Tasks Governance', requiresAuth: true },
+
   // Shift Supervisor Pages
   { path: '#supervisor-announcements', page: 'modules/store-employee/pages/supervisor-announcements/announcements.js', layout: 'dashboard', title: 'Supervisor Broadcast Announcements', requiresAuth: true },
   { path: '#supervisor-leaves', page: 'modules/store-employee/pages/supervisor-leaves/leaves.js', layout: 'dashboard', title: 'Supervisor Leave Management', requiresAuth: true },

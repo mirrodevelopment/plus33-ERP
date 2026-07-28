@@ -95,6 +95,13 @@ class NotificationStore {
   }
 
   /**
+   * Alias for danger notification
+   */
+  error(message, duration) {
+    return this.danger(message, duration);
+  }
+
+  /**
    * Performs the fn operation in this module.
    * @memberof Store Module
    */

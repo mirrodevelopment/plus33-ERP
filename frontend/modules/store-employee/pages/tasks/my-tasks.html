@@ -1,0 +1,161 @@
+<!-- ============================================================
+     PLUS33 Coffee ERP | Store Employee | My Tasks
+     File    : my-tasks.html
+     Path    : frontend/modules/store-employee/pages/tasks/my-tasks.html
+     ============================================================ -->
+<div class="my-tasks-page animate-fade-in">
+
+  <!-- Header Section -->
+  <div class="my-tasks-header">
+    <div class="my-tasks-header__left">
+      <h2 class="my-tasks-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="title-icon">
+          <path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        <span>My Tasks</span>
+      </h2>
+      <span class="my-tasks-subtitle">Personal shift task workspace, live status execution, &amp; report logging</span>
+    </div>
+
+    <div class="my-tasks-header__right">
+      <button type="button" id="btn-refresh-my-tasks" class="tasks-btn tasks-btn--glass">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/>
+        </svg>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3 KPI Summary Cards -->
+  <div class="tasks-kpi-grid mb-xl">
+    <!-- Card 1: Today's Tasks -->
+    <div class="tasks-kpi-card tasks-kpi-card--gold">
+      <div class="tasks-kpi-card__top">
+        <span class="tasks-kpi-card__label">Today's Tasks</span>
+        <div class="tasks-kpi-card__icon">📅</div>
+      </div>
+      <div class="tasks-kpi-card__val" id="kpi-today-tasks">0</div>
+      <div class="tasks-kpi-card__sub">Scheduled or due today</div>
+    </div>
+
+    <!-- Card 2: Total Completed in Month -->
+    <div class="tasks-kpi-card tasks-kpi-card--green">
+      <div class="tasks-kpi-card__top">
+        <span class="tasks-kpi-card__label">Completed (Month)</span>
+        <div class="tasks-kpi-card__icon">✅</div>
+      </div>
+      <div class="tasks-kpi-card__val" id="kpi-completed-month">0</div>
+      <div class="tasks-kpi-card__sub">Finished this month</div>
+    </div>
+
+    <!-- Card 3: Uncompleted in Month -->
+    <div class="tasks-kpi-card tasks-kpi-card--amber">
+      <div class="tasks-kpi-card__top">
+        <span class="tasks-kpi-card__label">Uncompleted (Month)</span>
+        <div class="tasks-kpi-card__icon">⏳</div>
+      </div>
+      <div class="tasks-kpi-card__val" id="kpi-uncompleted-month">0</div>
+      <div class="tasks-kpi-card__sub">Pending / active / blocked</div>
+    </div>
+  </div>
+
+  <!-- Preemption Emergency Warning Banner (Shown when an Immediate Task is active) -->
+  <div id="preemption-alert-banner" class="preemption-banner" style="display: none;">
+    <div class="preemption-banner__left">
+      <span class="preemption-badge">🔴 PRIORITY #1 IMMEDIATE</span>
+      <div class="preemption-info">
+        <strong>Emergency Task Preemption Active</strong>
+        <span>An immediate critical directive has paused non-immediate task timelines. Complete the emergency task below first to resume your normal schedule.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Tasks Card & Controls -->
+  <div class="tasks-card glass">
+    <div class="tasks-toolbar">
+      <!-- Filter Tabs -->
+      <div class="tasks-tabs">
+        <button type="button" class="tab-pill active" data-status="all">All Tasks (<span id="count-all">0</span>)</button>
+        <button type="button" class="tab-pill" data-status="PENDING">Pending (<span id="count-pending">0</span>)</button>
+        <button type="button" class="tab-pill" data-status="STARTED">Started (<span id="count-started">0</span>)</button>
+        <button type="button" class="tab-pill" data-status="IN_PROGRESS">Ongoing (<span id="count-ongoing">0</span>)</button>
+        <button type="button" class="tab-pill" data-status="COMPLETED">Completed (<span id="count-completed">0</span>)</button>
+        <button type="button" class="tab-pill" data-status="BLOCKED">Blocked (<span id="count-blocked">0</span>)</button>
+      </div>
+    </div>
+
+    <!-- Task List Container -->
+    <div id="my-tasks-list" class="tasks-list-container">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+
+  <!-- Deadline Extension Request Modal -->
+  <div id="modal-extension-request" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title">Request Deadline Extension</h4>
+        <button type="button" id="btn-close-extension-modal" class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-extension-request" class="tasks-form">
+        <input type="hidden" id="ext-task-id" />
+        <div class="form-group">
+          <label class="form-label">Task Title</label>
+          <input type="text" id="ext-task-title" class="form-input" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Requested Target Deadline Date &amp; Time</label>
+          <input type="datetime-local" id="ext-requested-date" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason for Extension Request</label>
+          <textarea id="ext-reason" class="form-input form-textarea" rows="3" placeholder="Explain operational obstacle or why additional time is needed..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-extension" class="tasks-btn tasks-btn--glass">Cancel</button>
+          <button type="submit" class="tasks-btn tasks-btn--gold">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Work Report Submission Drawer -->
+  <div id="modal-work-report" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title">Submit Task Progress Report</h4>
+        <button type="button" id="btn-close-report-modal" class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-work-report" class="tasks-form">
+        <input type="hidden" id="rep-task-id" />
+        <div class="form-group">
+          <label class="form-label">Report Status Action</label>
+          <select id="rep-status" class="form-input">
+            <option value="IN_PROGRESS">⚡ In-Progress / Ongoing Update</option>
+            <option value="COMPLETED">✅ Completed &amp; Ready for Review</option>
+            <option value="BLOCKED">⚠️ Report Operational Blocker</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Completion Percentage (%)</label>
+          <input type="number" id="rep-percent" class="form-input" min="0" max="100" value="100" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Progress Notes &amp; Observations</label>
+          <textarea id="rep-notes" class="form-input form-textarea" rows="4" placeholder="Detail actions completed, stock consumed, equipment checks, or issues..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Attachment URL / Document Link (Optional)</label>
+          <input type="text" id="rep-attachment" class="form-input" placeholder="e.g. photo checklist or report doc link" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-report" class="tasks-btn tasks-btn--glass">Cancel</button>
+          <button type="submit" class="tasks-btn tasks-btn--gold">Submit Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

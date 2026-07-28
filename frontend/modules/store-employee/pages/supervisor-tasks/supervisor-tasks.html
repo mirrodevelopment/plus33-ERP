@@ -1,0 +1,120 @@
+<!-- ============================================================
+     PLUS33 Coffee ERP | Shift Supervisor | Shift Task Management
+     File    : supervisor-tasks.html
+     Path    : frontend/modules/store-employee/pages/supervisor-tasks/supervisor-tasks.html
+     ============================================================ -->
+<div class="sup-manage-tasks-page animate-fade-in">
+
+  <!-- Header -->
+  <div class="sup-manage-header">
+    <div>
+      <h2 class="sup-manage-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="title-icon">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <polyline points="16 11 18 13 22 9"/>
+        </svg>
+        <span>Shift Task Management</span>
+      </h2>
+      <span class="sup-manage-subtitle">Assign tasks to shift team members, review deadline extension requests, &amp; monitor roster execution</span>
+    </div>
+
+    <div>
+      <button type="button" id="btn-open-create-task-modal" class="tasks-btn tasks-btn--gold">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>+ Assign Task to Barista</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Extension Requests Section (If any pending) -->
+  <div id="sup-extension-requests-card" class="glass mb-xl" style="padding: 18px; border-color: rgba(245, 158, 11, 0.3);">
+    <h3 style="font-family: var(--font-display); font-size: 1rem; font-weight: 800; color: #f59e0b; margin: 0 0 12px; display: flex; align-items: center; gap: 8px;">
+      <span>⏱ Pending Deadline Extension Requests</span>
+    </h3>
+    <div id="sup-extension-requests-list" style="display: flex; flex-direction: column; gap: 10px;">
+      <!-- Dynamically populated extension requests -->
+    </div>
+  </div>
+
+  <!-- Team Tasks Data Table Card -->
+  <div class="tasks-card glass">
+    <div class="tasks-toolbar">
+      <h3 style="font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: #fff; margin: 0;">Shift Roster Task Execution</h3>
+    </div>
+    <div id="sup-team-tasks-list" class="tasks-list-container">
+      <!-- Dynamically populated team tasks -->
+    </div>
+  </div>
+
+  <!-- Assign Task Modal -->
+  <div id="modal-assign-task" class="tasks-modal-overlay" style="display: none;">
+    <div class="tasks-modal-card">
+      <div class="tasks-modal-header">
+        <h4 class="tasks-modal-title">Assign Shift Task to Barista</h4>
+        <button type="button" id="btn-close-assign-modal" class="modal-close-btn">✕</button>
+      </div>
+      <form id="form-assign-task" class="tasks-form">
+        <div class="form-group">
+          <label class="form-label" style="color: #c9a46a; font-weight: 700;">⚡ Quick Shift Task Presets (Auto-Fill Template)</label>
+          <select id="asg-preset-template" class="form-input" style="border: 1px solid rgba(201,164,106,0.4); background: rgba(201,164,106,0.08); color: #c9a46a; font-weight: 600;">
+            <option value="">-- Choose a Preset Shift Task --</option>
+            <option value="INV_COUNT">📦 Bar Counter Stock & Syrup Replenishment</option>
+            <option value="EQUIP_CLEAN">☕ Backflush Espresso Group Heads & Wand Sanitize</option>
+            <option value="TEMP_CHECK">🛡️ Milk Fridge & Chiller Temperature Check</option>
+            <option value="CLOSING_CLEAN">🧹 End-of-Shift Floor Sweep & Trash Disposal</option>
+            <option value="PASTRY_RESTOCK">🥐 Pastry Display Case Restock & Expiry Check</option>
+            <option value="URGENT_SPILL">🔴 IMMEDIATE: Urgent Counter Spill & Station Clean</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Task Title</label>
+          <input type="text" id="asg-title" class="form-input" placeholder="e.g. Sanitize Steam Wand &amp; Dairy Temp Check" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Instructions / Description</label>
+          <textarea id="asg-desc" class="form-input form-textarea" rows="3" placeholder="Provide detailed steps, target parameters, or location..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign To Shift Employee</label>
+          <select id="asg-employee" class="form-input">
+            <option value="neha.sharma@plus33.com">Neha Sharma (Senior Barista)</option>
+            <option value="rahul.verma@plus33.com">Rahul Verma (Barista)</option>
+            <option value="priya.patel@plus33.com">Priya Patel (Barista Trainee)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="asg-category" class="form-input">
+            <option value="OPENING_CHECKLIST">Opening Checklist</option>
+            <option value="CLOSING_CHECKLIST">Closing Checklist</option>
+            <option value="EQUIPMENT_MAINTENANCE">Equipment Maintenance</option>
+            <option value="STOCK_REPLENISHMENT">Stock Replenishment</option>
+            <option value="HYGIENE_CLEANING">Hygiene &amp; Cleaning</option>
+            <option value="SAFETY_AUDIT">Safety Audit</option>
+            <option value="GENERAL">General Operational Task</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority / Classification</label>
+          <select id="asg-priority" class="form-input">
+            <option value="IMMEDIATE">🔴 IMMEDIATE (Auto-Pauses Current Timelines)</option>
+            <option value="IMPORTANT">🟠 IMPORTANT (High Priority Shift Directive)</option>
+            <option value="COMMON" selected>🔵 COMMON (Standard Checklist Task)</option>
+            <option value="ROUTINE">🟢 ROUTINE (Background Duty)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deadline Date &amp; Time</label>
+          <input type="datetime-local" id="asg-duedate" class="form-input" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-assign" class="tasks-btn tasks-btn--glass">Cancel</button>
+          <button type="submit" class="tasks-btn tasks-btn--gold">Dispatch Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
